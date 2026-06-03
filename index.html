@@ -103,6 +103,29 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 /* トースト */
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--ok);color:#fff;padding:12px 22px;border-radius:24px;font-size:15px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,.4);max-width:90%;text-align:center}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* 聞き流しモード */
+.modecard.listen{border-color:var(--blue)}
+.modecard.listen h3{color:var(--blue)}
+#scListen{padding:0;position:relative}
+.listenTap{min-height:calc(100vh - 56px);display:flex;flex-direction:column;padding:20px 18px 120px;cursor:pointer}
+.listenStage{font-size:14px;color:var(--blue);font-weight:700;letter-spacing:.05em;margin-bottom:6px;min-height:20px}
+.listenQno{font-size:14px;color:var(--sub);margin-bottom:14px}
+.listenScenario{font-size:17px;line-height:1.85;margin-bottom:18px}
+.listenScenario .ask{display:block;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-weight:700;color:#fff}
+.listenScenario .kw{color:var(--accent);font-weight:700}
+.listenOpts{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.listenOpt{background:var(--card);border:2px solid var(--line);border-radius:10px;padding:11px 14px;font-size:15px;display:flex;gap:9px}
+.listenOpt.ans{border-color:var(--ok);background:rgba(46,204,113,.12)}
+.listenOpt .lab{flex:0 0 22px;height:22px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--sub)}
+.listenOpt.ans .lab{background:var(--ok);color:#fff}
+.listenWhy{background:var(--card2);border-radius:10px;padding:14px;font-size:15px;line-height:1.8;display:none}
+.listenWhy.on{display:block}
+.listenWhy .h{color:var(--accent);font-weight:700;margin:8px 0 3px}
+.listenWhy .h:first-child{margin-top:0}
+.listenHint{position:fixed;left:0;right:0;bottom:78px;max-width:680px;margin:0 auto;text-align:center;font-size:13px;color:var(--sub);pointer-events:none;padding:0 16px}
+.listenThinking{text-align:center;font-size:22px;font-weight:800;color:var(--accent);margin:24px 0;display:none}
+.listenThinking.on{display:block}
 </style>
 </head>
 <body>
@@ -122,6 +145,12 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 
   <div class="tip">
     <b>読み方の型：</b>長い状況説明はほぼ飾り。<b>最後の1行</b>と、その中の<b>キーワード</b>（コスト最小／手間最小／可用性最大／最も安全 など）だけが正解を決める。選択肢4つのうち2つは「やりすぎ」か「明らかに違う」。
+  </div>
+
+  <div class="modecard listen" onclick="startListen()">
+    <h3>🎧 聞き流しモード（運転中・ハンズフリー）</h3>
+    <p>問題→選択肢→考える間→正解と理由、を読み上げて自動で次へ。画面どこでもタップで今の問題を最初から。</p>
+    <div class="cnt">耳だけで復習・全問ランダム</div>
   </div>
 
   <div class="modecard" onclick="startMode('all')">
@@ -166,10 +195,29 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
   <div class="reviewlist" id="rReview"></div>
 </section>
 
+<!-- 聞き流しモード -->
+<section class="screen" id="scListen">
+  <div class="listenTap" id="listenTap" onclick="listenReplay()">
+    <div class="listenStage" id="lStage"></div>
+    <div class="listenQno" id="lQno"></div>
+    <div class="listenScenario" id="lScenario"></div>
+    <div class="listenOpts" id="lOpts"></div>
+    <div class="listenThinking" id="lThinking">⏳ 考えてみよう…</div>
+    <div class="listenWhy" id="lWhy"></div>
+  </div>
+  <div class="listenHint" id="lHint">画面をタップ → この問題を最初からもう一度</div>
+</section>
+
 <!-- 下部ボタン -->
 <div class="btnrow" id="btnRow" style="display:none">
   <button class="btn ghost small" onclick="goHome()">中断</button>
   <button class="btn primary" id="btnNext" onclick="nextQ()">解答する</button>
+</div>
+
+<!-- 聞き流し用ボタン -->
+<div class="btnrow" id="listenBar" style="display:none">
+  <button class="btn ghost small" onclick="stopListen()">■ 終了</button>
+  <button class="btn primary" id="listenPause" onclick="listenTogglePause()">⏸ 一時停止</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -395,7 +443,189 @@ function showToast(msg){
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>t.classList.remove('on'),2600);
 }
-function goHome(){show('scHome');document.getElementById('btnRow').style.display='none';document.getElementById('hTitle').textContent='SAA ドリル';renderHome();}
+
+/* ===== 聞き流しモード ===== */
+const synth=window.speechSynthesis;
+let jaVoice=null;
+let listen={on:false,list:[],idx:0,steps:[],step:0,paused:false,token:0,wakeLock:null};
+
+function pickJaVoice(){
+  if(!synth)return;
+  const vs=synth.getVoices();
+  jaVoice=vs.find(v=>/ja-JP|ja_JP|^ja\b/i.test(v.lang))||vs.find(v=>/Japanese|日本/i.test(v.name))||null;
+}
+if(synth){
+  pickJaVoice();
+  if(typeof synth.onvoiceschanged!=='undefined'){synth.onvoiceschanged=pickJaVoice;}
+}
+
+async function requestWake(){
+  try{
+    if('wakeLock' in navigator){
+      listen.wakeLock=await navigator.wakeLock.request('screen');
+      listen.wakeLock.addEventListener&&listen.wakeLock.addEventListener('release',()=>{});
+    }
+  }catch(e){/* 取れなくても続行 */}
+}
+function releaseWake(){
+  try{if(listen.wakeLock){listen.wakeLock.release();listen.wakeLock=null;}}catch(e){}
+}
+// 画面復帰時にWake Lockを取り直す
+document.addEventListener('visibilitychange',()=>{
+  if(listen.on && !listen.paused && document.visibilityState==='visible'){requestWake();}
+});
+
+function startListen(){
+  if(!synth){alert('この端末は読み上げに対応していません。Chromeでお試しください。');return;}
+  listen.on=true;listen.paused=false;listen.token++;
+  listen.list=QUESTIONS.slice().sort(()=>Math.random()-.5);
+  listen.idx=0;
+  show('scListen');
+  document.getElementById('btnRow').style.display='none';
+  document.getElementById('listenBar').style.display='flex';
+  document.getElementById('hTitle').textContent='聞き流し';
+  requestWake();
+  renderListenQ();
+  playListenQ();
+}
+
+function renderListenQ(){
+  const q=listen.list[listen.idx];
+  document.getElementById('lStage').textContent='テーマ：'+q.cat;
+  document.getElementById('lQno').textContent=(listen.idx+1)+' / '+listen.list.length+' 問目';
+  document.getElementById('lScenario').innerHTML=q.scenario+'<span class="ask">'+q.ask+'</span>';
+  const opts=document.getElementById('lOpts');opts.innerHTML='';
+  q.options.forEach((o,i)=>{
+    const d=document.createElement('div');d.className='listenOpt';d.dataset.i=i;
+    d.innerHTML='<span class="lab">'+'ABCD'[i]+'</span><span>'+o+'</span>';
+    opts.appendChild(d);
+  });
+  document.getElementById('lThinking').className='listenThinking';
+  const why=document.getElementById('lWhy');why.className='listenWhy';why.innerHTML='';
+  document.getElementById('hStat').textContent='';
+  document.getElementById('hBar').style.width=(listen.idx/listen.list.length*100)+'%';
+  window.scrollTo(0,0);
+}
+
+// 1問分の読み上げ「セリフ」列を組み立てて順番に再生
+function playListenQ(){
+  const q=listen.list[listen.idx];
+  const labels='ABCD';
+  const myToken=listen.token;
+  // セリフ列（text + 前に置く待ち時間ms + 実行する画面処理）
+  const seq=[];
+  seq.push({t:'第'+(listen.idx+1)+'問。テーマは'+q.cat+'。'});
+  seq.push({t:stripTags(q.scenario)});
+  seq.push({t:'問題。'+stripTags(q.ask)});
+  q.options.forEach((o,i)=>{ seq.push({t:labels[i]+'、'+stripTags(o)+'。'}); });
+  seq.push({t:'では、考えてみてください。',before:0,fn:()=>{document.getElementById('lThinking').className='listenThinking on';}});
+  seq.push({t:'',before:4500}); // 考える間（無音）
+  seq.push({t:'正解は、'+labels[q.answer]+'。',before:0,fn:()=>{
+    document.getElementById('lThinking').className='listenThinking';
+    [...document.querySelectorAll('#lOpts .listenOpt')].forEach(el=>{
+      if(+el.dataset.i===q.answer)el.classList.add('ans');
+    });
+    // 進捗記録（聞いた＝seen、正解扱いにはしない）
+    progress.seen[q.id]=true;saveProgress();
+  }});
+  seq.push({t:'理由。'+stripTags(q.keypoint),before:300,fn:()=>{
+    const why=document.getElementById('lWhy');why.className='listenWhy on';
+    why.innerHTML='<div class="h">本当に聞かれていたこと</div>'+q.keypoint+
+      '<div class="h">なぜこれが正解か</div>'+q.explain;
+  }});
+  seq.push({t:stripTags(q.explain)});
+  seq.push({t:'',before:1200}); // 余韻
+  seq.push({t:'次の問題へ。',before:600,fn:()=>{}});
+  seq.push({t:'',before:1500,fn:()=>{
+    // 次の問題へ
+    listen.idx++;
+    if(listen.idx>=listen.list.length){listen.idx=0;listen.list.sort(()=>Math.random()-.5);}
+    renderListenQ();
+    playListenQ();
+  }});
+  runSeq(seq,0,myToken);
+}
+
+// セリフ列を順に再生（細切れ＝Android Chromeの長文打ち切り対策）
+function runSeq(seq,i,myToken){
+  if(!listen.on||myToken!==listen.token)return; // 中断/リスタート検知
+  if(listen.paused){ // 一時停止中は待つ
+    setTimeout(()=>runSeq(seq,i,myToken),300);return;
+  }
+  if(i>=seq.length)return;
+  const step=seq[i];
+  const go=()=>{
+    if(!listen.on||myToken!==listen.token)return;
+    if(step.fn)step.fn();
+    if(step.t){
+      speakChunks(stripTags(step.t),myToken,()=>runSeq(seq,i+1,myToken));
+    }else{
+      runSeq(seq,i+1,myToken);
+    }
+  };
+  if(step.before){setTimeout(go,step.before);}else{go();}
+}
+
+// 1つのテキストを「。」で割って連続再生（長文打ち切り回避）
+function speakChunks(text,myToken,done){
+  if(!text){done&&done();return;}
+  // 「。」の後で分割（後読み非対応の端末でも動くようマーカー方式）
+  const parts=text.replace(/。/g,'。\u0001').split('\u0001').map(s=>s.trim()).filter(Boolean);
+  if(!parts.length){done&&done();return;}
+  let k=0;
+  const next=()=>{
+    if(!listen.on||myToken!==listen.token)return;
+    if(listen.paused){setTimeout(next,300);return;}
+    if(k>=parts.length){done&&done();return;}
+    const u=new SpeechSynthesisUtterance(parts[k]);
+    if(jaVoice)u.voice=jaVoice;
+    u.lang='ja-JP';u.rate=1.0;u.pitch=1.0;
+    u.onend=()=>{k++;next();};
+    u.onerror=()=>{k++;next();};
+    try{synth.speak(u);}catch(e){k++;next();}
+  };
+  next();
+}
+
+// 画面タップ→今の問題を最初から
+function listenReplay(){
+  if(!listen.on)return;
+  listen.token++;          // 進行中シーケンスを無効化
+  listen.paused=false;
+  document.getElementById('listenPause').textContent='⏸ 一時停止';
+  try{synth.cancel();}catch(e){}
+  renderListenQ();
+  // cancel直後のAndroidの取りこぼし対策で少し待つ
+  setTimeout(()=>playListenQ(),200);
+  showToast('🔁 この問題を最初から');
+}
+
+function listenTogglePause(){
+  if(!listen.on)return;
+  listen.paused=!listen.paused;
+  const b=document.getElementById('listenPause');
+  if(listen.paused){
+    b.textContent='▶ 再開';
+    try{synth.pause();}catch(e){}
+    try{synth.cancel();}catch(e){} // Androidはpauseが効かない端末があるのでcancel併用
+    // cancelした場合は今の問題を頭から（位置保持は諦め、確実に動く方を取る）
+    listen._resumeReplay=true;
+  }else{
+    b.textContent='⏸ 一時停止';
+    if(listen._resumeReplay){listen._resumeReplay=false;listenReplay();}
+    else{try{synth.resume();}catch(e){}}
+  }
+}
+
+function stopListen(){
+  listen.on=false;listen.token++;
+  try{synth.cancel();}catch(e){}
+  releaseWake();
+  document.getElementById('listenBar').style.display='none';
+  goHome();
+}
+
+function goHome(){show('scHome');document.getElementById('btnRow').style.display='none';document.getElementById('listenBar').style.display='none';document.getElementById('hTitle').textContent='SAA ドリル';renderHome();}
 function show(id){[...document.querySelectorAll('.screen')].forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
 
 // 起動
