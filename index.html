@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>SAA シナリオ判断ドリル</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f1420; --card:#1a2233; --card2:#222d44;
+  --line:#2e3a52; --text:#e8edf5; --sub:#9fb0c8;
+  --accent:#ff9900; --ok:#2ecc71; --ng:#e74c3c; --blue:#4a9eff;
+}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;font-size:17px;line-height:1.7;-webkit-text-size-adjust:100%}
+body{padding:0 0 90px;max-width:680px;margin:0 auto;min-height:100vh}
+
+/* ヘッダー */
+header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 16px}
+.htop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.htitle{font-size:16px;font-weight:700;color:var(--accent)}
+.hstat{font-size:14px;color:var(--sub)}
+.bar{height:6px;background:var(--card);border-radius:3px;margin-top:10px;overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+
+/* 画面共通 */
+.screen{display:none;padding:18px 16px}
+.screen.on{display:block}
+
+/* ホーム */
+.home h1{font-size:24px;line-height:1.4;margin-bottom:6px}
+.home p.lead{color:var(--sub);font-size:16px;margin-bottom:20px}
+.modecard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px;cursor:pointer;transition:.15s}
+.modecard:active{transform:scale(.98)}
+.modecard h3{font-size:18px;margin-bottom:4px}
+.modecard p{font-size:14px;color:var(--sub)}
+.modecard .cnt{font-size:13px;color:var(--accent);margin-top:6px}
+.tip{background:var(--card2);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 16px;margin:18px 0;font-size:15px}
+.tip b{color:var(--accent)}
+.catgrid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.catchip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:7px 14px;font-size:14px;cursor:pointer}
+.catchip:active{background:var(--card2)}
+
+/* 問題 */
+.qmeta{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:10px}
+.qcat{color:var(--blue);font-weight:700}
+.qbody{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;font-size:16px;line-height:1.8}
+.qbody .ask{display:block;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-weight:700;font-size:17px;color:#fff}
+.qbody .kw{color:var(--accent);font-weight:700}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:14px 16px;font-size:16px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;transition:.12s}
+.opt:active{transform:scale(.99)}
+.opt .lab{flex:0 0 24px;height:24px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--sub)}
+.opt .ot{flex:1}
+.opt.sel{border-color:var(--blue)}
+.opt.correct{border-color:var(--ok);background:rgba(46,204,113,.12)}
+.opt.correct .lab{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--ng);background:rgba(231,76,60,.12)}
+.opt.wrong .lab{background:var(--ng);color:#fff}
+.opt.disabled{cursor:default}
+
+/* 解説 */
+.exp{display:none;margin-top:16px;background:var(--card2);border-radius:12px;padding:16px;font-size:15px;line-height:1.8}
+.exp.on{display:block}
+.exp .verdict{font-size:17px;font-weight:700;margin-bottom:8px}
+.exp .verdict.ok{color:var(--ok)}
+.exp .verdict.ng{color:var(--ng)}
+.exp .h{color:var(--accent);font-weight:700;margin:10px 0 4px}
+.exp .elim{font-size:14px;color:var(--sub);margin-top:8px}
+
+/* もっと詳しく（背景解説） */
+.moreBtn{margin-top:14px;width:100%;background:var(--card);border:1px solid var(--blue);color:var(--blue);border-radius:12px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+.moreBtn:active{background:var(--card2)}
+.promptBtn{margin-top:10px;width:100%;background:var(--accent);border:none;color:#1a1200;border-radius:12px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+.promptBtn:active{opacity:.85}
+.promptHint{font-size:13px;color:var(--sub);margin-top:6px;line-height:1.6}
+.deep{display:none;margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;font-size:15px;line-height:1.85}
+.deep.on{display:block}
+.deep .dh{color:var(--blue);font-weight:700;font-size:16px;margin:14px 0 6px}
+.deep .dh:first-child{margin-top:0}
+.deep .nick{background:var(--card2);border-radius:10px;padding:11px 13px;margin:7px 0;font-size:15px}
+.deep b{color:#fff}
+.deep .fig{display:block;width:100%;max-width:520px;height:auto;margin:10px auto 4px;background:#0f1420;border:1px solid var(--line);border-radius:10px;padding:10px}
+.deep .figcap{font-size:13px;color:var(--sub);margin:4px 2px 0;line-height:1.65}
+
+/* ボタン */
+.btnrow{position:fixed;bottom:0;left:0;right:0;max-width:680px;margin:0 auto;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(15,20,32,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;gap:10px}
+.btn{flex:1;border:none;border-radius:12px;padding:15px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn.primary{background:var(--accent);color:#1a1200}
+.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.btn:disabled{opacity:.4}
+.btn.small{flex:0 0 auto;padding:15px 18px}
+
+/* 結果 */
+.result{text-align:center;padding-top:30px}
+.result .score{font-size:56px;font-weight:800;color:var(--accent)}
+.result .smeta{color:var(--sub);font-size:16px;margin:6px 0 20px}
+.result .msg{font-size:18px;margin-bottom:24px;line-height:1.6}
+.reviewlist{text-align:left;margin-top:10px}
+.ritem{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;font-size:14px}
+.ritem .rc{color:var(--blue);font-size:12px}
+
+/* トースト */
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--ok);color:#fff;padding:12px 22px;border-radius:24px;font-size:15px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,.4);max-width:90%;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="htop">
+    <div class="htitle" id="hTitle">SAA ドリル</div>
+    <div class="hstat" id="hStat"></div>
+  </div>
+  <div class="bar"><i id="hBar"></i></div>
+</header>
+
+<!-- ホーム -->
+<section class="screen on home" id="scHome">
+  <h1>SAA シナリオ判断ドリル</h1>
+  <p class="lead">電車で1問ずつ。状況文から「本当の質問」を抜き出す練習。</p>
+
+  <div class="tip">
+    <b>読み方の型：</b>長い状況説明はほぼ飾り。<b>最後の1行</b>と、その中の<b>キーワード</b>（コスト最小／手間最小／可用性最大／最も安全 など）だけが正解を決める。選択肢4つのうち2つは「やりすぎ」か「明らかに違う」。
+  </div>
+
+  <div class="modecard" onclick="startMode('all')">
+    <h3>▶ 全問を順番に</h3>
+    <p>頭から全部解く。まずはこれ。</p>
+    <div class="cnt" id="cntAll"></div>
+  </div>
+  <div class="modecard" onclick="startMode('wrong')">
+    <h3>🔁 間違えた問題だけ</h3>
+    <p>前回ミスした問題を復習。</p>
+    <div class="cnt" id="cntWrong"></div>
+  </div>
+  <div class="modecard" onclick="startMode('shuffle')">
+    <h3>🎲 ランダム10問</h3>
+    <p>スキマ時間用。シャッフルで10問。</p>
+  </div>
+
+  <h3 style="margin:22px 0 4px;font-size:16px;color:var(--sub)">テーマ別</h3>
+  <div class="catgrid" id="catGrid"></div>
+
+  <div style="margin-top:24px;text-align:center">
+    <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px" onclick="resetProgress()">進捗をリセット</button>
+  </div>
+</section>
+
+<!-- 問題 -->
+<section class="screen" id="scQuiz">
+  <div class="qmeta">
+    <span class="qcat" id="qCat"></span>
+    <span id="qIdx"></span>
+  </div>
+  <div class="qbody" id="qBody"></div>
+  <div class="opts" id="qOpts"></div>
+  <div class="exp" id="qExp"></div>
+</section>
+
+<!-- 結果 -->
+<section class="screen result" id="scResult">
+  <div class="score" id="rScore"></div>
+  <div class="smeta" id="rMeta"></div>
+  <div class="msg" id="rMsg"></div>
+  <div class="reviewlist" id="rReview"></div>
+</section>
+
+<!-- 下部ボタン -->
+<div class="btnrow" id="btnRow" style="display:none">
+  <button class="btn ghost small" onclick="goHome()">中断</button>
+  <button class="btn primary" id="btnNext" onclick="nextQ()">解答する</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="questions.js"></script>
+<script>
+const LS_KEY='saa_drill_progress_v1';
+let state={mode:'all',list:[],idx:0,answered:false,sel:null,session:{correct:0,total:0,wrongIds:[]}};
+let progress=loadProgress();
+
+function loadProgress(){
+  try{return JSON.parse(localStorage.getItem(LS_KEY))||{seen:{},wrong:{}}}catch(e){return{seen:{},wrong:{}}}
+}
+function saveProgress(){localStorage.setItem(LS_KEY,JSON.stringify(progress))}
+function resetProgress(){
+  if(!confirm('進捗（正解・間違い履歴）を消します。よろしいですか？'))return;
+  progress={seen:{},wrong:{}};saveProgress();renderHome();
+}
+
+// カテゴリ一覧
+function categories(){
+  const s=new Set();QUESTIONS.forEach(q=>s.add(q.cat));return[...s];
+}
+
+function renderHome(){
+  document.getElementById('cntAll').textContent=`全${QUESTIONS.length}問`;
+  const wrongCount=Object.keys(progress.wrong).filter(id=>progress.wrong[id]).length;
+  document.getElementById('cntWrong').textContent=wrongCount?`${wrongCount}問たまっています`:'まだありません';
+  const seen=Object.keys(progress.seen).length;
+  document.getElementById('hStat').textContent=`学習済 ${seen}/${QUESTIONS.length}`;
+  document.getElementById('hBar').style.width=(seen/QUESTIONS.length*100)+'%';
+  const cg=document.getElementById('catGrid');cg.innerHTML='';
+  categories().forEach(c=>{
+    const n=QUESTIONS.filter(q=>q.cat===c).length;
+    const chip=document.createElement('div');chip.className='catchip';
+    chip.textContent=`${c} (${n})`;chip.onclick=()=>startMode('cat',c);
+    cg.appendChild(chip);
+  });
+}
+
+function startMode(mode,cat){
+  state.mode=mode;
+  let list=[];
+  if(mode==='all')list=QUESTIONS.slice();
+  else if(mode==='cat')list=QUESTIONS.filter(q=>q.cat===cat);
+  else if(mode==='wrong'){
+    list=QUESTIONS.filter(q=>progress.wrong[q.id]);
+    if(!list.length){alert('間違えた問題はまだありません。まず全問を解いてみましょう。');return;}
+  }else if(mode==='shuffle'){
+    list=QUESTIONS.slice().sort(()=>Math.random()-.5).slice(0,10);
+  }
+  state.list=list;state.idx=0;
+  state.session={correct:0,total:0,wrongIds:[]};
+  show('scQuiz');document.getElementById('btnRow').style.display='flex';
+  document.getElementById('hTitle').textContent=
+    mode==='wrong'?'復習モード':mode==='cat'?cat:mode==='shuffle'?'ランダム10問':'全問';
+  renderQ();
+}
+
+function renderQ(){
+  const q=state.list[state.idx];
+  state.answered=false;state.sel=null;
+  document.getElementById('qCat').textContent=q.cat;
+  document.getElementById('qIdx').textContent=`${state.idx+1} / ${state.list.length}`;
+  document.getElementById('qBody').innerHTML=q.scenario+'<span class="ask">'+q.ask+'</span>';
+  const opts=document.getElementById('qOpts');opts.innerHTML='';
+  q.options.forEach((o,i)=>{
+    const d=document.createElement('div');d.className='opt';d.dataset.i=i;
+    d.innerHTML=`<span class="lab">${'ABCD'[i]}</span><span class="ot">${o}</span>`;
+    d.onclick=()=>selectOpt(i);
+    opts.appendChild(d);
+  });
+  const exp=document.getElementById('qExp');exp.className='exp';exp.innerHTML='';
+  const bn=document.getElementById('btnNext');bn.textContent='解答する';bn.disabled=true;
+  window.scrollTo(0,0);
+  // progress bar = session
+  document.getElementById('hStat').textContent=`正解 ${state.session.correct}/${state.session.total}`;
+  document.getElementById('hBar').style.width=(state.idx/state.list.length*100)+'%';
+}
+
+function selectOpt(i){
+  if(state.answered)return;
+  state.sel=i;
+  [...document.querySelectorAll('#qOpts .opt')].forEach(o=>o.classList.toggle('sel',+o.dataset.i===i));
+  document.getElementById('btnNext').disabled=false;
+}
+
+function nextQ(){
+  if(!state.answered){revealAnswer();return;}
+  state.idx++;
+  if(state.idx>=state.list.length){finish();return;}
+  renderQ();
+}
+
+function revealAnswer(){
+  const q=state.list[state.idx];
+  state.answered=true;
+  const correct=state.sel===q.answer;
+  state.session.total++;
+  if(correct)state.session.correct++;else state.session.wrongIds.push(q.id);
+  // 記録
+  progress.seen[q.id]=true;
+  progress.wrong[q.id]=!correct; // 正解したら false に上書き（復習リストから外れる）
+  saveProgress();
+  // 選択肢色付け
+  [...document.querySelectorAll('#qOpts .opt')].forEach(o=>{
+    const oi=+o.dataset.i;o.classList.add('disabled');o.onclick=null;
+    if(oi===q.answer)o.classList.add('correct');
+    else if(oi===state.sel)o.classList.add('wrong');
+  });
+  // 解説
+  const exp=document.getElementById('qExp');exp.className='exp on';
+  let elim='';
+  if(q.elim){elim='<div class="elim"><b>消去法：</b>'+q.elim+'</div>';}
+  let more='';
+  if(q.deep){more='<button class="moreBtn" id="moreBtn" onclick="toggleDeep()">🔍 もっと詳しく（なぜ？）</button>'+
+    '<div class="deep" id="deepBox">'+q.deep+'</div>';}
+  const aiBtn='<button class="promptBtn" onclick="copyAIPrompt('+state.idx+')">🤖 この問題をAIに相談する（コピー）</button>'+
+    '<div class="promptHint">問題・選択肢・正解＋「各選択肢がなぜ正解／誤答か初心者向けに解説して」という指示をコピーします。ChatGPTやClaudeに貼り付けて、納得いくまで質問できます。</div>';
+  exp.innerHTML=
+    `<div class="verdict ${correct?'ok':'ng'}">${correct?'◯ 正解':'✕ 不正解'}（正解は ${'ABCD'[q.answer]}）</div>`+
+    `<div class="h">本当に聞かれていたこと</div>${q.keypoint}`+
+    `<div class="h">なぜこれが正解か</div>${q.explain}`+
+    elim+more+aiBtn;
+  document.getElementById('btnNext').textContent=
+    state.idx+1>=state.list.length?'結果を見る':'次の問題 →';
+  document.getElementById('hStat').textContent=`正解 ${state.session.correct}/${state.session.total}`;
+}
+
+function finish(){
+  show('scResult');document.getElementById('btnRow').style.display='none';
+  document.getElementById('hTitle').textContent='結果';
+  const c=state.session.correct,t=state.session.total;
+  const pct=t?Math.round(c/t*100):0;
+  document.getElementById('rScore').textContent=pct+'%';
+  document.getElementById('rMeta').textContent=`${t}問中 ${c}問正解`;
+  let msg='';
+  if(pct>=80)msg='本番ライン（7割）超え。この調子。';
+  else if(pct>=70)msg='合格ラインに乗ってきた。間違えた所を復習へ。';
+  else msg='まだ伸びしろ。解説を読んで「読み方の型」を意識して。';
+  document.getElementById('rMsg').textContent=msg;
+  const rv=document.getElementById('rReview');rv.innerHTML='';
+  if(state.session.wrongIds.length){
+    rv.innerHTML='<h3 style="font-size:15px;color:var(--sub);margin:18px 0 8px">間違えた問題</h3>';
+    state.session.wrongIds.forEach(id=>{
+      const q=QUESTIONS.find(x=>x.id===id);
+      const d=document.createElement('div');d.className='ritem';
+      d.innerHTML=`<div class="rc">${q.cat}</div>${q.ask}`;
+      rv.appendChild(d);
+    });
+  }
+  renderHome();
+}
+
+function toggleDeep(){
+  const box=document.getElementById('deepBox');const btn=document.getElementById('moreBtn');
+  if(!box)return;
+  const open=box.classList.toggle('on');
+  btn.textContent=open?'🔼 閉じる':'🔍 もっと詳しく（なぜ？）';
+}
+
+// HTMLタグ・装飾を落としてプレーンテキスト化
+function stripTags(s){
+  return (s||'').replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+}
+
+// この問題をAIに相談するためのプロンプトを組み立ててコピー
+function buildAIPrompt(q){
+  const labels='ABCD';
+  let opts=q.options.map((o,i)=>`${labels[i]}. ${stripTags(o)}`).join('\n');
+  return [
+'あなたはAWS認定ソリューションアーキテクト（SAA）の講師です。',
+'AWS初心者の私が、下のSAA風の問題を「なぜその答えになるのか」まで腹落ちできるように解説してください。',
+'',
+'【お願い】',
+'1. まず、この問題が結局「何を問うているのか」を一文で。',
+'2. 正解の選択肢が、なぜこの状況に最も合うのかを、初心者にもわかる言葉（できればたとえ話）で。',
+'3. 他の選択肢が、それぞれ「なぜダメか／どういう時なら正解になるか」を1つずつ。ただ間違いと言うのでなく、紛らわしいポイントを明かしてください。',
+'4. 出てくるAWSサービスや用語は、正式名称と「ざっくり何をするものか」をセットで。略語は何の略かも。',
+'5. 最後に、本番で似た問題を見たとき一発で見抜くための「キーワードと判断のコツ」を一言。',
+'専門用語をいきなり使わず、必要なら噛み砕いてください。',
+'',
+'==== 問題 ====',
+stripTags(q.scenario),
+'',
+'問い: '+stripTags(q.ask),
+'',
+'選択肢:',
+opts,
+'',
+'正解: '+labels[q.answer],
+'（テーマ: '+q.cat+'）'
+  ].join('\n');
+}
+
+function copyAIPrompt(idx){
+  const q=state.list[idx];
+  if(!q)return;
+  const text=buildAIPrompt(q);
+  const done=()=>showToast('📋 プロンプトをコピーしました。AIに貼り付けて相談できます');
+  const fail=()=>{
+    // フォールバック: テキストエリア経由
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.focus();ta.select();
+      document.execCommand('copy');document.body.removeChild(ta);
+      done();
+    }catch(e){
+      // 最終手段: 全選択して見せる
+      window.prompt('下のテキストを長押しでコピーして、AIに貼り付けてください', text);
+    }
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(fail);
+  }else{fail();}
+}
+
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById('toast');if(!t)return;
+  t.textContent=msg;t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('on'),2600);
+}
+function goHome(){show('scHome');document.getElementById('btnRow').style.display='none';document.getElementById('hTitle').textContent='SAA ドリル';renderHome();}
+function show(id){[...document.querySelectorAll('.screen')].forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
+
+// 起動
+renderHome();
+</script>
+</body>
+</html>
