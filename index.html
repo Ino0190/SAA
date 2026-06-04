@@ -67,6 +67,18 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .exp .verdict.ng{color:var(--ng)}
 .exp .h{color:var(--accent);font-weight:700;margin:10px 0 4px}
 .exp .elim{font-size:14px;color:var(--sub);margin-top:8px}
+/* 正解の全文表示 */
+.ansfull{background:rgba(46,204,113,.12);border:1px solid var(--ok);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:15px;line-height:1.7}
+.ansfull .anslab{display:inline-block;background:var(--ok);color:#fff;font-weight:700;font-size:13px;border-radius:6px;padding:2px 9px;margin-right:8px}
+/* 混同注意 */
+.confbox{margin-top:12px;background:rgba(255,153,0,.1);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.75}
+.confbox .confh{color:var(--accent);font-weight:700;margin-bottom:5px}
+.confbox b{color:#fff}
+/* 用語ミニ辞典 */
+.termbox{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 14px}
+.termrow{font-size:14px;line-height:1.7;padding:7px 0;border-bottom:1px dashed var(--line)}
+.termrow:last-child{border-bottom:none}
+.termrow b{color:var(--blue)}
 
 /* もっと詳しく（背景解説） */
 .moreBtn{margin-top:14px;width:100%;background:var(--card);border:1px solid var(--blue);color:var(--blue);border-radius:12px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
@@ -158,9 +170,14 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
     <p>頭から全部解く。まずはこれ。</p>
     <div class="cnt" id="cntAll"></div>
   </div>
+  <div class="modecard" onclick="startMode('unseen')">
+    <h3>🆕 まだ解いてない問題から</h3>
+    <p>一度も解いていない問題だけを出す。やり残しを潰す。</p>
+    <div class="cnt" id="cntUnseen"></div>
+  </div>
   <div class="modecard" onclick="startMode('wrong')">
     <h3>🔁 間違えた問題だけ</h3>
-    <p>前回ミスした問題を復習。</p>
+    <p>前回ミスした問題を、間違えた回数の多い順に復習。</p>
     <div class="cnt" id="cntWrong"></div>
   </div>
   <div class="modecard" onclick="startMode('shuffle')">
@@ -229,12 +246,17 @@ let state={mode:'all',list:[],idx:0,answered:false,sel:null,session:{correct:0,t
 let progress=loadProgress();
 
 function loadProgress(){
-  try{return JSON.parse(localStorage.getItem(LS_KEY))||{seen:{},wrong:{}}}catch(e){return{seen:{},wrong:{}}}
+  try{
+    const p=JSON.parse(localStorage.getItem(LS_KEY))||{};
+    p.seen=p.seen||{};p.wrong=p.wrong||{};
+    p.wrongCount=p.wrongCount||{};p.correctCount=p.correctCount||{};
+    return p;
+  }catch(e){return{seen:{},wrong:{},wrongCount:{},correctCount:{}}}
 }
 function saveProgress(){localStorage.setItem(LS_KEY,JSON.stringify(progress))}
 function resetProgress(){
   if(!confirm('進捗（正解・間違い履歴）を消します。よろしいですか？'))return;
-  progress={seen:{},wrong:{}};saveProgress();renderHome();
+  progress={seen:{},wrong:{},wrongCount:{},correctCount:{}};saveProgress();renderHome();
 }
 
 // カテゴリ一覧
@@ -247,6 +269,9 @@ function renderHome(){
   const wrongCount=Object.keys(progress.wrong).filter(id=>progress.wrong[id]).length;
   document.getElementById('cntWrong').textContent=wrongCount?`${wrongCount}問たまっています`:'まだありません';
   const seen=Object.keys(progress.seen).length;
+  const unseen=QUESTIONS.filter(q=>!progress.seen[q.id]).length;
+  const cu=document.getElementById('cntUnseen');
+  if(cu)cu.textContent=unseen?`残り${unseen}問`:'全部やりました🎉';
   document.getElementById('hStat').textContent=`学習済 ${seen}/${QUESTIONS.length}`;
   document.getElementById('hBar').style.width=(seen/QUESTIONS.length*100)+'%';
   const cg=document.getElementById('catGrid');cg.innerHTML='';
@@ -263,9 +288,13 @@ function startMode(mode,cat){
   let list=[];
   if(mode==='all')list=QUESTIONS.slice();
   else if(mode==='cat')list=QUESTIONS.filter(q=>q.cat===cat);
-  else if(mode==='wrong'){
+  else if(mode==='unseen'){
+    list=QUESTIONS.filter(q=>!progress.seen[q.id]);
+    if(!list.length){alert('全問やり切りました🎉 「間違えた問題だけ」や「全問」で復習しましょう。');return;}
+  }else if(mode==='wrong'){
     list=QUESTIONS.filter(q=>progress.wrong[q.id]);
     if(!list.length){alert('間違えた問題はまだありません。まず全問を解いてみましょう。');return;}
+    list.sort((a,b)=>(progress.wrongCount[b.id]||0)-(progress.wrongCount[a.id]||0));
   }else if(mode==='shuffle'){
     list=QUESTIONS.slice().sort(()=>Math.random()-.5).slice(0,10);
   }
@@ -273,7 +302,7 @@ function startMode(mode,cat){
   state.session={correct:0,total:0,wrongIds:[]};
   show('scQuiz');document.getElementById('btnRow').style.display='flex';
   document.getElementById('hTitle').textContent=
-    mode==='wrong'?'復習モード':mode==='cat'?cat:mode==='shuffle'?'ランダム10問':'全問';
+    mode==='wrong'?'復習モード':mode==='cat'?cat:mode==='shuffle'?'ランダム10問':mode==='unseen'?'未学習から':'全問';
   renderQ();
 }
 
@@ -321,6 +350,11 @@ function revealAnswer(){
   // 記録
   progress.seen[q.id]=true;
   progress.wrong[q.id]=!correct; // 正解したら false に上書き（復習リストから外れる）
+  // 累計回数（裏で蓄積＝本当の弱点が見える）
+  progress.wrongCount=progress.wrongCount||{};
+  progress.correctCount=progress.correctCount||{};
+  if(correct)progress.correctCount[q.id]=(progress.correctCount[q.id]||0)+1;
+  else progress.wrongCount[q.id]=(progress.wrongCount[q.id]||0)+1;
   saveProgress();
   // 選択肢色付け
   [...document.querySelectorAll('#qOpts .opt')].forEach(o=>{
@@ -332,19 +366,35 @@ function revealAnswer(){
   const exp=document.getElementById('qExp');exp.className='exp on';
   let elim='';
   if(q.elim){elim='<div class="elim"><b>消去法：</b>'+q.elim+'</div>';}
+  // 用語ミニ辞典（問題文の業界用語・略語）
+  let terms='';
+  if(q.terms){
+    let rows=q.terms.map(t=>'<div class="termrow"><b>'+t.t+'</b>：'+t.d+'</div>').join('');
+    terms='<div class="h">📖 出てきた用語</div><div class="termbox">'+rows+'</div>';
+  }
+  // 間違えやすいペア
+  let conf='';
+  if(q.confusion){
+    conf='<div class="confbox"><div class="confh">⚡ 混同注意</div>'+q.confusion+'</div>';
+  }
   let more='';
   if(q.deep){more='<button class="moreBtn" id="moreBtn" onclick="toggleDeep()">🔍 もっと詳しく（なぜ？）</button>'+
     '<div class="deep" id="deepBox">'+q.deep+'</div>';}
   const aiBtn='<button class="promptBtn" onclick="copyAIPrompt('+state.idx+')">🤖 この問題をAIに相談する（コピー）</button>'+
     '<div class="promptHint">問題・選択肢・正解＋「各選択肢がなぜ正解／誤答か初心者向けに解説して」という指示をコピーします。ChatGPTやClaudeに貼り付けて、納得いくまで質問できます。</div>';
+  // 正解＝記号＋正解選択肢の文章
+  const ansText=stripTags(q.options[q.answer]);
   exp.innerHTML=
-    `<div class="verdict ${correct?'ok':'ng'}">${correct?'◯ 正解':'✕ 不正解'}（正解は ${'ABCD'[q.answer]}）</div>`+
+    `<div class="verdict ${correct?'ok':'ng'}">${correct?'◯ 正解':'✕ 不正解'}</div>`+
+    `<div class="ansfull"><span class="anslab">正解 ${'ABCD'[q.answer]}</span> ${ansText}</div>`+
     `<div class="h">本当に聞かれていたこと</div>${q.keypoint}`+
     `<div class="h">なぜこれが正解か</div>${q.explain}`+
-    elim+more+aiBtn;
+    elim+conf+terms+more+aiBtn;
   document.getElementById('btnNext').textContent=
     state.idx+1>=state.list.length?'結果を見る':'次の問題 →';
   document.getElementById('hStat').textContent=`正解 ${state.session.correct}/${state.session.total}`;
+  // 解説までスクロール
+  setTimeout(()=>{exp.scrollIntoView({behavior:'smooth',block:'start'});},120);
 }
 
 function finish(){
@@ -364,8 +414,10 @@ function finish(){
     rv.innerHTML='<h3 style="font-size:15px;color:var(--sub);margin:18px 0 8px">間違えた問題</h3>';
     state.session.wrongIds.forEach(id=>{
       const q=QUESTIONS.find(x=>x.id===id);
+      const wc=(progress.wrongCount&&progress.wrongCount[id])||0;
+      const badge=wc>=2?` <span style="color:var(--ng)">✕${wc}回目</span>`:'';
       const d=document.createElement('div');d.className='ritem';
-      d.innerHTML=`<div class="rc">${q.cat}</div>${q.ask}`;
+      d.innerHTML=`<div class="rc">${q.cat}${badge}</div>${q.ask}`;
       rv.appendChild(d);
     });
   }
