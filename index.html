@@ -116,6 +116,19 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--ok);color:#fff;padding:12px 22px;border-radius:24px;font-size:15px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,.4);max-width:90%;text-align:center}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ふっかつのじゅもん モーダル */
+.jmask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.jmask.on{display:flex;align-items:flex-start;justify-content:center}
+.jcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px;max-width:560px;width:100%;margin:auto}
+.jtitle{font-size:20px;font-weight:800;color:var(--accent);margin-bottom:8px;text-align:center}
+.jlead{font-size:14px;color:var(--sub);line-height:1.7;margin-bottom:16px}
+.jsec{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.jsech{font-size:15px;font-weight:700;color:var(--blue);margin-bottom:10px}
+.jta{width:100%;min-height:88px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.6;resize:vertical;word-break:break-all}
+.jrow{display:flex;gap:10px;margin-top:10px}
+.jrow .btn{flex:1;padding:13px;font-size:15px}
+.jnote{font-size:12px;color:var(--sub);margin-top:8px;line-height:1.6}
+
 /* 聞き流しモード */
 .modecard.listen{border-color:var(--blue)}
 .modecard.listen h3{color:var(--blue)}
@@ -189,7 +202,8 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
   <div class="catgrid" id="catGrid"></div>
 
   <div style="margin-top:24px;text-align:center">
-    <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px" onclick="resetProgress()">進捗をリセット</button>
+    <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px" onclick="openJumon()">📜 ふっかつのじゅもん</button>
+    <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px;margin-left:8px" onclick="resetProgress()">進捗をリセット</button>
   </div>
 </section>
 
@@ -238,6 +252,34 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ふっかつのじゅもん モーダル -->
+<div class="jmask" id="jmask" onclick="if(event.target===this)closeJumon()">
+  <div class="jcard">
+    <div class="jtitle">📜 ふっかつのじゅもん</div>
+    <p class="jlead">PCとスマホで進捗（学習済み・間違えた回数）を引き継げる。<br>片方で「じゅもんを書き写す」→もう片方で貼り付けて読み込むと、両方の記録が合算される。</p>
+
+    <div class="jsec">
+      <div class="jsech">① いまの進捗を じゅもんにする（書き写す側）</div>
+      <textarea id="jOut" class="jta" readonly placeholder="ボタンを押すと ここに じゅもんが出る"></textarea>
+      <div class="jrow">
+        <button class="btn primary" onclick="genJumon()">じゅもんを 出す</button>
+        <button class="btn ghost" onclick="copyJumon()">コピー</button>
+      </div>
+    </div>
+
+    <div class="jsec">
+      <div class="jsech">② じゅもんを 打ち込む（よみがえらせる側）</div>
+      <textarea id="jIn" class="jta" placeholder="ここに じゅもんを 貼り付ける"></textarea>
+      <div class="jrow">
+        <button class="btn primary" onclick="applyJumon()">ぼうけんのしょを よみがえらせる</button>
+      </div>
+      <p class="jnote">※ 今の進捗に「合算」されます（履歴は消えません）。同じ端末で出した古いじゅもんを読み戻しても二重加算されないよう、回数は多い方を採用します。</p>
+    </div>
+
+    <button class="btn ghost" style="width:100%;margin-top:6px" onclick="closeJumon()">とじる</button>
+  </div>
+</div>
 
 <script src="questions.js"></script>
 <script>
@@ -678,6 +720,93 @@ function stopListen(){
 }
 
 function goHome(){show('scHome');document.getElementById('btnRow').style.display='none';document.getElementById('listenBar').style.display='none';document.getElementById('hTitle').textContent='SAA ドリル';renderHome();}
+
+/* ===== ふっかつのじゅもん（進捗の端末間引き継ぎ・案B フル） ===== */
+const JUMON_PREFIX='SAAv1:';
+function openJumon(){
+  document.getElementById('jOut').value='';
+  document.getElementById('jIn').value='';
+  document.getElementById('jmask').classList.add('on');
+}
+function closeJumon(){document.getElementById('jmask').classList.remove('on');}
+
+// 進捗オブジェクト→じゅもん文字列（UTF-8安全なBase64）
+function encodeJumon(obj){
+  const json=JSON.stringify(obj);
+  // encodeURIComponent でUTF-8化→btoaでBase64（マルチバイト対策）
+  const b64=btoa(unescape(encodeURIComponent(json)));
+  return JUMON_PREFIX+b64;
+}
+function decodeJumon(str){
+  let s=(str||'').trim();
+  if(s.startsWith(JUMON_PREFIX))s=s.slice(JUMON_PREFIX.length);
+  s=s.replace(/\s+/g,''); // 改行・空白を除去（手打ち/コピペの保険）
+  const json=decodeURIComponent(escape(atob(s)));
+  return JSON.parse(json);
+}
+
+function genJumon(){
+  // 持ち運ぶのは進捗4種だけ（弱点データも全部）
+  const payload={
+    seen:progress.seen||{},
+    wrong:progress.wrong||{},
+    wrongCount:progress.wrongCount||{},
+    correctCount:progress.correctCount||{}
+  };
+  document.getElementById('jOut').value=encodeJumon(payload);
+  showToast('📜 じゅもんを出しました。コピーして もう片方の端末へ');
+}
+
+function copyJumon(){
+  const v=document.getElementById('jOut').value;
+  if(!v){showToast('先に「じゅもんを 出す」を押してください');return;}
+  const done=()=>showToast('📋 じゅもんをコピーしました');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(v).then(done).catch(()=>{
+      const ta=document.getElementById('jOut');ta.focus();ta.select();
+      try{document.execCommand('copy');done();}catch(e){showToast('長押しでコピーしてください');}
+    });
+  }else{
+    const ta=document.getElementById('jOut');ta.focus();ta.select();
+    try{document.execCommand('copy');done();}catch(e){showToast('長押しでコピーしてください');}
+  }
+}
+
+function applyJumon(){
+  const v=document.getElementById('jIn').value;
+  if(!v.trim()){showToast('じゅもんを貼り付けてください');return;}
+  let data;
+  try{data=decodeJumon(v);}catch(e){alert('じゅもんが ちがうようです。コピーミスや欠けがないか確認してください。');return;}
+  if(!data||typeof data!=='object'||!data.seen){alert('じゅもんの中身が読み取れませんでした。');return;}
+  // マージ（合算）＝過去の履歴を消さずに足し合わせる
+  const cur={
+    seen:progress.seen||{},wrong:progress.wrong||{},
+    wrongCount:progress.wrongCount||{},correctCount:progress.correctCount||{}
+  };
+  const inc=data;
+  const merged={seen:{},wrong:{},wrongCount:{},correctCount:{}};
+  const allIds=new Set([
+    ...Object.keys(cur.seen),...Object.keys(inc.seen||{}),
+    ...Object.keys(cur.wrong),...Object.keys(inc.wrong||{}),
+    ...Object.keys(cur.wrongCount),...Object.keys(inc.wrongCount||{}),
+    ...Object.keys(cur.correctCount),...Object.keys(inc.correctCount||{})
+  ]);
+  allIds.forEach(id=>{
+    // seen: どちらかが見ていればtrue
+    if(cur.seen[id]||(inc.seen&&inc.seen[id]))merged.seen[id]=true;
+    // wrong: どちらかで「間違い中」ならtrue（安全側で復習に残す）
+    if(cur.wrong[id]||(inc.wrong&&inc.wrong[id]))merged.wrong[id]=true;
+    // 回数: 大きい方を採用（同じじゅもんの二度読みで二重加算しない）
+    const wc=Math.max(cur.wrongCount[id]||0,(inc.wrongCount&&inc.wrongCount[id])||0);
+    if(wc)merged.wrongCount[id]=wc;
+    const cc=Math.max(cur.correctCount[id]||0,(inc.correctCount&&inc.correctCount[id])||0);
+    if(cc)merged.correctCount[id]=cc;
+  });
+  progress=merged;
+  saveProgress();renderHome();
+  closeJumon();
+  showToast('✨ じゅもんを合算しました（履歴は消えません）');
+}
 function show(id){[...document.querySelectorAll('.screen')].forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
 
 // 起動
