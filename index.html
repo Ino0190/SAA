@@ -53,6 +53,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .opt .lab{flex:0 0 24px;height:24px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--sub)}
 .opt .ot{flex:1}
 .opt.sel{border-color:var(--blue)}
+.multiHint{background:rgba(74,158,255,.12);border:1px solid var(--blue);color:var(--blue);border-radius:8px;padding:9px 13px;font-size:15px;font-weight:bold;margin-bottom:6px}
 .opt.correct{border-color:var(--ok);background:rgba(46,204,113,.12)}
 .opt.correct .lab{background:var(--ok);color:#fff}
 .opt.wrong{border-color:var(--ng);background:rgba(231,76,60,.12)}
@@ -287,6 +288,13 @@ const LS_KEY='saa_drill_progress_v1';
 let state={mode:'all',list:[],idx:0,answered:false,sel:null,session:{correct:0,total:0,wrongIds:[]}};
 let progress=loadProgress();
 
+// ===== 複数選択ヘルパー（answerが数値→単一／配列→複数選択）=====
+function ansArr(q){return Array.isArray(q.answer)?q.answer.slice().sort((a,b)=>a-b):[q.answer];}
+function isMulti(q){return Array.isArray(q.answer);}
+function selArr(){return Array.isArray(state.sel)?state.sel.slice().sort((a,b)=>a-b):(state.sel==null?[]:[state.sel]);}
+function arrEq(a,b){return a.length===b.length&&a.every((v,i)=>v===b[i]);}
+function ansLabels(q){return ansArr(q).map(i=>'ABCD'[i]).join('・');}
+
 function loadProgress(){
   try{
     const p=JSON.parse(localStorage.getItem(LS_KEY))||{};
@@ -350,10 +358,12 @@ function startMode(mode,cat){
 
 function renderQ(){
   const q=state.list[state.idx];
-  state.answered=false;state.sel=null;
+  state.answered=false;state.sel=isMulti(q)?[]:null;
   document.getElementById('qCat').textContent=q.cat;
   document.getElementById('qIdx').textContent=`${state.idx+1} / ${state.list.length}`;
-  document.getElementById('qBody').innerHTML=q.scenario+'<span class="ask">'+q.ask+'</span>';
+  let multiHint='';
+  if(isMulti(q)){const n=ansArr(q).length;multiHint=`<div class="multiHint">✓ ${n}つ選んでください（複数選択）</div>`;}
+  document.getElementById('qBody').innerHTML=multiHint+q.scenario+'<span class="ask">'+q.ask+'</span>';
   const opts=document.getElementById('qOpts');opts.innerHTML='';
   q.options.forEach((o,i)=>{
     const d=document.createElement('div');d.className='opt';d.dataset.i=i;
@@ -371,9 +381,21 @@ function renderQ(){
 
 function selectOpt(i){
   if(state.answered)return;
-  state.sel=i;
-  [...document.querySelectorAll('#qOpts .opt')].forEach(o=>o.classList.toggle('sel',+o.dataset.i===i));
-  document.getElementById('btnNext').disabled=false;
+  const q=state.list[state.idx];
+  if(isMulti(q)){
+    // トグル選択。必要数を選ぶまで解答ボタン無効
+    const need=ansArr(q).length;
+    let cur=Array.isArray(state.sel)?state.sel.slice():[];
+    if(cur.includes(i))cur=cur.filter(x=>x!==i);
+    else{if(cur.length>=need)return; cur.push(i);}
+    state.sel=cur;
+    [...document.querySelectorAll('#qOpts .opt')].forEach(o=>o.classList.toggle('sel',cur.includes(+o.dataset.i)));
+    document.getElementById('btnNext').disabled=(cur.length!==need);
+  }else{
+    state.sel=i;
+    [...document.querySelectorAll('#qOpts .opt')].forEach(o=>o.classList.toggle('sel',+o.dataset.i===i));
+    document.getElementById('btnNext').disabled=false;
+  }
 }
 
 function nextQ(){
@@ -386,7 +408,8 @@ function nextQ(){
 function revealAnswer(){
   const q=state.list[state.idx];
   state.answered=true;
-  const correct=state.sel===q.answer;
+  const ans=ansArr(q), sel=selArr();
+  const correct=arrEq(ans,sel); // 単一・複数とも集合一致で採点
   state.session.total++;
   if(correct)state.session.correct++;else state.session.wrongIds.push(q.id);
   // 記録
@@ -398,11 +421,11 @@ function revealAnswer(){
   if(correct)progress.correctCount[q.id]=(progress.correctCount[q.id]||0)+1;
   else progress.wrongCount[q.id]=(progress.wrongCount[q.id]||0)+1;
   saveProgress();
-  // 選択肢色付け
+  // 選択肢色付け（正解＝緑／選んだが不正解＝赤）
   [...document.querySelectorAll('#qOpts .opt')].forEach(o=>{
     const oi=+o.dataset.i;o.classList.add('disabled');o.onclick=null;
-    if(oi===q.answer)o.classList.add('correct');
-    else if(oi===state.sel)o.classList.add('wrong');
+    if(ans.includes(oi))o.classList.add('correct');
+    else if(sel.includes(oi))o.classList.add('wrong');
   });
   // 解説
   const exp=document.getElementById('qExp');exp.className='exp on';
@@ -424,11 +447,11 @@ function revealAnswer(){
     '<div class="deep" id="deepBox">'+q.deep+'</div>';}
   const aiBtn='<button class="promptBtn" onclick="copyAIPrompt('+state.idx+')">🤖 この問題をAIに相談する（コピー）</button>'+
     '<div class="promptHint">問題・選択肢・正解＋「各選択肢がなぜ正解／誤答か初心者向けに解説して」という指示をコピーします。ChatGPTやClaudeに貼り付けて、納得いくまで質問できます。</div>';
-  // 正解＝記号＋正解選択肢の文章
-  const ansText=stripTags(q.options[q.answer]);
+  // 正解＝記号＋正解選択肢の文章（複数選択は全て列挙）
+  const ansFull=ansArr(q).map(i=>`<div class="ansfull"><span class="anslab">正解 ${'ABCD'[i]}</span> ${stripTags(q.options[i])}</div>`).join('');
   exp.innerHTML=
     `<div class="verdict ${correct?'ok':'ng'}">${correct?'◯ 正解':'✕ 不正解'}</div>`+
-    `<div class="ansfull"><span class="anslab">正解 ${'ABCD'[q.answer]}</span> ${ansText}</div>`+
+    ansFull+
     `<div class="h">本当に聞かれていたこと</div>${q.keypoint}`+
     `<div class="h">なぜこれが正解か</div>${q.explain}`+
     elim+conf+terms+more+aiBtn;
@@ -502,7 +525,7 @@ stripTags(q.scenario),
 '選択肢:',
 opts,
 '',
-'正解: '+labels[q.answer],
+'正解: '+ansLabels(q),
 '（テーマ: '+q.cat+'）'
   ].join('\n');
 }
@@ -610,14 +633,15 @@ function playListenQ(){
   const seq=[];
   seq.push({t:'第'+(listen.idx+1)+'問。テーマは'+q.cat+'。'});
   seq.push({t:stripTags(q.scenario)});
-  seq.push({t:'問題。'+stripTags(q.ask)});
+  seq.push({t:'問題。'+stripTags(q.ask)+(isMulti(q)?' '+ansArr(q).length+'つ選びます。':'')});
   q.options.forEach((o,i)=>{ seq.push({t:labels[i]+'、'+stripTags(o)+'。'}); });
   seq.push({t:'では、考えてみてください。',before:0,fn:()=>{document.getElementById('lThinking').className='listenThinking on';}});
   seq.push({t:'',before:4500}); // 考える間（無音）
-  seq.push({t:'正解は、'+labels[q.answer]+'。',before:0,fn:()=>{
+  seq.push({t:'正解は、'+ansLabels(q)+'。',before:0,fn:()=>{
     document.getElementById('lThinking').className='listenThinking';
+    const ans=ansArr(q);
     [...document.querySelectorAll('#lOpts .listenOpt')].forEach(el=>{
-      if(+el.dataset.i===q.answer)el.classList.add('ans');
+      if(ans.includes(+el.dataset.i))el.classList.add('ans');
     });
     // 進捗記録（聞いた＝seen、正解扱いにはしない）
     progress.seen[q.id]=true;saveProgress();
