@@ -152,6 +152,11 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .listenHint{position:fixed;left:0;right:0;bottom:78px;max-width:680px;margin:0 auto;text-align:center;font-size:13px;color:var(--sub);pointer-events:none;padding:0 16px}
 .listenThinking{text-align:center;font-size:22px;font-weight:800;color:var(--accent);margin:24px 0;display:none}
 .listenThinking.on{display:block}
+/* 問題セット切替トグル */
+.bankToggle{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.bankLabel{font-size:14px;color:var(--sub);margin-right:2px}
+.bankBtn{font-size:15px;padding:8px 16px;border-radius:18px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-family:inherit}
+.bankBtn.on{background:var(--accent);color:#fff;font-weight:700}
 </style>
 </head>
 <body>
@@ -168,6 +173,8 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 <section class="screen on home" id="scHome">
   <h1>SAA シナリオ判断ドリル</h1>
   <p class="lead">電車で1問ずつ。状況文から「本当の質問」を抜き出す練習。</p>
+
+  <div id="bankToggle" class="bankToggle"></div>
 
   <div class="tip">
     <b>読み方の型：</b>長い状況説明はほぼ飾り。<b>最後の1行</b>と、その中の<b>キーワード</b>（コスト最小／手間最小／可用性最大／最も安全 など）だけが正解を決める。選択肢4つのうち2つは「やりすぎ」か「明らかに違う」。
@@ -282,9 +289,33 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
   </div>
 </div>
 
-<script src="questions.js"></script>
 <script>
-const LS_KEY='saa_drill_progress_v1';
+// ===== 問題バンク切替（questions.js=86問 / questions_v2.js=新80問）=====
+const BANKS={
+  main:{file:'questions.js', label:'A・既存'},
+  v2:{file:'questions_v2.js', label:'B・新規'}
+};
+function currentBank(){
+  const b=localStorage.getItem('saa_drill_bank');
+  return BANKS[b]?b:'main';
+}
+function setBank(b){
+  if(!BANKS[b]||b===currentBank())return;
+  localStorage.setItem('saa_drill_bank',b);
+  location.reload(); // QUESTIONSの再宣言を避けるためリロードで読み直す
+}
+// 選択中バンクのquestionsを動的に読み込んでから起動
+(function loadBank(){
+  const s=document.createElement('script');
+  s.src=BANKS[currentBank()].file;
+  s.onload=function(){ if(typeof boot==='function') boot(); };
+  s.onerror=function(){ document.body.innerHTML='<p style="padding:20px;font-size:16px">問題ファイル('+BANKS[currentBank()].file+')を読み込めませんでした。python3 -m http.server 経由で開いてください。</p>'; };
+  document.head.appendChild(s);
+})();
+</script>
+<script>
+// 進捗キーはバンクごとに分ける（問題数・id体系が違うため混ぜない）
+const LS_KEY='saa_drill_progress_v1_'+currentBank();
 let state={mode:'all',list:[],idx:0,answered:false,sel:null,session:{correct:0,total:0,wrongIds:[]}};
 let progress=loadProgress();
 
@@ -833,8 +864,20 @@ function applyJumon(){
 }
 function show(id){[...document.querySelectorAll('.screen')].forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
 
-// 起動
-renderHome();
+// 起動（バンクのquestionsスクリプト読み込み完了後にloadBankのonloadから呼ばれる）
+function renderBankToggle(){
+  const el=document.getElementById('bankToggle');
+  if(!el)return;
+  const cur=currentBank();
+  el.innerHTML='<span class="bankLabel">問題セット</span>'+
+    Object.keys(BANKS).map(k=>
+      `<button class="bankBtn${k===cur?' on':''}" onclick="setBank('${k}')">${BANKS[k].label}</button>`
+    ).join('');
+}
+function boot(){
+  renderBankToggle();
+  renderHome();
+}
 </script>
 </body>
 </html>
