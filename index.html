@@ -157,6 +157,9 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .bankLabel{font-size:14px;color:var(--sub);margin-right:2px}
 .bankBtn{font-size:15px;padding:8px 16px;border-radius:18px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-family:inherit}
 .bankBtn.on{background:var(--accent);color:#fff;font-weight:700}
+.appnav{display:flex;gap:6px;max-width:680px;margin:0 auto;padding:8px 12px;background:var(--bg)}
+.appnav .navbtn{flex:1;text-align:center;text-decoration:none;font-size:14px;font-weight:700;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 4px}
+.appnav .navbtn.active{color:#1a1200;background:var(--accent);border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -168,6 +171,11 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
   </div>
   <div class="bar"><i id="hBar"></i></div>
 </header>
+<nav class="appnav">
+  <a class="navbtn active" href="index.html">🎯 ドリル</a>
+  <a class="navbtn" href="cards.html">📇 暗記帳</a>
+  <a class="navbtn" href="patterns.html">🗺️ アーキ図</a>
+</nav>
 
 <!-- ホーム -->
 <section class="screen on home" id="scHome">

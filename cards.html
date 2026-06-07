@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>SAA サービス暗記帳</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f1420; --card:#1a2233; --card2:#222d44;
+  --line:#2e3a52; --text:#e8edf5; --sub:#9fb0c8;
+  --accent:#ff9900; --ok:#2ecc71; --ng:#e74c3c; --blue:#4a9eff;
+}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;font-size:17px;line-height:1.7;-webkit-text-size-adjust:100%}
+body{padding:0 0 100px;max-width:680px;margin:0 auto;min-height:100vh}
+
+header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 16px}
+.htop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.htitle{font-size:16px;font-weight:700;color:var(--accent)}
+.hstat{font-size:14px;color:var(--sub)}
+.bar{height:6px;background:var(--card);border-radius:3px;margin-top:10px;overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+
+.screen{display:none;padding:18px 16px}
+.screen.on{display:block}
+
+/* ホーム */
+.home h1{font-size:24px;line-height:1.4;margin-bottom:6px}
+.home p.lead{color:var(--sub);font-size:16px;margin-bottom:18px}
+.modecard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px;cursor:pointer;transition:.15s}
+.modecard:active{transform:scale(.98)}
+.modecard h3{font-size:18px;margin-bottom:4px}
+.modecard p{font-size:14px;color:var(--sub)}
+.modecard .cnt{font-size:13px;color:var(--accent);margin-top:6px}
+.seclabel{font-size:14px;color:var(--sub);font-weight:700;margin:18px 0 8px}
+.catgrid{display:flex;flex-wrap:wrap;gap:8px}
+.catchip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:9px 15px;font-size:15px;cursor:pointer}
+.catchip:active{background:var(--card2)}
+.catchip .n{color:var(--accent);font-size:13px;margin-left:5px}
+.tip{background:var(--card2);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 16px;margin:18px 0;font-size:15px}
+.tip b{color:var(--accent)}
+
+/* カード */
+.cardmeta{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:12px}
+.cardcat{color:var(--blue);font-weight:700}
+.flip{perspective:1600px;cursor:pointer;min-height:360px}
+.flipinner{position:relative;width:100%;min-height:360px;transition:transform .5s;transform-style:preserve-3d}
+.flip.flipped .flipinner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px 20px;display:flex;flex-direction:column}
+.face.back{transform:rotateY(180deg)}
+/* 表 */
+.face.front{align-items:center;justify-content:center;text-align:center}
+.front .svcname{font-size:30px;font-weight:800;line-height:1.35}
+.front .svccat{font-size:14px;color:var(--blue);font-weight:700;margin-bottom:18px}
+.front .svcfull{font-size:15px;color:var(--sub);margin-top:14px;line-height:1.6;max-width:90%}
+.front .hintflip{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:13px;color:var(--sub)}
+/* 裏 */
+.back .svcsmall{font-size:14px;color:var(--sub);margin-bottom:2px}
+.back .svcfullb{font-size:14px;color:var(--blue);margin-bottom:12px;line-height:1.6}
+.back .nick{font-size:20px;font-weight:800;color:var(--accent);margin-bottom:14px;line-height:1.4}
+.back .blk{margin-bottom:13px}
+.back .blk.key{margin-bottom:0}
+.back .blkh{display:inline-block;font-size:14px;font-weight:700;margin-bottom:5px}
+.back .blkh.wh{color:#fff}
+.back .blkh.gd{color:var(--ok)}
+.back .blkh.bd{color:var(--ng)}
+.back .blkh.ky{color:var(--blue)}
+.back .blkt{font-size:16px;line-height:1.8}
+.back .blk.key .blkt{background:var(--card2);border-radius:10px;padding:11px 13px;font-size:15px}
+.back .blkt b{color:#fff}
+/* 本文中のサービス名リンク */
+.svclink{color:var(--blue);font-weight:700;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;cursor:pointer}
+
+/* 仕分けボタン */
+.judge{display:flex;gap:10px;margin-top:14px}
+.jbtn{flex:1;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+.jbtn.know{background:rgba(46,204,113,.15);color:var(--ok);border:1px solid var(--ok)}
+.jbtn.dunno{background:rgba(231,76,60,.13);color:var(--ng);border:1px solid var(--ng)}
+.jbtn.know.on{background:var(--ok);color:#fff}
+.jbtn.dunno.on{background:var(--ng);color:#fff}
+
+/* 下部バー */
+.btnrow{position:fixed;bottom:0;left:0;right:0;max-width:680px;margin:0 auto;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(15,20,32,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.btn{border:none;border-radius:12px;padding:15px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn.primary{flex:1;background:var(--accent);color:#1a1200}
+.btn.ghost{flex:0 0 auto;background:var(--card2);color:var(--text);border:1px solid var(--line);padding:15px 18px}
+.btn:disabled{opacity:.4}
+
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--ok);color:#fff;padding:12px 22px;border-radius:24px;font-size:15px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.appnav{display:flex;gap:6px;max-width:680px;margin:0 auto;padding:8px 12px;background:var(--bg)}
+.appnav .navbtn{flex:1;text-align:center;text-decoration:none;font-size:14px;font-weight:700;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 4px}
+.appnav .navbtn.active{color:#1a1200;background:var(--accent);border-color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="htop">
+    <span class="htitle" onclick="goHome()" style="cursor:pointer">📇 SAA サービス暗記帳</span>
+    <span class="hstat" id="hstat"></span>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+</header>
+<nav class="appnav">
+  <a class="navbtn" href="index.html">🎯 ドリル</a>
+  <a class="navbtn active" href="cards.html">📇 暗記帳</a>
+  <a class="navbtn" href="patterns.html">🗺️ アーキ図</a>
+</nav>
+
+<!-- ホーム -->
+<section class="screen home on" id="home">
+  <h1>サービスを<br>表裏カードで覚える</h1>
+  <p class="lead">表＝サービス名／裏＝あだ名とたとえ＋使いどころ。タップでめくる。</p>
+
+  <div class="modecard" onclick="start('all',false)">
+    <h3>🔀 全カードをシャッフル</h3>
+    <p>全分野からランダムに出題</p>
+    <p class="cnt" id="cntAll"></p>
+  </div>
+  <div class="modecard" onclick="start('all',true)">
+    <h3>❓ まだ覚えてないカードだけ</h3>
+    <p>「まだ」に仕分けたカードを集中復習</p>
+    <p class="cnt" id="cntDunno"></p>
+  </div>
+
+  <div class="seclabel">分野で選ぶ</div>
+  <div class="catgrid" id="catgrid"></div>
+
+  <div class="tip">
+    <b>使い方</b>：カードをタップで表↔裏。裏まで見たら「✓覚えた / △まだ」で仕分け。仕分けは自動保存されるので、続きから復習できる。
+  </div>
+  <div class="modecard" onclick="resetJudge()" style="border-color:var(--ng)">
+    <h3 style="color:var(--ng)">🗑 仕分けをリセット</h3>
+    <p>「覚えた／まだ」の記録を全部消す</p>
+  </div>
+</section>
+
+<!-- カード -->
+<section class="screen" id="study">
+  <div class="cardmeta">
+    <span class="cardcat" id="cCat"></span>
+    <span id="cPos"></span>
+  </div>
+  <div class="flip" id="flip" onclick="toggleFlip()">
+    <div class="flipinner">
+      <div class="face front">
+        <div class="svccat" id="fCat"></div>
+        <div class="svcname" id="fName"></div>
+        <div class="svcfull" id="fFull"></div>
+        <div class="hintflip">タップでめくる ↻</div>
+      </div>
+      <div class="face back" id="face_back">
+        <div class="svcsmall" id="bName"></div>
+        <div class="svcfullb" id="bFull"></div>
+        <div class="nick" id="bNick"></div>
+        <div class="blk"><span class="blkh wh">📌 何をする</span><div class="blkt" id="bWhat"></div></div>
+        <div class="blk"><span class="blkh gd">⭕ 向いてる</span><div class="blkt" id="bGood"></div></div>
+        <div class="blk"><span class="blkh bd">❌ 向いてない</span><div class="blkt" id="bBad"></div></div>
+        <div class="blk key"><span class="blkh ky">🔑 SAAの決め手</span><div class="blkt" id="bKey"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="judge">
+    <button class="jbtn dunno" id="jDunno" onclick="judge(false)">△ まだ</button>
+    <button class="jbtn know" id="jKnow" onclick="judge(true)">✓ 覚えた</button>
+  </div>
+</section>
+
+<div class="btnrow" id="btnrow" style="display:none">
+  <button class="btn ghost" onclick="navBack()">↩</button>
+  <button class="btn ghost" id="prevBtn" onclick="prev()">◀ 前</button>
+  <button class="btn primary" id="nextBtn" onclick="next()">次へ ▶</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== カードデータ =====
+// cat:分野 / name:サービス名 / nick:あだ名
+// what:何をする / good:向いてる / bad:向いてない / key:SAAの決め手
+const CARDS = [
+// --- コンピュート ---
+{cat:"コンピュート",name:"EC2",full:"Elastic Compute Cloud",nick:"自分で借りる仮想サーバー",what:"クラウドの中に1台のパソコン（サーバー）を借りる。OSの設定もアプリの用意も全部自分でやる。一番自由なぶん、世話も自分でする。",good:"今あるアプリをそのままクラウドに引っ越したい時。OSの中まで細かくいじりたい時。",bad:"「サーバーの管理をしたくない」「使った時だけ動けばいい」時は重い。→そういう時はLambda。",key:"<b>自由にいじりたい・既存アプリをそのまま移す</b>ならEC2。"},
+{cat:"コンピュート",name:"Lambda",nick:"呼ばれた時だけ来る出張スタッフ",what:"サーバーを持たず、何か起きた時（ファイルが届いた等）だけ動いてサッと終わる。動いた分だけお金がかかり、待機中はタダ。",good:"短い処理をたまに動かす。サーバーの管理をしたくない。アクセスが0の時はお金をかけたくない。",bad:"ずっと動かし続ける処理や、15分以上かかる長い処理には向かない。",key:"<b>サーバーレス（サーバー管理なし）・使った分だけ・短い処理</b>。最大15分。"},
+{cat:"コンピュート",name:"ECS / Fargate",full:"Elastic Container Service / AWS Fargate",alias:["Fargate","ECS"],nick:"コンテナを動かす場所",what:"コンテナ（アプリを箱詰めにしたもの）を動かす場所。Fargateを選ぶと、土台のサーバーの管理もAWSが代わりにやってくれる。",good:"アプリをコンテナで作っている。サーバーの面倒を見たくない（→Fargate）。",bad:"コンテナを使っていない単純なアプリには大げさ。",key:"<b>コンテナを動かす</b>。サーバー管理したくない→Fargate。"},
+{cat:"コンピュート",name:"Auto Scaling",nick:"混み具合で勝手にバイトを増やす店長",what:"アクセスが増えたらサーバーの台数を自動で増やし、減ったら自動で減らす。手で増やしたり減らしたりしなくていい。",good:"昼は混んで夜は空く、みたいにアクセスに波がある時。手作業の台数調整をやめたい時。",bad:"アクセスがずっと一定なら、わざわざ増減させる意味は薄い。",key:"<b>アクセスの波に自動で台数を合わせる＋ムダなコストを削る</b>。"},
+{cat:"コンピュート",name:"スポットインスタンス",nick:"空席を激安で買う代わり追い出される",what:"EC2を最大9割引で借りられる。ただしAWSの都合で途中で止められることがある（席を譲らされる感じ）。",good:"途中で止まっても困らない作業（夜間の大量計算など）を、とにかく安くやりたい時。",bad:"止まったら困るもの（ずっと動かすWebサイト等）には向かない。",key:"<b>途中で止まってOKな作業を最安で</b>。ずっと動かすなら別物のSavings Plans。"},
+
+// --- ストレージ ---
+{cat:"ストレージ",name:"S3",full:"Simple Storage Service",nick:"無限に入るネット倉庫",what:"写真・動画・ファイルを何でも置けるネット上の倉庫。容量は実質無限で、データが壊れにくい。Webサイトの公開やバックアップに使う。",good:"ファイルやバックアップを大量に置きたい。Webの画像や動画を配りたい。",bad:"OSが「ドライブ（Cドライブ等）」として使うディスクにはならない。→それはEBS/EFS。",key:"<b>ファイル置き場・バックアップ・容量無限</b>。EBS/EFS（ディスク）と混同注意。"},
+{cat:"ストレージ",name:"S3 Standard-IA",full:"S3 Standard-Infrequent Access（低頻度アクセス）",nick:"たまにしか使わないがすぐ欲しい本",what:"S3の安いプラン。置いておく料金は安いが、取り出す時に少しお金がかかる。取り出しはすぐできる。",good:"めったに見ないけど、見たい時はすぐ欲しいデータ（過去の資料など）。",bad:"毎日たくさん読むデータだと、取り出し料金がかさんで逆に高くつく。",key:"<b>アクセスは少ないが、すぐ取り出したい</b>データ。"},
+{cat:"ストレージ",name:"S3 Glacier Deep Archive",alias:["Glacier"],nick:"倉庫の奥の段ボール",what:"S3の一番安いプラン。ほぼ見ないデータを激安でしまっておく。取り出すのに12時間かかり、最低180日は預ける必要がある。",good:"法律で7年保管が必要な書類など、ほぼ見ないけど捨てられないもの。",bad:"すぐ取り出したいデータには向かない（12時間待つ）。",key:"<b>ほぼ見ない長期保管を最安で</b>。「数時間待てる」「○年保管」がヒント。"},
+{cat:"ストレージ",name:"S3 Intelligent-Tiering",nick:"勝手に棚を移してくれる倉庫番",what:"よく使うデータか、あまり使わないデータかをAWSが見て、自動でちょうどいい安さの棚に移してくれる。",good:"そのデータをどれくらい使うか、自分でも読めない時。",bad:"アクセスの予測がはっきり付くなら、手動で安いプランを選んだ方が安い場合も。",key:"<b>アクセスの頻度が読めない</b>時。手動の階層設定がいらない。"},
+{cat:"ストレージ",name:"EBS",full:"Elastic Block Store",nick:"1台専用の外付けハードディスク",what:"EC2にくっつけて使うディスク（Cドライブのようなもの）。基本は1台のサーバー専用で、他とは共有しない。",good:"1台のEC2が使う、OSやアプリのためのディスク。",bad:"複数のサーバーから同時に使いたい時は無理。→それはEFS。",key:"<b>EC2 1台専用のディスク</b>。共有したいならEFS。"},
+{cat:"ストレージ",name:"EFS",full:"Elastic File System",nick:"みんなで使う共有フォルダ（Linux用）",what:"複数のサーバー（Linux）から同時に読み書きできる共有フォルダ。使う量に応じて自動で広がる。",good:"何台ものLinuxサーバーが同じファイルを一緒に使いたい時。",bad:"Windowsサーバー用ではない。→WindowsはFSx for Windows。1台専用ならEBSで十分。",key:"<b>複数のLinuxから同時に使う共有フォルダ</b>。WindowsはFSx。"},
+{cat:"ストレージ",name:"FSx for Windows",full:"Amazon FSx for Windows File Server",nick:"みんなで使う共有フォルダ（Windows用）",what:"Windowsの共有フォルダ（ファイルサーバー）をAWS上で使える。会社のWindowsの仕組み（Active Directory）にもつながる。",good:"Windowsサーバーでファイル共有したい時。",bad:"Linux用ではない。→LinuxはEFS。",key:"<b>Windows用の共有フォルダ</b>。EFS（Linux用）と取り違え注意。"},
+{cat:"ストレージ",name:"Storage Gateway",nick:"会社のサーバーとクラウド倉庫をつなぐ橋",what:"会社（オンプレ）に置いてある今までのサーバーから、AWSのS3などを手元のディスクのように使えるようにする橋渡し。",good:"今までの社内サーバーを残したまま、保存先だけクラウドに広げたい時。",bad:"全部クラウドに移すなら、わざわざ橋を架ける必要はない。",key:"<b>社内サーバーを残しつつクラウドに橋渡し</b>（ハイブリッド）。"},
+{cat:"ストレージ",name:"Snowball",nick:"データを物理的に運ぶ宅配トランク",what:"大量のデータを頑丈な箱（装置）に入れてAWSに郵送する。ネット回線では遅すぎる量を運ぶための引っ越しトランク。",good:"何十TB〜の超大量データを、ネットだと何週間もかかるから物で運びたい時。",bad:"少量のデータならネット転送で十分。",key:"<b>超大量データを回線でなく郵送</b>で。「ネットだと時間がかかりすぎる」がヒント。"},
+
+// --- データベース ---
+{cat:"データベース",name:"RDS",full:"Relational Database Service（リレーショナル＝表のDB）",nick:"管理をおまかせできる普通のデータベース",what:"表（エクセルのような行と列）でデータを持つ、ごく普通のデータベース（MySQL等）。バックアップや更新をAWSが代わりにやってくれる。",good:"普通の業務システム・Webサービスのデータ置き場。表を組み合わせた集計をしたい時。",bad:"アクセスが桁違いに多くて速さ最優先、という極端な用途には別の選択肢も。",key:"<b>普通のSQLデータベースを、管理ラクに</b>。"},
+{cat:"データベース",name:"RDS マルチAZ",full:"RDS Multi-AZ（マルチ・アベイラビリティゾーン）",alias:["マルチAZ"],nick:"別の建物に置く控えのデータベース",what:"同じデータベースの控え（コピー）を別の場所にもう1つ持っておき、本体が壊れたら自動で控えに切り替える仕組み。",good:"データベースが止まると困る、止まらないようにしたい（可用性）時。",bad:"アクセスを分散して速くする目的では使えない（控えは普段使えない）。→速くするのはリードレプリカ。",key:"<b>止まらないようにする（可用性）</b>。読み取りを分散するリードレプリカと混同＝頻出のひっかけ。"},
+{cat:"データベース",name:"リードレプリカ",nick:"読む専用のコピー",what:"データベースの「読み取り専用のコピー」を増やして、読み取りのアクセスを何台かに分散させて速くする。",good:"読み取り（表示・検索）が多すぎてデータベースが重い時。",bad:"故障対策（止まらないように）が目的なら別物。→それはマルチAZ。",key:"<b>読み取りが多くて重い</b>時の高速化。故障対策のマルチAZと混同注意。"},
+{cat:"データベース",name:"Aurora",nick:"AWS製の高性能データベース",what:"RDSの上位版。MySQL等と同じ使い方なのに、もっと速くて壊れにくく、容量も自動で増える。",good:"普通のデータベースより、速さも壊れにくさも欲しい時。",bad:"ごく小規模で安さ最優先なら、普通のRDSで足りることも。",key:"<b>速さと壊れにくさを両取り</b>したい時。"},
+{cat:"データベース",name:"DynamoDB",nick:"巨大なコインロッカー室",what:"「鍵（ID）」を渡すと中身を一発で出すデータベース。アクセスがどれだけ増えても勝手に対応し、ミリ秒で返す。管理いらず。",good:"IDで読み書きするだけだけど数が桁違いに多い時（ゲームのスコア、買い物カゴ、IoTの記録など）。",bad:"「複数の表を組み合わせた複雑な集計」は苦手（＝JOINができない。JOIN＝別々の表をつなげて答えを組み立てる操作）。→それはRDS/Aurora。",key:"<b>超大量・ミリ秒・IDで引くだけ</b>ならDynamoDB／<b>複雑な集計・表の組み合わせ</b>ならRDS。"},
+{cat:"データベース",name:"DynamoDB グローバルテーブル",full:"DynamoDB Global Tables",alias:["グローバルテーブル"],nick:"世界中に同じコインロッカーを置く",what:"DynamoDBを世界の複数の地域に自動でコピーして置く。どの国の人も近くのを使えて速い。",good:"世界中で使われるサービスで、どこからでも速く・地域が1つ壊れても平気にしたい時。",bad:"1つの地域だけで使うなら不要（コストの無駄）。",key:"<b>世界中で速い＋地域まるごと障害に強い</b>。"},
+{cat:"データベース",name:"ElastiCache",nick:"よく使う答えを手元に貼っておくメモ",what:"よく聞かれる答えを、データベースの手前のメモ（メモリ）に貼っておき、次からは一瞬で返す仕組み（キャッシュ）。",good:"同じデータを何度も読まれてDBが重い時。ログイン情報（セッション）を高速に持ちたい時。",bad:"ずっと残す本番データの保存場所にはしない（あくまで一時的なメモ）。",key:"<b>DBの負担を減らして爆速に</b>。ログイン情報の保持はRedisタイプ。"},
+{cat:"データベース",name:"RDS Proxy",nick:"データベースへの接続をまとめる受付係",what:"たくさんの接続を1つにまとめて使い回し、データベースが接続だらけでパンクするのを防ぐ受付係。",good:"Lambdaが一気に大量起動してDBへの接続が爆発する時。",bad:"接続数がそもそも少ないなら、わざわざ間に挟む必要はない。",key:"<b>接続が多すぎてDBが詰まる</b>時。Lambda×RDSの定番。"},
+
+// --- ネットワーク ---
+{cat:"ネットワーク",name:"VPC",full:"Virtual Private Cloud（自分専用の仮想ネットワーク）",nick:"自分専用の区画（敷地）",what:"AWSの中に区切った、自分だけのネットワークの敷地。中をサブネット（部屋）に分けて使う。",good:"AWSでネットワークを作る時の土台（ほぼ必ず使う）。",bad:"—",key:"ネットワーク設計の<b>土台</b>。この上に部屋（サブネット）を作る。"},
+{cat:"ネットワーク",name:"NATゲートウェイ",full:"NAT = Network Address Translation Gateway",nick:"奥の部屋の外出用の取次窓口",what:"外から見えない奥のサーバーが、ネットの外には出られる（更新の取得など）が、外からは入ってこられないようにする窓口。",good:"奥に隠したサーバーが、外へアクセスはしたいが、外からは触られたくない時。",bad:"外からアクセスを受けたいサーバーには使わない（それは入れない）。",key:"<b>中→外はOK、外→中はNG</b>。奥のサーバーを隠しつつ外に出す。"},
+{cat:"ネットワーク",name:"インターネットゲートウェイ",nick:"敷地の正門",what:"VPC（自分の敷地）をインターネットにつなぐ正面の出入口。",good:"外から直接アクセスを受けるサーバー（公開Webなど）を置く部屋につなぐ。",bad:"外から隠したい奥のサーバーには付けない。",key:"<b>公開する部屋を外につなぐ正門</b>。"},
+{cat:"ネットワーク",name:"セキュリティグループ",nick:"各部屋のドアのボディガード",what:"サーバー1台ごとのドアに立つ警備。「この通信だけ通す」という許可だけを書ける。",good:"サーバー単位で「どの通信を入れるか」を決めたい時（普段の防御はこれ）。",bad:"「この相手だけ拒否」のような拒否ルールは書けない。→拒否はネットワークACL。",key:"<b>サーバー単位・許可ルールだけ</b>。拒否も書けるNACLと混同注意。"},
+{cat:"ネットワーク",name:"ネットワークACL",full:"Network ACL（NACL／ネットワーク・アクセスコントロールリスト）",alias:["NACL"],nick:"フロア全体の入口の警備員",what:"部屋（サブネット）のフロア全体の入口に立つ警備。許可だけでなく「この相手は拒否」も書ける。",good:"フロアごとにまとめて制御したい時。特定の相手（IP）を遮断したい時。",bad:"細かいサーバー単位の制御は普通セキュリティグループでやる。",key:"<b>サブネット単位・拒否ルールも書ける</b>。特定IPの遮断はこっち。"},
+{cat:"ネットワーク",name:"VPCエンドポイント",full:"VPC Endpoint",nick:"敷地内の専用通路",what:"自分の敷地からS3などのAWSサービスへ、インターネットを通らず内部の専用通路で直接つなぐ。",good:"S3等にアクセスするのに、外のネットを通したくない・NATの通信料を浮かせたい時。",bad:"AWSの外（一般のWeb）への通信には使えない。",key:"<b>AWSサービスへ内部だけで接続・NAT代を節約</b>。S3/DynamoDB向けは無料タイプ。"},
+{cat:"ネットワーク",name:"Route 53",full:"Route 53（AWSのDNSサービス）",nick:"住所案内の電話帳＋交通整理",what:"「この名前（ドメイン）はこのサーバー」と案内するDNS。さらに、片方が壊れたら別のサーバーへ自動で案内を切り替えられる。",good:"独自ドメインの運用。障害時に元気な方へ自動で振り向けたい時。",bad:"—",key:"<b>ドメイン案内＋故障時の自動切り替え</b>（フェイルオーバー）。"},
+{cat:"ネットワーク",name:"Direct Connect",nick:"会社とAWSを結ぶ専用線",what:"会社とAWSを、一般のインターネットを通らない自前の専用線で直接つなぐ。安定して速い。",good:"会社とAWSの間で、ずっと安定した速い通信・大きな容量が欲しい時。",bad:"少しつなぐだけなら割高。手軽さ重視ならVPN。",key:"<b>安定・低遅延・大容量の会社↔AWS接続</b>。VPNより速くて安定。"},
+{cat:"ネットワーク",name:"Transit Gateway",nick:"複数の敷地をつなぐ中央ハブ",what:"たくさんのVPC（敷地）や会社の拠点を、1つの中央のハブに集めてまとめてつなぐ。",good:"VPCや拠点が増えて、つなぎ方がぐちゃぐちゃになってきた時。",bad:"VPCが1〜2個しかないなら大げさ。",key:"<b>VPCがたくさんあって接続が複雑</b>な時の中央ハブ。"},
+{cat:"ネットワーク",name:"Global Accelerator",nick:"世界中から最寄りの入口へ案内",what:"世界中のユーザーを、AWSの速い専用網を通して一番近い入口に入れて、通信の遅れを減らす。固定のIPももらえる。",good:"世界中で使われ、ゲームや音声など（Webページ以外も含む）の遅延を減らしたい時。",bad:"画像や動画などのコンテンツ配信が主目的ならCloudFrontの方が向く。",key:"<b>世界中で低遅延・Web以外もOK・固定IP</b>。コンテンツ配信はCloudFront。"},
+
+// --- 配信・CDN ---
+{cat:"配信・CDN",name:"CloudFront",full:"CDN = Content Delivery Network（世界配信網）",nick:"世界中の支店から配る宅配網（CDN）",what:"画像や動画のコピーを世界中の拠点に置いておき、ユーザーに一番近い拠点から届ける。距離が縮むから速い。",good:"世界中の人にサイトの画像・動画・ページを速く届けたい時。",bad:"特定の社内だけの通信など、配信が目的でないなら不要。",key:"<b>コンテンツを世界に高速配信</b>。近くから配るから速い。"},
+{cat:"配信・CDN",name:"CloudFront OAC",full:"Origin Access Control（オリジン＝配信元の保護）",nick:"S3の裏口に付けるCloudFront専用の鍵",what:"S3を一般公開せずに隠したまま、CloudFront経由でだけ中身を配れるようにする鍵の仕組み。",good:"S3を直接は公開したくないが、CloudFront経由でなら配りたい時。",bad:"—",key:"<b>S3を直接公開せず、CDN経由だけ</b>にする（倉庫の保護）。"},
+{cat:"配信・CDN",name:"署名付きURL",nick:"時間制限つきの入場券",what:"「この時間まで・この人だけ」アクセスできる、期限付きの特別なURL。",good:"買った人だけにダウンロードさせたい、期限を切って配りたい時。",bad:"誰でも自由に見ていい公開ファイルには不要。",key:"<b>限られた人に一時的に配る</b>。有料コンテンツ・期限付きDL。"},
+
+// --- セキュリティ ---
+{cat:"セキュリティ",name:"IAMロール",full:"IAM = Identity and Access Management（権限管理）のロール",nick:"使い捨ての社員バッジ",what:"サーバーやLambdaに「この権限あるよ」という一時的なバッジを持たせる。パスワードを置きっぱなしにせず、自動で短時間ごとに更新される。",good:"EC2やLambdaにAWSの操作権限を持たせたい時（安全なやり方）。",bad:"パスワード（アクセスキー）をコードに直接書くのは絶対NG。それの代わりがこれ。",key:"<b>サーバー/Lambdaに安全に権限を持たせる</b>。キーの直書き禁止。"},
+{cat:"セキュリティ",name:"IAM Identity Center",full:"旧称 AWS SSO（シングルサインオン）",alias:["Identity Center"],nick:"社員用のまとめてログイン窓口（SSO）",what:"社員が、複数のAWSアカウントやアプリに1回のログインで入れるようにする仕組み（シングルサインオン）。",good:"会社の社員のログインをまとめて管理したい時。",bad:"アプリを使う一般のお客さん向けではない。→お客さんはCognito。",key:"<b>社員のまとめログイン（SSO）</b>。お客さん向けはCognito。"},
+{cat:"セキュリティ",name:"Cognito",nick:"アプリのお客さん用 会員受付",what:"アプリを使う一般ユーザーの会員登録・ログインを担当。GoogleログインやSMS認証（MFA）もできる。",good:"スマホ/Webアプリの、何百万人ものお客さんのログイン管理。",bad:"社員の管理用ではない。→社員はIAM Identity Center。",key:"<b>お客さん（一般ユーザー）のログイン</b>。社員はIdentity Center。"},
+{cat:"セキュリティ",name:"KMS",full:"Key Management Service（鍵管理）",nick:"暗号のカギを預かる金庫番",what:"データを暗号化する「カギ」をまとめて管理する。S3やEBSなどに保存したデータを暗号化する時に使う。",good:"保存したデータ（保管中のデータ）を暗号化したい・カギを安全に管理したい時。",bad:"—",key:"<b>保存データの暗号化＋カギの管理・交換・記録</b>。"},
+{cat:"セキュリティ",name:"Secrets Manager",nick:"パスワードを預けて自動で取り替える金庫",what:"データベースのパスワードなどの秘密を安全にしまい、定期的に自動で新しいものに取り替える。コードに直接書かなくて済む。",good:"DBのパスワードなどを安全に保管し、自動で更新したい時。",bad:"ただの設定値（パスワードでないもの）なら、もっと安いParameter Storeで十分。",key:"<b>パスワードの保管＋自動の取り替え</b>。ただの設定はParameter Store。"},
+{cat:"セキュリティ",name:"WAF",full:"Web Application Firewall（Webアプリ用の防火壁）",nick:"アプリ手前の門番（中身を調べる）",what:"Webサイトへの攻撃（不正な命令を送り込む等）を、通信の中身を見て見つけてブロックする門番。",good:"Webアプリを、よくある攻撃パターンから守りたい時。",bad:"大量アクセスで押し潰すタイプの攻撃（DDoS）はこれの担当ではない。→Shield。",key:"<b>Webアプリへの攻撃を中身を見て防ぐ</b>。大量攻撃(DDoS)はShield。"},
+{cat:"セキュリティ",name:"Shield",nick:"大量攻撃を跳ね返す盾",what:"DDoS（とんでもない量のアクセスを送りつけてサイトを潰す攻撃）を防ぐ。標準は自動でタダ、上位版は有料で手厚い。",good:"アクセスを浴びせるタイプの攻撃に備えたい時。",bad:"通信の中身を見て防ぐタイプの攻撃対策ではない。→それはWAF。",key:"<b>大量アクセス攻撃(DDoS)対策</b>。中身を見て防ぐのはWAF。"},
+{cat:"セキュリティ",name:"GuardDuty",nick:"異常を見張る監視カメラ",what:"いろんなログを自動で分析して、「なんか怪しい動きがある」と気づいて知らせてくれる。",good:"不正アクセスや乗っ取りの兆候に、早く気づきたい時。",bad:"気づくのが役割で、攻撃を自動でブロックする役ではない。",key:"<b>怪しい動きを検知して知らせる（脅威検知）</b>。"},
+{cat:"セキュリティ",name:"Inspector",nick:"弱点の自動健康診断",what:"サーバーやコンテナに「知られている弱点（穴）」がないかを自動で繰り返し調べる。",good:"使っているソフトに既知のセキュリティ穴がないか、ずっとチェックしたい時。",bad:"怪しい動きの検知（GuardDuty）や、個人情報探し（Macie）とは役割が別。",key:"<b>ソフトの弱点（脆弱性）をスキャン</b>。GuardDuty・Macieと役割違い。"},
+{cat:"セキュリティ",name:"Macie",nick:"S3の中の個人情報を探す探偵",what:"S3の中に、名前やカード番号などの個人情報がうっかり置かれていないかを自動で見つけ出す。",good:"大量のファイルの中から個人情報を見つけ出したい時。",bad:"攻撃検知や弱点スキャンが目的なら別物。",key:"<b>S3の中の個人情報を見つける</b>。"},
+
+// --- 監視・運用 ---
+{cat:"監視・運用",name:"CloudWatch",nick:"健康状態を測る計器",what:"サーバーのCPUやメモリの使い具合・ログを集めてグラフにし、「危ない値になったら知らせる」アラームを出す。",good:"システムの性能を監視したい・異常が出たら通知/自動対応したい時。",bad:"「誰がどの操作をしたか」の記録は取らない。→それはCloudTrail。",key:"<b>性能の監視・ログ・アラーム</b>。「誰が操作したか」はCloudTrail。"},
+{cat:"監視・運用",name:"CloudTrail",nick:"誰が何をしたかの操作記録（監査ログ）",what:"AWS上で「いつ・誰が・何を変えたか」をすべて記録する。後から犯人や原因を追える。",good:"監査やコンプライアンス、「誰がこの設定を変えた？」を調べたい時。",bad:"CPUやメモリの性能監視はしない。→それはCloudWatch。",key:"<b>操作の記録・監査</b>。性能監視のCloudWatchと取り違え＝最頻出。"},
+{cat:"監視・運用",name:"Config",nick:"設定の変化を記録する係",what:"各サービスの設定が「いつどう変わったか」を記録し、「決めたルール通りになっているか」を自動でチェックする。",good:"設定が社内ルール通りか確認したい・設定変更の履歴を残したい時。",bad:"操作した人の追跡が主目的ならCloudTrailの方が直接的。",key:"<b>設定がルール通りか・いつ変わったか</b>を見張る。"},
+
+// --- 疎結合・連携 ---
+{cat:"疎結合・連携",name:"SQS",full:"Simple Queue Service（キュー＝順番待ちの列）",nick:"注文の伝票を貯める箱",what:"処理してほしい用事（メッセージ）を一旦この箱に入れ、受け取る側が空いた時に1件ずつ取り出して処理する。受付と処理を切り離せる。",good:"急に大量の依頼が来ても、貯めておいて順番に処理したい時。処理側が落ちても依頼を失いたくない時。",bad:"1件を同時に大勢へ知らせたい（一斉通知）には向かない。→それはSNS。",key:"<b>依頼を貯めて1件ずつ処理・受付と処理を切り離す</b>。順序保証＋重複防止はFIFO。"},
+{cat:"疎結合・連携",name:"SNS",full:"Simple Notification Service（通知）",nick:"一斉放送する拡声器",what:"1つのお知らせを、登録している複数の宛先へ一斉に同時配信する（メール・SMS・他サービスへ）。",good:"1つの出来事を、いろんな相手に同時に知らせたい時。",bad:"順番に1件ずつ貯めて処理したい時には向かない。→それはSQS。",key:"<b>1つを多数へ一斉通知（1対多）</b>。SQSと組ませて拡散も。"},
+{cat:"疎結合・連携",name:"EventBridge",nick:"出来事を賢く仕分ける交換手",what:"AWSや他サービス・決まった時刻などで起きた出来事を、中身を見て条件に合うものだけ、行き先（複数可）へ振り分ける。",good:"「○○が起きたらAとBを動かす」を自動化したい時。SaaS連携や定時実行。",bad:"ただ単純に多数へ同じ通知を配るだけならSNSで十分。",key:"<b>出来事を条件で仕分けて振り分け・定時実行・SaaS連携</b>。単純配信はSNS。"},
+{cat:"疎結合・連携",name:"Step Functions",nick:"処理の段取りを描く指揮者",what:"「まずA、次にB、失敗したらやり直し、条件で分岐」といった複数の処理の流れ（手順)を絵で組み立てて自動で進める。",good:"いくつもの処理を、順番・分岐・リトライ付きで確実に流したい時。",bad:"処理が1個だけならLambda単体で十分。",key:"<b>複数ステップの業務の流れ・状態管理</b>。"},
+{cat:"疎結合・連携",name:"Kinesis",nick:"流れ続けるデータの川",what:"絶え間なく流れてくるデータ（IoTの計測値・アクセスログ等）を、リアルタイムに受け取って処理する。",good:"止まらず流れてくるデータをその場で処理・分析したい時。",bad:"たまにしか来ないデータならSQS等で十分。",key:"<b>リアルタイムに流れ続けるデータ</b>（IoT・ログ・クリック）。"},
+{cat:"疎結合・連携",name:"API Gateway",full:"Amazon API Gateway",nick:"APIの受付カウンター",what:"スマホやWebからの呼び出し（API）を受け付ける入口。認証や「呼びすぎを抑える」制御をして、裏のLambda等へ渡す。",good:"サーバーレスでAPIを公開したい時（+Lambdaが定番）。",bad:"—",key:"<b>サーバーレスAPIの入口</b>。+Lambdaが鉄板。"},
+
+// --- コスト最適化 ---
+{cat:"コスト最適化",name:"Savings Plans / RI",full:"Savings Plans / Reserved Instances（リザーブドインスタンス）",alias:["Savings Plans"],nick:"1〜3年の定期券",what:"「○年使い続けます」と先に約束する代わりに、料金を大きく割引してもらう仕組み。",good:"ずっと動かし続けるサーバーがある時（定期券の方が都度払いより安い）。",bad:"使ったり止めたりが激しい・途中で止めてOKな作業には向かない。→それはスポット。",key:"<b>常時動かす・長期前提</b>の割引。止めてOKな作業はスポット。"},
+{cat:"コスト最適化",name:"Compute Optimizer",nick:"サイズが合ってるか測る仕立て屋",what:"実際の使い具合を見て、「このサーバーは大きすぎ/小さすぎ、このサイズが適正」と教えてくれる。",good:"オーバースペックで払いすぎていないか、実測で見直したい時。",bad:"—",key:"<b>実際の使用率からちょうどいいサイズを提案</b>。"},
+{cat:"コスト最適化",name:"AWS Budgets",nick:"予算オーバーを見張る家計簿アラーム",what:"「今月○円まで」と予算を決めておき、超えそうになったら知らせる。自動で使用を抑える設定もできる。",good:"使いすぎを防ぎたい・予算超過を早く知りたい時。",bad:"過去に何にいくら使ったかを分析するのは別。→それはCost Explorer。",key:"<b>予算オーバーの通知・自動の抑制</b>。"},
+{cat:"コスト最適化",name:"Cost Explorer",nick:"何にいくら使ったか見るレシート分析",what:"これまで何のサービスにいくらかかったかを、グラフで見て分析する。",good:"コストの内訳や増え方を振り返って分析したい時。",bad:"予算超過の通知が目的なら別。→それはBudgets。",key:"<b>コストの内訳・推移を可視化して分析</b>。"},
+
+// --- AI/ML ---
+{cat:"AI/ML",name:"Rekognition",nick:"画像を見る目",what:"写真や動画に「何が写っているか」（物・顔・ロゴ・不適切な内容）をAIが判定してくれる。自分でAIを作らなくていい。",good:"アップされた画像の中身を自動判定したい時（不適切画像の検出など）。",bad:"書類の中の文字を読み取りたいなら別。→それはTextract。",key:"<b>画像の中身を判定</b>。書類の文字読み取りはTextract。"},
+{cat:"AI/ML",name:"Textract",nick:"書類を読み取るスキャナー（OCR）",what:"請求書や申込書などの書類から、文字・表・記入欄の中身を読み取ってデータにする。",good:"紙の書類やPDFを自動で文字データにしたい時。",bad:"写真に何が写っているかの判定とは別。→それはRekognition。",key:"<b>書類の文字・表を読み取る（OCR）</b>。画像の物体判定はRekognition＝混同注意。"},
+{cat:"AI/ML",name:"Comprehend",nick:"文章の意味を読む人",what:"文章を読んで「ポジティブ/ネガティブ」「何語か」「重要な言葉」などを自動で分析する。",good:"レビューやSNSの文章の感情分析、キーワード抽出をしたい時。",bad:"翻訳そのものは別。→それはTranslate。",key:"<b>文章の分析（感情・言語の判定）</b>。"},
+{cat:"AI/ML",name:"Transcribe",nick:"聞いて書き起こす耳",what:"音声を聞き取って文字にする（文字起こし）。",good:"会議や通話の録音を自動で文字にしたい時。",bad:"逆に文字を音声にしたいなら別。→それはPolly。",key:"<b>音声 → 文字</b>。逆（文字→音声）はPolly。"},
+{cat:"AI/ML",name:"Polly",nick:"読み上げる口",what:"文字を、自然な人の声の音声に変換して読み上げる。",good:"テキストを音声教材やナレーションにしたい時。",bad:"逆に音声を文字にしたいなら別。→それはTranscribe。",key:"<b>文字 → 音声（読み上げ）</b>。逆はTranscribe。"},
+{cat:"AI/ML",name:"Translate",nick:"翻訳家",what:"文章を別の言語に翻訳する。",good:"レビューやコンテンツを多言語に翻訳したい時。",bad:"「何語で書かれているか」を知るだけならComprehendで足りる。",key:"<b>言語から言語へ翻訳</b>。言語の判定だけならComprehend。"},
+{cat:"AI/ML",name:"Bedrock",nick:"何でも屋の生成AI受付",what:"文章を作る・要約する・質問に答えるといった生成AI（ChatGPTのようなもの）を、APIで呼んで使える。社内文書をもとに回答させる（RAG）こともできる。",good:"チャットボットや文章生成、社内文書から答えるAIを作りたい時。",bad:"単純な感情分析や翻訳だけなら専用サービス（Comprehend/Translate）の方が手軽。",key:"<b>生成AI・チャットボット・社内文書回答(RAG)</b>。"},
+{cat:"AI/ML",name:"SageMaker",nick:"AIモデルを一から作る工房",what:"自分専用の機械学習モデルを、一から訓練して動かすための本格的な作業場。",good:"既製のAIサービスでは解けない、自社だけの予測モデルを作りたい時（データと専門家がいる前提）。",bad:"既製のAIサービス(Rekognition等)で足りるなら使わない。AI/MLと聞いて反射で選ぶのは逆＝大げさになりがち。",key:"<b>独自モデルがどうしても必要な時だけ</b>。既製で足りるなら使わない。"},
+
+// --- 可用性・移行 ---
+{cat:"可用性・移行",name:"ELB (ALB/NLB)",full:"Elastic Load Balancing（ALB=Application / NLB=Network Load Balancer）",alias:["ALB","NLB","ELB"],nick:"入口の案内係",what:"届いたアクセスを、複数のサーバーに振り分ける案内係。元気なサーバーだけに回し、故障した台は自動で外す。ALBはWeb向け、NLBは超高速向け。",good:"複数サーバーに負荷を分散したい・1台壊れても止めたくない時。",bad:"サーバーが1台だけなら振り分ける相手がいない。",key:"<b>負荷分散＋故障した台を自動で外す</b>。URLで振り分けるならALB。"},
+{cat:"可用性・移行",name:"複数AZ配置",alias:["マルチAZ配置"],nick:"同じ店を別の建物にも構える",what:"サーバーやDBを、離れた複数の場所（AZ）に分けて置く。1か所が災害等で止まっても、別の場所で動き続ける。",good:"止まったら困るシステムの、一番の基本の備え。",bad:"—（1台・1か所だけの構成は、その場所が落ちたら全部止まる＝可用性ゼロ）",key:"<b>可用性の基本</b>。1台・1か所構成は落ちたら全滅。"},
+{cat:"可用性・移行",name:"DMS",full:"Database Migration Service（DB移行）",nick:"データベースの引っ越し業者",what:"会社にある（または他社の）データベースを、AWSへなるべく止めずに引っ越しさせる。",good:"既存のDBをAWSへ移行したい時。",bad:"データの形(スキーマ)も大きく変えるなら、変換ツール(SCT)と一緒に使う。",key:"<b>データベースの移行</b>。形の変換はSCTと併用。"},
+];
+
+// ===== 状態 =====
+const LS_KEY='saa_cards_judge_v1';
+let judged = loadJudge();   // {サービス名: 'know'|'dunno'}
+let deck=[], idx=0, flipped=false;
+
+function loadJudge(){ try{return JSON.parse(localStorage.getItem(LS_KEY))||{};}catch(e){return {};} }
+function saveJudge(){ try{localStorage.setItem(LS_KEY,JSON.stringify(judged));}catch(e){} }
+
+function $(id){return document.getElementById(id);}
+function showToast(msg){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),1500);}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ===== リンク索引（本文中のサービス名→カード） =====
+// 表記ゆれ(alias)も含めて、長い名前から優先で拾う
+const LINKMAP=[];
+CARDS.forEach((c,i)=>{
+  LINKMAP.push({term:c.name,i});
+  (c.alias||[]).forEach(a=>LINKMAP.push({term:a,i}));
+});
+LINKMAP.sort((a,b)=>b.term.length-a.term.length);
+function reEsc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+
+// 本文(HTML文字列)の中のサービス名をリンクに変える。selfは自分自身（リンクにしない）
+function linkify(html,selfIdx){
+  // <b>...</b>等のタグは壊さないよう、タグ外のテキストだけ置換する簡易処理
+  return html.split(/(<[^>]+>)/).map(seg=>{
+    if(seg.startsWith('<')) return seg;
+    let out=seg;
+    for(const {term,i} of LINKMAP){
+      if(i===selfIdx) continue;
+      const re=new RegExp(reEsc(term),'g');
+      out=out.replace(re,m=>'\u0001'+i+'\u0002'+m+'\u0003');
+    }
+    // マーカーを実タグに（入れ子置換を防ぐため最後に一括変換）
+    out=out.replace(/\u0001(\d+)\u0002([\s\S]*?)\u0003/g,(_,i,t)=>'<span class="svclink" onclick="jumpTo('+i+');event.stopPropagation();">'+t+'</span>');
+    return out;
+  }).join('');
+}
+
+// リンクジャンプ（戻れるよう履歴を積む）
+let navStack=[];
+function jumpTo(cardIdx){
+  navStack.push({deck:deck,idx:idx});
+  deck=[CARDS[cardIdx]]; idx=0;
+  renderCard();
+  showToast('🔗 '+CARDS[cardIdx].name);
+}
+function navBack(){
+  if(!navStack.length){ goHome(); return; }
+  const p=navStack.pop();
+  deck=p.deck; idx=p.idx; renderCard();
+}
+
+
+// ===== ホーム描画 =====
+function renderHome(){
+  $('cntAll').textContent='全 '+CARDS.length+' 枚';
+  const dunno=CARDS.filter(c=>judged[c.name]!=='know');
+  $('cntDunno').textContent='残り '+dunno.length+' 枚';
+  // 分野チップ
+  const cats=[...new Set(CARDS.map(c=>c.cat))];
+  $('catgrid').innerHTML=cats.map(c=>{
+    const n=CARDS.filter(x=>x.cat===c).length;
+    return '<div class="catchip" onclick="startCat(\''+c.replace(/'/g,"\\'")+'\')">'+c+'<span class="n">'+n+'</span></div>';
+  }).join('');
+  // 全体の覚えた率
+  const know=CARDS.filter(c=>judged[c.name]==='know').length;
+  $('hstat').textContent='覚えた '+know+'/'+CARDS.length;
+  $('bar').style.width=(CARDS.length?know/CARDS.length*100:0)+'%';
+}
+
+// ===== 開始 =====
+function start(mode,onlyDunno){
+  let pool=CARDS.slice();
+  if(onlyDunno) pool=pool.filter(c=>judged[c.name]!=='know');
+  if(!pool.length){ showToast('対象のカードがありません'); return; }
+  deck=shuffle(pool); idx=0;
+  enterStudy();
+}
+function startCat(cat){
+  deck=CARDS.filter(c=>c.cat===cat); // 分野はシャッフルせず順番に
+  idx=0; enterStudy();
+}
+function enterStudy(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $('study').classList.add('on');
+  $('btnrow').style.display='flex';
+  renderCard();
+}
+function goHome(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $('home').classList.add('on');
+  $('btnrow').style.display='none';
+  renderHome();
+}
+
+// ===== カード描画 =====
+function renderCard(){
+  const c=deck[idx];
+  const selfIdx=CARDS.indexOf(c);
+  flipped=false;
+  $('flip').classList.remove('flipped');
+  $('cCat').textContent=c.cat;
+  $('cPos').textContent=(idx+1)+' / '+deck.length;
+  // 表
+  $('fCat').textContent=c.cat;
+  $('fName').textContent=c.name;
+  $('fFull').textContent=c.full?('= '+c.full):'';
+  // 裏
+  $('bName').textContent=c.name;
+  $('bFull').textContent=c.full?('正式名：'+c.full):'';
+  $('bFull').style.display=c.full?'block':'none';
+  $('bNick').textContent='🏷 '+c.nick;
+  $('bWhat').innerHTML=linkify(c.what,selfIdx);
+  $('bGood').innerHTML=linkify(c.good,selfIdx);
+  $('bBad').innerHTML=linkify(c.bad,selfIdx);
+  $('bKey').innerHTML=linkify(c.key,selfIdx);
+  fitHeight();
+  // 仕分けボタンの状態
+  const j=judged[c.name];
+  $('jKnow').classList.toggle('on',j==='know');
+  $('jDunno').classList.toggle('on',j==='dunno');
+  // ナビ
+  $('prevBtn').disabled=(idx===0);
+  $('nextBtn').textContent=(idx===deck.length-1)?'最初へ ↺':'次へ ▶';
+  // 進捗バー（このデッキ内）
+  $('hstat').textContent='覚えた '+CARDS.filter(c=>judged[c.name]==='know').length+'/'+CARDS.length;
+  $('bar').style.width=((idx+1)/deck.length*100)+'%';
+}
+function toggleFlip(){ flipped=!flipped; $('flip').classList.toggle('flipped',flipped); fitHeight(); }
+// 表示中の面の高さにカードを合わせる（カード内スクロールでなくページ全体でスクロール）
+function fitHeight(){
+  const face = flipped ? $('face_back') : document.querySelector('.face.front');
+  const inner = document.querySelector('.flipinner');
+  const flip = $('flip');
+  // 面はabsoluteなのでscrollHeightで中身の実高さを測る
+  requestAnimationFrame(()=>{
+    const h = Math.max(360, face.scrollHeight);
+    inner.style.minHeight = h+'px';
+    flip.style.minHeight = h+'px';
+  });
+}
+function judge(know){
+  const c=deck[idx];
+  judged[c.name]=know?'know':'dunno';
+  saveJudge();
+  $('jKnow').classList.toggle('on',know);
+  $('jDunno').classList.toggle('on',!know);
+  showToast(know?'✓ 覚えた':'△ また復習する');
+  setTimeout(next,350);
+}
+function next(){ idx=(idx+1)%deck.length; renderCard(); }
+function prev(){ if(idx>0){idx--;renderCard();} }
+
+function resetJudge(){
+  if(!confirm('「覚えた／まだ」の記録を全部消します。よろしいですか？')) return;
+  judged={}; saveJudge(); renderHome(); showToast('仕分けをリセットしました');
+}
+
+// キーボード（PC確認用）
+document.addEventListener('keydown',e=>{
+  if(!$('study').classList.contains('on'))return;
+  if(e.key===' '){e.preventDefault();toggleFlip();}
+  else if(e.key==='ArrowRight')next();
+  else if(e.key==='ArrowLeft')prev();
+  else if(e.key==='1')judge(false);
+  else if(e.key==='2')judge(true);
+});
+
+renderHome();
+</script>
+</body>
+</html>
