@@ -798,7 +798,8 @@ function drawAddNode(layer, a, lookupNodes, cls){
     const n=lookupNodes.find(x=>x.id===id); return n?{x:n.x+n.w/2,y:n.y+n.h/2}:null;
   };
   const fromC=a.from?center(a.from):null;
-  const toC=a.to?center(a.to):null;
+  // a.to は中継先（自分自身を指す誤記データはゼロ長パスになるので除外）
+  const toC=(a.to && a.to!==a.id)?center(a.to):null;
   if(fromC){
     const p=document.createElementNS(svgns,'path');
     p.setAttribute('class','edge '+cls);
