@@ -87,6 +87,8 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .promptBtn{margin-top:10px;width:100%;background:var(--accent);border:none;color:#1a1200;border-radius:12px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
 .promptBtn:active{opacity:.85}
 .promptHint{font-size:13px;color:var(--sub);margin-top:6px;line-height:1.6}
+.patternBtn{display:block;margin-top:10px;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;background:var(--card);border:1px solid var(--accent);color:var(--accent);border-radius:12px;padding:13px;font-size:16px;font-weight:700;font-family:inherit}
+.patternBtn:active{background:var(--card2)}
 .deep{display:none;margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;font-size:15px;line-height:1.85}
 .deep.on{display:block}
 .deep .dh{color:var(--blue);font-weight:700;font-size:16px;margin:14px 0 6px}
@@ -301,7 +303,8 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 // ===== 問題バンク切替（questions.js=86問 / questions_v2.js=新80問）=====
 const BANKS={
   main:{file:'questions.js', label:'A・既存'},
-  v2:{file:'questions_v2.js', label:'B・新規'}
+  v2:{file:'questions_v2.js', label:'B・新規'},
+  v3:{file:'questions_v3.js', label:'C・未カバー'}
 };
 function currentBank(){
   const b=localStorage.getItem('saa_drill_bank');
@@ -484,6 +487,9 @@ function revealAnswer(){
   let more='';
   if(q.deep){more='<button class="moreBtn" id="moreBtn" onclick="toggleDeep()">🔍 もっと詳しく（なぜ？）</button>'+
     '<div class="deep" id="deepBox">'+q.deep+'</div>';}
+  // アーキ図ドリルへのリンク（pattern が設定された問題のみ）
+  let patternLink='';
+  if(q.pattern){patternLink='<a class="patternBtn" href="patterns.html#'+q.pattern+'" target="_blank" rel="noopener">🗺️ この構成をアーキ図で見る</a>';}
   const aiBtn='<button class="promptBtn" onclick="copyAIPrompt('+state.idx+')">🤖 この問題をAIに相談する（コピー）</button>'+
     '<div class="promptHint">問題・選択肢・正解＋「各選択肢がなぜ正解／誤答か初心者向けに解説して」という指示をコピーします。ChatGPTやClaudeに貼り付けて、納得いくまで質問できます。</div>';
   // 正解＝記号＋正解選択肢の文章（複数選択は全て列挙）
@@ -493,7 +499,7 @@ function revealAnswer(){
     ansFull+
     `<div class="h">本当に聞かれていたこと</div>${q.keypoint}`+
     `<div class="h">なぜこれが正解か</div>${q.explain}`+
-    elim+conf+terms+more+aiBtn;
+    elim+conf+terms+more+patternLink+aiBtn;
   document.getElementById('btnNext').textContent=
     state.idx+1>=state.list.length?'結果を見る':'次の問題 →';
   document.getElementById('hStat').textContent=`正解 ${state.session.correct}/${state.session.total}`;
