@@ -30,7 +30,7 @@ const QUESTIONS = [
   <div class="nick"><b>GuardDuty</b>＝アカウントに住み込みの探偵。ログ（誰が何のAPIを叩いた・どこへ通信した）を勝手に読んで「この動き、怪しいですよ」と教える。自分でカメラを設置しなくていい（基盤構築不要）。</div>
   <div class="nick"><b>Inspector</b>＝健康診断。建物の「鍵が古い・窓が壊れている（＝脆弱性）」を点検する。泥棒が入ったかは見ない。</div>
   <div class="nick"><b>Config</b>＝間取りの監査役。「ドアはこの位置と決めたよね？勝手に動かした人いる？」と構成のズレを見る。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   キーワードは「不正なAPI・侵害された認証情報・不正通信」＝<b>侵入や悪用の兆候</b>そのもの。これを継続的に見張るのがGuardDutyの専門。しかもログを自動で読むので少人数チームでも回せる（運用負荷が最小）。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   4つとも「セキュリティを高める正しいサービス」なので消去法が効かない。本番はこう作る。だから「何を検知/防御したいのか」を一語で押さえる＝<b>脅威の検知ならGuardDuty</b>／脆弱性ならInspector／攻撃の遮断ならWAF／構成のズレならConfig。`
@@ -55,7 +55,7 @@ const QUESTIONS = [
   <div class="nick"><b>DAX</b>＝DynamoDB専属の早出し係。よく注文されるメニュー（人気プレイヤーのデータ）を手元に持っていて即出しする。DynamoDBと同じ言葉で話せる（API互換）から、店員（アプリ）はやり方をほぼ変えなくていい。</div>
   <div class="nick"><b>ElastiCache</b>＝どの店にも雇える汎用の早出し係。優秀だが「何を手元に置くか・いつ捨てるか」を店員が指示しないと動かない（＝自前のキャッシュ制御コードが要る）。</div>
   <div class="nick"><b>GSI</b>＝索引の付け替え。「名前で引く」を「スコアで引く」に変える道具で、速さのためのキャッシュではない。</div>
-  <div class="dh">💡 なぜAが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「同じデータが何度も読まれる」「マイクロ秒」「DynamoDB本体のコストを下げる」「改修は最小」。この4つを一度に満たすのはDynamoDB専用キャッシュのDAXだけ。ElastiCacheでも速くはなるが自前実装が増える分、要件の「コード変更最小」で一歩負ける。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「キャッシュ＝とりあえずElastiCache」と反射しないこと。<b>対象がDynamoDBに限定＋改修を増やしたくない</b>と書いてあったらDAXを疑う。逆にRDSやその他いろんなデータ源をまとめてキャッシュしたい/細かく制御したいならElastiCache。`
@@ -84,7 +84,7 @@ const QUESTIONS = [
   <div class="nick"><b>NATゲートウェイ</b>＝表通りに面した取次窓口。中の人が外（インターネット）に用事があるとき必ずここを通る。通った荷物の量だけ料金を取られる（データ処理課金）。S3への大量書き込みが全部ここを通ると高い。</div>
   <div class="nick"><b>ゲートウェイ型エンドポイント</b>＝S3・DynamoDB行きの「敷地内専用の裏口」。表通り（インターネット）に出ずにAWS内部で直結。しかも通行料タダ。</div>
   <div class="nick"><b>インターフェイス型（PrivateLink）</b>＝いろんな部屋に通じる汎用の専用扉。便利だが扉の設置費（時間課金）と通行料（データ処理課金）がかかる。</div>
-  <div class="dh">💡 なぜCが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「NATコストを消したい」＋「インターネットを通したくない」＝S3/DynamoDBへの専用裏口（ゲートウェイ型エンドポイント）がドンピシャ。内部経路で完結するのでセキュリティ要件も満たし、しかも無料なのでNATのデータ処理課金がまるごと浮く。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「プライベートに繋ぐ＝PrivateLink（インターフェイス型）」と反射するとDを選んで課金で損する。<b>相手がS3かDynamoDBなら、まず無料のゲートウェイ型を思い出す</b>。インターフェイス型が要るのはそれ以外の多くのサービス（KMS・SQS・各種API等）に内部接続したいとき。`
@@ -109,7 +109,7 @@ const QUESTIONS = [
   <div class="nick"><b>Session Manager</b>＝各EC2に住み込みの内線係（SSMエージェント）。AWSの管理画面から内線で呼べば繋がる。玄関（22番ポート）を開ける必要も、合鍵（SSHキー）を配る必要もない。会話の記録（操作ログ）も自動で残る。</div>
   <div class="nick"><b>踏み台サーバー</b>＝表玄関の受付。外から一度ここに入ってから各部屋へ。受付の鍵管理と玄関の開けっ放しが負担。</div>
   <div class="nick"><b>Instance Connect</b>＝その場限りの合鍵を発行してくれる係。鍵の使い回しは減るが、結局玄関（22番）から入る。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「キーも踏み台もポート開放もなくしたい＋ログ」を一度に満たすのはSession Managerだけ。他は「キーは一時化したがポートは開く」「ネットワークは繋いだがSSHは残る」と、必ず1つ条件が外れる。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「キーレスっぽい」Instance Connectに引っかからない。<b>22番ポートを開けるか</b>で線を引く＝Session Managerはポートを一切開けない（ここが他と決定的に違う）。`
@@ -139,7 +139,7 @@ const QUESTIONS = [
   <div class="nick"><b>パイロットライト</b>＝種火だけ灯しておく（コアDBは生きている）。災害時に火を大きくする。</div>
   <div class="nick"><b>ウォームスタンバイ</b>＝小さい店を実際に営業しておく。災害時に即増床（RTO数分・RPOほぼゼロを安く）。</div>
   <div class="nick"><b>マルチサイト</b>＝同じ店を2軒フル営業。最強だが家賃2倍。</div>
-  <div class="dh">💡 なぜCが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「RTO数分＋RPOほぼゼロ」だけならマルチサイトでも満たすが、「フル二重投資は避ける」が効いてDが脱落。継続レプリ（RPOほぼゼロ）＋スケールアップ（RTO数分）を縮小構成で実現するウォームスタンバイがちょうど真ん中。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   RTO/RPOが「厳しい」ほど右（高コスト）の戦略、「緩い」ほど左（安い）。問題文の数値とコスト制約の<b>両方</b>を見て段を決める。片方だけ見るとDかAに振れて外す。`
@@ -163,7 +163,7 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>CloudFront</b>＝各国の支店に商品の在庫（キャッシュ）を置いて即配る。動的でキャッシュできないゲーム通信には在庫を置けない。</div>
   <div class="nick"><b>Global Accelerator</b>＝AWS専用の高速道路の入口。プレイヤーは最寄りの入口（エッジ）から渋滞しない専用道（AWS網）で目的地へ。入口の住所（IP）は変わらない。</div>
-  <div class="dh">💡 なぜDが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   ゲームのリアルタイム通信は「キャッシュできない＋HTTPでない＋固定IPが要る」。CloudFront（キャッシュ前提・HTTP）では3つとも外れる。経路そのものを速くし固定IPを出すGlobal Acceleratorが唯一合致。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「グローバル配信＝とりあえずCloudFront」と反射しない。<b>非HTTP・動的・固定IP</b>のどれかが出たらGlobal Acceleratorを疑う。静的/動的でもHTTPのWeb配信ならCloudFront。`
@@ -186,8 +186,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Fargate</b>＝サーバーを自分で持たずにコンテナを動かす（建物の管理を委託）。</div>
   <div class="nick"><b>Spot</b>＝空席を激安で使う代わり、満席になったら席を立たされる（中断）。立ち退いてもやり直せる仕事（冪等バッチ）なら一番得。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「中断OK」と書いてある＝Spotを使える合図。さらに「サーバー管理なし」でEC2系（A）が消え、Fargate Spotに絞られる。中断耐性をそのまま割引に変える。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「中断OK」と書いてある＝Spotを使える合図。さらに「サーバー管理なし」でEC2系が消え、Fargate Spotに絞られる。中断耐性をそのまま割引に変える。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「中断されても再実行すればよい」は<b>Spotを選ばせるキーワード</b>。逆に「中断が許されない常時処理」ならSpotは選ばない（Savings Plans/オンデマンド）。`
 },
@@ -210,7 +210,7 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>リードレプリカ</b>＝同じ台帳の「読み取り専用コピー」を何冊も用意し、読む人を分散させる。混んだら自動でコピーを増やす（Auto Scaling）。</div>
   <div class="nick"><b>Multi-AZスタンバイ</b>＝別の建物の控え台帳。普段は使わず、本番が倒れた時だけ昇格する（＝可用性。読み取り分散ではない）。</div>
-  <div class="dh">💡 なぜAが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   欲しいのは「読み取りを分けて捌く＋増減に自動で追従」。コピーを増やして分散するリードレプリカ＋Auto Scalingがそのもの。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「Multi-AZにすれば読み取りも分散される」は誤り（スタンバイは普段クエリを受けない）。<b>可用性＝Multi-AZ／読み取りスケール＝リードレプリカ</b>を必ず分けて考える。`
@@ -235,7 +235,7 @@ const QUESTIONS = [
   <div class="nick"><b>Transfer Acceleration</b>＝近所の集荷所（エッジ）に出せば、あとはAWS専用便（グローバル網）で東京まで速く運んでくれる。出し方（API）はほぼ同じ＝最小改修。</div>
   <div class="nick"><b>CloudFront</b>＝配る方向（ダウンロード）の宅配網。送る（アップロード）のが主目的ではない。</div>
   <div class="nick"><b>DataSync</b>＝引っ越し業者。大量の荷物をまとめて移すのは得意だが、各拠点に作業員（エージェント）を置く必要がある。</div>
-  <div class="dh">💡 なぜCが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「都度の遠距離アップロードを、改修少なく速く」＝Transfer Acceleration一択。バケットで有効化＋エンドポイント変更だけで効く。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   CloudFrontは「配信（下り）」、Transfer Accelerationは「アップロード（上り）」の高速化。<b>方向</b>で取り違えない。`
@@ -260,7 +260,7 @@ const QUESTIONS = [
   <div class="nick"><b>Kinesis</b>＝録画してある番組（データの川）。何人でも好きな所から見られ、巻き戻し（リプレイ）も順番もそのまま。</div>
   <div class="nick"><b>SQS</b>＝受付の伝票スタンド。1人が取ったら無くなる（再生不可・順番は標準だと保証なし）。</div>
   <div class="nick"><b>SNS</b>＝一斉放送。流したらそれっきり（録画は残らない）。</div>
-  <div class="dh">💡 なぜCが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「複数が独立に読む」「巻き戻して再処理」「順序」＝録画・複数視聴・巻き戻しができるKinesisだけ。キュー（取ったら消える）系では全部は無理。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「複数の処理系」「リプレイ」「ストリーム」のどれかが出たらKinesisを疑う。1回処理して消えてよいならSQS。`
@@ -284,7 +284,7 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Secrets Manager</b>＝合鍵を定期的に勝手に作り替えてくれる管理人。RDSとは連携済みで、鍵替えの手続きを全部やってくれる。</div>
   <div class="nick"><b>Parameter Store</b>＝鍵を預かる金庫。預かりと暗号化はするが、鍵替えは自分でスケジュールを組んで実行する（自作）。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「自動でローテーション＋RDS統合」を箱から出してすぐ使えるのはSecrets Manager。Parameter Storeでも実現できるが自作Lambdaが要る分、運用自動化の要件で一歩負ける。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「ただ秘密を安全に置きたい」だけならParameter Storeで十分。<b>自動ローテーション・RDS統合</b>が要件に出たらSecrets Managerに上げる、が判断軸。`
@@ -308,7 +308,7 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Auroraグローバルデータベース</b>＝東京の本店の写しを欧州・米国にも置く。現地の人は近くの写しを読めて速い。本店が倒れたら写しを本店に昇格（DR）。</div>
   <div class="nick"><b>同一リージョンのリードレプリカ</b>＝東京の中でコピーを増やすだけ。欧州から東京までの距離は縮まらない。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「Aurora」「海外の読み取りを速く」「リージョンDR」の3つを、データベースを作り替えずに満たすのはAuroraグローバルデータベース。同一リージョンのレプリカでは海外距離が縮まらず外す。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「リードレプリカで読み取り改善」は<b>同一リージョン内</b>の話。<b>地域（リージョン）をまたぐ</b>低レイテンシ＋DRが要件ならグローバルデータベース。`
@@ -335,7 +335,7 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>gp2</b>＝「広い部屋を借りるほど速くなる」プラン。速さが欲しいだけなのに広い部屋（大容量）を借りて余分に払っている。</div>
   <div class="nick"><b>gp3</b>＝「部屋の広さ」と「速さ」を別々に選べるプラン。必要な速さだけ買えて、しかも基本料が安い。</div>
-  <div class="dh">💡 なぜAが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「性能は確保＋コスト減」の王道がgp2→gp3。性能と容量を切り離せるので、速さのために容量を盛る無駄が消え、単価も下がる。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   io2は「もっと速く・止められない」用途（高コスト）、HDD（st1/sc1）は「大量を安く・速度二の次」用途。<b>汎用で性能維持しつつ安く＝gp3</b>がほぼ定番。`
@@ -359,7 +359,7 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Step Functions</b>＝料理の手順表（レシピ）を見える形で持つ司令塔。「この工程が失敗したら3回やり直す」「条件でこっちの工程へ」を表に書いておき、今どの工程かも一目でわかる。</div>
   <div class="nick"><b>Lambdaチェーン</b>＝各担当が次の担当を口頭で呼ぶ方式。誰がどこで止まったか全体が見えない。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「順序＋分岐＋リトライ＋可視化」を、コードでなく定義で持てるのがStep Functions。失敗箇所が一目でわかり保守が楽になる。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   SQS/EventBridgeは「つなぐ」のは得意でも「全体の段取りを管理・可視化」はしない。<b>ワークフロー（順序・分岐・リトライ）の管理</b>が主題ならStep Functions。`
@@ -383,7 +383,7 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>ElastiCache</b>＝よく聞かれる質問の答えを手元のメモ（インメモリ）に貼っておく受付。同じ質問は奥（RDS）に取りに行かず即答する。</div>
   <div class="nick"><b>リードレプリカ</b>＝受付の人数を増やす。質問の総量は変わらないが手分けできる。</div>
-  <div class="dh">💡 なぜCが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「同じ結果を何度も」「古くてもOK」＝キャッシュがドンピシャ。RDSに届く前に返すので負荷が根本から減る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   リードレプリカは「分散」、ElastiCacheは「そもそもDBに行かせない」。<b>同一クエリの繰り返し＋陳腐化許容</b>ならキャッシュを優先。`
@@ -407,7 +407,7 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>ALBヘルスチェック</b>＝案内係が各レジに「ちゃんと営業してる？」と声をかけ、返事のないレジ（アプリ無応答）には客を回さない。</div>
   <div class="nick"><b>Auto ScalingのELBヘルスチェック連動</b>＝「返事がないレジは閉めて新しいレジを開ける」を自動でやる店長。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   問題は「インスタンスは生きているがアプリが死んでいる」。EC2の生死だけ見るEC2タイプでは見逃す。ALBのアプリ応答チェック＋ASのELB連動で、検知→切り離し→置換が自動で回る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「Auto Scalingにしてるから自動回復するはず」だけでは不十分。<b>ヘルスチェックタイプがEC2のままだとアプリのハングを拾えない</b>。ELBタイプにして初めてアプリ層の異常で置換される。`
@@ -433,10 +433,10 @@ const QUESTIONS = [
   ],
   deep:`
   <div class="dh">🏷 たとえ</div>
-  <div class="nick"><b>IAMで削除権限を与えない（A）</b>＝「削除しないでね」とルールで頼む。管理者は鍵を持っているので破れる。</div>
-  <div class="nick"><b>Object Lockコンプライアンスモード（C）</b>＝金庫に時限ロックをかける。期間が来るまで社長でも開けられない（技術的に不変）。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「管理者すら削除できない」は権限設計（A）では保証できない（権限はいつでも変えられる）。期間中の物理的な不変性を強制するObject Lockだけが要件を満たす。
+  <div class="nick"><b>IAMで削除権限を与えない</b>＝「削除しないでね」とルールで頼む。管理者は鍵を持っているので破れる。</div>
+  <div class="nick"><b>Object Lockコンプライアンスモード</b>＝金庫に時限ロックをかける。期間が来るまで社長でも開けられない（技術的に不変）。</div>
+  <div class="dh">💡 なぜこれが正解か</div>
+  「管理者すら削除できない」は権限設計では保証できない（権限はいつでも変えられる）。期間中の物理的な不変性を強制するObject Lockだけが要件を満たす。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「読み取り専用にすれば守れる」はIAMの話で、特権者には穴がある。<b>改ざん・削除を"誰であっても"防ぐ</b>＝Object Lock（WORM）。`
 },
@@ -459,8 +459,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>固定ライフサイクル</b>＝「30日たったら倉庫の奥へ」と決め打ち。よく出る商品も問答無用で奥に送ってしまう。</div>
   <div class="nick"><b>Intelligent-Tiering</b>＝出入りを見ている倉庫番。よく出る物は手前、出ない物は奥へ自動で動かす。人は何もしない。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「いつアクセスされるか読めない」と書いてある＝決め打ちの固定ライフサイクル（A）が外れる合図。監視して自動で動かすIntelligent-Tieringが適任。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「いつアクセスされるか読めない」と書いてある＝決め打ちの固定ライフサイクルが外れる合図。監視して自動で動かすIntelligent-Tieringが適任。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「直近30日はよく見て以降は見ない」のように<b>パターンが読める</b>なら固定ライフサイクル（安い）。<b>読めない</b>ならIntelligent-Tiering。問題文の"予測できる/できない"で切る。`
 },
@@ -483,8 +483,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>SNS</b>＝一斉放送（拡声器）。「注文が入りました」を関係部署全部に同時に流す。</div>
   <div class="nick"><b>各部署のSQS</b>＝放送を各部署が自分の受信箱に貯めて、自分のペースで処理する。</div>
-  <div class="nick"><b>単一SQSの共有（C）</b>＝1枚の伝票を取り合う。誰か1部署が取ったら他は処理できない（1対多にならない）。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="nick"><b>単一SQSの共有</b>＝1枚の伝票を取り合う。誰か1部署が取ったら他は処理できない（1対多にならない）。</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「1つのイベントを3システムが各自処理」＝拡声器（SNS）で同報し、各自の受信箱（SQS）に貯める形。受け手を足すのも放送の購読者を増やすだけ＝発生元は無関係（疎結合）。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   単一SQSは「1対1」（取ったら消える）。<b>1つを複数に届けたい＝SNSでfanout</b>。リプレイや順序が要件に出たらKinesisに寄せる。`
@@ -508,8 +508,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>クラスタープレイスメントグループ</b>＝計算担当者を同じ部屋の隣同士に座らせる。声をかければ即届く（低遅延）。</div>
   <div class="nick"><b>EFA</b>＝隣同士をつなぐ専用の太いパイプ（高帯域・低遅延の特殊ネットワーク）。</div>
-  <div class="nick"><b>複数AZ分散（A）</b>＝担当者を別々のビルに置く。可用性は上がるが会話（ノード間通信）に時間がかかりHPCには逆効果。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="nick"><b>複数AZ分散</b>＝担当者を別々のビルに置く。可用性は上がるが会話（ノード間通信）に時間がかかりHPCには逆効果。</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   HPCの密結合計算は「ノード間の会話の速さ」が命。近接配置（クラスター）＋専用パイプ（EFA）が直球。可用性のための分散はここでは害になる。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「可用性＝複数AZ分散」は正しいが、HPCの<b>ノード間低遅延</b>とは目的が逆（分散すると遅くなる）。要件が「通信を速く」ならクラスター＋EFA。`
@@ -533,7 +533,7 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>ファイルゲートウェイ</b>＝手元の小さな受け取り棚（ローカルキャッシュ）。よく使う物は棚にあるが、本体倉庫はクラウド（S3）。棚への出し入れの作法（NFS/SMB）は今まで通り。</div>
   <div class="nick"><b>DataSync</b>＝引っ越しトラック。荷物を運び終えたら役目は終わり（その後も今まで通り使う窓口にはならない）。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「今まで通りNFS/SMBで使う＋実体はS3＋よく使う分は手元」＝ハイブリッドのファイルゲートウェイがそのもの。DataSyncは運ぶだけで日常アクセスの窓口にならない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   DataSyncは「移行・同期」、Storage Gatewayは「移行後も使い続けるハイブリッドの窓口」。<b>従来のプロトコルで使い続ける</b>が要件ならStorage Gateway。`
@@ -557,7 +557,7 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>アクセスキー</b>＝ずっと使える合鍵。どこに置いても「置いた時点で漏洩リスク」が残る。</div>
   <div class="nick"><b>IAMロール</b>＝その場で発行され数時間で失効する使い捨ての入館バッジ。EC2に「君はこのロールね」と付けるだけで、アプリはバッジを自動で受け取る。合鍵を持ち歩く必要がない。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   要件は「長期認証情報を持たせない」。Parameter StoreやSecrets Managerは"安全に置く"だけで長期キー自体は存在する。EC2にロールを付ければキーそのものが消える。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「キーを暗号化して保管」は対策に見えるが、漏洩・ローテーションの根本は残る。<b>EC2/Lambdaのアプリ認証は、まずIAMロールで長期キーをゼロにする</b>のが原則。`
@@ -582,7 +582,7 @@ const QUESTIONS = [
   <div class="nick"><b>S3静的ホスティング</b>＝ファイルを置くだけで公開できる棚。サーバーを建てる必要がない。</div>
   <div class="nick"><b>CloudFront</b>＝世界中の支店からコピーを配る配送網。遠い人にも速い＋HTTPSの窓口になる。</div>
   <div class="nick"><b>ACM</b>＝独自ドメインのHTTPS証明書を無料で発行・自動更新してくれる係。</div>
-  <div class="dh">💡 なぜCが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   静的ファイルにEC2は要らない。S3に置いてCloudFrontで配ればサーバー管理ゼロで高可用・自動スケール・グローバル低遅延・HTTPSが全部揃う。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「Webサイト＝EC2にWebサーバー」と反射しない。<b>中身が静的（HTML/CSS/JS/画像）</b>なら、まずS3＋CloudFrontのサーバーレス配信を考える。`
@@ -606,8 +606,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>DynamoDB（オンデマンド）</b>＝鍵番号を言えば即その箱を出すコインロッカー。客が増えたら勝手にロッカーが増え、使った扉の分だけ課金。管理人いらず。</div>
   <div class="nick"><b>RDS/Aurora</b>＝表と表を突き合わせる帳簿システム（JOIN）。高機能だが管理が要る。単純な鍵引きには大げさ。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「キーで引くだけ・JOIN不要・増減読めない・運用したくない・従量」＝NoSQLのDynamoDBオンデマンドが全部に刺さる。RDB（B/C）は機能過剰＋運用が残り、自前Redis（D）は運用そのものが残る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「キーで引くだけ・JOIN不要・増減読めない・運用したくない・従量」＝NoSQLのDynamoDBオンデマンドが全部に刺さる。RDBは機能過剰＋運用が残り、自前Redisは運用そのものが残る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「DB＝とりあえずRDS」と反射しない。<b>アクセスが単純なキー単位＋容量設計したくない＋従量</b>が揃ったらDynamoDBを疑う。JOINや複雑な集計が要るならRDS/Aurora。`
 },
@@ -631,7 +631,7 @@ const QUESTIONS = [
   <div class="nick"><b>オンデマンド</b>＝その都度払いの正規料金。いつでもやめられるが割高。</div>
   <div class="nick"><b>Savings Plans / RI</b>＝1年/3年の定期券。「確実に毎日乗る」なら定期が一番安い。</div>
   <div class="nick"><b>Spot</b>＝空席の格安券。安いが満席なら降ろされる（本番の常時稼働には使えない）。</div>
-  <div class="dh">💡 なぜAが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「1年以上・確実に・常時・同規模」＝定期券（コミット）が最安。中断されるSpotは本番に不可、需要変動前提のAuto Scalingは効きどころが違う。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「確実に使い続ける／常時稼働／長期」＝Savings Plans/RIの合図。「中断されてもよいバッチ」ならSpot、と問題文のワークロード特性で切り分ける。`
@@ -659,8 +659,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>IAMポリシー</b>＝各部屋の中で「ここまでやっていい」を決める鍵。部屋が増えるたびに全部屋へ配って回るのは無理。</div>
   <div class="nick"><b>SCP</b>＝建物全体の「立入禁止区域」の張り紙。どの部屋の住人（管理者すら）も超えられない上限。新しい部屋もこの建物に属せば自動で従う。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「組織全体に・一括で・超えられない上限を強制」＝SCP。IAMの個別配布（A）は破綻、Config（C）は検知止まり、Identity Center（D）はアクセス割り当てで上限強制ではない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「組織全体に・一括で・超えられない上限を強制」＝SCP。IAMの個別配布は破綻、Configは検知止まり、Identity Centerはアクセス割り当てで上限強制ではない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   SCPは「許可を与える」ものではなく「上限を決める（これ以上はダメ）」もの。実際の許可はアカウント内のIAMで出す。<b>組織横断のガードレール＝SCP</b>。`
 },
@@ -683,8 +683,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>RDS Proxy</b>＝受付の取次係。客（Lambda）が大勢来ても、奥の窓口（DB接続）は限られた数を順に使い回す。客が増えても窓口がパンクしない。</div>
   <div class="nick"><b>スケールアップ</b>＝窓口の数を増やす。一時しのぎにはなるが、客がもっと増えればまた足りなくなる。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  Lambdaは同時実行ごとに接続を張るので、急増すると接続数が即枯渇する。これを根本から解くのは「接続を使い回す」RDS Proxy。スケールアップ（A）は上限を上げるだけで再発しうる。
+  <div class="dh">💡 なぜこれが正解か</div>
+  Lambdaは同時実行ごとに接続を張るので、急増すると接続数が即枯渇する。これを根本から解くのは「接続を使い回す」RDS Proxy。スケールアップは上限を上げるだけで再発しうる。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「Lambda＋RDSで接続数が枯渇」はRDS Proxyを選ばせる典型キーワード。読み取り遅延ならElastiCache/レプリカ、<b>接続枯渇ならRDS Proxy</b>と症状で切り分ける。`
 },
@@ -707,8 +707,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Route 53</b>＝電話の交換手（DNS）。「いつもの番号（ドメイン）」にかけると東京につなぐが、東京が不通だと自動で大阪につなぎ直す。客は同じ番号にかけ続けるだけ。</div>
   <div class="nick"><b>ALB</b>＝建物の中の案内係。その建物（リージョン）が丸ごと停電したら案内係も止まる（別の建物へは回せない）。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「リージョンごと落ちる」「同じドメインで継続」＝建物をまたいで向き先を変える交換手（Route 53）の仕事。ALB（A）は建物内、Auto Scaling（B）は台数、CloudFront（D）はオリジン単位で、リージョン跨ぎのDNS切り替えはできない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「リージョンごと落ちる」「同じドメインで継続」＝建物をまたいで向き先を変える交換手（Route 53）の仕事。ALBは建物内、Auto Scalingは台数、CloudFrontはオリジン単位で、リージョン跨ぎのDNS切り替えはできない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「リージョン全体障害＋同じドメインで自動切り替え」はRoute 53フェイルオーバーの合図。リージョン内の振り分けはALB、と<b>跨ぐか跨がないか</b>で切り分ける。`
 },
@@ -731,8 +731,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Lambda</b>＝呼ばれたときだけ来る出張スタッフ。S3に画像が届いた瞬間（イベント）に来て、数秒で仕事して帰る。働いた分だけ報酬（従量）。</div>
   <div class="nick"><b>EC2/Fargate常時稼働</b>＝仕事がなくても出勤している社員。待機時間も給料が出る（無駄）。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「アップロードのたび」「不定期」「数秒」「常時起動したくない」＝イベント駆動のLambdaがそのもの。常時稼働系（B/C）は待機コストが無駄、Batch（D）は重い処理向けで大げさ。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「アップロードのたび」「不定期」「数秒」「常時起動したくない」＝イベント駆動のLambdaがそのもの。常時稼働系は待機コストが無駄、Batchは重い処理向けで大げさ。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「○○されたら、そのたびに、短い処理」はLambdaを選ばせる合図。長時間・大量並列のバッチならBatch/Fargate、と<b>処理時間と起動契機</b>で切り分ける。`
 },
@@ -759,8 +759,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Standard-IA</b>＝たまに出す物を入れる手前の物置（出すのは速いが家賃は中くらい）。</div>
   <div class="nick"><b>Glacier Deep Archive</b>＝郊外の超安い倉庫の奥。出すのに半日かかるが家賃は最安。7年寝かせる書類向け。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「滅多に出さない＋翌日でOK＋最安」＝取り出しの遅さを払う代わりに家賃を最安にするDeep Archive。即時取り出せるクラス（A/C）はそのぶん保管料が高く、即時不要の今回は払い損。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「滅多に出さない＋翌日でOK＋最安」＝取り出しの遅さを払う代わりに家賃を最安にするDeep Archive。即時取り出せるクラスはそのぶん保管料が高く、即時不要の今回は払い損。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「即時に取り出したい」ならGlacier Instant、「数時間〜翌日でいい・とにかく安く」ならDeep Archive。<b>取り出しの速さの要否</b>で階層を選ぶ。`
 },
@@ -784,8 +784,8 @@ const QUESTIONS = [
   <div class="nick"><b>Rekognition</b>＝画像を見る目。「これは犬」「露出あり」と中身を見て判定する。学習済みなので専門家いらず。</div>
   <div class="nick"><b>Textract</b>＝書類を読み取るスキャナー（文字専門）。物体は見ない。</div>
   <div class="nick"><b>SageMaker</b>＝モデルを一から作る工房。データと専門家がいる時の選択肢。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「専門家なし」「画像の中身を判定」＝学習済みの既製サービスRekognition。SageMaker（B）は工房なので「専門家なし・早く」と真逆。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「専門家なし」「画像の中身を判定」＝学習済みの既製サービスRekognition。SageMakerは工房なので「専門家なし・早く」と真逆。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   AI/MLと聞くと反射でSageMakerを選びがちだが逆。<b>ML専門家いない・データない・早く作りたいなら、まずマネージドAIサービス</b>（Rekognition等）を疑う。SageMakerは独自モデルがどうしても要る時だけ。`
 },
@@ -808,8 +808,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>Textract</b>＝書類を読み取るスキャナー。ただの文字起こしでなく「氏名：山田」のキーと値、表のセルまで構造で取り出す。</div>
   <div class="nick"><b>Rekognition</b>＝画像を見る目（物体・シーン）。書類の中の文字や表の構造は専門外。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「請求書・申込書から文字＋表＋フォームを構造化」＝帳票特化のTextract。Rekognition（A）は「画像」つながりで紛らわしいが、見るのは物体であって帳票の構造ではない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「請求書・申込書から文字＋表＋フォームを構造化」＝帳票特化のTextract。Rekognitionは「画像」つながりで紛らわしいが、見るのは物体であって帳票の構造ではない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   画像が出てくると反射でRekognitionを選びがち。<b>中身が「帳票・文書の文字や表」ならTextract</b>、「写真に何が写っているか」ならRekognition、と画像の種類で切り分ける。`
 },
@@ -820,7 +820,7 @@ const QUESTIONS = [
   options:[
     "1年のSavings Plansを購入してバッチ用EC2の使用量をコミットし、割引料金で実行する。",
     "オンデマンドインスタンスで実行し、Compute Optimizerの推奨に従ってインスタンスタイプを適正化する。",
-    "Spotインスタンス（Spot Fleet）でバッチを実行し、中断されたら別のプール/インスタンスで再開する設計にして、最大level の割引を受ける。",
+    "Spotインスタンス（Spot Fleet）でバッチを実行し、中断されたら別のプール/インスタンスで再開する設計にして、最大級の割引を受ける。",
     "Auto Scalingでバッチの負荷に応じて台数を自動増減させ、アイドルを減らしてオンデマンドコストを抑える。"
   ],
   answer:2,
@@ -832,8 +832,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Spot</b>＝キャンセル空席の激安チケット。満席になったら降ろされる（中断）が、やり直せる用事（再実行OKのバッチ）なら一番得。</div>
   <div class="nick"><b>Savings Plans</b>＝定期券。毎日確実に乗る常時稼働向け。たまにしか動かないバッチでは元が取れない。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「中断OK」「納期に余裕」と書いてある＝Spotを使える最大の合図。中断耐性をそのまま最大割引に変換できる。常時稼働前提のSavings Plans（A）はバッチでは使い切れない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「中断OK」「納期に余裕」と書いてある＝Spotを使える最大の合図。中断耐性をそのまま最大割引に変換できる。常時稼働前提のSavings Plansはバッチでは使い切れない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「中断されても再実行すればよい」＝Spot。「中断できない常時稼働を確実に長期」＝Savings Plans/RI。<b>ワークロードが中断を許すか</b>で割引手段が決まる。`
 },
@@ -857,7 +857,7 @@ const QUESTIONS = [
   <div class="nick"><b>WAF</b>＝持ち物検査をする入口の警備員。「この申込用紙に不正な文字列（SQLi/XSS）が書いてある」と中身を見て弾く。</div>
   <div class="nick"><b>SG/NACL</b>＝建物の門。「どの住所（IP）・どの扉（ポート）から来たか」は見るが、持ち物の中身は見ない。</div>
   <div class="nick"><b>Shield</b>＝大群が押し寄せる（DDoS）のをさばく係。中身の精査はしない。</div>
-  <div class="dh">💡 なぜCが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   SQLi/XSSは「リクエストの中身」への攻撃。中身を見て弾けるのはL7のWAFだけ。門（SG/NACL）は中身を見られず、Shieldは物量、GuardDutyは見張るだけ。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「IPで拒否」はSG/NACLでもできるが、SQLi/XSSの<b>中身</b>は弾けない。攻撃が「HTTPリクエストの内容」ならWAF、と層で切り分ける。`
@@ -881,8 +881,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Kinesis</b>＝大量の水が流れ続ける川（ストリーム）。何人もが同じ川から同時に水をくめる（複数の独立処理）。流量が多くても受け止められる。</div>
   <div class="nick"><b>SQS</b>＝受付の伝票スタンド。1枚ずつ処理する用途で、毎秒数十万件の濁流を流す川ではない。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「毎秒数十万件・リアルタイム・複数処理に流す」＝ストリーム取り込み特化のKinesis。RDS直書き（C）は破綻、EC2自前受信（B）は運用が重い。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「毎秒数十万件・リアルタイム・複数処理に流す」＝ストリーム取り込み特化のKinesis。RDS直書きは破綻、EC2自前受信は運用が重い。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「大量データをリアルタイムで取り込む・複数の処理系に流す」＝Kinesis。「1件ずつ非同期に処理を渡す」だけならSQS、と<b>ストリームかキューか</b>で切り分ける。`
 },
@@ -905,8 +905,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>EFS</b>＝みんなで使う共有の本棚。何人（複数EC2）でも同時に出し入れでき、棚は中身が増えれば勝手に広がる（自動伸縮）。</div>
   <div class="nick"><b>EBS</b>＝1人用の外付けHDD。基本1台にしか挿せない（共有できない）。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「複数台から同時に・NFSで・自動伸縮」＝共有ファイルシステムのEFSがそのもの。EBS（A）は1台専用で共有にならず、自前NFS（D）は単一障害点。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「複数台から同時に・NFSで・自動伸縮」＝共有ファイルシステムのEFSがそのもの。EBSは1台専用で共有にならず、自前NFSは単一障害点。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「複数EC2から同時マウント・NFS・共有」が出たらEFS。1台専用の高速ディスクならEBS、と<b>共有するかどうか</b>で切り分ける。`
 },
@@ -929,8 +929,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>SCT</b>＝翻訳家。Oracle語で書かれた設計図・手続き（ストアド）を移行先のDB語に訳す。</div>
   <div class="nick"><b>DMS</b>＝引っ越し業者。営業しながら（稼働中）少しずつ荷物を運び、最後にサッと切り替える（低ダウンタイム）。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「Oracle固有を変換」＝SCT、「稼働中を低ダウンタイムで移行」＝DMS、の2つが揃って初めて要件を満たす。ダンプ手動（B）は止める必要があり、DataSync（C）はDB移行用途でない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「Oracle固有を変換」＝SCT、「稼働中を低ダウンタイムで移行」＝DMS、の2つが揃って初めて要件を満たす。ダンプ手動は止める必要があり、DataSyncはDB移行用途でない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   異種DB移行は「変換（SCT）＋移行（DMS）」のセットで覚える。同種DBで変換不要ならDMS単独。<b>固有要素の変換が要るか</b>でSCTの要否が決まる。`
 },
@@ -954,8 +954,8 @@ const QUESTIONS = [
   <div class="nick"><b>一括請求</b>＝家族の携帯料金をまとめて1つの請求に。まとめるとボリューム割引が効く。</div>
   <div class="nick"><b>Cost Explorer</b>＝誰が何にいくら使ったかの家計簿（横断で見える）。</div>
   <div class="nick"><b>Budgets</b>＝「今月の予算を超えそう」と教えてくれるアラート。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「横断可視化＋予算通知＋割引集約」の3つを一度に満たすのは、一括請求でまとめた上でCost Explorer＋Budgetsを使う構成。個別設定（C/D）は横断・集約ができない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「横断可視化＋予算通知＋割引集約」の3つを一度に満たすのは、一括請求でまとめた上でCost Explorer＋Budgetsを使う構成。個別設定は横断・集約ができない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「組織全体・複数アカウントを横断」が出たら、まずOrganizationsの一括請求でまとめる発想。可視化＝Cost Explorer、予算通知＝Budgets、と役割で覚える。`
 },
@@ -982,8 +982,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>DLQ</b>＝何度やっても処理できない不良品を「保留箱」に移す仕組み。ラインに不良品が居座って全体が止まるのを防ぐ。</div>
   <div class="nick"><b>可視性タイムアウト</b>＝処理中の品を一時的に隠す時間。延ばしても不良品が消えるわけではない。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「特定メッセージが失敗ループでキューを詰まらせる」＝毒メッセージ問題。規定回数失敗したら保留箱（DLQ）へ自動で逃がすのが直球。ワーカー増（A）も待ち延長（B）も毒は残る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「特定メッセージが失敗ループでキューを詰まらせる」＝毒メッセージ問題。規定回数失敗したら保留箱（DLQ）へ自動で逃がすのが直球。ワーカー増も待ち延長も毒は残る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「繰り返し失敗するメッセージ」「処理が詰まる」が出たらDLQ＋maxReceiveCount。順序が主題ならFIFO、と症状で切り分ける。`
 },
@@ -1006,8 +1006,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>グローバルテーブル</b>＝世界各地に同じ内容の台帳を置き、どの地域でも自分の近くの台帳に読み書きできる。書いた内容は他地域の台帳にも自動で反映される。1地域が倒れても他で続く。</div>
   <div class="nick"><b>DAX</b>＝読み取り専用の早出し係（キャッシュ）。書き込みのマルチリージョンや冗長はカバーしない。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「各地域でローカル読み書き＋障害時も他地域で継続」＝マルチアクティブなグローバルテーブル。DAX（B）は読み取り高速化だけ、バックアップ（C）は復旧に時間がかかる。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「各地域でローカル読み書き＋障害時も他地域で継続」＝マルチアクティブなグローバルテーブル。DAXは読み取り高速化だけ、バックアップは復旧に時間がかかる。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   DynamoDBで「マルチリージョンの読み書き・地域低遅延」＝グローバルテーブル。読み取りをマイクロ秒で速くだけならDAX、と<b>マルチリージョンか高速化か</b>で切り分ける。`
 },
@@ -1031,8 +1031,8 @@ const QUESTIONS = [
   <div class="nick"><b>Macie</b>＝書類棚を1枚ずつめくって「これはマイナンバーが書いてある」「これはカード番号」と中身を仕分ける個人情報の専門家。</div>
   <div class="nick"><b>GuardDuty</b>＝棚に不審な人が近づいたら教える警備員（中身は見ない）。</div>
   <div class="nick"><b>Config</b>＝棚に鍵がかかっているか（暗号化）を点検する係（中身は見ない）。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「S3の中身に個人情報が紛れていないか発見・分類」＝データの中身を読むMacie。GuardDuty（B）は挙動、Config（C）は構成、Inspector（D）は脆弱性で、どれも中身の機微情報は分類しない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「S3の中身に個人情報が紛れていないか発見・分類」＝データの中身を読むMacie。GuardDutyは挙動、Configは構成、Inspectorは脆弱性で、どれも中身の機微情報は分類しない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「個人情報・機微データの発見/分類」はMacieの専売。「脅威の検知」はGuardDuty、と<b>データの中身か挙動か</b>で切り分ける。`
 },
@@ -1054,8 +1054,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>RDS Proxy</b>＝受付の取次。客（Lambda）が大勢来ても奥の窓口（DB接続）を限られた数で使い回す。客が増えても窓口がパンクしない。Lambda側は受付に頼むだけで作法を変えなくていい（改修最小）。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  Lambdaは同時実行ごとに接続を張るので急増で枯渇する。これを使い回し（プール）で根本から解くのがRDS Proxy。同時実行制限（A）は詰まり、Aurora移行（C）は大がかり。
+  <div class="dh">💡 なぜこれが正解か</div>
+  Lambdaは同時実行ごとに接続を張るので急増で枯渇する。これを使い回し（プール）で根本から解くのがRDS Proxy。同時実行制限は詰まり、Aurora移行は大がかり。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「Lambda＋RDSで接続数が枯渇」は<b>RDS Proxy</b>を選ばせる典型。読み取り遅延ならElastiCache/レプリカ、と症状で切り分ける（接続枯渇＝Proxy）。`
 },
@@ -1078,8 +1078,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>FSx for Windows</b>＝Windows用の共有フォルダをまるごと貸してくれるサービス。既存の社員アカウント（AD）でそのままログインでき、Windowsアプリも今まで通り。管理は任せられる。</div>
   <div class="nick"><b>EFS</b>＝Linux向けの共有本棚（NFS）。Windowsの共有フォルダ（SMB）とは作法が違う。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「Windows・SMB・AD統合・マネージド」＝FSx for Windowsがそのもの。EFS（A）はLinux/NFS、S3（B）はファイル共有でなく、自前EC2（D）は運用が残る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「Windows・SMB・AD統合・マネージド」＝FSx for Windowsがそのもの。EFSはLinux/NFS、S3はファイル共有でなく、自前EC2は運用が残る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   共有ファイルは「Windows/SMB/AD＝FSx for Windows」「Linux/NFS＝EFS」で切り分ける。オブジェクト保存ならS3、と用途で区別。`
 },
@@ -1102,8 +1102,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>EventBridge</b>＝郵便の自動仕分け機。届いた手紙の中身（差出人・種類）を見て「これは経理へ」「これは出荷へ」と複数の宛先に賢く振り分ける。仕分けルールは後から足せる。</div>
   <div class="nick"><b>SNS</b>＝一斉放送（拡声器）。全員に同じ内容を流すだけで中身の仕分けはしない。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「多様な源・中身でフィルタ・複数ターゲット・ルール追加」＝内容ベースルーティングのEventBridge。SNS（B）は同報のみ、SQS（C）は分岐を自前実装。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「多様な源・中身でフィルタ・複数ターゲット・ルール追加」＝内容ベースルーティングのEventBridge。SNSは同報のみ、SQSは分岐を自前実装。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「1つを単純に複数へ同報」＝SNS、「中身を見て条件で振り分け・SaaSやスケジュールも源」＝EventBridge。<b>フィルタ・ルーティングの賢さ</b>で切り分ける。`
 },
@@ -1128,9 +1128,9 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>署名付きURL</b>＝時間制限つきの入場チケット。会員に「23時まで有効」のチケットを渡す。時間を過ぎたら、誰かに見せても入れない。</div>
-  <div class="nick"><b>S3公開＋URL（A）</b>＝鍵のかかっていないドアに「URLを知ってる人だけ来てね」と貼るだけ。漏れたら誰でも無期限で入れる。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「会員だけ・一定時間だけ・共有されても期限切れで無効」＝期限付きチケットの署名付きURL。Geo（D）は国単位、WAF（C）はIP管理が破綻、公開（A）は制御なし。
+  <div class="nick"><b>S3公開＋URL</b>＝鍵のかかっていないドアに「URLを知ってる人だけ来てね」と貼るだけ。漏れたら誰でも無期限で入れる。</div>
+  <div class="dh">💡 なぜこれが正解か</div>
+  「会員だけ・一定時間だけ・共有されても期限切れで無効」＝期限付きチケットの署名付きURL。Geoは国単位、WAFはIP管理が破綻、公開は制御なし。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「特定ユーザーに・期限付きで」＝署名付きURL/Cookie。「国で制限」＝Geo Restriction、と<b>制御の単位（個人＋期限か、地域か）</b>で切り分ける。`
 },
@@ -1153,8 +1153,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Aurora Serverless v2</b>＝人が来たら自動で明かりがつき、いなくなったら絞るセンサー照明。使う分だけ容量が伸縮するのでアイドルの無駄が少ない。</div>
   <div class="nick"><b>プロビジョンド</b>＝つけっぱなしの照明。安定して使うなら良いが、断続利用だと消し忘れ（アイドル課金）が無駄。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「断続・負荷の上下が大きい・常時起動は無駄」＝容量を自動伸縮するServerless v2。手動スケール（A）や停止スケジュール自作（B）は運用が残る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「断続・負荷の上下が大きい・常時起動は無駄」＝容量を自動伸縮するServerless v2。手動スケールや停止スケジュール自作は運用が残る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「負荷が読めない・断続・自動で伸縮」＝Serverless v2。「安定して常時一定の負荷」＝プロビジョンド、と<b>負荷の変動と連続性</b>で切り分ける。`
 },
@@ -1177,8 +1177,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Cognito</b>＝お店のお客さん用の会員システム。何百万人でも会員登録・ログイン・SNS連携・二段階認証をまるごと面倒みる。</div>
   <div class="nick"><b>IAM</b>＝店の従業員用の社員証（AWSを操作する人向け）。お客さん一人ひとりに社員証は配らない。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「アプリの利用者・数百万・ソーシャル・MFA」＝toC認証のCognito。IAMユーザー（A）は管理者向けで数百万のエンドユーザーには使わない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「アプリの利用者・数百万・ソーシャル・MFA」＝toC認証のCognito。IAMユーザーは管理者向けで数百万のエンドユーザーには使わない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「アプリのお客さんのログイン」＝Cognito、「AWSを操作する社員・開発者」＝IAM/Identity Center。<b>認証する相手がお客さんか社員か</b>で切り分ける。`
 },
@@ -1201,8 +1201,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>VPCピアリング</b>＝部屋同士を1本ずつ廊下でつなぐ。3部屋なら3本だが、10部屋だと45本（フルメッシュ）で管理不能。</div>
   <div class="nick"><b>Transit Gateway</b>＝中央のロビー（ハブ）。各部屋はロビーに1本つなぐだけで全部屋とつながる。新しい部屋もロビーに1本足すだけ。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「VPC・拠点が増えて網の目で破綻」＝ハブで束ねるTransit Gatewayの出番。ピアリングのフルメッシュ（A）は接続数が爆発するのが当の問題。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「VPC・拠点が増えて網の目で破綻」＝ハブで束ねるTransit Gatewayの出番。ピアリングのフルメッシュは接続数が爆発するのが当の問題。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   VPCが少数の1対1ならピアリングで十分だが、<b>多数のVPC＋オンプレを一元管理</b>が出たらTransit Gateway。「数が増えて管理が破綻」がハブ集約の合図。`
 },
@@ -1225,8 +1225,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>CRR</b>＝大事な書類を別の街の支店にも自動で複写して送る。本店（東京）が被災しても支店（別リージョン）に同じ書類がある。</div>
   <div class="nick"><b>バージョニング</b>＝同じ棚に過去の版を残すだけ。棚（リージョン）ごと焼けたら全部失う。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「別リージョンにコピー・リージョン災害に備える・新規も自動」＝CRR。バージョニング（A）やIntelligent-Tiering（D）は同一リージョン内の話でリージョン災害に効かない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「別リージョンにコピー・リージョン災害に備える・新規も自動」＝CRR。バージョニングやIntelligent-Tieringは同一リージョン内の話でリージョン災害に効かない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「リージョンをまたいで複製」＝CRR、「同じリージョンで世代管理」＝バージョニング。<b>リージョンを跨ぐかどうか</b>で切り分ける。`
 },
@@ -1251,9 +1251,9 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>OAC</b>＝倉庫（S3）の鍵を配送業者（CloudFront）だけに渡す仕組み。倉庫は施錠したまま（非公開）、業者経由でしか中身を出せない。</div>
-  <div class="nick"><b>S3公開＋URL案内（A）</b>＝倉庫を開けっ放しにして「正面（CloudFront）から来てね」と頼むだけ。裏口（直URL）から誰でも入れる。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「S3は非公開・CloudFront経由のみ」＝OACでバケットポリシーをCloudFront限定にする。公開＋お願い（A）は技術的に防げず、エッジIP制限（C）は非現実的。
+  <div class="nick"><b>S3公開＋URL案内</b>＝倉庫を開けっ放しにして「正面（CloudFront）から来てね」と頼むだけ。裏口（直URL）から誰でも入れる。</div>
+  <div class="dh">💡 なぜこれが正解か</div>
+  「S3は非公開・CloudFront経由のみ」＝OACでバケットポリシーをCloudFront限定にする。公開＋お願いは技術的に防げず、エッジIP制限は非現実的。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「CloudFront経由のみ・S3直アクセス禁止」が出たらOAC（旧OAI）。WAFはS3に直接は付かない（CloudFront/ALBに付ける）点も押さえる。`
 },
@@ -1277,8 +1277,8 @@ const QUESTIONS = [
   <div class="nick"><b>Bedrock</b>＝何でも屋の生成AI受付。学習済みの賢いモデルをすぐ呼べる。</div>
   <div class="nick"><b>RAG</b>＝回答前に社内文書を調べてカンペ（関連箇所）を渡す仕組み。根拠つきで答えるので作り話が減る。</div>
   <div class="nick"><b>SageMaker</b>＝モデルを一から作る工房（専門家・データが要る）。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「専門家なし・自社文書が根拠・自然文・作り話を避ける」＝Bedrock＋RAG。SageMaker（A）は工房なので「専門家なし」と逆、Comprehend（B）は生成しない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「専門家なし・自社文書が根拠・自然文・作り話を避ける」＝Bedrock＋RAG。SageMakerは工房なので「専門家なし」と逆、Comprehendは生成しない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   生成AIで「自社の情報に基づいて答えさせる」＝Bedrock＋RAG（Knowledge Bases）。分析だけならComprehend、自前モデルが要る時だけSageMaker。`
 },
@@ -1305,8 +1305,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>SQS FIFO</b>＝整理券方式の窓口。番号順（順序保証）に呼び、同じ整理券が二重に出ても1回しか受け付けない（重複排除）。仕組みが最初から備わっている。</div>
   <div class="nick"><b>SQS標準</b>＝順番も重複もこちらで管理する素のキュー（自前実装が増える）。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「順序を保証＋重複を排除＋中規模スループット」＝標準機能で両方を持つFIFO。標準キュー（A）は自前実装、Kinesis（D）は高スループット向けで大げさ。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「順序を保証＋重複を排除＋中規模スループット」＝標準機能で両方を持つFIFO。標準キューは自前実装、Kinesisは高スループット向けで大げさ。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「順序」「重複排除」が出たらFIFO。ただしFIFOはスループット上限があるので、<b>極端な高スループット</b>が要件ならKinesisを検討、と規模で切り分ける。`
 },
@@ -1328,9 +1328,9 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Compute Optimizer</b>＝健康診断の結果（実使用率）を見て「あなたには1サイズ小さい服が合う」と具体的に勧めてくれる係。データに基づくので外さない。</div>
-  <div class="nick"><b>一律で小さく（A）</b>＝全員に同じサイズの服を配るようなもの。合わない人が出る。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「実使用に基づいて適切なタイプを推奨」＝Compute Optimizerそのもの。一律変更（A）はデータ無視、Savings Plans（C）は過剰スペックを固定するので適正化が先。
+  <div class="nick"><b>一律で小さく</b>＝全員に同じサイズの服を配るようなもの。合わない人が出る。</div>
+  <div class="dh">💡 なぜこれが正解か</div>
+  「実使用に基づいて適切なタイプを推奨」＝Compute Optimizerそのもの。一律変更はデータ無視、Savings Plansは過剰スペックを固定するので適正化が先。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「実使用率に基づくサイズ適正化（ライトサイジング）」＝Compute Optimizer。割引コミット（Savings Plans）は<b>適正化してから</b>が鉄則（無駄を固定しない）。`
 },
@@ -1353,8 +1353,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>ElastiCache（Redis）</b>＝手元のメモ帳（インメモリ）。出し入れが一瞬。買い物カゴやログイン状態のような「今だけ・速さ命」のデータ置き場に最適。</div>
   <div class="nick"><b>RDS</b>＝きちんとした台帳（ディスク）。永続化には良いが、頻繁な一時データの出し入れには遅い。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「一時的・超低遅延・RDSから切り離す」＝インメモリのElastiCache。スケールアップ（A）やレプリカ（B）はRDSに置いたままで超低遅延に届かない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「一時的・超低遅延・RDSから切り離す」＝インメモリのElastiCache。スケールアップやレプリカはRDSに置いたままで超低遅延に届かない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   セッション/カート/ランキングのような「一時的で超高速」なデータはElastiCache。永続的な業務データはRDS、と<b>永続性と速度要件</b>で切り分ける。`
 },
@@ -1377,8 +1377,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>スケジュールスケーリング</b>＝混む時間が分かっているお店が、開店前にバイトを増やしておく。客が来てから呼ぶより速い。</div>
   <div class="nick"><b>動的スケーリング</b>＝混んできたのを見てからバイトを呼ぶ。来てから動くので数分のタイムラグが出る。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「毎週月曜9時と分かっている」＝時刻が予測できる急増。事前に増やすスケジュールスケーリングが最適。閾値下げ（B）は結局「検知後」、常時最大（C）は無駄。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「毎週月曜9時と分かっている」＝時刻が予測できる急増。事前に増やすスケジュールスケーリングが最適。閾値下げは結局「検知後」、常時最大は無駄。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「時刻が予測できる」＝スケジュール、「予測できない変動に追従」＝動的（ターゲット追跡）、「過去パターンから自動予測」＝予測スケーリング。<b>予測できるかどうか</b>で選ぶ。`
 },
@@ -1400,8 +1400,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>レプリカAuto Scaling</b>＝読み取り担当のコピー台帳（レプリカ）を、混み具合を見て自動で増やしたり減らしたりする店長。手動でやっていた増減を任せられる。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「レプリカの数を負荷に応じて自動増減」＝標準のレプリカAuto Scaling。Lambda自作（B）は標準機能があるのに過剰、Serverless v2（C）は容量の話でレプリカ数ではない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「レプリカの数を負荷に応じて自動増減」＝標準のレプリカAuto Scaling。Lambda自作は標準機能があるのに過剰、Serverless v2は容量の話でレプリカ数ではない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「レプリカの数を自動で増減」＝レプリカAuto Scaling、「1台の容量を自動で伸縮」＝Serverless v2。<b>台数か容量か</b>で切り分ける。`
 },
@@ -1424,8 +1424,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>IAM Identity Center</b>＝社員証（既存AD）を見せれば複数の建物（AWSアカウント）に1枚で入れる共通ゲート。新しい社員証を作り直す必要がない。</div>
   <div class="nick"><b>Cognito</b>＝お店のお客さん用の会員証（toC）。社員のSSOには使わない。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「既存ADの社員・作り直さない・複数アカウントSSO」＝IAM Identity Center。IAMユーザー作成（A）は作り直しで破綻、Cognito（D）はお客さん向け。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「既存ADの社員・作り直さない・複数アカウントSSO」＝IAM Identity Center。IAMユーザー作成は作り直しで破綻、Cognitoはお客さん向け。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「社員のAWSアクセスSSO・既存AD連携」＝IAM Identity Center、「アプリのお客さんのログイン」＝Cognito。<b>相手が社員かお客さんか</b>で切り分ける。`
 },
@@ -1448,8 +1448,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Snowball Edge</b>＝大量の荷物を細い道（回線）でなく、トラック（物理デバイス）に積んで運ぶ。道が細くても関係ない。</div>
   <div class="nick"><b>DataSync</b>＝その細い道を通って荷物を送る。道が細ければ何をしても遅い。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「回線が細い＋80TB＋数週間かかる」＝回線がボトルネック。回線をバイパスして物理で運ぶSnowballが現実解。DataSync（B）やTransfer Acceleration（C）は回線依存で根本解決にならない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「回線が細い＋80TB＋数週間かかる」＝回線がボトルネック。回線をバイパスして物理で運ぶSnowballが現実解。DataSyncやTransfer Accelerationは回線依存で根本解決にならない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「回線が細い・大容量・一度きり」＝Snowball（物理）。「回線は十分・継続的に同期/転送」＝DataSync。<b>回線がボトルネックかどうか</b>で切り分ける。`
 },
@@ -1472,7 +1472,7 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>AWS Batch</b>＝工場の生産管理係。大量の注文（ジョブ）を行列に並べ、空いた機械（FargateやSpot）に割り振って長時間の加工も並列でこなす。</div>
   <div class="nick"><b>Lambda</b>＝短時間で帰る出張スタッフ（最大15分）。数時間かかる加工は任せられない。</div>
-  <div class="dh">💡 なぜCが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「長時間（30分〜数時間）」がLambda（A・15分上限）を即脱落させる。大量ジョブのキューイング＋並列実行をマネージドでやるのはAWS Batch。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「短いイベント処理」＝Lambda、「長時間・大量のコンテナバッチ」＝AWS Batch、「順序・分岐のワークフロー」＝Step Functions。<b>処理時間と性質</b>で切り分ける。`
@@ -1496,8 +1496,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>CloudFront</b>＝世界中の支店（エッジ）。動的な内容も支店でTLSを受けてAWS専用網で本店につなぐので、遠い人でも速い。</div>
   <div class="nick"><b>Global Accelerator</b>＝非HTTP（ゲーム等）や固定IPが要る時の高速道路入口。HTTPのWeb配信最適化（キャッシュ/TLS終端）はCloudFrontの担当。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「HTTPSのWeb/API・動的・グローバル低遅延」＝CloudFront（動的コンテンツもエッジ最適化）。Route53（A）は振り分けだけ、Global Accelerator（D）はHTTP配信最適化が主目的でない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「HTTPSのWeb/API・動的・グローバル低遅延」＝CloudFront（動的コンテンツもエッジ最適化）。Route53は振り分けだけ、Global AcceleratorはHTTP配信最適化が主目的でない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   HTTP/SのWeb・API（静的/動的）＝CloudFront、非HTTP・固定IP（ゲーム/独自プロトコル）＝Global Accelerator。<b>HTTPかどうか</b>で切り分ける。`
 },
@@ -1520,8 +1520,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>Geo Restriction</b>＝「この映画は日本国内のみ上映可」のような国単位の上映制限。許可国リストを設定すれば他国は弾かれる。</div>
   <div class="nick"><b>署名付きURL</b>＝時間制限つきの入場券（個人向け）。国の制限ではない。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「特定の国だけ・国によるアクセス制限」＝CloudFrontのGeo Restriction。署名付きURL（B）は個人/期限、WAF手動IP（C）は非現実的。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「特定の国だけ・国によるアクセス制限」＝CloudFrontのGeo Restriction。署名付きURLは個人/期限、WAF手動IPは非現実的。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「国・地域で制限」＝Geo Restriction、「特定ユーザーに期限付きで」＝署名付きURL。<b>制限の単位が国か個人か</b>で切り分ける。`
 },
@@ -1530,7 +1530,7 @@ const QUESTIONS = [
   scenario:"ある企業が、フロントのWebアプリ（Lambda）とバックエンドの処理（別のLambda）を連携させている。現在はフロントがバックエンドを同期的に直接呼び出しており、バックエンドの処理が重いときにフロントが待たされてタイムアウトしたり、バックエンドの一時的な障害がフロントに直接波及したりする。両者を切り離し、バックエンドが一時的に落ちてもリクエストを失わず後で処理できるようにしたい。",
   ask:'同期直結を<span class="kw">疎結合化しバックエンド障害時もリクエストを失わない</span>には？',
   options:[
-    "フロントとバックエンドの間にSQSキューを挟み、フローントはキューに入れるだけで応答を返し、バックエンドが自分のペースで取り出して処理する（障害時はキューに保持）。",
+    "フロントとバックエンドの間にSQSキューを挟み、フロントはキューに入れるだけで応答を返し、バックエンドが自分のペースで取り出して処理する（障害時はキューに保持）。",
     "フロントのLambdaのタイムアウト時間を最大まで延ばし、バックエンドの処理完了を待てるようにする。",
     "バックエンドのLambdaの同時実行数を増やして、重い処理でも待たせないようにする。",
     "フロントからバックエンドをリトライ付きで同期呼び出しし、失敗したら一定回数まで再試行する。"
@@ -1544,8 +1544,8 @@ const QUESTIONS = [
   <div class="dh">🏷 たとえ</div>
   <div class="nick"><b>SQSを挟む</b>＝注文を受付（フロント）が伝票スタンド（キュー）に挿すだけ。厨房（バックエンド）が忙しくても受付は待たず次の客へ。厨房が一時的に止まっても伝票は残るので後で作れる。</div>
   <div class="nick"><b>同期直結</b>＝受付が厨房の料理完成まで客の前で待つ。厨房が詰まれば受付も止まる。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「待たされる・障害が波及・リクエストを失いたくない」＝間にキュー（SQS）を挟んで疎結合化。タイムアウト延長（B）やリトライ（D）は同期のままで根本解決にならない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「待たされる・障害が波及・リクエストを失いたくない」＝間にキュー（SQS）を挟んで疎結合化。タイムアウト延長やリトライは同期のままで根本解決にならない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「コンポーネントを切り離す・障害を波及させない・リクエストを失わない」＝間にSQS。同期のチューニング（タイムアウト/リトライ）は結合したままなので疎結合化にならない。`
 },
@@ -1568,8 +1568,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>Inspector</b>＝建物の定期点検員。「この窓の鍵は古い（CVE）」「このドアは脆い」と既知の弱点を継続的に見つけ、危険な順に教える。</div>
   <div class="nick"><b>GuardDuty</b>＝不審者を見張る警備員（脆弱性そのものは点検しない）。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「EC2・コンテナの既知の脆弱性を継続スキャン」＝Inspector。手動ツール（A）は運用が残り、GuardDuty（C）は脅威検知、Config（D）は構成チェックで、CVEの脆弱性スキャンはInspectorの専門。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「EC2・コンテナの既知の脆弱性を継続スキャン」＝Inspector。手動ツールは運用が残り、GuardDutyは脅威検知、Configは構成チェックで、CVEの脆弱性スキャンはInspectorの専門。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「脆弱性・CVE・パッチ未適用のスキャン」＝Inspector、「不正アクセス・侵害の検知」＝GuardDuty。<b>弱点の点検か、攻撃の検知か</b>で切り分ける。`
 },
@@ -1592,8 +1592,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>CloudFront Functions</b>＝各支店（エッジ）の入口に立つ受付の付箋作業。ハンコを押す程度の一瞬の仕事を、本店に送らずその場で片付ける。</div>
   <div class="nick"><b>Lambda@Edge</b>＝同じ支店でももっと手の込んだ事務処理をする係。重いぶん時間も費用もかかる。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「軽量なヘッダー・URL書き換えをユーザーに近い場所で最安」＝CloudFront Functions。オリジン往復（A）はレイテンシ大、Lambda@Edge（B）は軽い用途には過剰。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「軽量なヘッダー・URL書き換えをユーザーに近い場所で最安」＝CloudFront Functions。オリジン往復はレイテンシ大、Lambda@Edgeは軽い用途には過剰。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「軽量・ヘッダー操作・サブミリ秒・最安」＝CloudFront Functions、「重い処理・外部呼び出し・オリジン応答の加工」＝Lambda@Edge。<b>処理の重さ</b>で切り分ける。`
 },
@@ -1616,8 +1616,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>CloudTrail</b>＝建物の入退室記録簿。誰が何時にどの部屋（API）を操作したかを全部書き留める。Object Lockで「ページを破れない記録簿」にする。</div>
   <div class="nick"><b>Config</b>＝部屋の模様替え（構成変更）の記録係で、操作した人を追うのが主目的ではない。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「API操作を誰がしたか・全リージョン・改ざん防止」＝CloudTrail＋S3 Object Lock。GuardDuty（A）は検知、Config（B）は構成、CloudWatch Logs（C）はアプリログ。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「API操作を誰がしたか・全リージョン・改ざん防止」＝CloudTrail＋S3 Object Lock。GuardDutyは検知、Configは構成、CloudWatch Logsはアプリログ。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「誰が・いつ・どのAPI・監査・証跡」＝CloudTrail。「不審な挙動・脅威」＝GuardDuty。<b>記録か検知か</b>で切り分ける。`
 },
@@ -1640,8 +1640,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>TTL</b>＝牛乳パックの賞味期限シール。期限が来たら冷蔵庫（テーブル）が自動で捨ててくれる。自分で毎日中を点検（Scan）しなくていい。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「期限が来たら自動で消える・追加コストなし・運用ゼロ」＝TTL。定期Scan（B）やStreams（C）やテーブル作り直し（D）はどれもコスト・手間が増える。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「期限が来たら自動で消える・追加コストなし・運用ゼロ」＝TTL。定期ScanやStreamsやテーブル作り直しはどれもコスト・手間が増える。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「一時データ・有効期限・自動削除・運用を最小」＝TTL。自前で削除を回すのは過剰。`
 },
@@ -1664,8 +1664,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>Direct Connect</b>＝会社専用の高速道路を一本通す。一般道（インターネット＝VPN）の渋滞に巻き込まれず、毎日同じ時間で着く。</div>
   <div class="nick"><b>VPN</b>＝一般道にトンネル（暗号化）を掘っただけ。道自体は混雑次第で遅延が変わる。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「一貫した低遅延・安定帯域」＝専用線のDirect Connect。VPNを何本束ねても（A）経路はインターネットで変動は残る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「一貫した低遅延・安定帯域」＝専用線のDirect Connect。VPNを何本束ねても経路はインターネットで変動は残る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「一貫した・安定した・専用線」＝Direct Connect、「手軽・暗号化・コスト安いが変動」＝VPN。<b>安定か手軽か</b>で切り分ける。`
 },
@@ -1688,8 +1688,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>One Zone-IA</b>＝倉庫を1棟だけにして賃料を下げる作戦。万一その倉庫が燃えても、元データから作り直せる物（サムネイル）だから困らない。</div>
   <div class="nick"><b>Standard-IA</b>＝同じ低頻度でも倉庫を3棟（3AZ）に分散するぶん賃料が高い。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「再生成できる＝可用性を落とせる」＋「低頻度・最安」＝One Zone-IA。Standard（A）は割高、Standard-IA（B）は3AZで高い、Glacier（D）は即時取り出せない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「再生成できる＝可用性を落とせる」＋「低頻度・最安」＝One Zone-IA。Standardは割高、Standard-IAは3AZで高い、Glacierは即時取り出せない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「再生成可能・単一AZでよい・最安」＝One Zone-IA、「即時アクセス不要・アーカイブ」＝Glacier。<b>可用性を落とせるか／即時要るか</b>で切り分ける。`
 },
@@ -1712,8 +1712,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>SSE-KMS</b>＝鍵を金庫室（KMS）で集中管理。誰が鍵を使ったか台帳（CloudTrail）に残り、合鍵の配り方（キーポリシー）も決められ、定期的に鍵を取り替える（ローテーション）。</div>
   <div class="nick"><b>SSE-S3</b>＝鍵の管理を丸ごとお任せ。楽だが「誰がどの鍵を使ったか」の細かい統制はできない。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「保管時暗号化＋鍵のアクセス制御・監査・ローテーション・自前インフラ不要」＝SSE-KMS。自前暗号化（A）は鍵管理が重く、SSE-S3（B）は統制が粗く、HTTPS（C）は通信時の話。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「保管時暗号化＋鍵のアクセス制御・監査・ローテーション・自前インフラ不要」＝SSE-KMS。自前暗号化は鍵管理が重く、SSE-S3は統制が粗く、HTTPSは通信時の話。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「キーのアクセス制御・利用監査・ローテーション」＝KMS。「通信を暗号化（HTTPS）」＝in transitで別物。<b>保管時か通信時か／鍵を管理したいか</b>で切り分ける。`
 },
@@ -1735,8 +1735,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>加重ルーティング</b>＝行列を「95人は旧レジ、5人は新レジ」と割合で振り分ける案内係。新レジが大丈夫そうなら少しずつ新レジの割合を増やす。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「5%→徐々に増やす」＝割合制御＝加重ルーティング。フェイルオーバー（A）は切替、レイテンシー（B）は速さ、位置情報（D）は地域で、どれも割合配分ではない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「5%→徐々に増やす」＝割合制御＝加重ルーティング。フェイルオーバーは切替、レイテンシーは速さ、位置情報は地域で、どれも割合配分ではない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「段階的・カナリア・○%だけ」＝加重ルーティング。「正常/異常で切替」＝フェイルオーバー。<b>割合か切替か地域か</b>で切り分ける。`
 },
@@ -1758,8 +1758,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>使用量プラン</b>＝会員ランク別の利用券。「ゴールド会員は1日1万回まで」とキー（会員証）ごとに上限を決め、使いすぎを止める。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「APIキー単位・日次上限・レート制限」＝使用量プラン。WAF（A）はIP単位、予約同時実行（B）はバックエンド側、CloudFront（C）はキャッシュで、キー別の上限管理はできない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「APIキー単位・日次上限・レート制限」＝使用量プラン。WAFはIP単位、予約同時実行はバックエンド側、CloudFrontはキャッシュで、キー別の上限管理はできない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「APIキー別・クォータ・契約プラン別の上限」＝API Gateway使用量プラン。「IP単位の制限」＝WAFレートベース。<b>キー単位かIP単位か</b>。`
 },
@@ -1782,8 +1782,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>Polly</b>＝読み上げてくれる口。原稿（テキスト）を渡すと自然な声で読んでくれる。</div>
   <div class="nick"><b>Transcribe</b>＝聞いて書き取る耳（音声→文字）で、Pollyと向きが逆。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「テキストを自然な音声にして配信」＝Polly。Transcribe（B）は逆向き、Translate（C）は翻訳、Comprehend（D）は分析で、どれも音声を作らない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「テキストを自然な音声にして配信」＝Polly。Transcribeは逆向き、Translateは翻訳、Comprehendは分析で、どれも音声を作らない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「読み上げ・テキスト→音声・MP3」＝Polly。「文字起こし・音声→テキスト」＝Transcribe。<b>向き（口か耳か）</b>で切り分ける。`
 },
@@ -1806,8 +1806,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>可視性タイムアウト</b>＝伝票を取った店員がいる間、その伝票を「処理中」として隠す時間。隠す時間が短すぎると、まだ作ってる料理の伝票が別の店員にも見えて二度作ってしまう。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  原因は「処理が隠す時間を超えた→再び見えて二重処理」。隠す時間を処理に合わせて長くし、長引けば延長すれば再配信されない。受信即削除（C）は失敗時にデータを失う危険手。
+  <div class="dh">💡 なぜこれが正解か</div>
+  原因は「処理が隠す時間を超えた→再び見えて二重処理」。隠す時間を処理に合わせて長くし、長引けば延長すれば再配信されない。受信即削除は失敗時にデータを失う危険手。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「処理が長引いて再配信・二重処理」＝可視性タイムアウトの調整。「順序がバラバラ・重複排除」＝FIFO。<b>原因が時間切れか順序か</b>で切り分ける。`
 },
@@ -1830,8 +1830,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>署名付きURL</b>＝「○時まで有効」と書いた使い捨ての入場券。期限が切れたら同じURLでも入れない。</div>
   <div class="nick"><b>OAC</b>＝裏口（S3直リンク）を施錠して正面（CloudFront）からしか入れなくする鍵。誰でもいいから正面から来た人は入れる。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「許可した相手・一定時間で失効」＝署名付きURL/Cookie。OAC（D）は経路の強制で時間制限・個別許可はしない、IP（A）/Geo（C）は個人を識別しない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「許可した相手・一定時間で失効」＝署名付きURL/Cookie。OACは経路の強制で時間制限・個別許可はしない、IP/Geoは個人を識別しない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「時間制限・限定配信・期限切れ」＝署名付きURL。「S3への直リンク防止・オリジン保護」＝OAC。<b>誰に時間制限で配るか／経路を縛るか</b>で切り分ける。`
 },
@@ -1854,8 +1854,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>EFS</b>＝みんなで使える共有の本棚（NFS）。何人（何台）来ても同じ棚を同時に読み書きでき、物が増えれば棚が自動で広がる。</div>
   <div class="nick"><b>EBS</b>＝1人用の外付けHDD。基本は1台にだけ繋ぐ。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「複数Linuxから同時・自動伸縮の共有」＝EFS。EBS（A）は単一台向け、S3（C）はマウントでなくオブジェクト、FSx for Windows（D）はWindows/SMB向け。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「複数Linuxから同時・自動伸縮の共有」＝EFS。EBSは単一台向け、S3はマウントでなくオブジェクト、FSx for WindowsはWindows/SMB向け。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「複数から同時マウント・NFS・Linux共有」＝EFS、「Windows・SMB・Active Directory連携」＝FSx for Windows、「1台専用の外付け」＝EBS。<b>同時共有か単一か／LinuxかWindowsか</b>。`
 },
@@ -1877,8 +1877,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>スケジュールスケーリング</b>＝開店前にバイトを多めに呼んでおく店長。9時に客が来てから呼ぶ（後追い）と間に合わないので、毎日決まって8時45分に増員する。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「毎日決まった時間帯」＝予測できるので時刻ベースで先回り＝スケジュールスケーリング。後追いのターゲット追跡（A）・簡易（C）は立ち上がり遅れが残り、固定（D）は深夜が無駄。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「毎日決まった時間帯」＝予測できるので時刻ベースで先回り＝スケジュールスケーリング。後追いのターゲット追跡・簡易は立ち上がり遅れが残り、固定は深夜が無駄。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「決まった時間・予測できる需要・事前に用意」＝スケジュールスケーリング。「負荷に応じて自動増減」＝ターゲット追跡。<b>予測できる時刻か、その場の負荷か</b>で切り分ける。`
 },
@@ -1901,8 +1901,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>VPCフローログ</b>＝建物の通信記録の受付台帳。「誰から誰へ・どのドア（ポート）・通した/断った」を書く。会話の中身（パケット本体）までは書かない。</div>
   <div class="nick"><b>CloudTrail</b>＝AWSの操作記録簿（API）。ネットワークの通信そのものは見ない。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「IP・ポート・許可/拒否のメタデータを記録」＝VPCフローログ。CloudTrail（B）はAPI操作、GuardDuty（C）は検知、Traffic Mirroring（D）は中身まで取る過剰手段。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「IP・ポート・許可/拒否のメタデータを記録」＝VPCフローログ。CloudTrailはAPI操作、GuardDutyは検知、Traffic Mirroringは中身まで取る過剰手段。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「通信のメタデータ・送信元/宛先・許可/拒否」＝VPCフローログ。「誰がどのAPIを叩いたか」＝CloudTrail。<b>通信の記録かAPI操作の記録か</b>で切り分ける。`
 },
@@ -1925,8 +1925,8 @@ const QUESTIONS = [
   <div class="dh">🏷 あだ名</div>
   <div class="nick"><b>Translate</b>＝翻訳家。どの言語で書かれていても（自動検出）日本語に訳してくれる。</div>
   <div class="nick"><b>Comprehend</b>＝文章を読んで「これは英語だね」「怒ってる感じ」と分析する人。訳すのは仕事ではない。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「多言語→日本語に翻訳」＝Translate（ソース言語の自動検出付き）。Comprehend（B）は言語検出止まりで翻訳しない、Transcribe/Polly（C/D）は音声系。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「多言語→日本語に翻訳」＝Translate（ソース言語の自動検出付き）。Comprehendは言語検出止まりで翻訳しない、Transcribe/Pollyは音声系。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「翻訳・別言語へ変換」＝Translate。「言語を検出する・意味や感情を分析」＝Comprehend。<b>訳すのか分析するのか</b>で切り分ける。`
 },
@@ -1950,7 +1950,7 @@ const QUESTIONS = [
   <div class="nick"><b>バージョニング</b>＝書類のコピーを世代ごとに残す。上書き・削除しても前の版を取り出せる。</div>
   <div class="nick"><b>MFA Delete</b>＝完全削除には二重ロック（多要素認証）を要求する金庫。鍵が漏れても勝手に消せない。</div>
   <div class="dh">💡 なぜA・Bが正解か</div>
-  「誤削除・誤上書きから守り復元」＝バージョニング、「削除を強力に保護」＝MFA Delete。Glacier（C）・One Zone-IA（D）はコストの話で保護の軸ではない。
+  「誤削除・誤上書きから守り復元」＝バージョニング、「削除を強力に保護」＝MFA Delete。Glacier・One Zone-IAはコストの話で保護の軸ではない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「保護・復元・誤削除対策」＝バージョニング＋MFA Delete。「コスト削減・アーカイブ・安く」が出たらライフサイクル/ストレージクラスの話で、保護の問いとは混ぜない。<b>保護かコストか</b>で2つを選ぶ。`
 },
@@ -1975,7 +1975,7 @@ const QUESTIONS = [
   <div class="nick"><b>ライトサイジング</b>＝大きすぎる部屋を実際の人数に合った広さに替えて賃料を下げる。</div>
   <div class="nick"><b>RI/Savings Plans</b>＝長期契約の定期券。毎日フルに使う人は得だが、使い方が変わる開発環境では縛りが裏目に出る。</div>
   <div class="dh">💡 なぜA・Bが正解か</div>
-  「断続利用＋過大サイズ＋長期コミット不可」＝止める（A）＋縮める（B）。RI（C）・Savings Plans（D）は長期コミットで「使い方が変わる」開発環境に不向き。
+  「断続利用＋過大サイズ＋長期コミット不可」＝止める＋縮める。RI・Savings Plansは長期コミットで「使い方が変わる」開発環境に不向き。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「使う時間が決まっている・断続利用」＝スケジュール停止、「サイズが過大」＝ライトサイジング、「常時稼働・長期コミットOK」＝RI/Savings Plans。<b>コミットできるかどうか</b>で切り分ける。`
 }

@@ -38,8 +38,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>責任共有モデル</b>＝AWSと顧客の「掃除当番表」。建物(物理・基盤)はAWSが掃除、<b>部屋の中(ゲストOS・アプリ・データ・設定)は顧客</b>が掃除。EC2はIaaSなので部屋の範囲が広く、OSパッチまで顧客の担当。</div>
   <div class="nick"><b>Systems Manager Patch Manager</b>＝「全台のパッチ当番を自動でやる管理人」。いつ(メンテナンスウィンドウ)・何を(パッチベースライン)当てるか決めれば、勝手に回って未適用を名簿(コンプライアンスレポート)で見せてくれる。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  EC2のOSパッチは<b>顧客責任</b>(AWSはやってくれない＝Aが罠)。要件は「自動適用＋未適用の可視化」で、まさにPatch Managerの守備範囲。Trusted Advisor(C)は指摘止まり、手作業が残る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  EC2のOSパッチは<b>顧客責任</b>(AWSはやってくれない＝Aが罠)。要件は「自動適用＋未適用の可視化」で、まさにPatch Managerの守備範囲。Trusted Advisorは指摘止まり、手作業が残る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>「クラウドだからパッチもAWSがやってくれる」は最頻出の罠</b>。マネージドの度合いで責任が動く＝EC2(OSまで顧客)／RDS(OSはAWS)／Lambda・S3(実行環境は全部AWS、顧客はデータとアクセス制御だけ)。「EC2のOSパッチを誰がやる?」と来たら顧客→Patch Manager、が反射で出るようにする。`,
   confusion:[
@@ -69,10 +69,10 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>AWS Artifact</b>＝AWSの「監査レポート受け取り窓口」。AWSが第三者にチェックしてもらった成績表(SOC/ISO/PCI)を、顧客がいつでもダウンロードできる。</div>
-  <div class="dh">💡 なぜCが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   データセンターの物理セキュリティは<b>AWS責任範囲</b>＝顧客は中に立ち入って監査できない(Aが罠)。代わりにAWSが第三者監査を受けた結果をArtifactで配っているので、それを取って提出する。
   <div class="dh">⚠️ つまずきやすい言葉</div>
-  「監査証跡」と聞くとCloudTrail(B)に飛びつきがちだが、CloudTrailは<b>自分のアカウントで誰が何のAPIを叩いたか</b>のログ。AWSの物理・基盤の統制証跡はArtifact。責任共有モデルで「AWS側の証明が欲しい→Artifact」と覚える。`,
+  「監査証跡」と聞くとCloudTrailに飛びつきがちだが、CloudTrailは<b>自分のアカウントで誰が何のAPIを叩いたか</b>のログ。AWSの物理・基盤の統制証跡はArtifact。責任共有モデルで「AWS側の証明が欲しい→Artifact」と覚える。`,
   confusion:[
     {a:"AWS Artifact",b:"CloudTrail",d:"Artifact＝AWS側の第三者監査レポート(物理・基盤の証明)を入手。CloudTrail＝自アカウント内のAPI操作の監査ログ。"},
     {a:"AWS Artifact",b:"AWS Config",d:"Artifact＝AWSの統制証跡を受け取る。Config＝自アカウントのリソース構成が社内ルールに準拠しているかを記録・評価。"}
@@ -99,7 +99,7 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>マネージドDB(RDS)</b>＝「DBの面倒な裏方をAWSに外注」。OS・エンジンのパッチ、バックアップ、故障時の切り替えをAWSが肩代わり。顧客は中身(データ・設計・誰に見せるか)に専念。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   自前DB(EC2上のMySQL)はOSもエンジンも顧客責任で運用が重い。RDSに移すと<b>OS/エンジンのパッチ・バックアップ・フェイルオーバーがAWS責任に移る</b>＝これが運用負荷を下げる正体。責任の境界を正しく説明しているのもB。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Dの「運用作業ゼロ」は言い過ぎの罠</b>。マネージドでも「データのバックアップ保持方針・IAM・暗号化・スキーマ」は顧客責任。SAAは「全部AWSがやる」と書いた選択肢を不正解にする＝責任は移るがゼロにはならない、を覚える。`,
@@ -128,7 +128,7 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>サーバーレスの責任範囲</b>＝S3/Lambdaでは「建物も部屋も家具もAWS持ち」。顧客に残るのは<b>持ち込んだ荷物(データ)と、誰に鍵を渡すか(アクセス制御)</b>だけ。だがそこは必ず顧客がやる。</div>
-  <div class="dh">💡 なぜCが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   マネージドでも<b>データの暗号化(SSE-KMS)・通信の暗号化(TLS)・アクセス制御(IAM/バケットポリシー)は常に顧客責任</b>。Cはこの3点ぴったり。A/B/Dは全部AWS責任の領域(物理・OS・基盤)を顧客がやると書いた罠。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「マネージドだから何もしなくていい」は誤り。マネージドの度合いが上がるほど顧客責任は<b>狭くなるが消えない</b>＝最後に残るのは常に「データ」と「アクセス制御」。ここを問う問題は迷ったら暗号化＋IAMを選ぶ。`,
@@ -157,8 +157,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>AWS Backup</b>＝「複数サービスのバックアップを束ねる司令塔」。RDSもEBSもEFSもDynamoDBも、1つのプラン(いつ・何世代・どれだけ保持)でまとめて面倒を見る。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  バックアップの<b>取得方針・保持期間・復元テストは顧客責任</b>(Aが罠)。複数サービスを横断して一元管理する要件にはAWS Backupが直球。自前実装(B)は保守が重い。
+  <div class="dh">💡 なぜこれが正解か</div>
+  バックアップの<b>取得方針・保持期間・復元テストは顧客責任</b>(Aが罠)。複数サービスを横断して一元管理する要件にはAWS Backupが直球。自前実装は保守が重い。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   「マネージドだからバックアップもAWSが全部やる」は責任共有モデルの典型的な誤解。基盤の冗長性(壊れにくさ)はAWSだが、<b>誤操作・ランサム対策としての世代バックアップと復元は顧客責任</b>。`,
   confusion:[
@@ -187,8 +187,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>AWS Config</b>＝「リソースの健康診断＋カルテ」。今の状態がルールに合っているか継続的に診断(Config Rules)し、いつどう変わったかのカルテ(構成変更履歴)を残す。</div>
   <div class="nick"><b>EventBridge＋SSM Automation</b>＝「違反を見つけたら自動で直す当番」。Configが非準拠を出した瞬間をEventBridgeが拾い、SSMの修復手順書を走らせる。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  要件は「準拠の継続評価＋変更履歴＋自動是正」の3点セット。これを1サービスの守備範囲で満たせるのはConfig(＋EventBridge/SSM)。CloudTrail(B)は監査ログで状態評価ではない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  要件は「準拠の継続評価＋変更履歴＋自動是正」の3点セット。これを1サービスの守備範囲で満たせるのはConfig(＋EventBridge/SSM)。CloudTrailは監査ログで状態評価ではない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Config(状態：今ルールに合っているか)とCloudTrail(行為：誰が何をしたか)の混同が最頻出</b>。「準拠しているか・構成が変わったか」→Config、「誰がいつそのAPIを呼んだか」→CloudTrail。`,
   confusion:[
@@ -217,10 +217,10 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>SCP(サービスコントロールポリシー)</b>＝「組織の天井」。各アカウントのIAMが「鍵を配る」役なら、SCPは「そもそもこの建物では何階より上には行けない」という上限。管理者でも天井は超えられない。</div>
   <div class="nick"><b>OU</b>＝アカウントをまとめる「部屋割り」。OUにSCPを貼ると中のアカウント全部＋後から入る新アカウントにも効く。</div>
-  <div class="dh">💡 なぜDが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「各アカウントのIAMに依存せず」「アカウントが増えても自動」が決め手。IAMは付与する側なので各アカウント任せ＝抜ける。SCPは組織レベルの禁止上限で、IAMの上から効く。
   <div class="dh">⚠️ つまずきやすい言葉</div>
-  <b>SCPは「許可」を与えない。あくまで許可の上限(ガードレール)を絞るだけ</b>。実際にアクセスできるのは「IAMで許可」かつ「SCPで禁止されていない」操作の重なり。IAM Identity Center(C)＝人にログインと権限を配るSSO、SCP＝組織の天井、で役割が違う。`,
+  <b>SCPは「許可」を与えない。あくまで許可の上限(ガードレール)を絞るだけ</b>。実際にアクセスできるのは「IAMで許可」かつ「SCPで禁止されていない」操作の重なり。IAM Identity Center＝人にログインと権限を配るSSO、SCP＝組織の天井、で役割が違う。`,
   confusion:[
     {a:"SCP",b:"IAMポリシー",d:"SCP＝組織/OU/アカウントにかける許可の上限(管理者でも超えられない)。IAMポリシー＝アカウント内で個々のユーザー/ロールに許可を付与。実効権限は両者の重なり。"},
     {a:"SCP",b:"IAM Identity Center",d:"SCP＝組織全体の禁止ガードレール。IAM Identity Center＝SSOでログインと権限セットを人に配る仕組み。"}
@@ -248,7 +248,7 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>CloudTrail</b>＝「AWSの防犯カメラ＋入退室記録」。誰が(IAM主体)・いつ・どのAPIを・どこから呼んだかを残す。</div>
   <div class="nick"><b>S3 Object Lock(WORM)</b>＝「書いたら消せない金庫」。Write Once Read Many。保持期間中は管理者でも削除・上書き不可＝証跡の改ざん防止。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「誰がどのAPIを呼んだか」はCloudTrailの専売。全リージョン・全アカウントは組織の証跡で実現、改ざん・削除防止はObject Lock＋整合性検証。要件3点が全部CloudTrail+S3で揃う。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   ログ系3兄弟の取り違えが頻出。<b>CloudTrail＝API操作(誰が何を)／CloudWatch Logs＝アプリ・システムのログ(何が起きた)／VPCフローログ＝通信(どのIPがどこへ)</b>。「API・誰が・監査」と来たらCloudTrail。`,
@@ -278,8 +278,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Session Manager</b>＝「裏口から入る出張シェル」。EC2に入れたSSMエージェントがAWS側へ外向き(アウトバウンド)に繋ぎに行くので、インバウンドの穴(22番)を一切開けずにシェルが使える。鍵も踏み台もいらない。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  要件は「ポートを開けない・踏み台/鍵を無くす・IAMで認可・操作を監査」。全部Session Managerの設計思想そのもの。踏み台強化(A)やVPN(D)はポート到達と鍵管理が残る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  要件は「ポートを開けない・踏み台/鍵を無くす・IAMで認可・操作を監査」。全部Session Managerの設計思想そのもの。踏み台強化やVPNはポート到達と鍵管理が残る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>「SSHするなら踏み台かVPN」という固定観念が罠</b>。SSMエージェントのアウトバウンド通信で完結するので<b>インバウンド0</b>にできるのがSession Managerの肝。「ポートを開けずにEC2に入りたい・監査したい」と来たら反射でSession Manager。`,
   confusion:[
@@ -309,8 +309,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>AWS Control Tower</b>＝「分譲地の区画整備をまるごとやる開発業者」。新しい区画(アカウント)を、上下水道・電気・ルール(ログ集約・ガードレール・SSO)込みで一気に整地して引き渡す。</div>
   <div class="nick"><b>Account Factory</b>＝「規格化された家を量産する工場」。毎回同じ品質のアカウントをボタンひとつで払い出す。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  要件は「マルチアカウントの土台を標準手順で自動」＝ランディングゾーン。Organizations+SCP(C)やStackSets(B)は部品で、土台を丸ごと自動構築するのはControl Tower。
+  <div class="dh">💡 なぜこれが正解か</div>
+  要件は「マルチアカウントの土台を標準手順で自動」＝ランディングゾーン。Organizations+SCPやStackSetsは部品で、土台を丸ごと自動構築するのはControl Tower。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Organizations(土台の部品＝アカウント束ね＋SCP)とControl Tower(部品を組んでベストプラクティスの土台を自動構築する完成サービス)の関係を押さえる</b>。「ゼロからマルチアカウントを標準化して量産」ならControl Tower、「既にある組織に上限を貼る」だけならSCP。`,
   confusion:[
@@ -340,8 +340,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>ゲートウェイ型VPCエンドポイント</b>＝「S3/DynamoDB専用の無料の裏口」。ルートテーブルに行き先を1行足すだけで、NATの取次窓口を通らずAWS内部で直結。利用料タダ。<b>対応はS3とDynamoDBの2つだけ</b>。</div>
   <div class="nick"><b>インターフェイス型(PrivateLink)</b>＝「他サービス用のENIの専用線」。多くのサービスに使えるが時間課金＋データ処理料金あり。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  対象がS3とDynamoDB＝ゲートウェイ型が使える数少ないサービス。料金ゼロでNATのデータ処理料金を消せる。インターフェイス型(C)はここでは割高、NAT増設(A)はコスト悪化。
+  <div class="dh">💡 なぜこれが正解か</div>
+  対象がS3とDynamoDB＝ゲートウェイ型が使える数少ないサービス。料金ゼロでNATのデータ処理料金を消せる。インターフェイス型はここでは割高、NAT増設はコスト悪化。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>「ゲートウェイ型＝S3とDynamoDBだけ・無料・ルートテーブル」「インターフェイス型(PrivateLink)＝その他多数・ENI・有料」</b>の二択が最頻出。S3/DynamoDBのNATコスト削減と来たら反射でゲートウェイ型。`,
   confusion:[
@@ -370,8 +370,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Transit Gateway</b>＝「ネットワークの中央駅」。各VPC・オンプレ(Direct Connect)・VPNを駅に乗り入れさせれば、駅を経由してどこへでも行ける。新しい路線(VPC)は駅に繋ぐだけ。</div>
   <div class="nick"><b>VPCピアリング</b>＝「2拠点を結ぶ直通バス」。1対1は単純だが、N拠点を全部繋ぐと路線がN×(N-1)/2本に爆発＋乗り換え(推移的ルーティング)ができない。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「数十のVPC＋オンプレを中央ハブで集約・一元管理・スケール」はTransit Gatewayの定義そのもの。ピアリングのフルメッシュ(A)が破綻したから乗り換える、という問題設定。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「数十のVPC＋オンプレを中央ハブで集約・一元管理・スケール」はTransit Gatewayの定義そのもの。ピアリングのフルメッシュが破綻したから乗り換える、という問題設定。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>VPCピアリングは「推移的ルーティング不可」(A→B、B→CがあってもA→Cは通らない)＝フルメッシュが必要になり数が爆発</b>。少数VPCの1対1ならピアリングで十分だが、多数VPC＋オンプレ集約はTransit Gateway。`,
   confusion:[
@@ -400,8 +400,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Route 53 Resolver インバウンドEP</b>＝「オンプレからAWSのDNSに問い合わせる窓口」。オンプレが app.internal を引けるようになる。</div>
   <div class="nick"><b>アウトバウンドEP＋転送ルール</b>＝「AWSからオンプレDNSへ取り次ぐ窓口」。corp.local のクエリだけオンプレDNSへ転送。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「双方向」が決め手。オンプレ→AWS＝インバウンド、AWS→オンプレ＝アウトバウンド＋転送ルール、の2つを組むのがハイブリッドDNSの定石。hosts手動(A)や自前BIND(D)は保守破綻。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「双方向」が決め手。オンプレ→AWS＝インバウンド、AWS→オンプレ＝アウトバウンド＋転送ルール、の2つを組むのがハイブリッドDNSの定石。hosts手動や自前BINDは保守破綻。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>方向を取り違えやすい。インバウンド＝外(オンプレ)からAWSへ問い合わせが入ってくる／アウトバウンド＝AWSから外(オンプレ)へ問い合わせが出ていく</b>。「オンプレがAWS名を引く」→インバウンド、「AWSがオンプレ名を引く」→アウトバウンド＋転送ルール。`,
   confusion:[
@@ -430,8 +430,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Network Firewall</b>＝「VPCの関所」。ネットワーク層を通る全トラフィックを止めて中身を検査(ステートフル)＋行き先ドメインを許可リストで制御＋侵入検知(IPS/IDS)。</div>
   <div class="nick"><b>WAF</b>＝「アプリの受付ガードマン」。HTTP/HTTPSの中身(SQLi/XSS)を見るL7専門。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「VPCのネットワーク層・ドメインフィルタ・IPS/IDS・ステートフル」はNetwork Firewallの守備範囲。WAF(B)はL7のHTTP専門で層が違う、Shield(D)はDDoS特化。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「VPCのネットワーク層・ドメインフィルタ・IPS/IDS・ステートフル」はNetwork Firewallの守備範囲。WAFはL7のHTTP専門で層が違う、ShieldはDDoS特化。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   保護の層で切り分ける。<b>Network Firewall＝VPCのネットワーク層(L3-L7のトラフィック全般・ドメイン/IPS)／WAF＝アプリ層(L7のHTTP・SQLi/XSS)／Shield＝DDoS(L3/L4の大量攻撃)/SG・NACL＝IP・ポートの単純許可拒否</b>。`,
   confusion:[
@@ -461,8 +461,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Global Accelerator</b>＝「世界共通の2つの固定入口＋AWS高速道路」。どこから来ても同じ2つのIPに入り、混んだ一般道(インターネット)でなくAWSの専用高速道路で最寄りの正常拠点へ。TCPもUDPもOK・障害時は数秒で別拠点へ。</div>
   <div class="nick"><b>CloudFront</b>＝「世界中のキャッシュ倉庫」。静的/動的コンテンツをエッジに置いて配信(HTTP専門)。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「TCP/UDP・低遅延・固定IP・バックボーン経由・数秒フェイルオーバー」が全部Global Acceleratorの特徴。CloudFront(A)はキャッシュ配信(明確に否定されている)、Route 53(C)はDNSなので切り替えが遅く固定IPもない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「TCP/UDP・低遅延・固定IP・バックボーン経由・数秒フェイルオーバー」が全部Global Acceleratorの特徴。CloudFrontはキャッシュ配信(明確に否定されている)、Route 53はDNSなので切り替えが遅く固定IPもない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Global Accelerator(通信そのものを速く・固定IP・TCP/UDP・非キャッシュ)とCloudFront(コンテンツをキャッシュして配信・HTTP)の使い分けが頻出</b>。「ゲーム/IoT/非HTTP/固定IP/低遅延」→Global Accelerator、「静的サイト/動画/画像のキャッシュ」→CloudFront。`,
   confusion:[
@@ -492,8 +492,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>PrivateLink</b>＝「1つの窓口だけ差し出す専用線」。VPC同士を繋ぐのでなく、自社サービス1個だけをNLBの裏に出し、顧客はその窓口(ENI)にだけ繋ぐ。VPC全体は見えない＋IPがかぶっても関係ない。</div>
   <div class="nick"><b>VPCピアリング/Transit Gateway</b>＝「ネットワーク同士を道路で繋ぐ」。だからIP範囲がかぶると繋げない＋相手のVPCが経路上見える。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「特定サービスだけ・IP重複OK・VPC全体は隠す・相互ルート不要」は全部PrivateLinkの特徴。ネットワーク接続系(A/C)はIP重複NG＋VPCが見える。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「特定サービスだけ・IP重複OK・VPC全体は隠す・相互ルート不要」は全部PrivateLinkの特徴。ネットワーク接続系はIP重複NG＋VPCが見える。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>PrivateLink＝サービス単位の公開(IP重複OK・最小露出・SaaS提供に最適)／ピアリング・TGW＝ネットワーク単位の接続(IP重複NG・VPCが見える)</b>。「多数の顧客に特定サービスだけ安全に公開」と来たらPrivateLink。`,
   confusion:[
@@ -522,8 +522,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Kinesis Data Streams</b>＝「巻き戻せる録画テープ」。流れてきたデータを保持期間ぶん溜めておき、何人もの視聴者(コンシューマー)がそれぞれ好きな位置から再生・巻き戻し(リプレイ)できる。</div>
   <div class="nick"><b>Kinesis Data Firehose</b>＝「溜めて配達するだけのベルトコンベア」。S3/Redshift等へ配信するのが仕事で、巻き戻しや複数独立読みはできない。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「複数独立コンシューマー＋リプレイ」が決め手。保持してシーケンス指定で読み直せるのはData Streams。SQS(A)は読んだら消える、Firehose(C)は配達専門でストリーム機能なし。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「複数独立コンシューマー＋リプレイ」が決め手。保持してシーケンス指定で読み直せるのはData Streams。SQSは読んだら消える、Firehoseは配達専門でストリーム機能なし。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Data Streams(保持・複数独立読み・リプレイ・要シャード管理)とFirehose(S3等へ配信するだけ・ほぼ全自動・リプレイ不可)の違いが頻出</b>。「巻き戻す/複数が同じデータを別々に読む」→Data Streams、「とにかくS3/Redshiftへ流し込む」→Firehose。`,
   confusion:[
@@ -553,8 +553,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Athena</b>＝「S3に直接SQLを投げる出張アナリスト」。サーバーを持たず、聞かれたとき(クエリ時)だけ動いて、読んだデータ量ぶんだけ請求。事前のロードもクラスタ常駐も不要。</div>
   <div class="nick"><b>Glue Data Catalog</b>＝「S3のデータの目録」。どのファイルがどんな列構成かを登録しておくと、Athenaがそれを見てSQLを解釈できる。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「S3に直接・サーバー立てない・使った分だけ・ロードしない」は全部Athenaの特徴。Redshift(A)は常時稼働DWHで低頻度には過剰、自前構築(B)は運用負荷大。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「S3に直接・サーバー立てない・使った分だけ・ロードしない」は全部Athenaの特徴。Redshiftは常時稼働DWHで低頻度には過剰、自前構築は運用負荷大。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Athena(S3に直接・サーバーレス・スキャン量課金・アドホック/低頻度向き)とRedshift(クラスタ常駐・ロード必要・大規模/高頻度の本格DWH向き)の使い分けが頻出</b>。「S3のログをたまにSQLで」→Athena、「ペタバイト級を継続的にBI分析」→Redshift。`,
   confusion:[
@@ -582,8 +582,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>AWS Glue</b>＝「サーバーを持たないETL工場」。クローラーが原料(データ)を見て自動で目録(カタログ)を作り、Sparkの変換ラインを必要なときだけ動かす。工場の建物(サーバー)管理は不要。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「Sparkベース・サーバー管理不要・スキーマ自動カタログ・スケジュール」が全部Glueの機能。EMR(B)はクラスタ管理が残り、Lambda(C)は15分制限で大規模Spark変換に不向き。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「Sparkベース・サーバー管理不要・スキーマ自動カタログ・スケジュール」が全部Glueの機能。EMRはクラスタ管理が残り、Lambdaは15分制限で大規模Spark変換に不向き。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Glue(サーバーレスETL・クローラーでカタログ自動化・スケジュールジョブ)とEMR(Hadoop/Sparkクラスタを自分で立てて細かく制御・長時間/特殊フレームワーク向き)の使い分け</b>。「マネージドでSpark ETL・サーバー管理したくない」→Glue、「クラスタを細かくチューニングしたい大規模処理」→EMR。`,
   confusion:[
@@ -613,8 +613,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>QuickSight</b>＝「サーバーいらずのBIダッシュボード」。RedshiftやS3に繋いで非エンジニアがグラフを作って共有。SPICEという速攻メモリ集計エンジン付き。使う人ぶんだけ課金。</div>
   <div class="nick"><b>SPICE</b>＝「ダッシュボード用の速いメモリ倉庫」。よく見るデータをインメモリに取り込んで高速表示。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「マネージドBI・非エンジニアが自作共有・インメモリ高速・利用者課金」は全部QuickSightの特徴。自前構築のBI(A/D)は運用負荷大、CSV配布(B)は共有・更新が成立しない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「マネージドBI・非エンジニアが自作共有・インメモリ高速・利用者課金」は全部QuickSightの特徴。自前構築のBIは運用負荷大、CSV配布は共有・更新が成立しない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   分析系の役割分担を押さえる。<b>Athena＝S3にSQLを投げるクエリエンジン／Redshift＝本格DWH／QuickSight＝可視化・ダッシュボードのBI層</b>。「グラフ・ダッシュボード・非エンジニアが見る」と来たらQuickSight。`,
   confusion:[
@@ -642,8 +642,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>OpenSearch Service</b>＝「ログ専用の超高速検索＋可視化システム」。大量のログを放り込んでキーワードで瞬時に横断検索、OpenSearch Dashboards(旧Kibana)でグラフ化・アラート。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「全文検索・リアルタイム可視化・Kibana相当・横断検索」はOpenSearchの専門。Athena(A)はSQLバッチ向き、CloudWatch Logsのスクロール(C)では探索性が足りない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「全文検索・リアルタイム可視化・Kibana相当・横断検索」はOpenSearchの専門。AthenaはSQLバッチ向き、CloudWatch Logsのスクロールでは探索性が足りない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>OpenSearch(全文検索・ログ探索・Kibana的リアルタイム可視化)とAthena(S3にSQLでバッチ分析)の使い分けが頻出</b>。「ログをキーワードで横断検索・ダッシュボードで探索」→OpenSearch、「構造化データをSQLで集計」→Athena。`,
   confusion:[
@@ -672,8 +672,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Amazon MSK</b>＝「運用代行つきのKafka」。中身は本物のApache Kafkaなので既存のコードもツールもそのまま動く。ブローカーのお守り(構築・パッチ・スケール・Zookeeper)だけAWSが肩代わり。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「Kafka API互換が必須・既存資産を活かす・運用はAWS」はMSKの存在意義そのもの。Kinesis(A)は非互換で書き換え必要、自前Kafka(B)は運用が残る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「Kafka API互換が必須・既存資産を活かす・運用はAWS」はMSKの存在意義そのもの。Kinesisは非互換で書き換え必要、自前Kafkaは運用が残る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>「既にKafkaを使っている／Kafka API互換が要る」→MSK。新規でAWSネイティブにストリームを作る／運用を極限まで減らす→Kinesis</b>。互換性の要件があるかどうかが分かれ目。`,
   confusion:[
@@ -702,8 +702,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>DataSync</b>＝「NASとAWSをつなぐ自動引っ越し業者」。ネットワーク経由でNAS→S3/EFS/FSxを暗号化・検証つきで運び、スケジュールで差分だけ繰り返し同期。</div>
   <div class="nick"><b>Snowball Edge</b>＝「物理的にデータを箱で送る宅配」。1回限りの巨大データをネット回線を使わず搬送。継続同期はできない。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「ネットワーク経由・継続的な差分同期・マネージド」はDataSyncの定義。Snowball(A)は1回限りの物理搬送で継続同期に使えない、rsync自前(B)は運用負荷大、Storage Gateway(C)は移行でなく常設ハイブリッド用途。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「ネットワーク経由・継続的な差分同期・マネージド」はDataSyncの定義。Snowballは1回限りの物理搬送で継続同期に使えない、rsync自前は運用負荷大、Storage Gatewayは移行でなく常設ハイブリッド用途。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   3つの取り違えが頻出。<b>DataSync＝オンライン転送・同期(継続OK)／Snowball＝オフライン物理搬送(1回限り・回線が細い/超大容量)／Storage Gateway＝オンプレからクラウドストレージを常設で使い続けるハイブリッド</b>。「日次同期を続ける」と来たらDataSync。`,
   confusion:[
@@ -732,8 +732,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Storage Gateway(ファイルゲートウェイ)</b>＝「オンプレの顔をしたS3の窓口」。アプリから見ると普通のSMB/NFS共有、裏では実体をS3に預けて容量無制限、よく使うものは手元(ローカルキャッシュ)に置いて速い。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「アプリ変更なし・SMB/NFS維持・実体はS3・ローカルキャッシュ」は全部ファイルゲートウェイの特徴。S3直接移行＋改修(B)はアプリ変更が必要で要件に反する。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「アプリ変更なし・SMB/NFS維持・実体はS3・ローカルキャッシュ」は全部ファイルゲートウェイの特徴。S3直接移行＋改修はアプリ変更が必要で要件に反する。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Storage Gateway＝「使い続ける」ハイブリッド(プロトコル維持＋キャッシュ＋クラウドバック)／DataSync＝「運んで移行する」</b>。「アプリ変えずSMB/NFSのままクラウド容量を使いたい」と来たらStorage Gateway。ファイル(SMB/NFS)/ボリューム(iSCSI)/テープ(VTL)の3タイプがある。`,
   confusion:[
@@ -761,8 +761,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Snowball Edge</b>＝「データを箱で郵送する引っ越し便」。回線が細くて大容量をネットで送ると数か月かかるとき、物理デバイスにコピーして宅配でAWSへ。回線は一切使わない。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「細い回線・数百TB・1回限り・回線を圧迫しない」はSnowball Edgeの典型シナリオ。DataSync(A)/VPN(D)はオンラインなので細い回線がボトルネック、Direct Connect新規敷設(B)は1回の移行に過剰。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「細い回線・数百TB・1回限り・回線を圧迫しない」はSnowball Edgeの典型シナリオ。DataSync/VPNはオンラインなので細い回線がボトルネック、Direct Connect新規敷設は1回の移行に過剰。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>オンライン転送(DataSync/Direct Connect/VPN)とオフライン搬送(Snowball)の分かれ目は「回線で現実的な時間に終わるか」</b>。「回線が細い＋大容量＋1回限り」→Snowball、「継続的な同期」→DataSync。目安として数十〜数百TBで回線が細いならSnowball。`,
   confusion:[
@@ -791,8 +791,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>SCT(Schema Conversion Tool)</b>＝「DBの方言の翻訳家」。Oracle弁のスキーマ・ストアドをPostgreSQL弁に書き換える。異種DB移行で必須。</div>
   <div class="nick"><b>DMS(Database Migration Service)</b>＝「DBの引っ越し業者＋差分追っかけ係」。初回に全部運び、その後も変更分(CDC)を反映し続けて、切り替え時の停止を最小化。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「異種DB(構文が違う)＋ダウンタイム最小(CDC)」の2点が決め手。構文変換はSCT、無停止に近い移行はDMSのCDC。CSV手動(B)は一括停止、DataSync(C)はファイル転送でDB論理移行不可。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「異種DB(構文が違う)＋ダウンタイム最小(CDC)」の2点が決め手。構文変換はSCT、無停止に近い移行はDMSのCDC。CSV手動は一括停止、DataSyncはファイル転送でDB論理移行不可。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>同種DB(Oracle→Oracle等)ならSCT不要でDMSだけ／異種DB(Oracle→PostgreSQL等)はSCTでスキーマ変換してからDMS</b>。「業務を止めずに移行」と来たらDMSのCDC(変更データキャプチャ)を反射で。`,
   confusion:[
@@ -821,8 +821,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Transfer Family</b>＝「サーバー不要のSFTP窓口」。取引先から見ると普通のSFTPサーバー、裏では受け取ったファイルを直接S3に置く。サーバーの構築・パッチ・スケールはAWS任せ。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「取引先のSFTPはそのまま・自前サーバーやめたい・直接S3保存」は全部Transfer Familyの特徴。EC2自前(A)は運用が残り、C/Dは取引先に運用変更を強いる。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「取引先のSFTPはそのまま・自前サーバーやめたい・直接S3保存」は全部Transfer Familyの特徴。EC2自前は運用が残り、C/Dは取引先に運用変更を強いる。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>「既存のSFTP/FTPSのやり取りを変えずにマネージド化＋S3保存」と来たらTransfer Family</b>。取引先のプロトコル(SFTP)を維持できるのが選定理由。SFTPをやめさせる選択肢は要件違反になりやすい。`,
   confusion:[
@@ -850,8 +850,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>FSx for Windows File Server</b>＝「マネージドなWindowsファイルサーバー」。SMB・NTFSのアクセス権・AD認証・DFSをそのまま使えて、運用はAWS任せ。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「SMB・NTFS ACL・AD統合・DFS・マネージド」はWindows特有の要件で、これを丸ごと満たすのはFSx for Windows。EFS(A)はLinux/NFS、Lustre(D)はHPC向けで用途が違う。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「SMB・NTFS ACL・AD統合・DFS・マネージド」はWindows特有の要件で、これを丸ごと満たすのはFSx for Windows。EFSはLinux/NFS、LustreはHPC向けで用途が違う。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   FSxとEFSの使い分けが頻出。<b>FSx for Windows＝Windows/SMB/NTFS/AD／FSx for Lustre＝HPC・ML向け超高性能並列／EFS＝Linux/NFSの共有／EBS＝1台専用ブロック</b>。「Windowsファイルサーバー・SMB・AD」と来たらFSx for Windows。`,
   confusion:[
@@ -881,8 +881,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>ECS on Fargate</b>＝「サーバーを持たないコンテナ置き場」。EC2を一切管理せず、タスク(コンテナ)を投げれば動く。使ったvCPU/メモリぶんだけ課金。AWSネイティブでKubernetes知識不要。</div>
   <div class="nick"><b>EKS</b>＝「マネージドKubernetes」。Kubernetesのエコシステムを使いたい/既にk8s資産があるとき。運用知識が要る。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「EC2管理しない・Kubernetesに縛られない・タスク単位課金」はECS on Fargateの定義。EKS(A)はk8s知識とノード管理が要る、EC2+Docker(B)はサーバー管理そのもの。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「EC2管理しない・Kubernetesに縛られない・タスク単位課金」はECS on Fargateの定義。EKSはk8s知識とノード管理が要る、EC2+Dockerはサーバー管理そのもの。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   起動タイプとオーケストレータの2軸で整理。<b>オーケストレータ＝ECS(AWSネイティブ・シンプル)／EKS(Kubernetes・移植性/エコシステム)。起動タイプ＝Fargate(サーバーレス・管理なし)／EC2(自分でノード管理・細かい制御/コスト最適)</b>。「サーバー管理したくない＋k8s不要」→ECS on Fargate。`,
   confusion:[
@@ -912,7 +912,7 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>予測スケーリング</b>＝「過去の混み方を学習して先回りで店員を増やす店長」。毎週同じ時間に混むなら、混む前に増員しておく。スパイク直後に慌てない。</div>
   <div class="nick"><b>ターゲット追跡</b>＝「今の混み具合を見て反応する店長」。CPUが目標を超えたら増やす(後追い)。急な立ち上がりには一瞬遅れる。</div>
-  <div class="dh">💡 なぜBが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「過去パターンを繰り返す・予測できる需要に先回り」が決め手＝予測スケーリング。ターゲット追跡だけだと反応型なのでスパイク直後に遅延する(問題設定そのもの)。両者の併用が定石。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   Auto Scalingのポリシーを整理。<b>ターゲット追跡＝指標を目標値に保つ反応型／ステップ/シンプル＝しきい値で段階増減／スケジュール＝決まった時刻に増減/予測＝過去傾向から先回り</b>。「予測できる・過去のパターン・先回り」と来たら予測スケーリング。`,
@@ -942,8 +942,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>API Gateway＋Lambda</b>＝「呼ばれたときだけ来る受付＋出張スタッフ」。リクエストが来た瞬間だけLambdaが動いて課金、誰も来なければ(アイドル)ほぼ無料。バーストも自動で並列起動。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「ゼロもバーストもある・アイドル課金イヤ・リクエスト分だけ・サーバー管理ゼロ」は全部サーバーレスの特徴。EC2(A)/Fargate(B)は最小1台常時起動でアイドル課金が出る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「ゼロもバーストもある・アイドル課金イヤ・リクエスト分だけ・サーバー管理ゼロ」は全部サーバーレスの特徴。EC2/Fargateは最小1台常時起動でアイドル課金が出る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>「アイドル時は無料に近い・予測不能なバースト・サーバー管理ゼロ」と来たらLambda</b>。常時一定の負荷や15分超の長時間処理、特殊ランタイムが必要ならFargate/EC2を検討。アイドルが多く変動が激しいほどLambdaが効く。`,
   confusion:[
@@ -972,8 +972,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>スポットインスタンス</b>＝「キャンセル待ちの激安席(最大約90%引き)」。空き容量を安く使える代わり、AWSが必要になれば追い出される。中断されても平気な仕事に最適。</div>
   <div class="nick"><b>SQS＋ワーカー</b>＝「伝票スタンドと処理係」。ジョブを伝票(メッセージ)で積み、係が取って処理。係が倒れても伝票は残る(可視性タイムアウトで復活)。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「中断OK・冪等・急がない・コスト最優先」はスポットの黄金パターン。SQSで疎結合にすれば中断時もメッセージが戻り再処理できる。オンデマンド(A)/RI(B)は割高、Lambda(D)は重い変換に不向き。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「中断OK・冪等・急がない・コスト最優先」はスポットの黄金パターン。SQSで疎結合にすれば中断時もメッセージが戻り再処理できる。オンデマンド/RIは割高、Lambdaは重い変換に不向き。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   購入オプションの使い分け。<b>スポット＝中断OKのバッチ/ステートレスを最大90%引き／オンデマンド＝短期・予測不能で中断NG／リザーブド・Savings Plans＝常時稼働を長期コミットで割引</b>。「中断されてもいい・コスト最優先」と来たらスポット。`,
   confusion:[
@@ -1002,8 +1002,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>プロビジョンドコンカレンシー</b>＝「あらかじめ温めておく出張スタッフ」。Lambdaは普段「呼ばれてから準備(コールドスタート)」だが、指定数ぶんを先に準備済み(ウォーム)で待機させ、初回でも即応答。</div>
   <div class="nick"><b>コールドスタート</b>＝「久しぶりに呼ばれた人が支度に手間取る一瞬の遅れ」。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「コールドスタートを避けたい・一定の同時実行を事前ウォーム」はプロビジョンドコンカレンシーそのもの。自作ウォーマー(C)は不確実、メモリ増(A)は根本解決でない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「コールドスタートを避けたい・一定の同時実行を事前ウォーム」はプロビジョンドコンカレンシーそのもの。自作ウォーマーは不確実、メモリ増は根本解決でない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>コールドスタート対策＝プロビジョンドコンカレンシー(事前ウォーム)が正式解</b>。「Lambdaのレイテンシが初回だけ遅い・SLAを守りたい」と来たら反射でプロビジョンドコンカレンシー。予約済み同時実行数(Reserved Concurrency＝同時実行の上限/確保)とは別物なので混同注意。`,
   confusion:[
@@ -1031,8 +1031,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>ElastiCache</b>＝「DBの前に置く高速メモ帳」。よく聞かれる答え(人気商品・セッション)をメモリに貼っておき、DBに行かずミリ秒未満で即答。DBの読み取り負担が激減。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「同一クエリ大量集中・ミリ秒未満・インメモリ・読み取り負荷を下げる」はElastiCacheの定義。垂直スケール(A)は一時しのぎ、リードレプリカ(C)は読み取り分散だがインメモリ即答ではない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「同一クエリ大量集中・ミリ秒未満・インメモリ・読み取り負荷を下げる」はElastiCacheの定義。垂直スケールは一時しのぎ、リードレプリカは読み取り分散だがインメモリ即答ではない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   読み取り対策の使い分け。<b>ElastiCache＝同一データの繰り返し参照をインメモリで吸収(ミリ秒未満・セッション/人気データ)／リードレプリカ＝多様な読み取りクエリを複数DBに分散</b>。「同じ問い合わせが集中・超低レイテンシ・キャッシュ」と来たらElastiCache。Redis(永続/高機能)とMemcached(シンプル/マルチスレッド)の使い分けも押さえる。`,
   confusion:[
@@ -1061,8 +1061,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Aurora Global Database</b>＝「リージョンをまたぐ即時コピー＋緊急昇格」。本店(プライマリ)の更新を別の国の支店(セカンダリ)へ1秒未満で複製、本店が災害で潰れたら支店を1分で本店に昇格。普段は支店で地元の読み取りも高速。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「リージョン全体の災害・1秒未満ラグ・1分昇格・ローカル読み取り」は全部Global Databaseの特徴。マルチAZ(C)はリージョン内の話、スナップショットコピー(A)はRPO/RTOが大きい。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「リージョン全体の災害・1秒未満ラグ・1分昇格・ローカル読み取り」は全部Global Databaseの特徴。マルチAZはリージョン内の話、スナップショットコピーはRPO/RTOが大きい。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   可用性の階層を取り違えない。<b>マルチAZ＝同一リージョン内のAZ障害対策(自動フェイルオーバー)／Aurora Global Database＝リージョン全体の災害対策(マルチリージョンDR・1秒未満ラグ・高速昇格)</b>。「リージョンをまたぐDR・RPO/RTO極小」と来たらGlobal Database。`,
   confusion:[
@@ -1090,8 +1090,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Route 53 フェイルオーバールーティング</b>＝「電話の自動転送」。普段はwww.example.comを東京の番号に繋ぐが、東京が応答しない(ヘルスチェック失敗)と自動で大阪の番号に転送。かけ手(クライアント)は何も変えなくていい。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「リージョンまたぎ・DNSレベル・クライアント設定不要・ヘルスチェックで自動」はフェイルオーバールーティングそのもの。ALB(A)は1リージョン内、クライアント改修(C)は要件違反。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「リージョンまたぎ・DNSレベル・クライアント設定不要・ヘルスチェックで自動」はフェイルオーバールーティングそのもの。ALBは1リージョン内、クライアント改修は要件違反。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>リージョン間の切り替えはDNS(Route 53)の仕事／リージョン内・AZ間の分散はELB(ALB/NLB)の仕事</b>。「ドメインを別リージョンへ自動で・クライアント変更なし」と来たらRoute 53フェイルオーバー＋ヘルスチェック。`,
   confusion:[
@@ -1119,8 +1119,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick">DR4戦略＝「復旧の速さとコストの天秤」。<b>バックアップ&リストア(最安・最遅)＜パイロットライト(DBだけ複製・アプリは火種だけ)＜ウォームスタンバイ(縮小版を常時稼働・災害時に拡大)＜マルチサイト(常時フル稼働・最速・最高コスト)</b>。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「RTO1時間・RPO数分・フル稼働は高すぎ・DB継続複製＋アプリ最小起動して災害時スケールアップ」は、ウォームスタンバイの定義そのもの。マルチサイト(B)は高すぎ、パイロットライト(D)はアプリ起動から始めるぶん遅い。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「RTO1時間・RPO数分・フル稼働は高すぎ・DB継続複製＋アプリ最小起動して災害時スケールアップ」は、ウォームスタンバイの定義そのもの。マルチサイトは高すぎ、パイロットライトはアプリ起動から始めるぶん遅い。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>パイロットライト(アプリ層は止めてある＝災害時にゼロから起動)とウォームスタンバイ(アプリ層も縮小版が動いている＝スケールアップするだけ)の差が頻出</b>。「最小規模で常時起動して災害時に拡大」ならウォームスタンバイ、「DBだけ複製しアプリは消火しておく」ならパイロットライト。`,
   confusion:[
@@ -1149,8 +1149,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>S3 CRR(クロスリージョンレプリケーション)</b>＝「別の国の倉庫に自動で複製を送る仕組み」。アップロードや更新があるたび、離れたリージョンのバケットに自動コピー。リージョンごと災害でもデータが残る。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「別リージョンへ自動・継続複製・地理的分散・リージョン災害対策」はCRRの定義。バージョニング(A)は同一バケット内、別AZコピー(D)はリージョン内なのでリージョン災害を守れない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「別リージョンへ自動・継続複製・地理的分散・リージョン災害対策」はCRRの定義。バージョニングは同一バケット内、別AZコピーはリージョン内なのでリージョン災害を守れない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>S3は標準でリージョン内の複数AZに冗長化済み(99.999999999%耐久性)＝AZ障害は元々守られている。リージョン全体の災害やコンプライアンスの地理的分散にはCRR(別リージョンへ複製)</b>。「別リージョンへ・地理的に離して」と来たらCRR、同一バケットの世代管理ならバージョニング。`,
   confusion:[
@@ -1178,8 +1178,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>ElastiCache Redis マルチAZ＋自動フェイルオーバー</b>＝「別の建物に控えのメモ帳を置く」。プライマリが倒れたら別AZのレプリカが自動で主役に昇格、セッションは保たれる。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「プライマリ障害で自動昇格・ダウンタイム最小・AZ障害に耐える」はRedisのマルチAZ＋自動フェイルオーバーの定義。単一ノード(A)は単一障害点、Memcached(D)はレプリケーション/自動昇格を持たない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「プライマリ障害で自動昇格・ダウンタイム最小・AZ障害に耐える」はRedisのマルチAZ＋自動フェイルオーバーの定義。単一ノードは単一障害点、Memcachedはレプリケーション/自動昇格を持たない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Redis＝レプリケーション・マルチAZ・自動フェイルオーバー・永続化あり(セッション/高可用が必要ならRedis)／Memcached＝シンプルなキャッシュでレプリケーション・自動フェイルオーバーなし</b>。「セッションを失いたくない・自動昇格・AZ障害対応」と来たらRedisのマルチAZ。`,
   confusion:[
@@ -1207,8 +1207,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>AWS Backup＋Backup Vault Lock</b>＝「複数サービスのバックアップを束ねる司令塔＋消せない金庫」。1つのプランでRDS/EBS/DynamoDB/EFSをまとめて取得し別リージョンへコピー、Vault Lock(WORM)で保持期間中は誰も消せない・改ざんできない。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「複数サービス横断・別リージョンコピー・削除/改ざん防止・ポリシー一元管理」は全部AWS Backup＋Vault Lockの機能。自前実装(A)は保守が重く、S3 CRR(C)はオブジェクト複製で横断バックアップ管理にならない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「複数サービス横断・別リージョンコピー・削除/改ざん防止・ポリシー一元管理」は全部AWS Backup＋Vault Lockの機能。自前実装は保守が重く、S3 CRRはオブジェクト複製で横断バックアップ管理にならない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>複数サービスのバックアップ一元管理＝AWS Backup／改ざん・削除防止の追加＝Backup Vault Lock(WORM、S3 Object Lockのバックアップ版)／別リージョン保管＝クロスリージョンバックアップ</b>。規制対応で「消せないバックアップを横断管理」と来たらこの組み合わせ。`,
   confusion:[
@@ -1237,8 +1237,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>GuardDuty</b>＝「AWS環境専門の脅威検知センサー」。CloudTrail/VPCフロー/DNSのログを勝手に読み、機械学習で「これは攻撃の挙動だ」を見つける。エージェントもログ基盤も要らない。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「脅威を検知・エージェント不要・複数ログを横断・マネージド」はGuardDutyの定義。Config(C)は構成準拠の評価で脅威検知ではなく、Athena自前(A)は運用負荷大。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「脅威を検知・エージェント不要・複数ログを横断・マネージド」はGuardDutyの定義。Configは構成準拠の評価で脅威検知ではなく、Athena自前は運用負荷大。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   セキュリティ系の役割を取り違えない。<b>GuardDuty＝脅威検知(攻撃の挙動)／Inspector＝脆弱性スキャン(弱点)／Macie＝S3のPII検出(機密データ)／Config＝構成準拠／CloudTrail＝API監査ログ</b>。「不正な挙動・異常API・マイニングを検知」と来たらGuardDuty。`,
   confusion:[
@@ -1267,8 +1267,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Macie</b>＝「S3の中身を見回る個人情報ハンター」。バケットの中を自動スキャンして「ここにクレカ番号がある」「ここにマイナンバーがある」と分類して教えてくれる。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「S3内の機密データ(PII)を自動スキャン・分類」はMacieの専門。GuardDuty(B)は脅威検知、Inspector(C)は脆弱性、Comprehend自前(D)は運用負荷が高い。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「S3内の機密データ(PII)を自動スキャン・分類」はMacieの専門。GuardDutyは脅威検知、Inspectorは脆弱性、Comprehend自前は運用負荷が高い。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   検出系の対象で切り分ける。<b>Macie＝S3の機密データ(PII)／GuardDuty＝脅威・攻撃挙動／Inspector＝脆弱性(CVE)</b>。「S3に個人情報が紛れていないか」と来たら反射でMacie。`,
   confusion:[
@@ -1296,8 +1296,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Security Hub</b>＝「セキュリティの司令塔ダッシュボード」。GuardDuty/Inspector/Macieの報告をバラバラに見るのでなく、1画面に集約・優先度付け＋ベストプラクティス準拠を自動採点。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「複数サービスの検出結果を集約・標準準拠を自動チェック・一元表示」はSecurity Hubの定義。CloudWatch(B)はメトリクス監視で役割が違う。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「複数サービスの検出結果を集約・標準準拠を自動チェック・一元表示」はSecurity Hubの定義。CloudWatchはメトリクス監視で役割が違う。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>GuardDuty/Inspector/Macie＝検出する個別のセンサー／Security Hub＝それらの結果を集約して全体を見る司令塔</b>。「複数のセキュリティサービスを横断して一元管理・準拠チェック」と来たらSecurity Hub。`,
   confusion:[
@@ -1325,8 +1325,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Inspector</b>＝「弱点(脆弱性)の自動健康診断」。EC2やコンテナイメージを継続スキャンして「このバージョンに既知の穴(CVE)がある」「ここがネットから届いてしまう」を見つける。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「既知の脆弱性(CVE)を継続的・自動でスキャン」はInspectorの専門。GuardDuty(B)は脅威検知、Config(C)は構成準拠で対象が違う。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「既知の脆弱性(CVE)を継続的・自動でスキャン」はInspectorの専門。GuardDutyは脅威検知、Configは構成準拠で対象が違う。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Inspector＝脆弱性(まだ攻撃されてない弱点)を探す／GuardDuty＝実際の攻撃の挙動を検知する</b>。「CVE・パッチ未適用・ネットワーク到達性のリスク」と来たらInspector。`,
   confusion:[
@@ -1354,8 +1354,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Secrets Manager</b>＝「自動で鍵を取り替える金庫」。DBパスワードやAPIキーを暗号化して保管し、決めた周期で勝手に新しいものへローテーション。アプリは取りに来るだけ。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「安全に保管＋自動ローテーション＋APIで取得」はSecrets Managerの専門。Parameter Store(C)は保管はできるが自動ローテーション機能がなく手動が残る、自前Lambda(B)は保守負荷大。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「安全に保管＋自動ローテーション＋APIで取得」はSecrets Managerの専門。Parameter Storeは保管はできるが自動ローテーション機能がなく手動が残る、自前Lambdaは保守負荷大。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>自動ローテーションが要る→Secrets Manager／単なる設定値や保管だけ(ローテーション不要)で安く済ませる→Parameter Store</b>。「定期的にパスワードを自動更新」と来たらSecrets Manager。`,
   confusion:[
@@ -1383,8 +1383,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Parameter Store</b>＝「安い設定値の保管棚」。機能フラグやURL、ちょっとしたシークレットを階層で整理して保管。標準パラメータは追加料金なし。暗号化(SecureString)もIAM制御もできる。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「自動ローテーション不要・コストを抑えたい・階層管理・暗号化」はParameter Storeの守備範囲。Secrets Manager(A)はローテーション機能つきで割高、コード埋め込み(B)は一元管理にならない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「自動ローテーション不要・コストを抑えたい・階層管理・暗号化」はParameter Storeの守備範囲。Secrets Managerはローテーション機能つきで割高、コード埋め込みは一元管理にならない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>ローテーション不要で安く→Parameter Store／自動ローテーションが要る→Secrets Manager</b>。「設定値が多い・ローテーション不要・コスト重視」と来たらParameter Store。逆に「定期的に自動でパスワード更新」ならSecrets Manager。`,
   confusion:[
@@ -1412,8 +1412,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>IAM Identity Center</b>＝「社員用の一括ログイン窓口」。社内のAD等と繋いで、社員は1回ログインすれば権限に応じた複数アカウントへ入れる。アカウントごとのユーザー作成は不要。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「社員・複数アカウント・AD連携・一度のサインイン」はIAM Identity Centerの定義。Cognito(B)はアプリのお客さん向けで対象が違う。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「社員・複数アカウント・AD連携・一度のサインイン」はIAM Identity Centerの定義。Cognitoはアプリのお客さん向けで対象が違う。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>IAM Identity Center＝社員(従業員)のSSO・複数アカウントアクセス／Cognito＝アプリのエンドユーザー(toC)の認証</b>。「社員が複数アカウントにSSOで」と来たらIAM Identity Center。`,
   confusion:[
@@ -1441,8 +1441,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>クロスアカウントロール＋STS AssumeRole</b>＝「相手の家の合鍵を渡すのでなく、来客用バッジを発行する」。アカウントBが『Aさんなら入っていい』とロールを用意し、AさんはAssumeRoleで期限つきの一時バッジ(一時認証情報)をもらって入る。長期キーのやり取りなし。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「別アカウント・長期キーを避ける・許可範囲だけ・一時認証情報」はクロスアカウントロールの定義。アクセスキー共有(B)やルートキー(C)は長期キー漏洩リスクで真逆。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「別アカウント・長期キーを避ける・許可範囲だけ・一時認証情報」はクロスアカウントロールの定義。アクセスキー共有やルートキーは長期キー漏洩リスクで真逆。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>クロスアカウントは「アクセスキーをコピー」でなく「ロールをAssumeRole」が定石</b>。アクセスされる側にロール＋信頼ポリシー、アクセスする側はsts:AssumeRoleで一時認証情報。「長期キーを配らずに別アカウントへ」と来たらロール。`,
   confusion:[
@@ -1471,8 +1471,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>AWS Budgets</b>＝「予算の見張り番」。決めた予算に近づく/超えそう(予測)になったら事前にアラート。</div>
   <div class="nick"><b>Cost Anomaly Detection</b>＝「いつもと違う出費を見つける番犬」。機械学習で普段の使い方を覚えていて、急な異常増(設定ミス/不正)を自動で知らせる。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「予算しきい値の事前通知＋異常増の自動検知」の2要件は、Budgets＋Cost Anomaly Detectionの組み合わせがちょうど満たす。Cost Explorer(A)は事後分析、CloudWatch請求アラーム(B)は単純なしきい値のみ。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「予算しきい値の事前通知＋異常増の自動検知」の2要件は、Budgets＋Cost Anomaly Detectionの組み合わせがちょうど満たす。Cost Explorerは事後分析、CloudWatch請求アラームは単純なしきい値のみ。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   コスト系の役割。<b>Cost Explorer＝過去の可視化・分析／Budgets＝予算としきい値アラート(先回り)／Cost Anomaly Detection＝MLで異常増を自動検知</b>。「事前に・異常を自動で気づく」と来たらBudgets＋Cost Anomaly Detection。`,
   confusion:[
@@ -1501,8 +1501,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Resource Access Manager(RAM)</b>＝「リソースの貸し出しカウンター」。サブネットやTransit Gatewayを各アカウントで作り直すのでなく、持ち主アカウントが所有したまま他アカウントに『使っていいよ』と共有する。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「所有は集約・複数アカウントで共有・重複作成を避ける」はRAMの定義。個別作成＋ピアリング(B)やStackSets複製(C)は重複そのもの。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「所有は集約・複数アカウントで共有・重複作成を避ける」はRAMの定義。個別作成＋ピアリングやStackSets複製は重複そのもの。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>RAM＝リソースそのものを複数アカウントで共有して使う(VPCサブネット/TGW/Resolverルール等)／StackSets＝同じ構成を各アカウントに複製する(別々の実体)</b>。「ネットワーク基盤を1つに集約して共有」と来たらRAM。`,
   confusion:[
@@ -1530,8 +1530,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>NAT Gateway</b>＝「中→外だけ通す自動ドアの取次窓口」。プライベートな部屋から外には出られるが、外から中へは開始できない。マネージドで勝手に冗長化・スケール。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「外向きだけ・インバウンド拒否・マネージド・自前運用なし」はNAT Gatewayの定義。NATインスタンス(B)は自前運用、パブリックIP(A)はインバウンド到達可で要件違反。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「外向きだけ・インバウンド拒否・マネージド・自前運用なし」はNAT Gatewayの定義。NATインスタンスは自前運用、パブリックIPはインバウンド到達可で要件違反。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>NAT Gateway(マネージド・高可用・スケール)とNATインスタンス(自前EC2・冗長化やスケールを自分で・ソース/デスティネーションチェック無効化が必要)の違いが頻出</b>。「運用負荷を下げたい」ならNAT Gateway。AZ障害に備えるならAZごとに配置。`,
   confusion:[
@@ -1561,8 +1561,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Direct Connect</b>＝「オンプレとAWSを結ぶ専用の高速道路」。一般道(インターネット)の渋滞と無縁で、帯域もレイテンシも安定。敷設に時間とコストはかかる。</div>
   <div class="nick"><b>Site-to-Site VPN</b>＝「一般道に引いた暗号化トンネル」。すぐ安く作れるがインターネットの混雑に左右される。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「一貫した帯域・低レイテンシ・インターネット非経由の物理接続・安定優先」はDirect Connectの定義。VPN増設(B)はインターネット依存が残る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「一貫した帯域・低レイテンシ・インターネット非経由の物理接続・安定優先」はDirect Connectの定義。VPN増設はインターネット依存が残る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Direct Connect＝専用線・安定性能・高コスト・敷設に時間／VPN＝インターネット経由・すぐ安く・性能は不安定</b>。「一貫した性能・専用接続・大量データ」と来たらDirect Connect。「とにかく早く安く暗号化接続」ならVPN。`,
   confusion:[
@@ -1590,8 +1590,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Direct Connect＋VPNバックアップ</b>＝「普段は専用高速道路、事故で通行止めなら自動で一般道(VPN)に迂回」。専用線の安定性を主に使いつつ、断線時はVPNへ自動切替。2本目の専用線より安い。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「単一障害点の解消・自動フェイルオーバー・コスト抑制」を全部満たすのがDX主＋VPNバックアップ。DX2本(A)は最も堅いがコスト高、手動(C)は自動要件に反する。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「単一障害点の解消・自動フェイルオーバー・コスト抑制」を全部満たすのがDX主＋VPNバックアップ。DX2本は最も堅いがコスト高、手動は自動要件に反する。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>最高の冗長性＝Direct Connect 2本(別ロケーション)／コスト重視の冗長性＝Direct Connect＋VPNバックアップ</b>。問題文の「コストを抑えて」がVPNバックアップを選ばせるキー。「最も堅牢に」ならDX2本が正解になることもある。`,
   confusion:[
@@ -1619,8 +1619,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>VPCピアリング</b>＝「2拠点を結ぶ直通バス」。VPCが2つだけなら一番シンプルで安い。ルートテーブルに相手への経路を1行足すだけ。CIDRがかぶると使えない。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「2VPCだけ・増えない・CIDR重複なし・最小限・低コスト」はVPCピアリングの得意分野。Transit Gateway(B)は多数VPC向けで2つには過剰。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「2VPCだけ・増えない・CIDR重複なし・最小限・低コスト」はVPCピアリングの得意分野。Transit Gatewayは多数VPC向けで2つには過剰。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>少数VPCの1対1＝VPCピアリング(シンプル・安い)／多数VPC＋オンプレを集約＝Transit Gateway(ハブ・スケール)</b>。「2つだけ・増えない」と来たらピアリング、「数十のVPCを束ねる」ならTransit Gateway。`,
   confusion:[
@@ -1649,7 +1649,7 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>セキュリティグループ</b>＝「インスタンスのボディガード」。許可リストだけ持ち、行きを許せば戻りは自動でOK(ステートフル)。拒否は書けない。</div>
   <div class="nick"><b>ネットワークACL</b>＝「サブネット入口の門番」。許可も拒否も書ける(ステートレスなので行きと戻りを両方書く)。特定IPの明示拒否はこっち。</div>
-  <div class="dh">💡 なぜCが正解か</div>
+  <div class="dh">💡 なぜこれが正解か</div>
   「インスタンス単位・戻り自動許可」＝SG、「サブネット単位・明示拒否・ステートレス」＝NACL、と特性が正しく対応するのはC。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>SG＝インスタンス単位・ステートフル・許可のみ／NACL＝サブネット単位・ステートレス・許可と拒否</b>。「特定IPを明示的に拒否したい」→NACL(SGでは拒否を書けない)。「戻り通信を自動で許可」→SG。この2点の取り違えが最頻出。`,
@@ -1678,8 +1678,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>位置情報(Geolocation)ルーティング</b>＝「国ごとに案内先を変える受付」。日本からなら日本向け、欧州なら欧州向け、と所在国で確実に振り分ける。ライセンス制限に最適。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「所在国/地域で確実に出し分け・コンプライアンス・レイテンシではない」は位置情報ルーティングの定義。レイテンシ(A)は速さで選ぶので国の確実な制限にならない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「所在国/地域で確実に出し分け・コンプライアンス・レイテンシではない」は位置情報ルーティングの定義。レイテンシは速さで選ぶので国の確実な制限にならない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   Route 53ポリシーの使い分け。<b>位置情報＝ユーザーの国/地域で出し分け(コンプライアンス)／レイテンシ＝最も速いリージョンへ／加重＝比率配分(カナリア/AB)／フェイルオーバー＝可用性／地理的近接＝リソースの地理的位置とバイアスで最適化</b>。「国で確実に分ける」と来たら位置情報。`,
   confusion:[
@@ -1707,8 +1707,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>VPCフローログ</b>＝「ネットワークの通行記録」。どのIPからどのIP・ポートへの通信が許可(ACCEPT)/拒否(REJECT)されたかを記録。SG/NACLの設定ミス切り分けに必須。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「許可/拒否を含む通信メタデータを記録・トラブルシュート」はVPCフローログの専門。CloudTrail(A)はAPI操作ログで通信は記録しない、GuardDuty(D)は脅威検知。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「許可/拒否を含む通信メタデータを記録・トラブルシュート」はVPCフローログの専門。CloudTrailはAPI操作ログで通信は記録しない、GuardDutyは脅威検知。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   ログ系3兄弟。<b>VPCフローログ＝通信(どのIPがどこへ・許可/拒否)／CloudTrail＝API操作(誰が何のAPIを)／CloudWatch Logs＝アプリ/OSのログ</b>。「通信が通った/拒否された・SG/NACLの切り分け」と来たらVPCフローログ。なお中身(ペイロード)は記録しない(メタデータのみ)。`,
   confusion:[
@@ -1736,8 +1736,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Gateway Load Balancer(GWLB)</b>＝「セキュリティ検査場へ全車を通す誘導係」。サードパーティのファイアウォール/IDS/IPSを何台も並べ、通る全トラフィックを透過的にそこへ流し、混んだら増やし故障したら避ける。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「サードパーティアプライアンス・全トラフィックを透過的にインライン検査・スケール・ヘルスチェック」はGWLBの専用用途。ALB(A)はHTTP向け、WAF(D)はマネージドで自前アプライアンスを通さない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「サードパーティアプライアンス・全トラフィックを透過的にインライン検査・スケール・ヘルスチェック」はGWLBの専用用途。ALBはHTTP向け、WAFはマネージドで自前アプライアンスを通さない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   ロードバランサーの使い分け。<b>ALB＝L7 HTTP／NLB＝L4 超低遅延・固定IP／GWLB＝サードパーティのセキュリティアプライアンスを透過的に挿入</b>。「自前/サードパーティの仮想ファイアウォール群にトラフィックを通す」と来たらGWLB。`,
   confusion:[
@@ -1765,8 +1765,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Egress-Only Internet Gateway</b>＝「IPv6専用の中→外だけドア」。NAT GatewayのIPv6版。外には出られるが外から中へは開始できない。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「IPv6・アウトバウンドのみ・インバウンド開始を防ぐ・NAT Gateway相当」はEgress-Only IGWの定義。NAT Gateway(A)はIPv4用で対象が違う。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「IPv6・アウトバウンドのみ・インバウンド開始を防ぐ・NAT Gateway相当」はEgress-Only IGWの定義。NAT GatewayはIPv4用で対象が違う。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>IPv4の外向き専用＝NAT Gateway／IPv6の外向き専用＝Egress-Only Internet Gateway</b>。IPv6はグローバルアドレスでNATを使わないため専用ゲートウェイがある。「IPv6でプライベートな外向き通信」と来たらEgress-Only IGW。`,
   confusion:[
@@ -1795,8 +1795,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Client VPN</b>＝「社員一人ひとりの端末用VPN」。在宅PCからVPCへマネージドに接続。AD/SAML/証明書で認証し、人数が増えても自動でスケール。</div>
   <div class="nick"><b>Site-to-Site VPN</b>＝「拠点と拠点を結ぶVPN」。会社のネットワーク同士をつなぐもので、個々の端末用ではない。</div>
-  <div class="dh">💡 なぜBが正解か</div>
-  「個々の端末・多数の社員・ID連携認証・マネージドにスケール」はClient VPNの定義。Site-to-Site(A)は拠点間で対象が違う。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「個々の端末・多数の社員・ID連携認証・マネージドにスケール」はClient VPNの定義。Site-to-Siteは拠点間で対象が違う。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Client VPN＝端末(人)単位のリモートアクセス(在宅勤務)／Site-to-Site VPN＝拠点(ネットワーク)同士の接続(オフィス-AWS)</b>。「在宅社員が個々にVPCへ」と来たらClient VPN。`,
   confusion:[
@@ -1824,8 +1824,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Kinesis Data Firehose</b>＝「溜めて整えてS3へ届けるだけの全自動ベルトコンベア」。シャードもコンシューマーも管理不要。変換・圧縮もついでにやってS3/Redshift/OpenSearchへニアリアルタイム配信。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「とにかくS3へマネージド配信・変換圧縮込み・管理したくない・保持/リプレイ不要」はFirehoseの定義。Data Streams(A)は保持/複数読み/リプレイが要るときの選択で運用が重い。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「とにかくS3へマネージド配信・変換圧縮込み・管理したくない・保持/リプレイ不要」はFirehoseの定義。Data Streamsは保持/複数読み/リプレイが要るときの選択で運用が重い。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Firehose＝配信専門・ほぼ全自動・リプレイ不可／Data Streams＝保持・複数独立読み・リプレイ可・シャード管理あり</b>。「とにかくS3/Redshiftへ流すだけ」→Firehose、「巻き戻す/複数が別々に読む」→Data Streams。`,
   confusion:[
@@ -1853,8 +1853,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Redshift</b>＝「大規模分析専用の常駐DWH」。列指向＋分散並列(MPP)で、ペタバイト級の複雑集計を高速に。データをロードして高頻度のBIを安定して回す。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「ペタバイト級・複雑集計を高頻度・常時稼働・列指向/MPP」はRedshiftの定義。Athena(B)は低頻度アドホック向き、RDS(C)は行指向OLTPで大規模分析に不向き。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「ペタバイト級・複雑集計を高頻度・常時稼働・列指向/MPP」はRedshiftの定義。Athenaは低頻度アドホック向き、RDSは行指向OLTPで大規模分析に不向き。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Athena＝S3に直接・低頻度アドホック・サーバーレス／Redshift＝ロードして高頻度・大規模・常時のBI(列指向DWH)／RDS＝トランザクション処理(OLTP)</b>。「常時・高頻度・複雑・大規模なBI」と来たらRedshift。`,
   confusion:[
@@ -1884,8 +1884,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>EMR</b>＝「マネージドなビッグデータクラスタ」。Hadoop/Spark/Presto/Hive等をそのまま動かせて、ノードの台数・種類・バージョンを自分で細かく調整できる。</div>
   <div class="nick"><b>Glue</b>＝「サーバーレスETL」。手軽だがクラスタの細かい制御はできない。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「Hadoop/Sparkエコシステムをそのまま・クラスタを細かく制御・大規模処理」はEMRの守備範囲。Glue(A)はサーバーレスで制御が効かず、EC2手動(B)は運用負荷大。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「Hadoop/Sparkエコシステムをそのまま・クラスタを細かく制御・大規模処理」はEMRの守備範囲。Glueはサーバーレスで制御が効かず、EC2手動は運用負荷大。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Glue＝サーバーレスETL・管理不要・標準的な変換／EMR＝Hadoop/Sparkクラスタを細かく制御・多様なエコシステム・大規模/特殊処理</b>。「クラスタをチューニングしたい・既存Hadoop資産・HBase/Presto」と来たらEMR。`,
   confusion:[
@@ -1913,8 +1913,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Lake Formation</b>＝「データレイクの一括権限管理人」。S3データレイクの取り込み・カタログ化を楽にし、テーブル/列/行レベルの権限を1か所で定義。Athena/Redshift Spectrum/EMRが全部その権限に従う。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「テーブル/列/行レベルの一元権限・複数分析サービスから統一・構築簡素化」はLake Formationの定義。個別ポリシー(B)はその煩雑さこそ解決対象。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「テーブル/列/行レベルの一元権限・複数分析サービスから統一・構築簡素化」はLake Formationの定義。個別ポリシーはその煩雑さこそ解決対象。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Glue Data Catalog＝メタデータの目録／Lake Formation＝その上にきめ細かいアクセス権限と構築の簡素化を載せるガバナンス層</b>。「データレイクの権限を列/行レベルで一元管理」と来たらLake Formation。`,
   confusion:[
@@ -1942,8 +1942,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Managed Service for Apache Flink</b>＝「流れている川の水を流れたまま分析する装置」。ストリームに対し直近5分平均や異常検知を継続的に計算し、結果を即下流へ。クラスタ管理は不要。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「ストリームにリアルタイムでウィンドウ集計/異常検知・継続クエリ・マネージド」はManaged Flinkの定義。Athena(A)はバッチ、EMR(B)はクラスタ管理が残る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「ストリームにリアルタイムでウィンドウ集計/異常検知・継続クエリ・マネージド」はManaged Flinkの定義。Athenaはバッチ、EMRはクラスタ管理が残る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>ストリームを「運ぶ」＝Kinesis Data Streams/Firehose／ストリームを流れたまま「分析する」＝Managed Service for Apache Flink(リアルタイムウィンドウ集計)／溜めてから分析＝Athena/Redshift</b>。「流れている最中にリアルタイム集計」と来たらManaged Flink。`,
   confusion:[
@@ -1971,8 +1971,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Glue DataBrew</b>＝「コード不要のデータ整え職人(GUI)」。欠損埋め・型変換・正規化をマウス操作で行い、手順をレシピとして保存して使い回す。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「コードを書かない・視覚的にクレンジング・レシピ再利用」はGlue DataBrewの定義。Glueジョブ(B)/EMR(C)/Athena(D)はいずれもコード(PySpark/SQL)記述が必要。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「コードを書かない・視覚的にクレンジング・レシピ再利用」はGlue DataBrewの定義。Glueジョブ/EMR/Athenaはいずれもコード(PySpark/SQL)記述が必要。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Glue DataBrew＝ノーコードGUIのデータ準備(非エンジニア向け)／Glue(ジョブ)＝コードを書くサーバーレスETL(エンジニア向け)</b>。「コードを書かずに視覚的にクレンジング」と来たらDataBrew。`,
   confusion:[
@@ -2000,8 +2000,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Redshift Spectrum</b>＝「Redshiftの手を伸ばしてS3を直接読む機能」。よく使うデータはDWHに置き、たまにしか使わない大量データはS3に置いたまま、Redshiftから直接クエリして結合できる。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「Redshiftから・S3を直接クエリ・ロード済みと結合・コールドデータのロード回避」はRedshift Spectrumの定義。全ロード(A)はコストと手間で要件に反する。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「Redshiftから・S3を直接クエリ・ロード済みと結合・コールドデータのロード回避」はRedshift Spectrumの定義。全ロードはコストと手間で要件に反する。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Athena＝独立してS3にSQL／Redshift Spectrum＝Redshiftの中からS3を直接読み、ロード済みデータと結合できる(ホット＝Redshift、コールド＝S3の使い分け)</b>。「Redshiftにロードせず・既存テーブルと結合」と来たらSpectrum。`,
   confusion:[
@@ -2029,8 +2029,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Timestream</b>＝「時系列データ専用の倉庫」。毎秒の計測値を効率よく書き込み、時間軸の集計を高速に。新しいデータは速い棚、古いデータは自動で安い棚へ移す。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「時系列・大量書き込み・時間クエリ高速・古いデータ自動階層化」はTimestreamの定義。RDS(A)は時系列で破綻、DynamoDB(B)は時系列特化の最適化がない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「時系列・大量書き込み・時間クエリ高速・古いデータ自動階層化」はTimestreamの定義。RDSは時系列で破綻、DynamoDBは時系列特化の最適化がない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   データストアの使い分け。<b>Timestream＝時系列(IoT/メトリクス)／DynamoDB＝キーバリューの高速スケール／RDS・Aurora＝リレーショナル(OLTP)／Redshift＝大規模分析(OLAP)</b>。「タイムスタンプ・メトリクス・時間範囲集計」と来たらTimestream。`,
   confusion:[
@@ -2059,8 +2059,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>gp3</b>＝「容量と性能を別々に注文できる汎用SSD」。gp2のバースト枯渇から解放され、必要なIOPS/スループットを独立指定。コスパが良い標準。</div>
   <div class="nick"><b>io2 Block Express</b>＝「最高級のプロビジョンドIOPS SSD」。サブミリ秒・超高IOPS・99.999%耐久。ミッションクリティカルDB用。</div>
-  <div class="dh">💡 なぜCが正解か</div>
-  「一貫性能をコスト効率よく＝gp3」「極めて高IOPS・高耐久のクリティカルDB＝io2」と用途で正しく対応するのはC。マグネティック(A)は高IOPS不向き、gp2拡大(B)は根本解決でない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「一貫性能をコスト効率よく＝gp3」「極めて高IOPS・高耐久のクリティカルDB＝io2」と用途で正しく対応するのはC。マグネティックは高IOPS不向き、gp2拡大は根本解決でない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   EBSタイプの使い分け。<b>gp3＝汎用SSD・性能独立設定・標準／io1/io2＝プロビジョンドIOPS・高性能DB／st1＝スループット最適化HDD(ログ/ビッグデータ)／sc1＝コールドHDD(低頻度)</b>。「一貫性能・コスト」→gp3、「極めて高IOPS・クリティカル」→io2。`,
   confusion:[
@@ -2089,8 +2089,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>FSx for Lustre</b>＝「HPC/ML専用の超高速並列ファイルシステム」。S3と連携し、数百GB/秒で多数の計算ノードへ並列にデータを供給。汎用NFS(EFS)では出せない速度。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「HPC/ML・数百GB/秒・サブミリ秒・並列・S3連携」はFSx for Lustreの定義。EFS(A)は汎用NFSで速度不足、EBS(B)は単一ノード向け。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「HPC/ML・数百GB/秒・サブミリ秒・並列・S3連携」はFSx for Lustreの定義。EFSは汎用NFSで速度不足、EBSは単一ノード向け。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   ファイルストレージの使い分け。<b>FSx for Lustre＝HPC/MLの超高性能並列・S3連携／FSx for Windows＝Windows SMB/AD／EFS＝Linux汎用NFS共有／EBS＝1台専用ブロック</b>。「HPC・機械学習・超高スループット・S3」と来たらFSx for Lustre。`,
   confusion:[
@@ -2118,8 +2118,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Application Migration Service(MGN)</b>＝「サーバーまるごと引っ越し自動化」。オンプレのサーバーをブロックレベルでコピーし続け、テスト起動で確認してから短い停止でEC2へ切り替え。アプリは書き換え不要。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「サーバーをそのまま・ブロックレベル継続レプリ・テスト起動・短いカットオーバー」はMGNの定義(リフトアンドシフト)。DataSync(C)はファイル、DMS(D)はDBで対象が違う。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「サーバーをそのまま・ブロックレベル継続レプリ・テスト起動・短いカットオーバー」はMGNの定義(リフトアンドシフト)。DataSyncはファイル、DMSはDBで対象が違う。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   移行ツールの対象で切り分け。<b>MGN＝サーバーまるごと(リフトアンドシフト)／DMS＝データベース／DataSync＝ファイル・オブジェクト／Snowball＝大容量の物理搬送</b>。「サーバーをそのままEC2へ大量移行」と来たらMGN。`,
   confusion:[
@@ -2148,8 +2148,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>FSx for NetApp ONTAP</b>＝「AWS上の本物のNetApp」。NFSもSMBも使え、スナップショット・クローン・重複排除などONTAPの機能がそのまま。NetApp依存の運用を変えずに移行できる。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「ONTAP機能依存・NFSとSMB両方・そのまま活かす」はFSx for NetApp ONTAPの存在意義。EFS(A)はNFS専用、FSx Windows(B)はSMB専用で片方しか満たせない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「ONTAP機能依存・NFSとSMB両方・そのまま活かす」はFSx for NetApp ONTAPの存在意義。EFSはNFS専用、FSx WindowsはSMB専用で片方しか満たせない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   FSxファミリーの使い分け。<b>NetApp ONTAP＝マルチプロトコル(NFS/SMB)＋ONTAP機能・NetApp移行／Windows＝SMB/NTFS/AD／Lustre＝HPC/ML高性能／OpenZFS＝Linux/NFSの高性能</b>。「NetApp依存・NFSとSMB両方」と来たらFSx for NetApp ONTAP。`,
   confusion:[
@@ -2177,8 +2177,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Storage Gateway ボリュームゲートウェイ</b>＝「iSCSIの顔をしたクラウドバックアップ＋DR」。オンプレにiSCSIブロックを見せつつ、裏でAWSにスナップショット保存。よく使う部分はローカルキャッシュ。災害時はEBSで復元。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「iSCSIブロック・AWSバックアップ・ローカルキャッシュ・EBS復元」はボリュームゲートウェイの定義。DataSync(B)はファイル、FSx Windows(D)はSMBで対象が違う。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「iSCSIブロック・AWSバックアップ・ローカルキャッシュ・EBS復元」はボリュームゲートウェイの定義。DataSyncはファイル、FSx WindowsはSMBで対象が違う。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   Storage Gatewayの3タイプ。<b>ファイルゲートウェイ＝SMB/NFS→S3／ボリュームゲートウェイ＝iSCSIブロック→EBSスナップショット(バックアップ/DR)／テープゲートウェイ＝仮想テープ(VTL)→S3/Glacier(バックアップソフト連携)</b>。「iSCSIブロックのバックアップ/DR」と来たらボリュームゲートウェイ。`,
   confusion:[
@@ -2207,8 +2207,8 @@ const QUESTIONS = [
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Application Discovery Service</b>＝「オンプレの自動棚卸し係」。どんなサーバーがあり何に依存し、どれくらい使われているかを自動収集。移行計画の元データになる。</div>
   <div class="nick"><b>Migration Hub</b>＝「移行プロジェクトの司令塔ダッシュボード」。MGN/DMS等の進捗を1画面で横断追跡。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「自動ディスカバリ＋計画＋複数ツールの進捗を一元追跡」はDiscovery Service＋Migration Hubの組み合わせ。個別確認＋手動集約(A)や手動ヒアリング(C)は大規模で破綻。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「自動ディスカバリ＋計画＋複数ツールの進捗を一元追跡」はDiscovery Service＋Migration Hubの組み合わせ。個別確認＋手動集約や手動ヒアリングは大規模で破綻。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Application Discovery Service＝移行前の発見(構成・依存関係の自動把握)／Migration Hub＝計画と複数ツールの進捗の一元管理</b>。「大規模移行の全体像把握・進捗を横断追跡」と来たらこの2つ。`,
   confusion:[
@@ -2236,8 +2236,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>App Runner</b>＝「イメージを渡すだけで公開される一番楽なコンテナ実行」。ビルド・デプロイ・LB・自動スケール・HTTPSを全部おまかせ。VPCもLBもクラスタも自分で組まない。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「最小の手間・イメージ指定だけ・LB/スケール/HTTPSまで全自動」はApp Runnerの抽象度。ECS Fargate(B)/EKS(C)は構成を自分で組む手間が残る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「最小の手間・イメージ指定だけ・LB/スケール/HTTPSまで全自動」はApp Runnerの抽象度。ECS Fargate/EKSは構成を自分で組む手間が残る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   コンテナの抽象度の階段。<b>App Runner＝最も簡単(Webアプリ/APIをイメージ指定だけ・構成不要)／ECS on Fargate＝サーバーレスだが構成は自分で／EKS＝Kubernetesで最も柔軟だが手間最大</b>。「とにかく最小の手間でコンテナWebアプリを公開」と来たらApp Runner。`,
   confusion:[
@@ -2265,8 +2265,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Elastic Beanstalk</b>＝「コードを渡すと環境一式を組んでくれる執事」。EC2・ELB・Auto Scaling・監視を自動構築。でも執事に任せきりでなく、配下のEC2を直接いじる余地も残っている。</div>
-  <div class="dh">💡 なぜDが正解か</div>
-  「コードを上げるだけ・環境自動構築・でも基盤を細かく制御できる」はElastic Beanstalkの特徴。手作業構成(A)は手間、Lambda(B)/Fargate(C)はアプリの作り替えが要る。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「コードを上げるだけ・環境自動構築・でも基盤を細かく制御できる」はElastic Beanstalkの特徴。手作業構成は手間、Lambda/Fargateはアプリの作り替えが要る。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>Elastic Beanstalk＝EC2ベースの環境を自動構築しつつ基盤も制御できる(楽さと制御の中間)／App Runner＝コンテナをさらに抽象化(制御は少ない)／Fargate/EKS＝コンテナ前提</b>。「既存Webアプリをコードアップロードで・EC2を制御できる余地も」と来たらElastic Beanstalk。`,
   confusion:[
@@ -2294,8 +2294,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>AWS Batch</b>＝「大量ジョブの自動配車係」。ジョブをキューに積めば、必要な計算リソースを自動で用意して走らせ、終わったら片付ける。スポットも使え、依存関係・優先度も管理。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「大量ジョブ・キュー・自動プロビジョニング/スケール・依存/優先度・自前運用なし」はAWS Batchの定義。EC2自前(B)は運用負荷大、Lambda(C)は15分制限で重い計算に不向き。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「大量ジョブ・キュー・自動プロビジョニング/スケール・依存/優先度・自前運用なし」はAWS Batchの定義。EC2自前は運用負荷大、Lambdaは15分制限で重い計算に不向き。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>AWS Batch＝大量の独立した計算ジョブをキューで自動スケール実行(HPC/レンダリング/シミュレーション)／Lambda＝軽量・短時間のイベント処理／EMR＝Hadoop/Sparkの分散データ処理</b>。「大量のバッチジョブ・自動スケール・依存管理」と来たらAWS Batch。`,
   confusion:[
@@ -2323,8 +2323,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>Fargate Spot</b>＝「サーバーレス版の激安席」。Fargateの手軽さのまま、中断され得る代わりに大幅割引。中断OKなバッチ/ワーカー向け。中断NGのAPIは通常Fargateで。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「Fargateのまま・中断耐性タスクは最大割引・フロントAPIは中断回避」は、タスクの性質でFargate SpotとFargateを使い分けるのが正解。全Spot(C)はAPIまで危険、全通常(B)は割引を捨てる。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「Fargateのまま・中断耐性タスクは最大割引・フロントAPIは中断回避」は、タスクの性質でFargate SpotとFargateを使い分けるのが正解。全SpotはAPIまで危険、全通常は割引を捨てる。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>EC2スポット＝EC2の激安・中断あり／Fargate Spot＝サーバーレス(Fargate)の激安・中断あり</b>。「Fargateのままコストを下げたい・中断OKなタスク」と来たらFargate Spot。中断耐性の有無で振り分けるのが定石。`,
   confusion:[
@@ -2352,8 +2352,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>DynamoDB Global Tables</b>＝「世界中のどの支店でも読み書きできる台帳」。複数リージョンが全部書き込みOK(マルチアクティブ)で、変更は自動で双方向に同期。1リージョン落ちても他で継続。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「複数リージョンで同時に読み書き(マルチアクティブ)・自動レプリケーション・リージョン障害で継続」はGlobal Tablesの定義。Aurora Global DB(D)は書き込みが基本1リージョンでマルチアクティブではない。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「複数リージョンで同時に読み書き(マルチアクティブ)・自動レプリケーション・リージョン障害で継続」はGlobal Tablesの定義。Aurora Global DBは書き込みが基本1リージョンでマルチアクティブではない。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   <b>DynamoDB Global Tables＝全リージョンで読み書きできる(マルチアクティブ)／Aurora Global Database＝書き込みは原則プライマリ1リージョンのみ＋他リージョンは高速読み取りレプリカ＋災害時に昇格</b>。「全リージョンで読み書き・キーバリュー」ならGlobal Tables、「複雑SQL・複数リージョン」ならAurora Global DB。これが最頻出の引っかけ。`,
   confusion:[
@@ -2381,8 +2381,8 @@ const QUESTIONS = [
   deep:`
   <div class="dh">🏷 出てきたものの「あだ名」</div>
   <div class="nick"><b>マルチAZ構成(ALB＋Auto Scaling＋RDSマルチAZ)</b>＝「同じ店を複数の建物に分散」。1つの建物(AZ)が火事でも、別の建物で営業を続けられる。ALBが生きてるEC2へ振り分け、RDSは別AZのスタンバイが自動昇格。</div>
-  <div class="dh">💡 なぜAが正解か</div>
-  「リージョン内のAZ障害に耐える・マルチリージョン不要・コスト合理的」は複数AZ分散＋ALB＋ASG＋RDSマルチAZの定石。垂直スケール(B)は単一AZのままで無意味、別リージョン(C)は過剰。
+  <div class="dh">💡 なぜこれが正解か</div>
+  「リージョン内のAZ障害に耐える・マルチリージョン不要・コスト合理的」は複数AZ分散＋ALB＋ASG＋RDSマルチAZの定石。垂直スケールは単一AZのままで無意味、別リージョンは過剰。
   <div class="dh">⚠️ つまずきやすい言葉</div>
   可用性の階層。<b>マルチAZ＝同一リージョン内のAZ障害対策(これが基本の高可用)／マルチリージョン(Aurora Global DB/Route53フェイルオーバー)＝リージョン全体の災害対策</b>。「AZ障害に耐える・リージョン内・コスト合理的」と来たら複数AZ＋ALB＋ASG＋RDSマルチAZ。リージョン災害まで問われたらマルチリージョン。`,
   confusion:[
