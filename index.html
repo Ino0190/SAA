@@ -75,6 +75,9 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .confbox{margin-top:12px;background:rgba(255,153,0,.1);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.75}
 .confbox .confh{color:var(--accent);font-weight:700;margin-bottom:5px}
 .confbox b{color:#fff}
+.confpair{margin-top:8px}
+.confpair .confvs{margin-bottom:2px}
+.confpair .confd{padding-left:2px}
 /* 用語ミニ辞典 */
 .termbox{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 14px}
 .termrow{font-size:14px;line-height:1.7;padding:7px 0;border-bottom:1px dashed var(--line)}
@@ -482,7 +485,17 @@ function revealAnswer(){
   // 間違えやすいペア
   let conf='';
   if(q.confusion){
-    conf='<div class="confbox"><div class="confh">⚡ 混同注意</div>'+q.confusion+'</div>';
+    let confBody;
+    if(Array.isArray(q.confusion)){
+      // v3形式：{a,b,d} の対比ペア配列
+      confBody=q.confusion.map(c=>
+        '<div class="confpair"><div class="confvs"><b>'+c.a+'</b> ⇔ <b>'+c.b+'</b></div><div class="confd">'+c.d+'</div></div>'
+      ).join('');
+    }else{
+      // 旧形式：HTML文字列
+      confBody=q.confusion;
+    }
+    conf='<div class="confbox"><div class="confh">⚡ 混同注意</div>'+confBody+'</div>';
   }
   let more='';
   if(q.deep){more='<button class="moreBtn" id="moreBtn" onclick="toggleDeep()">🔍 もっと詳しく（なぜ？）</button>'+
