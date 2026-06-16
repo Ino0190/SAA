@@ -90,6 +90,10 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .promptBtn{margin-top:10px;width:100%;background:var(--accent);border:none;color:#1a1200;border-radius:12px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
 .promptBtn:active{opacity:.85}
 .promptHint{font-size:13px;color:var(--sub);margin-top:6px;line-height:1.6}
+/* 自信がなかった（復習に入れる） */
+.unsureBtn{margin-top:10px;width:100%;background:var(--card);border:1px solid var(--sub);color:var(--sub);border-radius:12px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+.unsureBtn:active{background:var(--card2)}
+.unsureBtn.done{border-color:var(--accent);color:var(--accent);background:rgba(255,153,0,.08)}
 .patternBtn{display:block;margin-top:10px;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;background:var(--card);border:1px solid var(--accent);color:var(--accent);border-radius:12px;padding:13px;font-size:16px;font-weight:700;font-family:inherit}
 .patternBtn:active{background:var(--card2)}
 .deep{display:none;margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;font-size:15px;line-height:1.85}
@@ -345,13 +349,14 @@ function loadProgress(){
     const p=JSON.parse(localStorage.getItem(LS_KEY))||{};
     p.seen=p.seen||{};p.wrong=p.wrong||{};
     p.wrongCount=p.wrongCount||{};p.correctCount=p.correctCount||{};
+    p.unsure=p.unsure||{};
     return p;
-  }catch(e){return{seen:{},wrong:{},wrongCount:{},correctCount:{}}}
+  }catch(e){return{seen:{},wrong:{},wrongCount:{},correctCount:{},unsure:{}}}
 }
 function saveProgress(){localStorage.setItem(LS_KEY,JSON.stringify(progress))}
 function resetProgress(){
   if(!confirm('進捗（正解・間違い履歴）を消します。よろしいですか？'))return;
-  progress={seen:{},wrong:{},wrongCount:{},correctCount:{}};saveProgress();renderHome();
+  progress={seen:{},wrong:{},wrongCount:{},correctCount:{},unsure:{}};saveProgress();renderHome();
 }
 
 // カテゴリ一覧
@@ -503,8 +508,11 @@ function revealAnswer(){
   // アーキ図ドリルへのリンク（pattern が設定された問題のみ）
   let patternLink='';
   if(q.pattern){patternLink='<a class="patternBtn" href="patterns.html#'+q.pattern+'" target="_blank" rel="noopener">🗺️ この構成をアーキ図で見る</a>';}
+  // 自信がなかった（正解でも復習に入れる）。不正解は既に復習対象なので出さない
+  let unsureBtn='';
+  if(correct){unsureBtn='<button class="unsureBtn" id="unsureBtn" onclick="markUnsure('+q.id+')">🤔 自信がなかった（復習に入れる）</button>';}
   const aiBtn='<button class="promptBtn" onclick="copyAIPrompt('+state.idx+')">🤖 この問題をAIに相談する（コピー）</button>'+
-    '<div class="promptHint">問題・選択肢・正解＋「各選択肢がなぜ正解／誤答か初心者向けに解説して」という指示をコピーします。ChatGPTやClaudeに貼り付けて、納得いくまで質問できます。</div>';
+    '<div class="promptHint">問題・選択肢・正解＋「各選択肢がなぜ正解／誤答か初心者向けに解説して」という指示をコピーします。ChatGPTやClaudeに貼り付けて、納得いくまで質問できます。<br>相談した問題は「自信なし」として復習リストに追加されます。</div>';
   // 正解＝記号＋正解選択肢の文章（複数選択は全て列挙）
   const ansFull=ansArr(q).map(i=>`<div class="ansfull"><span class="anslab">正解 ${'ABCD'[i]}</span> ${stripTags(q.options[i])}</div>`).join('');
   exp.innerHTML=
@@ -512,7 +520,7 @@ function revealAnswer(){
     ansFull+
     `<div class="h">本当に聞かれていたこと</div>${q.keypoint}`+
     `<div class="h">なぜこれが正解か</div>${q.explain}`+
-    elim+conf+terms+more+patternLink+aiBtn;
+    elim+conf+terms+more+patternLink+unsureBtn+aiBtn;
   document.getElementById('btnNext').textContent=
     state.idx+1>=state.list.length?'結果を見る':'次の問題 →';
   document.getElementById('hStat').textContent=`正解 ${state.session.correct}/${state.session.total}`;
@@ -588,11 +596,24 @@ opts,
   ].join('\n');
 }
 
+function markUnsure(id,silent){
+  // 「自信がなかった」＝正解でも復習プールに入れる
+  progress.wrong[id]=true;
+  progress.unsure=progress.unsure||{};
+  progress.unsure[id]=true;
+  saveProgress();
+  const b=document.getElementById('unsureBtn');
+  if(b){b.textContent='✓ 復習に入れました';b.classList.add('done');b.disabled=true;}
+  if(!silent)showToast('🤔 自信なしとして復習リストに追加しました');
+}
+
 function copyAIPrompt(idx){
   const q=state.list[idx];
   if(!q)return;
+  // AIに相談＝自信がなかったとみなし復習に追加（正解でも）
+  markUnsure(q.id,true);
   const text=buildAIPrompt(q);
-  const done=()=>showToast('📋 プロンプトをコピーしました。AIに貼り付けて相談できます');
+  const done=()=>showToast('📋 コピーしました。AIに貼り付けて相談できます（自信なしとして復習に追加）');
   const fail=()=>{
     // フォールバック: テキストエリア経由
     try{
