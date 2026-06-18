@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>SAA 模試（本番形式65問）</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0f1420;--card:#1a2233;--card2:#222d44;--line:#2e3a52;--text:#e8edf5;--sub:#9fb0c8;--accent:#ff9900;--ok:#2ecc71;--ng:#e74c3c;--blue:#4a9eff}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;font-size:17px;line-height:1.7;-webkit-text-size-adjust:100%}
+body{padding:0 0 90px;max-width:680px;margin:0 auto;min-height:100vh}
+header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 16px}
+.htop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.htitle{font-size:16px;font-weight:700;color:var(--accent)}
+.hstat{font-size:14px;color:var(--sub)}
+.bar{height:6px;background:var(--card);border-radius:3px;margin-top:10px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.screen{display:none;padding:18px 16px}
+.screen.on{display:block}
+.qmeta{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:10px}
+.qcat{color:var(--blue);font-weight:700}
+.qbody{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;font-size:16px;line-height:1.8}
+.qbody .ask{display:block;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-weight:700;font-size:17px;color:#fff}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:14px 16px;font-size:16px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;transition:.12s}
+.opt:active{transform:scale(.99)}
+.opt .lab{flex:0 0 24px;height:24px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--sub)}
+.opt .ot{flex:1}
+.opt.sel{border-color:var(--blue)}
+.opt.correct{border-color:var(--ok);background:rgba(46,204,113,.12)}
+.opt.correct .lab{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--ng);background:rgba(231,76,60,.12)}
+.opt.wrong .lab{background:var(--ng);color:#fff}
+.opt.disabled{cursor:default}
+.multiHint{background:rgba(74,158,255,.12);border:1px solid var(--blue);color:var(--blue);border-radius:8px;padding:9px 13px;font-size:15px;font-weight:bold;margin-bottom:6px}
+.btnrow{position:fixed;bottom:0;left:0;right:0;max-width:680px;margin:0 auto;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(15,20,32,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;gap:10px}
+.btn{flex:1;border:none;border-radius:12px;padding:15px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn.primary{background:var(--accent);color:#1a1200}
+.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.btn:disabled{opacity:.4}
+.result{text-align:center;padding-top:30px}
+.result .score{font-size:56px;font-weight:800;color:var(--accent)}
+.result .smeta{color:var(--sub);font-size:16px;margin:6px 0 20px}
+.result .msg{font-size:18px;margin-bottom:24px;line-height:1.6}
+.result .domain{text-align:left;margin:0 auto;max-width:400px}
+.result .drow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+.result .drow .dlabel{color:var(--sub)}
+.result .drow .dscore{font-weight:700}
+.timer{font-size:14px;color:var(--sub);font-variant-numeric:tabular-nums}
+.intro{text-align:center;padding:60px 20px}
+.intro h1{font-size:22px;margin-bottom:12px}
+.intro p{color:var(--sub);font-size:16px;line-height:1.7;margin-bottom:8px}
+.intro .start{margin-top:28px;display:inline-block;background:var(--accent);color:#1a1200;font-size:18px;font-weight:700;padding:16px 40px;border-radius:14px;border:none;cursor:pointer;font-family:inherit}
+.intro .back{margin-top:16px;display:inline-block;color:var(--sub);font-size:15px;text-decoration:underline;cursor:pointer}
+.appnav{display:flex;gap:6px;max-width:680px;margin:0 auto;padding:8px 12px;background:var(--bg)}
+.appnav .navbtn{flex:1;text-align:center;text-decoration:none;font-size:14px;font-weight:700;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 4px}
+.appnav .navbtn.active{color:#1a1200;background:var(--accent);border-color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="htop">
+    <div class="htitle">SAA 模試</div>
+    <div class="hstat"><span id="hStat"></span> <span class="timer" id="timer"></span></div>
+  </div>
+  <div class="bar"><i id="hBar"></i></div>
+</header>
+<nav class="appnav">
+  <a class="navbtn" href="index.html">🎯 ドリル</a>
+  <a class="navbtn" href="cards.html">📇 暗記帳</a>
+  <a class="navbtn" href="patterns.html">🗺️ アーキ図</a>
+  <a class="navbtn active" href="mock-exam.html">📝 模試</a>
+</nav>
+
+<section class="screen on" id="scIntro">
+  <div class="intro">
+    <h1>📝 SAA模試（本番形式）</h1>
+    <p>全4バンク349問から本番と同じ配分で<b>65問</b>をランダム抽出</p>
+    <p>制限時間 <b>130分</b>｜合格目安 <b>72%（47問）</b></p>
+    <p style="font-size:14px;color:var(--sub);margin-top:12px">
+      セキュア設計30%(20問) / 回復性26%(17問) / 高性能24%(15問) / コスト最適化20%(13問)
+    </p>
+    <button class="start" onclick="startExam()">模試を開始する</button>
+    <div class="back" onclick="location.href='index.html'">← ドリルに戻る</div>
+  </div>
+</section>
+
+<section class="screen" id="scQuiz">
+  <div class="qmeta"><span class="qcat" id="qCat"></span><span id="qIdx"></span></div>
+  <div class="qbody" id="qBody"></div>
+  <div class="opts" id="qOpts"></div>
+</section>
+
+<section class="screen" id="scResult"></section>
+
+<div class="btnrow" id="btnRow" style="display:none">
+  <button class="btn ghost" id="btnFlag" onclick="flagQ()">🚩</button>
+  <button class="btn primary" id="btnNext" disabled onclick="nextAction()">次へ</button>
+</div>
+
+<script>
+// ===== 本番ドメインへのマッピング =====
+const DOMAIN_MAP = {
+  'セキュリティ': 'secure',
+  'セキュリティ深掘り': 'secure',
+  '運用・ガバナンス': 'secure',
+  '運用・IaC': 'secure',
+  'ネットワーク深掘り': 'secure',
+  '可用性': 'resilient',
+  'DR戦略': 'resilient',
+  '高可用DR': 'resilient',
+  'ストレージ': 'resilient',
+  'ストレージ移行': 'resilient',
+  'ストレージ深掘り': 'resilient',
+  '目的別データベース': 'resilient',
+  'データベース': 'resilient',
+  '高性能': 'performance',
+  'コンピュート・高性能': 'performance',
+  'コンピュート・コンテナ': 'performance',
+  '疎結合': 'performance',
+  'アプリ統合・疎結合': 'performance',
+  'サーバーレス': 'performance',
+  '配信/CDN': 'performance',
+  'データ分析': 'performance',
+  'AI/ML': 'performance',
+  'コスト最適化': 'cost'
+};
+
+const DOMAINS = {
+  secure:      {label:'セキュアなアーキテクチャ設計', target:20},
+  resilient:   {label:'回復性の高いアーキテクチャ設計', target:17},
+  performance: {label:'高性能アーキテクチャ設計', target:15},
+  cost:        {label:'コスト最適化アーキテクチャ設計', target:13}
+};
+
+const FILES = ['questions.js','questions_v2.js','questions_v3.js','questions_v4.js'];
+let ALL_Q = [];
+let exam = {list:[], idx:0, answers:{}, flagged:{}, startTime:null, timerInterval:null};
+
+// 全バンク読み込み
+async function loadAll(){
+  for(const f of FILES){
+    try{
+      const txt = await (await fetch(f)).text();
+      // eval in function scope to capture QUESTIONS
+      const fn = new Function(txt + '; return QUESTIONS;');
+      const qs = fn();
+      // tag with source file
+      qs.forEach(q => { q._src = f; });
+      ALL_Q = ALL_Q.concat(qs);
+    }catch(e){ console.warn('Failed to load '+f, e); }
+  }
+}
+
+function pickQuestions(){
+  // Group by domain
+  const pools = {secure:[], resilient:[], performance:[], cost:[]};
+  ALL_Q.forEach(q => {
+    const d = DOMAIN_MAP[q.cat];
+    if(d) pools[d].push(q);
+    else pools.performance.push(q); // fallback
+  });
+  // Shuffle each pool
+  Object.values(pools).forEach(arr => arr.sort(() => Math.random() - 0.5));
+  // Pick target count from each
+  let picked = [];
+  for(const [key, info] of Object.entries(DOMAINS)){
+    const pool = pools[key];
+    picked = picked.concat(pool.slice(0, info.target));
+  }
+  // If any domain is short, fill from largest pools
+  if(picked.length < 65){
+    const used = new Set(picked.map(q => q._src+':'+q.id));
+    const remaining = ALL_Q.filter(q => !used.has(q._src+':'+q.id));
+    remaining.sort(() => Math.random() - 0.5);
+    while(picked.length < 65 && remaining.length){
+      picked.push(remaining.shift());
+    }
+  }
+  // Final shuffle
+  picked.sort(() => Math.random() - 0.5);
+  return picked;
+}
+
+function startExam(){
+  exam.list = pickQuestions();
+  exam.idx = 0;
+  exam.answers = {};
+  exam.flagged = {};
+  exam.startTime = Date.now();
+  document.getElementById('scIntro').classList.remove('on');
+  document.getElementById('scQuiz').classList.add('on');
+  document.getElementById('btnRow').style.display = 'flex';
+  startTimer();
+  renderQ();
+}
+
+function startTimer(){
+  updateTimer();
+  exam.timerInterval = setInterval(updateTimer, 1000);
+}
+function updateTimer(){
+  const elapsed = Math.floor((Date.now() - exam.startTime) / 1000);
+  const remain = Math.max(0, 130*60 - elapsed);
+  const m = Math.floor(remain/60);
+  const s = remain%60;
+  document.getElementById('timer').textContent = `残り ${m}:${String(s).padStart(2,'0')}`;
+  if(remain <= 0){ clearInterval(exam.timerInterval); finishExam(); }
+}
+
+function isMulti(q){ return Array.isArray(q.answer); }
+function ansArr(q){ return isMulti(q) ? q.answer.slice().sort() : [q.answer]; }
+
+function renderQ(){
+  const q = exam.list[exam.idx];
+  document.getElementById('qCat').textContent = q.cat;
+  document.getElementById('qIdx').textContent = `${exam.idx+1} / 65`;
+  let multiHint = '';
+  if(isMulti(q)){ multiHint = `<div class="multiHint">✓ ${ansArr(q).length}つ選んでください（複数選択）</div>`; }
+  document.getElementById('qBody').innerHTML = multiHint + q.scenario + '<span class="ask">' + q.ask + '</span>';
+  const opts = document.getElementById('qOpts'); opts.innerHTML = '';
+  const prev = exam.answers[exam.idx];
+  q.options.forEach((o,i) => {
+    const d = document.createElement('div'); d.className = 'opt'; d.dataset.i = i;
+    d.innerHTML = `<span class="lab">${'ABCD'[i]}</span><span class="ot">${o}</span>`;
+    if(prev !== undefined){
+      if(Array.isArray(prev) && prev.includes(i)) d.classList.add('sel');
+      else if(prev === i) d.classList.add('sel');
+    }
+    d.onclick = () => selectOpt(i);
+    opts.appendChild(d);
+  });
+  document.getElementById('btnNext').textContent = exam.idx < 64 ? '次へ' : '提出する';
+  document.getElementById('btnNext').disabled = (exam.answers[exam.idx] === undefined);
+  document.getElementById('btnFlag').textContent = exam.flagged[exam.idx] ? '🚩済' : '🚩';
+  document.getElementById('hBar').style.width = ((exam.idx+1)/65*100)+'%';
+  document.getElementById('hStat').textContent = `${exam.idx+1}/65`;
+  window.scrollTo(0,0);
+}
+
+function selectOpt(i){
+  const q = exam.list[exam.idx];
+  if(isMulti(q)){
+    let sel = exam.answers[exam.idx] || [];
+    if(!Array.isArray(sel)) sel = [];
+    const idx = sel.indexOf(i);
+    if(idx >= 0) sel.splice(idx, 1);
+    else if(sel.length < ansArr(q).length) sel.push(i);
+    else return;
+    exam.answers[exam.idx] = sel.length ? sel : undefined;
+  } else {
+    exam.answers[exam.idx] = i;
+  }
+  // Update UI
+  document.querySelectorAll('#qOpts .opt').forEach(el => {
+    const oi = +el.dataset.i;
+    const ans = exam.answers[exam.idx];
+    if(Array.isArray(ans)) el.classList.toggle('sel', ans.includes(oi));
+    else el.classList.toggle('sel', oi === ans);
+  });
+  document.getElementById('btnNext').disabled = (exam.answers[exam.idx] === undefined);
+}
+
+function flagQ(){
+  exam.flagged[exam.idx] = !exam.flagged[exam.idx];
+  document.getElementById('btnFlag').textContent = exam.flagged[exam.idx] ? '🚩済' : '🚩';
+}
+
+function nextAction(){
+  if(exam.idx < 64){
+    exam.idx++;
+    renderQ();
+  } else {
+    if(confirm('模試を提出しますか？未回答や🚩がある場合は見直せます。')) finishExam();
+  }
+}
+
+function finishExam(){
+  clearInterval(exam.timerInterval);
+  const elapsed = Math.floor((Date.now() - exam.startTime) / 1000);
+  const elM = Math.floor(elapsed/60); const elS = elapsed%60;
+  // Score
+  let correct = 0;
+  const domainScore = {secure:{c:0,t:0}, resilient:{c:0,t:0}, performance:{c:0,t:0}, cost:{c:0,t:0}};
+  exam.list.forEach((q,i) => {
+    const d = DOMAIN_MAP[q.cat] || 'performance';
+    domainScore[d].t++;
+    const ans = exam.answers[i];
+    if(ans === undefined) return;
+    if(isMulti(q)){
+      const ca = ansArr(q);
+      const sa = (Array.isArray(ans) ? ans.slice().sort() : []);
+      if(JSON.stringify(ca) === JSON.stringify(sa)){ correct++; domainScore[d].c++; }
+    } else {
+      if(ans === q.answer){ correct++; domainScore[d].c++; }
+    }
+  });
+  const pct = Math.round(correct/65*100);
+  const pass = pct >= 72;
+  let html = `<div class="result">
+    <div class="score">${pct}%</div>
+    <div class="smeta">${correct}/65問正解　所要${elM}分${elS}秒</div>
+    <div class="msg">${pass ? '🎉 合格ライン突破！' : '😤 あと少し。間違えた問題をドリルで復習しよう。'}</div>
+    <div class="domain">`;
+  for(const [key, info] of Object.entries(DOMAINS)){
+    const ds = domainScore[key];
+    const dp = ds.t ? Math.round(ds.c/ds.t*100) : 0;
+    html += `<div class="drow"><span class="dlabel">${info.label}</span><span class="dscore">${ds.c}/${ds.t} (${dp}%)</span></div>`;
+  }
+  html += `</div>
+    <button class="start" style="margin-top:28px" onclick="location.reload()">もう一度</button>
+    <div class="back" style="margin-top:16px" onclick="location.href='index.html'">← ドリルに戻る</div>
+  </div>`;
+  document.getElementById('scQuiz').classList.remove('on');
+  document.getElementById('btnRow').style.display = 'none';
+  const sc = document.getElementById('scResult'); sc.innerHTML = html; sc.classList.add('on');
+}
+
+// 起動
+loadAll().then(() => {
+  document.getElementById('scIntro').querySelector('.start').disabled = false;
+}).catch(e => {
+  document.body.innerHTML = '<p style="padding:20px;font-size:16px">問題ファイルを読み込めませんでした。python3 -m http.server 経由で開いてください。</p>';
+});
+</script>
+</body>
+</html>

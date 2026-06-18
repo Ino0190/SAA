@@ -184,6 +184,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
   <a class="navbtn active" href="index.html">🎯 ドリル</a>
   <a class="navbtn" href="cards.html">📇 暗記帳</a>
   <a class="navbtn" href="patterns.html">🗺️ アーキ図</a>
+  <a class="navbtn" href="mock-exam.html">📝 模試</a>
 </nav>
 
 <!-- ホーム -->
@@ -221,6 +222,12 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
   <div class="modecard" onclick="startMode('shuffle')">
     <h3>🎲 ランダム10問</h3>
     <p>スキマ時間用。シャッフルで10問。</p>
+  </div>
+
+  <div class="modecard" onclick="location.href='mock-exam.html'" style="border-color:var(--accent)">
+    <h3 style="color:var(--accent)">📝 模試モード（本番形式65問・130分）</h3>
+    <p>全4バンク349問から本番配分で65問を抽出。タイマー付き。</p>
+    <div class="cnt">セキュア20問/回復性17問/高性能15問/コスト13問</div>
   </div>
 
   <h3 style="margin:22px 0 4px;font-size:16px;color:var(--sub)">テーマ別</h3>
