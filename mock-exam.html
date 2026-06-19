@@ -56,6 +56,39 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .appnav{display:flex;gap:6px;max-width:680px;margin:0 auto;padding:8px 12px;background:var(--bg)}
 .appnav .navbtn{flex:1;text-align:center;text-decoration:none;font-size:14px;font-weight:700;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 4px}
 .appnav .navbtn.active{color:#1a1200;background:var(--accent);border-color:var(--accent)}
+/* 解説 */
+.exp{margin-top:14px;background:var(--card2);border-radius:12px;padding:16px;font-size:15px;line-height:1.8}
+.exp .verdict{font-size:16px;font-weight:700;margin-bottom:8px}
+.exp .verdict.ok{color:var(--ok)}
+.exp .verdict.ng{color:var(--ng)}
+.exp .ansfull{background:rgba(46,204,113,.12);border:1px solid var(--ok);border-radius:10px;padding:11px 13px;margin-bottom:10px;font-size:14px;line-height:1.7}
+.exp .ansfull .anslab{display:inline-block;background:var(--ok);color:#fff;font-weight:700;font-size:12px;border-radius:6px;padding:2px 8px;margin-right:7px}
+.exp .h{color:var(--accent);font-weight:700;margin:10px 0 4px}
+.exp .elim{font-size:14px;color:var(--sub);margin-top:8px}
+/* チェックポイント */
+.cp{padding:18px 16px}
+.cp h2{font-size:20px;margin-bottom:6px}
+.cp .cpmeta{color:var(--sub);font-size:15px;margin-bottom:18px}
+.cp .cphint{color:var(--accent);font-size:14px;margin-bottom:14px}
+/* 問題リスト（チェックポイント・結果共通） */
+.qlist{margin-top:10px}
+.qli{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.qli .qhead{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer}
+.qli .qbadge{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700}
+.qli .qbadge.ok{background:var(--ok);color:#fff}
+.qli .qbadge.ng{background:var(--ng);color:#fff}
+.qli .qbadge.skip{background:var(--sub);color:#fff}
+.qli .qnum{flex:0 0 auto;font-size:13px;color:var(--sub);font-weight:700}
+.qli .qtt{flex:1;font-size:14px;color:var(--text);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.qli .qchev{flex:0 0 auto;color:var(--sub);font-size:13px}
+.qli .qdetail{display:none;padding:0 14px 14px;border-top:1px solid var(--line)}
+.qli.open .qdetail{display:block}
+.qli .qscenario{font-size:14px;color:var(--sub);line-height:1.7;margin:12px 0;padding:11px;background:var(--bg);border-radius:8px}
+.qli .qscenario .ask{display:block;margin-top:8px;color:#fff;font-weight:700}
+.qli .qopt{font-size:14px;padding:8px 11px;border-radius:8px;margin-bottom:6px;border:1px solid var(--line);line-height:1.6}
+.qli .qopt.correct{border-color:var(--ok);background:rgba(46,204,113,.1)}
+.qli .qopt.yourwrong{border-color:var(--ng);background:rgba(231,76,60,.1)}
+.qli .qopt .ol{font-weight:700;margin-right:6px}
 </style>
 </head>
 <body>
@@ -81,6 +114,10 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
     <p style="font-size:14px;color:var(--sub);margin-top:12px">
       セキュア設計30%(20問) / 回復性26%(17問) / 高性能24%(15問) / コスト最適化20%(13問)
     </p>
+    <p style="font-size:14px;color:var(--blue);margin-top:10px">
+      📍 10問ごとに区切りチェック（正誤と解説を確認できる）<br>
+      間違えた問題はドリルの「🔁間違えた問題だけ」に自動で入ります
+    </p>
     <button class="start" onclick="startExam()">模試を開始する</button>
     <div class="back" onclick="location.href='index.html'">← ドリルに戻る</div>
   </div>
@@ -93,6 +130,8 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 </section>
 
 <section class="screen" id="scResult"></section>
+
+<section class="screen" id="scCheckpoint"></section>
 
 <div class="btnrow" id="btnRow" style="display:none">
   <button class="btn ghost" id="btnFlag" onclick="flagQ()">🚩</button>
@@ -210,7 +249,94 @@ function updateTimer(){
 }
 
 function isMulti(q){ return Array.isArray(q.answer); }
-function ansArr(q){ return isMulti(q) ? q.answer.slice().sort() : [q.answer]; }
+function ansArr(q){ return isMulti(q) ? q.answer.slice().sort((a,b)=>a-b) : [q.answer]; }
+function isCorrect(q, ans){
+  if(ans === undefined) return false;
+  if(isMulti(q)){
+    const ca = ansArr(q);
+    const sa = (Array.isArray(ans) ? ans.slice().sort((a,b)=>a-b) : []);
+    return JSON.stringify(ca) === JSON.stringify(sa);
+  }
+  return ans === q.answer;
+}
+function esc(s){ return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+// 解説HTML（問題リストの展開部）
+function detailHTML(q, gi){
+  const ans = exam.answers[gi];
+  const ca = ansArr(q);
+  const yourArr = ans === undefined ? [] : (Array.isArray(ans) ? ans : [ans]);
+  let opts = '';
+  q.options.forEach((o,i) => {
+    let cls = '';
+    if(ca.includes(i)) cls = 'correct';
+    else if(yourArr.includes(i)) cls = 'yourwrong';
+    opts += `<div class="qopt ${cls}"><span class="ol">${'ABCD'[i]}</span>${esc(o)}${ca.includes(i)?' ✓':''}${(!ca.includes(i)&&yourArr.includes(i))?' ←あなたの回答':''}</div>`;
+  });
+  let html = `<div class="qdetail">
+    <div class="qscenario">${q.scenario}<span class="ask">${q.ask}</span></div>
+    ${opts}`;
+  if(q.keypoint) html += `<div class="exp" style="margin-top:12px"><div class="h">🎯 本当に聞かれていること</div>${q.keypoint}`;
+  else html += `<div class="exp" style="margin-top:12px">`;
+  if(q.explain) html += `<div class="h">💡 なぜこれが正解か</div>${q.explain}`;
+  if(q.elim) html += `<div class="elim">❌ ${q.elim}</div>`;
+  html += `</div></div>`;
+  return html;
+}
+
+// 問題リスト（範囲指定）
+function qlistHTML(fromIdx, toIdx){
+  let html = '<div class="qlist">';
+  for(let i = fromIdx; i <= toIdx; i++){
+    const q = exam.list[i];
+    const ans = exam.answers[i];
+    let badge, bcls;
+    if(ans === undefined){ badge = '—'; bcls = 'skip'; }
+    else if(isCorrect(q, ans)){ badge = '○'; bcls = 'ok'; }
+    else { badge = '×'; bcls = 'ng'; }
+    html += `<div class="qli" data-gi="${i}">
+      <div class="qhead" onclick="toggleQli(${i})">
+        <span class="qbadge ${bcls}">${badge}</span>
+        <span class="qnum">Q${i+1}</span>
+        <span class="qtt">${esc(q.ask)}</span>
+        <span class="qchev">解説 ▼</span>
+      </div>
+      ${detailHTML(q, i)}
+    </div>`;
+  }
+  html += '</div>';
+  return html;
+}
+function toggleQli(gi){
+  const el = document.querySelector(`.qli[data-gi="${gi}"]`);
+  if(el) el.classList.toggle('open');
+}
+
+// 復習プールへ書き込み（バンク別）
+const SRC_TO_BANK = {'questions.js':'main','questions_v2.js':'v2','questions_v3.js':'v3','questions_v4.js':'v4'};
+function saveWrongToReview(){
+  const byBank = {};
+  exam.list.forEach((q,i) => {
+    if(!isCorrect(q, exam.answers[i])){
+      const bank = SRC_TO_BANK[q._src] || 'main';
+      (byBank[bank] = byBank[bank] || []).push(q.id);
+    }
+  });
+  for(const [bank, ids] of Object.entries(byBank)){
+    const key = 'saa_drill_progress_v1_' + bank;
+    let prog;
+    try{ prog = JSON.parse(localStorage.getItem(key)) || {}; }catch(e){ prog = {}; }
+    prog.seen = prog.seen || {}; prog.wrong = prog.wrong || {};
+    prog.wrongCount = prog.wrongCount || {}; prog.correctCount = prog.correctCount || {};
+    prog.unsure = prog.unsure || {};
+    ids.forEach(id => {
+      prog.seen[id] = true;
+      prog.wrong[id] = true;
+      prog.wrongCount[id] = (prog.wrongCount[id] || 0) + 1;
+    });
+    localStorage.setItem(key, JSON.stringify(prog));
+  }
+}
 
 function renderQ(){
   const q = exam.list[exam.idx];
@@ -268,16 +394,53 @@ function flagQ(){
 }
 
 function nextAction(){
+  // 10問ごと（10,20,...,60問目の直後）にチェックポイント。最終問は提出。
+  if(exam.idx < 64 && (exam.idx + 1) % 10 === 0){
+    showCheckpoint();
+    return;
+  }
   if(exam.idx < 64){
     exam.idx++;
     renderQ();
   } else {
-    if(confirm('模試を提出しますか？未回答や🚩がある場合は見直せます。')) finishExam();
+    if(confirm('模試を提出しますか？')) finishExam();
   }
+}
+
+function showCheckpoint(){
+  const blockEnd = exam.idx;            // 0-indexed, 直近ブロックの最終問
+  const blockStart = blockEnd - 9;      // 直近10問
+  // そこまでの累計正解
+  let totalCorrect = 0;
+  for(let i = 0; i <= blockEnd; i++){ if(isCorrect(exam.list[i], exam.answers[i])) totalCorrect++; }
+  let blockCorrect = 0;
+  for(let i = blockStart; i <= blockEnd; i++){ if(isCorrect(exam.list[i], exam.answers[i])) blockCorrect++; }
+  const done = blockEnd + 1;
+  const html = `<div class="cp">
+    <h2>📍 ${done}問終了｜区切りチェック</h2>
+    <div class="cpmeta">この10問：<b style="color:var(--accent)">${blockCorrect}/10</b>　／　ここまで累計：<b style="color:var(--accent)">${totalCorrect}/${done}</b>（${Math.round(totalCorrect/done*100)}%）</div>
+    <div class="cphint">各問をタップすると正誤と解説が開きます。確認したら下のボタンで次へ。</div>
+    ${qlistHTML(blockStart, blockEnd)}
+    <button class="start" style="margin-top:20px;width:100%" onclick="continueExam()">次の${done<60?'10':'5'}問へ進む（残り${64-blockEnd}問）</button>
+    <div class="back" style="margin-top:14px" onclick="if(confirm('ここで模試を切り上げて結果を見ますか？'))finishExam()">ここで切り上げて結果を見る</div>
+  </div>`;
+  document.getElementById('scQuiz').classList.remove('on');
+  document.getElementById('btnRow').style.display = 'none';
+  const sc = document.getElementById('scCheckpoint'); sc.innerHTML = html; sc.classList.add('on');
+  window.scrollTo(0,0);
+}
+
+function continueExam(){
+  document.getElementById('scCheckpoint').classList.remove('on');
+  document.getElementById('scQuiz').classList.add('on');
+  document.getElementById('btnRow').style.display = 'flex';
+  exam.idx++;
+  renderQ();
 }
 
 function finishExam(){
   clearInterval(exam.timerInterval);
+  saveWrongToReview();
   const elapsed = Math.floor((Date.now() - exam.startTime) / 1000);
   const elM = Math.floor(elapsed/60); const elS = elapsed%60;
   // Score
@@ -286,15 +449,7 @@ function finishExam(){
   exam.list.forEach((q,i) => {
     const d = DOMAIN_MAP[q.cat] || 'performance';
     domainScore[d].t++;
-    const ans = exam.answers[i];
-    if(ans === undefined) return;
-    if(isMulti(q)){
-      const ca = ansArr(q);
-      const sa = (Array.isArray(ans) ? ans.slice().sort() : []);
-      if(JSON.stringify(ca) === JSON.stringify(sa)){ correct++; domainScore[d].c++; }
-    } else {
-      if(ans === q.answer){ correct++; domainScore[d].c++; }
-    }
+    if(isCorrect(q, exam.answers[i])){ correct++; domainScore[d].c++; }
   });
   const pct = Math.round(correct/65*100);
   const pass = pct >= 72;
@@ -309,12 +464,18 @@ function finishExam(){
     html += `<div class="drow"><span class="dlabel">${info.label}</span><span class="dscore">${ds.c}/${ds.t} (${dp}%)</span></div>`;
   }
   html += `</div>
-    <button class="start" style="margin-top:28px" onclick="location.reload()">もう一度</button>
-    <div class="back" style="margin-top:16px" onclick="location.href='index.html'">← ドリルに戻る</div>
+    <p style="color:var(--sub);font-size:14px;margin-top:16px">間違えた問題は<b style="color:var(--accent)">ドリルの「🔁間違えた問題だけ」</b>に追加しました。</p>
+    <button class="start" style="margin-top:20px" onclick="location.reload()">もう一度</button>
+    <div class="back" style="margin-top:14px" onclick="location.href='index.html'">← ドリルに戻る</div>
+    <h2 style="text-align:left;font-size:18px;margin:30px 0 4px">全65問の振り返り</h2>
+    <p style="text-align:left;color:var(--sub);font-size:14px;margin-bottom:8px">○×をタップで解説。間違えた問題から見直そう。</p>
+    ${qlistHTML(0, 64)}
   </div>`;
   document.getElementById('scQuiz').classList.remove('on');
+  document.getElementById('scCheckpoint').classList.remove('on');
   document.getElementById('btnRow').style.display = 'none';
   const sc = document.getElementById('scResult'); sc.innerHTML = html; sc.classList.add('on');
+  window.scrollTo(0,0);
 }
 
 // 起動
