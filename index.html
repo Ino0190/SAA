@@ -350,7 +350,7 @@ function ansArr(q){return Array.isArray(q.answer)?q.answer.slice().sort((a,b)=>a
 function isMulti(q){return Array.isArray(q.answer);}
 function selArr(){return Array.isArray(state.sel)?state.sel.slice().sort((a,b)=>a-b):(state.sel==null?[]:[state.sel]);}
 function arrEq(a,b){return a.length===b.length&&a.every((v,i)=>v===b[i]);}
-function ansLabels(q){return ansArr(q).map(i=>'ABCD'[i]).join('・');}
+function ansLabels(q){return ansArr(q).map(i=>'ABCDE'[i]).join('・');}
 
 function loadProgress(){
   try{
@@ -425,7 +425,7 @@ function renderQ(){
   const opts=document.getElementById('qOpts');opts.innerHTML='';
   q.options.forEach((o,i)=>{
     const d=document.createElement('div');d.className='opt';d.dataset.i=i;
-    d.innerHTML=`<span class="lab">${'ABCD'[i]}</span><span class="ot">${o}</span>`;
+    d.innerHTML=`<span class="lab">${'ABCDE'[i]}</span><span class="ot">${o}</span>`;
     d.onclick=()=>selectOpt(i);
     opts.appendChild(d);
   });
@@ -522,7 +522,7 @@ function revealAnswer(){
   const aiBtn='<button class="promptBtn" onclick="copyAIPrompt('+state.idx+')">🤖 この問題をAIに相談する（コピー）</button>'+
     '<div class="promptHint">問題・選択肢・正解＋「各選択肢がなぜ正解／誤答か初心者向けに解説して」という指示をコピーします。ChatGPTやClaudeに貼り付けて、納得いくまで質問できます。<br>相談した問題は「自信なし」として復習リストに追加されます。</div>';
   // 正解＝記号＋正解選択肢の文章（複数選択は全て列挙）
-  const ansFull=ansArr(q).map(i=>`<div class="ansfull"><span class="anslab">正解 ${'ABCD'[i]}</span> ${stripTags(q.options[i])}</div>`).join('');
+  const ansFull=ansArr(q).map(i=>`<div class="ansfull"><span class="anslab">正解 ${'ABCDE'[i]}</span> ${stripTags(q.options[i])}</div>`).join('');
   exp.innerHTML=
     `<div class="verdict ${correct?'ok':'ng'}">${correct?'◯ 正解':'✕ 不正解'}</div>`+
     ansFull+
@@ -577,7 +577,7 @@ function stripTags(s){
 
 // この問題をAIに相談するためのプロンプトを組み立ててコピー
 function buildAIPrompt(q){
-  const labels='ABCD';
+  const labels='ABCDE';
   let opts=q.options.map((o,i)=>`${labels[i]}. ${stripTags(o)}`).join('\n');
   return [
 'あなたはAWS認定ソリューションアーキテクト（SAA）の講師です。',
@@ -701,7 +701,7 @@ function renderListenQ(){
   const opts=document.getElementById('lOpts');opts.innerHTML='';
   q.options.forEach((o,i)=>{
     const d=document.createElement('div');d.className='listenOpt';d.dataset.i=i;
-    d.innerHTML='<span class="lab">'+'ABCD'[i]+'</span><span>'+o+'</span>';
+    d.innerHTML='<span class="lab">'+'ABCDE'[i]+'</span><span>'+o+'</span>';
     opts.appendChild(d);
   });
   document.getElementById('lThinking').className='listenThinking';
@@ -714,7 +714,7 @@ function renderListenQ(){
 // 1問分の読み上げ「セリフ」列を組み立てて順番に再生
 function playListenQ(){
   const q=listen.list[listen.idx];
-  const labels='ABCD';
+  const labels='ABCDE';
   const myToken=listen.token;
   // セリフ列（text + 前に置く待ち時間ms + 実行する画面処理）
   const seq=[];
