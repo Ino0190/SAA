@@ -117,6 +117,19 @@ table.cmp td.relrow{background:#fff;padding:11px 14px}
   .note-body table.gtbl td,.note-body table.gtbl th{word-break:normal;overflow-wrap:normal}
 }
 
+/* 折りたたみ（アコーディオン）＋目次 */
+.chapter{scroll-margin-top:74px}
+.chapter>h2.chaphd{cursor:pointer;user-select:none;position:relative;padding-right:28px}
+.chaphd .cnt{font-size:14px;font-weight:400;color:#5e5e5e;margin-left:10px}
+.chaphd .arw{position:absolute;right:2px;bottom:8px;color:#21537f;font-size:15px}
+.chapter.collapsed .chapbody{display:none}
+.toc{margin:18px 0 4px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toc .toclbl{font-size:14px;color:#5e5e5e;width:100%;margin-bottom:2px}
+.tocchip{font-size:14px;padding:7px 12px;border:1px solid #21537f;background:#fff;color:#21537f;
+  border-radius:0;cursor:pointer;font-family:inherit;line-height:1.3}
+.tocchip:hover{background:#21537f;color:#fff}
+.tocact{font-size:13px;padding:6px 10px;border:1px solid #b9b3a5;background:#fff;color:#5e5e5e;cursor:pointer;font-family:inherit}
+
 </style>
 </head>
 <body>
@@ -144,6 +157,7 @@ table.cmp td.relrow{background:#fff;padding:11px 14px}
     <p>この帳面は「紛らわしい対」の<b>比較・物語・関連問題</b>に専念する。サービス個別の本名・あだ名・何をする係かを表裏カードで覚えるのは、<a href="cards.html" style="color:#b01212;font-weight:700">暗記帳（cards.html）へ →</a>が専門。覚えた／まだの仕分けや、AIに質問する機能もそちらにある。</p>
   </div>
 
+  <div id="toc" class="toc"></div>
   <div id="chapters"></div>
   <div class="nores" id="nores">該当なし。別の言葉で試す。</div>
 
@@ -273,13 +287,17 @@ const DATA=[
   {h:"👁 まず全体像：監視・記録・検知・調査（似た顔ぶれを一望）",body:`<p style="margin-bottom:10px">セキュリティ・運用系は「何かを見ている」サービスが多くて混同しやすい。実は<b>何を見ているか</b>で4グループに分かれる。GuardDutyらの「検知4兄弟」は、この中の<b>検知</b>グループ。</p>
   <table class="gtbl">
    <tr><th>グループ</th><th>サービス</th><th>何を見る・する（一語で）</th></tr>
-   <tr><td>監視（性能）</td><td>CloudWatch</td><td>CPU・エラー数などの数値とログ → 今どう動いているか</td></tr>
+   <tr><td>監視（性能）</td><td>CloudWatch</td><td>CPU・エラー数などの数値（メトリクス）とアラーム → 今どう動いているか</td></tr>
+   <tr><td>記録（ログ）</td><td>CloudWatch Logs</td><td>アプリ/OS/サービスが出すログを集約・保持・検索 → ログそのもの</td></tr>
    <tr><td>記録（証跡）</td><td>CloudTrail</td><td>誰がいつどのAPIを叩いたか → 操作の履歴</td></tr>
    <tr><td>記録（構成）</td><td>Config</td><td>リソースの設定が今どうか・基準に沿うか → 状態</td></tr>
+   <tr><td>記録（監査）</td><td>Audit Manager</td><td>コンプライアンス対応の証拠を自動収集 → 監査証拠の準備</td></tr>
+   <tr><td>記録（通信）</td><td>VPCフローログ</td><td>どのIPからどのポートへ通信が許可/拒否されたか → ネットワークの記録</td></tr>
    <tr><td>追跡（遅延）</td><td>X-Ray</td><td>リクエストがどこで何秒かかったか → 遅延の経路</td></tr>
    <tr><td>検知</td><td>GuardDuty</td><td>攻撃の挙動を検知 → 現行犯</td></tr>
    <tr><td>検知</td><td>Inspector</td><td>既知の弱点（CVE）をスキャン → 弱点</td></tr>
    <tr><td>検知</td><td>Macie</td><td>S3の機密データ（PII）を発見 → 中身</td></tr>
+   <tr><td>検知（公開）</td><td>IAM Access Analyzer</td><td>外部アカウント等に公開・共有されているリソースを発見 → 意図しない外部アクセス</td></tr>
    <tr><td>調査</td><td>Detective</td><td>検知の後に誰がなぜを相関分析 → 事後捜査</td></tr>
    <tr><td>集約</td><td>Security Hub</td><td>検知結果を1か所に集約・俯瞰（自分では検知しない）</td></tr>
    <tr><td>助言</td><td>Trusted Advisor</td><td>コスト/セキュリティ/性能の改善点を指摘（実行はしない）</td></tr>
@@ -964,7 +982,7 @@ function related(p){
 function render(filter){
   filter=(filter||'').trim().toLowerCase();
   root.innerHTML='';let shown=0;
-  DATA.forEach(ch=>{
+  DATA.forEach((ch,ci)=>{
     let body='';let any=false;
     if(ch.pairs) ch.pairs.forEach(p=>{
       const hay=(p.a+' '+p.b+' '+p.key+' '+p.tale+' '+(p.scene||'')).toLowerCase();
@@ -1007,10 +1025,15 @@ function render(filter){
       });
     }
     if(filter&&!any)return;
-    let h='<h2><span class="ico">'+ch.ico+'</span>'+ch.t+'</h2>';
-    if(ch.story&&(!filter))h+='<div class="story">'+ch.story+'</div>';
-    const sec=document.createElement('div');sec.className='chapter';
-    sec.innerHTML=h+body;root.appendChild(sec);
+    const cnt=ch.pairs?ch.pairs.length+' 対':(ch.lookup?ch.lookup.length+' 項':(ch.notes?ch.notes.length+' 項':''));
+    const collapsed=!filter;
+    let head='<h2 class="chaphd"><span class="ico">'+ch.ico+'</span>'+ch.t
+      +'<span class="cnt">'+cnt+'</span><span class="arw">'+(collapsed?'▶':'▼')+'</span></h2>';
+    let inner='';
+    if(ch.story&&(!filter))inner+='<div class="story">'+ch.story+'</div>';
+    inner+=body;
+    const sec=document.createElement('div');sec.className='chapter'+(collapsed?' collapsed':'');sec.id='ch'+ci;
+    sec.innerHTML=head+'<div class="chapbody">'+inner+'</div>';root.appendChild(sec);
   });
   if(filter){hitEl.textContent=shown+' 件ヒット';noresEl.style.display=shown?'none':'block';}
   else{hitEl.textContent='';noresEl.style.display='none';}
@@ -1033,7 +1056,11 @@ function openModal(gi){
   document.getElementById('modal').classList.add('on');
 }
 function closeModal(){document.getElementById('modal').classList.remove('on');}
-root.addEventListener('click',e=>{const b=e.target.closest('.relq');if(b)openModal(+b.dataset.qi);});
+root.addEventListener('click',e=>{
+  const hd=e.target.closest('.chaphd');
+  if(hd){const c=hd.closest('.chapter');c.classList.toggle('collapsed');const a=hd.querySelector('.arw');if(a)a.textContent=c.classList.contains('collapsed')?'▶':'▼';return;}
+  const b=e.target.closest('.relq');if(b)openModal(+b.dataset.qi);
+});
 document.getElementById('modal').addEventListener('click',e=>{
   if(e.target.id==='modal'||e.target.classList.contains('mclose')||e.target.classList.contains('mback'))closeModal();
 });
@@ -1041,6 +1068,33 @@ document.getElementById('modal').addEventListener('click',e=>{
 render('');
 document.getElementById('q').addEventListener('input',e=>render(e.target.value));
 loadQ();
+
+// 目次（章ジャンプ＋開く）と全開閉
+function buildTOC(){
+  const t=document.getElementById('toc');if(!t)return;
+  t.innerHTML='<span class="toclbl">目次（タップでその章を開く）</span>'
+    +'<button class="tocact" id="openAll">全部開く</button><button class="tocact" id="closeAll">全部閉じる</button>'
+    +DATA.map((ch,i)=>'<button class="tocchip" data-ci="'+i+'">'+ch.ico+' '+ch.t.replace(/（.*$/,'')+'</button>').join('');
+}
+function setAll(collapse){
+  document.querySelectorAll('#chapters .chapter').forEach(c=>{
+    c.classList.toggle('collapsed',collapse);
+    const a=c.querySelector('.arw');if(a)a.textContent=collapse?'▶':'▼';
+  });
+}
+document.getElementById('toc').addEventListener('click',e=>{
+  if(e.target.id==='openAll'){setAll(false);return;}
+  if(e.target.id==='closeAll'){setAll(true);return;}
+  const b=e.target.closest('.tocchip');if(!b)return;
+  const ci=+b.dataset.ci;
+  const q=document.getElementById('q');
+  if(q.value){q.value='';render('');}
+  const sec=document.getElementById('ch'+ci);
+  if(sec){sec.classList.remove('collapsed');const a=sec.querySelector('.arw');if(a)a.textContent='▼';
+    sec.scrollIntoView({behavior:'smooth',block:'start'});}
+});
+buildTOC();
+
 </script>
 </body>
 </html>
