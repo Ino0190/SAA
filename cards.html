@@ -50,7 +50,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px 20px;display:flex;flex-direction:column}
 .face.back{transform:rotateY(180deg)}
 /* 表 */
-.face.front{align-items:center;justify-content:center;text-align:center}
+.face.front{align-items:center;justify-content:flex-start;text-align:center;padding-top:64px}
 .front .svcname{font-size:30px;font-weight:800;line-height:1.35}
 .front .svccat{font-size:14px;color:var(--blue);font-weight:700;margin-bottom:18px}
 .front .svcfull{font-size:15px;color:var(--sub);margin-top:14px;line-height:1.6;max-width:90%}
@@ -181,7 +181,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
         <div class="blk"><span class="blkh bd">❌ 向いてない</span><div class="blkt" id="bBad"></div></div>
         <div class="blk scene" id="blkScene"><span class="blkh sc">📖 こんな場面</span><div class="blkt" id="bScene"></div></div>
         <div class="blk key"><span class="blkh ky">🔑 SAAの決め手</span><div class="blkt" id="bKey"></div></div>
-        <div class="blk words" id="blkWords"><details onclick="event.stopPropagation()"><summary class="blkh wd">📚 ことば（むずかしい言葉）— タップで開く</summary><div class="blkt" id="bWords"></div></details></div>
+        <div class="blk words" id="blkWords"><details onclick="event.stopPropagation()" ontoggle="fitHeight()"><summary class="blkh wd">📚 ことば（むずかしい言葉）— タップで開く</summary><div class="blkt" id="bWords"></div></details></div>
       </div>
     </div>
   </div>
@@ -441,8 +441,9 @@ function renderCard(){
   // 進捗バー（このデッキ内）
   $('hstat').textContent='覚えた '+CARDS.filter(c=>judged[c.name]==='know').length+'/'+CARDS.length;
   $('bar').style.width=((idx+1)/deck.length*100)+'%';
+  scrollToCard();
 }
-function toggleFlip(){ flipped=!flipped; $('flip').classList.toggle('flipped',flipped); fitHeight(); }
+function toggleFlip(){ flipped=!flipped; $('flip').classList.toggle('flipped',flipped); fitHeight(); scrollToCard(); }
 // 表示中の面の高さにカードを合わせる（カード内スクロールでなくページ全体でスクロール）
 function fitHeight(){
   const face = flipped ? $('face_back') : document.querySelector('.face.front');
@@ -454,6 +455,15 @@ function fitHeight(){
     inner.style.minHeight = h+'px';
     flip.style.minHeight = h+'px';
   });
+}
+// めくり・カード切替時にカードの上端を画面に表示する（長いカードで上が隠れないように）
+function scrollToCard(){
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const el=document.querySelector('.cardmeta');
+    if(!el)return;
+    const y=el.getBoundingClientRect().top+window.scrollY-72;
+    window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+  }));
 }
 function judge(know){
   const c=deck[idx];
