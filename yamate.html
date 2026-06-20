@@ -110,6 +110,13 @@ table.cmp td.relrow{background:#fff;padding:11px 14px}
 .note-body .decide{background:#162a42;color:#fff;font-size:14.5px;padding:9px 13px;margin-top:8px;line-height:1.7}
 .note-body .decide b{color:#ffd9a0}
 
+/* スマホ：多列テーブルが潰れて改行が崩れるのを防ぐ（横スクロールにする） */
+@media(max-width:700px){
+  .note-body{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .note-body table.gtbl{min-width:560px}
+  .note-body table.gtbl td,.note-body table.gtbl th{word-break:normal;overflow-wrap:normal}
+}
+
 </style>
 </head>
 <body>
