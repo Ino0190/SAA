@@ -130,6 +130,17 @@ table.cmp td.relrow{background:#fff;padding:11px 14px}
 .tocchip:hover{background:#21537f;color:#fff}
 .tocact{font-size:13px;padding:6px 10px;border:1px solid #b9b3a5;background:#fff;color:#5e5e5e;cursor:pointer;font-family:inherit}
 
+/* 対決ペアのカードデッキ（1枚ずつ・スワイプ/◀▶でめくる） */
+.deck{margin-top:8px}
+.pcard{display:none}
+.pcard.on{display:block;animation:pcin .18s ease}
+@keyframes pcin{from{opacity:.3}to{opacity:1}}
+.decknav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 2px}
+.dnav{font-size:16px;padding:10px 18px;border:1px solid #21537f;background:#fff;color:#21537f;cursor:pointer;font-family:inherit;font-weight:700}
+.dnav:hover{background:#21537f;color:#fff}
+.dcount{font-size:16px;color:#183251;font-weight:700}
+.deckhint{font-size:13px;color:#9a948a;text-align:center;margin-top:4px}
+
 </style>
 </head>
 <body>
@@ -984,6 +995,7 @@ function render(filter){
   root.innerHTML='';let shown=0;
   DATA.forEach((ch,ci)=>{
     let body='';let any=false;
+    let pcards=[];
     if(ch.pairs) ch.pairs.forEach(p=>{
       const hay=(p.a+' '+p.b+' '+p.key+' '+p.tale+' '+(p.scene||'')).toLowerCase();
       if(filter&&hay.indexOf(filter)<0)return;
@@ -998,14 +1010,22 @@ function render(filter){
           rel+='<button class="relq" data-qi="'+q._gi+'"><span class="tag">'+srcLabel(q)+'</span>'+head+'…</button>';
         });
       }
-      body+='<div class="pair"><table class="cmp">'
+      const pairHTML='<table class="cmp">'
         +'<tr><th class="ca">🔵 '+p.a+'</th><th class="cb">🔴 '+p.b+'</th></tr>'
         +'<tr><td class="da">'+sp[0]+'</td><td class="db">'+sp[1]+'</td></tr>'
         +'<tr><td class="keyrow" colspan="2">決め手: '+p.key+'</td></tr>'
         +(p.scene?'<tr><td class="scenerow" colspan="2"><span class="ttl">📖 こんな場面</span>'+p.scene+'</td></tr>':'')
         +(rel?'<tr><td class="relrow" colspan="2">'+rel+'</td></tr>':'')
-        +'</table></div>';
+        +'</table>';
+      pcards.push('<div class="pcard'+(pcards.length===0?' on':'')+'"><div class="pair">'+pairHTML+'</div></div>');
     });
+    if(pcards.length){
+      body+='<div class="deck"><div class="deckwrap">'+pcards.join('')+'</div>'
+        +'<div class="decknav"><button class="dnav dprev">◀ 前</button>'
+        +'<span class="dcount">1 / '+pcards.length+'</span>'
+        +'<button class="dnav dnext">次 ▶</button></div>'
+        +'<div class="deckhint">カードを左右にスワイプ、または ◀ ▶ で次へ</div></div>';
+    }
     if(ch.lookup){
       let rows='';
       ch.lookup.forEach(r=>{
@@ -1056,11 +1076,30 @@ function openModal(gi){
   document.getElementById('modal').classList.add('on');
 }
 function closeModal(){document.getElementById('modal').classList.remove('on');}
+function deckGo(deck,dir){
+  const cards=[...deck.querySelectorAll('.pcard')];if(!cards.length)return;
+  let i=cards.findIndex(c=>c.classList.contains('on'));if(i<0)i=0;
+  cards[i].classList.remove('on');
+  i=(i+dir+cards.length)%cards.length;
+  cards[i].classList.add('on');
+  const c=deck.querySelector('.dcount');if(c)c.textContent=(i+1)+' / '+cards.length;
+}
 root.addEventListener('click',e=>{
   const hd=e.target.closest('.chaphd');
   if(hd){const c=hd.closest('.chapter');c.classList.toggle('collapsed');const a=hd.querySelector('.arw');if(a)a.textContent=c.classList.contains('collapsed')?'▶':'▼';return;}
+  const dn=e.target.closest('.dnext');if(dn){deckGo(dn.closest('.deck'),1);return;}
+  const dp=e.target.closest('.dprev');if(dp){deckGo(dp.closest('.deck'),-1);return;}
   const b=e.target.closest('.relq');if(b)openModal(+b.dataset.qi);
 });
+// スワイプでめくる
+let _tsx=null,_tsy=null,_tsDeck=null;
+root.addEventListener('touchstart',e=>{const d=e.target.closest('.deck');if(d){_tsx=e.touches[0].clientX;_tsy=e.touches[0].clientY;_tsDeck=d;}},{passive:true});
+root.addEventListener('touchend',e=>{
+  if(_tsx==null||!_tsDeck){return;}
+  const dx=e.changedTouches[0].clientX-_tsx, dy=e.changedTouches[0].clientY-_tsy;
+  if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5)deckGo(_tsDeck,dx<0?1:-1);
+  _tsx=_tsy=null;_tsDeck=null;
+},{passive:true});
 document.getElementById('modal').addEventListener('click',e=>{
   if(e.target.id==='modal'||e.target.classList.contains('mclose')||e.target.classList.contains('mback'))closeModal();
 });
