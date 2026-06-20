@@ -97,7 +97,7 @@ table.cmp td.relrow{background:#fff;padding:11px 14px}
 .note-blk{background:#fff;border:1px solid #ddd8cc;border-left:5px solid #21537f;margin:14px 0;padding:16px 20px}
 .note-blk h3{font-size:18px;color:#183251;margin-bottom:8px}
 .note-body{font-size:16px;line-height:1.85}
-.note-body b{color:#b01212}
+.note-body b{color:#183251}
 .note-body .en{color:#21537f;font-weight:700}
 .note-body ul{margin:8px 0 8px 0;padding-left:0;list-style:none}
 .note-body li{padding:6px 0;border-bottom:1px solid #f0ece0}
@@ -169,14 +169,14 @@ const DATA=[
    <tr><td>Beanstalk</td><td>Elastic Beanstalk</td><td>アプリ規模に応じて<b>環境一式</b>が伸縮</td></tr>
   </table>
   <div class="decide">引っかけ ／ <b>EFSは自動で伸びる</b>が、<b>EBSは手動</b>で増やす別物。「Elastic」の語に釣られず<b>「何が・自動か手動か」</b>を見る。EFSとEBSの取り違えは頻出。</div>`},
-  {h:"③ リレーショナル・SQL・JOIN・NoSQL とは（DBが初めての人へ）",body:`<p style="margin-bottom:10px"><b>そもそもデータベース（database）とは</b>、データを整理して貯めておき、後から探したり数えたり集計したりできる「電子的な台帳」のこと。その台帳の作り方に大きく2系統ある。</p>
+  {h:"③ リレーショナル・SQL・JOIN・NoSQL とは（DBが初めての人へ）",body:`<p style="margin-bottom:10px">データベース（database）とは、データを整理して貯めておき、後から探したり数えたり集計したりできる「電子的な台帳」のこと。その作り方に大きく2系統ある。</p>
   <ul>
-   <li><span class="nm">リレーショナルDB（relational database / RDB）</span>データを<b>表（テーブル）＝行と列</b>で持つ。たとえば「顧客表」と「注文表」を分けて作り、両方に載っている顧客番号でつなぐ。昔ながらの王道。例: <span class="en">MySQL / PostgreSQL</span> → AWSでは<b>RDS / Aurora</b>。</li>
-   <li><span class="nm">SQL（エスキューエル）</span>そのRDBに「この条件のデータを出して」「これを合計して」と命令する<b>共通の言葉（問い合わせ言語）</b>。RDBを使う＝だいたいSQLを書く。</li>
-   <li><span class="nm">JOIN（ジョイン）</span>「注文表の顧客番号を手がかりに、顧客表から名前を引っぱってくる」のように<b>複数の表をつなげる</b>操作。RDBの得意技で、これがあるから表を分けて持てる。</li>
-   <li><span class="nm">NoSQL（ノーエスキューエル）</span>表とJOINにこだわらない<b>別方式の総称</b>。1件をまるごと（ひとかたまり）で持ち、<b>キー（＝会員番号や商品IDのような、その1件を指す一意の目印）を渡すと、その1件だけを一発で取り出す</b>。クロークで番号札を出すと預けた荷物がすぐ出てくるのと同じイメージ。JOINや複雑な集計は苦手だが、桁違いの量と速度に強い。例: <b>DynamoDB</b>。</li>
+   <li><span class="nm">リレーショナルDB（RDB）</span>データを表（行と列）で持つ。たとえば「顧客表」と「注文表」を分けて作り、両方に載っている顧客番号でつなぐ。昔ながらの王道。例: MySQL / PostgreSQL → AWSではRDS / Aurora。</li>
+   <li><span class="nm">SQL（エスキューエル）</span>そのRDBに「この条件のデータを出して」「これを合計して」と命令する共通の言葉（問い合わせ言語）。RDBを使う＝だいたいSQLを書く。</li>
+   <li><span class="nm">JOIN（ジョイン）</span>「注文表の顧客番号から、顧客表の名前を引っぱってくる」のように複数の表をつなげる操作。RDBの得意技。</li>
+   <li><span class="nm">NoSQL（ノーエスキューエル）</span>表とJOINにこだわらない別方式の総称。1件をまるごと持ち、キー（会員番号や商品IDのような一意の目印）を渡すとその1件だけを一発で取り出す。クロークで番号札を出すと荷物がすぐ出てくるのと同じ。JOINや複雑な集計は苦手だが、量と速度に強い。例: DynamoDB。</li>
   </ul>
-  <div class="decide">設問の決め手 ／ <b>表どうしのJOIN・厳密な整合性・会計や在庫の取引</b>→RDB（RDS/Aurora） ／ <b>キーで引くだけ・超大量・速度最優先・サーバー管理したくない</b>→NoSQL（DynamoDB）。「データの形」を先に見極める。</div>`},
+  <div class="decide">決め手 ／ 表のJOIN・厳密な整合性・会計や在庫 → <b>RDB（RDS/Aurora）</b> ／ キーで引くだけ・超大量・速度優先 → <b>NoSQL（DynamoDB）</b>。「データの形」を先に見極める。</div>`},
   {h:"④ なぜS3に「ストレージクラス」が何種類もあるのか",body:`<p style="margin-bottom:10px">同じS3でも<b>「どれくらいの頻度で使うか」で最適な料金プランが違う</b>から、棚（クラス）が分かれている。原則は<b>保管料が安いほど、取り出しが遅い・取り出しに別料金</b>というトレードオフ。よく使うものを安い棚に入れると、取り出し料でかえって高くつく。</p>
   <table class="gtbl">
    <tr><th>クラス</th><th>使う頻度</th><th>取り出し</th><th>保管料</th></tr>
