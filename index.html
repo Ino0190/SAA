@@ -390,9 +390,17 @@ function renderHome(){
   document.getElementById('hBar').style.width=(seen/QUESTIONS.length*100)+'%';
   const cg=document.getElementById('catGrid');cg.innerHTML='';
   categories().forEach(c=>{
-    const n=QUESTIONS.filter(q=>q.cat===c).length;
+    const qs=QUESTIONS.filter(q=>q.cat===c);
+    const n=qs.length;
+    const seenQs=qs.filter(q=>progress.seen[q.id]);
+    const correct=seenQs.filter(q=>!progress.wrong[q.id]).length;
+    const rate=seenQs.length?Math.round(correct/seenQs.length*100):null;
+    let col='#9a948a',label='未着手';
+    if(rate!==null){label=rate+'%';col=rate<60?'#b01212':(rate<80?'#ba8425':'#2f7d32');}
     const chip=document.createElement('div');chip.className='catchip';
-    chip.textContent=`${c} (${n})`;chip.onclick=()=>startMode('cat',c);
+    chip.innerHTML=`${c} <span class="n">(${n})</span> <span style="color:${col};font-weight:700;font-size:13px;margin-left:4px">${label}</span>`;
+    chip.title=seenQs.length?`${c}：${seenQs.length}問中${correct}問 正解`:`${c}：まだ解いていません`;
+    chip.onclick=()=>startMode('cat',c);
     cg.appendChild(chip);
   });
 }
