@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SAA 山あて帳 — 物語で覚える紛らわしい対</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Yu Gothic','游ゴシック','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
+  background:#f4f3ee;color:#1a1a1a;line-height:1.7;font-size:17px;padding-bottom:80px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px}
+
+/* ヘッダー */
+header{background:linear-gradient(135deg,#183251,#21537f);color:#fff;padding:40px 0 34px;margin-bottom:8px}
+header h1{font-size:30px;font-weight:700;letter-spacing:.02em;margin-bottom:8px}
+header p{font-size:16px;color:#cfe0ef}
+
+/* 検索 */
+.searchbar{position:sticky;top:0;z-index:20;background:#f4f3ee;padding:14px 0;border-bottom:1px solid #d8d4c8}
+#q{width:100%;font-size:17px;padding:12px 16px;border:2px solid #21537f;border-radius:0;
+  font-family:inherit;background:#fff;color:#1a1a1a}
+#q::placeholder{color:#8a8a8a}
+.hit{font-size:14px;color:#5e5e5e;margin-top:6px}
+
+/* 大原則 */
+.intro{background:#fff;border-left:5px solid #ba8425;padding:22px 24px;margin:28px 0 8px}
+.intro h2{font-size:21px;color:#183251;margin-bottom:10px}
+.intro p{font-size:16px;margin-bottom:8px}
+.intro b{color:#b01212}
+
+/* 章 */
+.chapter{margin-top:52px}
+.chapter>h2{font-size:24px;color:#183251;font-weight:700;border-bottom:3px solid #21537f;
+  padding-bottom:8px;margin-bottom:6px}
+.chapter>h2 .ico{margin-right:8px}
+.story{background:#edf2f4;padding:18px 22px;margin:16px 0 26px;font-size:16px;color:#183251}
+.story .who{color:#b01212;font-weight:700}
+
+/* 対決カード */
+.pair{background:#fff;border:1px solid #ddd8cc;margin:14px 0;padding:18px 20px}
+.pair .vs{font-size:18px;font-weight:700;color:#183251;margin-bottom:4px}
+.pair .vs .a{color:#21537f}
+.pair .vs .b{color:#b01212}
+.pair .vs .x{color:#999;font-weight:400;margin:0 8px;font-size:15px}
+.pair .key{display:inline-block;background:#162a42;color:#fff;font-size:14px;font-weight:700;
+  padding:3px 12px;margin:8px 0 10px}
+.pair .tale{font-size:16px;color:#1a1a1a}
+.pair .tale .a{color:#21537f;font-weight:700}
+.pair .tale .b{color:#b01212;font-weight:700}
+
+/* 逆引き表 */
+table.lookup{width:100%;border-collapse:collapse;margin-top:18px;font-size:16px;background:#fff}
+table.lookup th{background:#183251;color:#fff;text-align:left;padding:10px 14px;font-weight:700}
+table.lookup td{padding:9px 14px;border-bottom:1px solid #e6e2d6;vertical-align:top}
+table.lookup td.k{color:#b01212;font-weight:700;width:42%}
+table.lookup tr:nth-child(even) td{background:#faf9f5}
+
+.note{font-size:14px;color:#5e5e5e;margin-top:6px}
+footer{margin-top:60px;padding-top:20px;border-top:1px solid #d8d4c8;font-size:14px;color:#5e5e5e}
+.nores{display:none;padding:30px;text-align:center;color:#5e5e5e;font-size:16px}
+
+/* 比較テーブル */
+table.cmp{width:100%;border-collapse:collapse;margin:0}
+table.cmp th{padding:10px 14px;font-size:17px;font-weight:700;text-align:left;width:50%;vertical-align:top}
+table.cmp th.ca{background:#edf2f4;color:#21537f;border-bottom:2px solid #21537f}
+table.cmp th.cb{background:#f7f2f2;color:#b01212;border-bottom:2px solid #b01212}
+table.cmp td.da{background:#f8fafc;font-size:15px;padding:11px 14px;vertical-align:top;width:50%;border-right:1px solid #e6e2d6}
+table.cmp td.db{background:#fdf8f8;font-size:15px;padding:11px 14px;vertical-align:top;width:50%}
+table.cmp td.da .a,table.cmp td.db .b{font-weight:700}
+table.cmp td.keyrow{background:#162a42;color:#fff;font-size:15px;font-weight:700;padding:9px 14px}
+table.cmp td.scenerow{background:#f4f4ef;color:#5a3a12;font-size:15px;padding:11px 14px;line-height:1.75}
+table.cmp td.scenerow .ttl{color:#7a471a;font-weight:700;margin-right:6px}
+table.cmp td.relrow{background:#fff;padding:11px 14px}
+.rellbl{font-size:13px;color:#5e5e5e;display:block;margin-bottom:4px}
+.relq{display:block;width:100%;text-align:left;margin:5px 0 0;padding:8px 12px;font-size:14px;font-family:inherit;
+  background:#fff;border:1px solid #21537f;color:#21537f;cursor:pointer;line-height:1.5}
+.relq:hover{background:#21537f;color:#fff}
+.relq .tag{font-weight:700;margin-right:6px}
+
+/* モーダル */
+.modal{display:none;position:fixed;inset:0;background:rgba(20,30,50,.62);z-index:100;overflow-y:auto;padding:28px 14px}
+.modal.on{display:block}
+.mbox{max-width:760px;margin:0 auto;background:#fff;padding:22px 24px}
+.mclose{float:right;font-size:26px;cursor:pointer;color:#888;background:none;border:none;line-height:1}
+.mcat{font-size:13px;color:#fff;background:#21537f;display:inline-block;padding:3px 10px;margin-bottom:12px}
+.msc{font-size:16px;line-height:1.85;margin-bottom:10px}
+.mask{font-size:16px;font-weight:700;color:#183251;border-top:1px dashed #ccc;padding-top:12px;margin-bottom:10px}
+.mopt{font-size:15px;padding:9px 12px;border:1px solid #ddd;margin:6px 0;line-height:1.6}
+.mopt.ok{background:#e9f5ec;border-color:#38a169;color:#1a4731;font-weight:700}
+.mexp{font-size:15px;background:#f4f4ef;padding:13px 15px;margin-top:12px;line-height:1.75}
+.mexp b{color:#b01212}
+.mback{display:block;width:100%;margin-top:16px;padding:13px;font-size:16px;font-family:inherit;
+  background:#21537f;color:#fff;border:none;cursor:pointer}
+.mback:hover{background:#183251}
+
+/* 解説ブロック（命名・用語） */
+.note-blk{background:#fff;border:1px solid #ddd8cc;border-left:5px solid #21537f;margin:14px 0;padding:16px 20px}
+.note-blk h3{font-size:18px;color:#183251;margin-bottom:8px}
+.note-body{font-size:16px;line-height:1.85}
+.note-body b{color:#b01212}
+.note-body .en{color:#21537f;font-weight:700}
+.note-body ul{margin:8px 0 8px 0;padding-left:0;list-style:none}
+.note-body li{padding:6px 0;border-bottom:1px solid #f0ece0}
+.note-body li .nm{color:#21537f;font-weight:700;margin-right:6px}
+.note-body table.gtbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+.note-body table.gtbl th{background:#183251;color:#fff;padding:8px 10px;text-align:left;font-weight:700}
+.note-body table.gtbl td{padding:8px 10px;border-bottom:1px solid #e6e2d6;vertical-align:top;line-height:1.6}
+.note-body table.gtbl td:first-child{font-weight:700;color:#21537f;white-space:nowrap}
+.note-body table.gtbl tr:nth-child(even) td{background:#faf9f5}
+.note-body .decide{background:#162a42;color:#fff;font-size:14.5px;padding:9px 13px;margin-top:8px;line-height:1.7}
+.note-body .decide b{color:#ffd9a0}
+
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a href="index.html" style="color:#cfe0ef;font-size:15px;text-decoration:none;display:inline-block;margin-bottom:10px">← SAAドリルへ戻る</a>
+  <h1>SAA 山あて帳</h1>
+  <p>物語で覚える「紛らわしい対」と決め手の一語 — 全368問の頻出比較を横断</p>
+</div></header>
+
+<div class="wrap">
+  <div class="searchbar">
+    <input id="q" type="text" placeholder="🔍 サービス名・キーワードで絞り込み（例: Kinesis / 専用線 / DDoS / 自動ローテーション）">
+    <div class="hit" id="hit"></div>
+  </div>
+
+  <div class="intro">
+    <h2>この帳面の使い方</h2>
+    <p>SAAの問題は、長いシナリオの中に隠れた<b>決め手の一語</b>で正解が決まる。選択肢は「もっともらしい4つ」で、たいてい2つで迷わせてくる。</p>
+    <p>ここでは、その「迷わせてくる2つ」＝<b>紛らわしい対</b>を分野ごとに並べ、どの一語で見分けるかと、忘れないための<b>たとえ話</b>をまとめた。設問を解いて迷ったら、ここで対を引く。</p>
+    <p class="note">青＝左側のサービス／赤＝右側のサービス。黒い帯＝見分ける決め手の言葉。各対の下の「🔗 関連する問題」を押すと実際の出題が開き、解いたら戻れる。</p>
+  </div>
+
+  <div class="intro" style="border-left-color:#21537f">
+    <h2 style="color:#183251">📇 サービスの本名・役割を1枚ずつ覚えるなら</h2>
+    <p>この帳面は「紛らわしい対」の<b>比較・物語・関連問題</b>に専念する。サービス個別の本名・あだ名・何をする係かを表裏カードで覚えるのは、<a href="cards.html" style="color:#b01212;font-weight:700">暗記帳（cards.html）へ →</a>が専門。覚えた／まだの仕分けや、AIに質問する機能もそちらにある。</p>
+  </div>
+
+  <div id="chapters"></div>
+  <div class="nores" id="nores">該当なし。別の言葉で試す。</div>
+
+  <footer>
+    SAA山あて帳 ／ 出題バンク V1〜V4（368問）の混同ペア200件＋頻出比較から構成。<br>
+    決め手の一語が腹落ちすれば、言い換え問題でも崩れない。
+  </footer>
+</div>
+
+<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
+
+<script>
+const DATA=[
+{ico:"🔤",t:"名前と用語の法則（読み解きのコツ）",
+ story:`AWSはアルファベットの略語だらけで、名前を見ても何者か分からない。でも実は名前の付け方に傾向があり、用語の意味さえ噛み砕いておけば、選択肢を見た瞬間に「ああ、あれの仲間か」と当たりがつく。ここはサービスを覚える前の準備運動。データベースもSQLも初めて、という前提で言葉から解きほぐす。`,
+ notes:[
+  {h:"① Amazon〜 と AWS〜 — 名前の頭で身構えない",body:`<ul>
+   <li><span class="nm">Amazon〜</span>はそれ単体で使う「製品・サービス」に付きやすい（<span class="en">Amazon S3 / EC2 / RDS / DynamoDB / CloudFront / Redshift</span>）。利用者が直接さわる「もの」のイメージ。</li>
+   <li><span class="nm">AWS〜</span>は他を支える「基盤・管理・横断ツール」に付きやすい（<span class="en">AWS Lambda / Config / Organizations / Glue / Batch</span>）。</li>
+  </ul>
+  <div class="decide">ただし<b>例外だらけ</b>（Lambdaは単体製品的だがAWS Lambda）。試験では正式名称の頭が <b>Amazon か AWS か</b> は正解にまったく関係しない。覚えるのは頭文字でなく<b>「何をする係か」</b>。名前で身構えないこと。</div>`},
+  {h:"②「Elastic」が付くサービス — 同じ語でも『弾力』の中身が違う",body:`<p style="margin-bottom:10px"><b>Elastic ＝「弾力」＝需要に応じて伸び縮みする</b>、という意味。AWS命名の核。ただし<b>「何が」伸びるかはサービスごとに違う</b>。「Elasticだから勝手に無限に伸びる」と思い込むと引っかかる。</p>
+  <table class="gtbl">
+   <tr><th>サービス</th><th>正式名称</th><th>"弾力"の中身（何が伸縮するか）</th></tr>
+   <tr><td>EC2</td><td>Elastic Compute Cloud</td><td>サーバーの<b>台数</b>を増減できる</td></tr>
+   <tr><td>EBS</td><td>Elastic Block Store</td><td><b>容量</b>を変更できる（※自動でなく手動）</td></tr>
+   <tr><td>EFS</td><td>Elastic File System</td><td>使った分だけ<b>容量が自動</b>で伸縮（本当に弾力的）</td></tr>
+   <tr><td>ELB</td><td>Elastic Load Balancing</td><td>負荷に応じて<b>分散能力</b>が自動拡張</td></tr>
+   <tr><td>ElastiCache</td><td>（in-memory cache）</td><td>キャッシュの<b>ノード数</b>を増減</td></tr>
+   <tr><td>Beanstalk</td><td>Elastic Beanstalk</td><td>アプリ規模に応じて<b>環境一式</b>が伸縮</td></tr>
+  </table>
+  <div class="decide">引っかけ ／ <b>EFSは自動で伸びる</b>が、<b>EBSは手動</b>で増やす別物。「Elastic」の語に釣られず<b>「何が・自動か手動か」</b>を見る。EFSとEBSの取り違えは頻出。</div>`},
+  {h:"③ リレーショナル・SQL・JOIN・NoSQL とは（DBが初めての人へ）",body:`<p style="margin-bottom:10px"><b>そもそもデータベース（database）とは</b>、データを整理して貯めておき、後から探したり数えたり集計したりできる「電子的な台帳」のこと。その台帳の作り方に大きく2系統ある。</p>
+  <ul>
+   <li><span class="nm">リレーショナルDB（relational database / RDB）</span>データを<b>表（テーブル）＝行と列</b>で持つ。たとえば「顧客表」と「注文表」を分けて作り、両方に載っている顧客番号でつなぐ。昔ながらの王道。例: <span class="en">MySQL / PostgreSQL</span> → AWSでは<b>RDS / Aurora</b>。</li>
+   <li><span class="nm">SQL（エスキューエル）</span>そのRDBに「この条件のデータを出して」「これを合計して」と命令する<b>共通の言葉（問い合わせ言語）</b>。RDBを使う＝だいたいSQLを書く。</li>
+   <li><span class="nm">JOIN（ジョイン）</span>「注文表の顧客番号を手がかりに、顧客表から名前を引っぱってくる」のように<b>複数の表をつなげる</b>操作。RDBの得意技で、これがあるから表を分けて持てる。</li>
+   <li><span class="nm">NoSQL（ノーエスキューエル）</span>表とJOINにこだわらない<b>別方式の総称</b>。1件をまるごと（ひとかたまり）で持ち、<b>キー（＝会員番号や商品IDのような、その1件を指す一意の目印）を渡すと、その1件だけを一発で取り出す</b>。クロークで番号札を出すと預けた荷物がすぐ出てくるのと同じイメージ。JOINや複雑な集計は苦手だが、桁違いの量と速度に強い。例: <b>DynamoDB</b>。</li>
+  </ul>
+  <div class="decide">設問の決め手 ／ <b>表どうしのJOIN・厳密な整合性・会計や在庫の取引</b>→RDB（RDS/Aurora） ／ <b>キーで引くだけ・超大量・速度最優先・サーバー管理したくない</b>→NoSQL（DynamoDB）。「データの形」を先に見極める。</div>`},
+  {h:"④ なぜS3に「ストレージクラス」が何種類もあるのか",body:`<p style="margin-bottom:10px">同じS3でも<b>「どれくらいの頻度で使うか」で最適な料金プランが違う</b>から、棚（クラス）が分かれている。原則は<b>保管料が安いほど、取り出しが遅い・取り出しに別料金</b>というトレードオフ。よく使うものを安い棚に入れると、取り出し料でかえって高くつく。</p>
+  <table class="gtbl">
+   <tr><th>クラス</th><th>使う頻度</th><th>取り出し</th><th>保管料</th></tr>
+   <tr><td>S3 Standard</td><td>毎日よく使う</td><td>即時・無料</td><td>高い</td></tr>
+   <tr><td>Standard-IA</td><td>たまに（月数回）</td><td>即時・取り出し有料</td><td>中</td></tr>
+   <tr><td>One Zone-IA</td><td>たまに・消えても再作成可</td><td>即時</td><td>中（やや安）</td></tr>
+   <tr><td>Intelligent-Tiering</td><td>頻度が予測できない（よく使う時期と使わない時期がある）</td><td>即時</td><td>自動で最適化</td></tr>
+   <tr><td>Glacier Instant</td><td>めったに・でも即必要</td><td>即時</td><td>安</td></tr>
+   <tr><td>Glacier Flexible</td><td>めったに・数分〜数時間待てる</td><td>数分〜時間</td><td>とても安</td></tr>
+   <tr><td>Glacier Deep Archive</td><td>年に数回・半日待てる</td><td>〜12時間</td><td>最安</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>即時に要る</b>→Standard系・Glacier Instant ／ <b>待てる・最安</b>→Glacier Flexible・Deep Archive ／ <b>頻度が読めない</b>→Intelligent-Tiering（S3が自動で棚を移す）。<b>引っかけ＝最低保管期間</b>（IAは30日・Glacierは90/180日）。すぐ消すデータを安い棚に入れると逆に割高。</div>`},
+  {h:"⑤ なぜデータベースが何種類もあるのか",body:`<p style="margin-bottom:10px"><b>データの「形」と「使い方」ごとに、一番速く安く扱えるエンジンが違う</b>から。万能の1個は無い。設問は「データの形」と「アクセスの仕方」をヒントに、どのエンジンを選ぶかを問う。だから先に<b>形</b>を見極める。</p>
+  <table class="gtbl">
+   <tr><th>データの形・用途</th><th>最適なサービス</th></tr>
+   <tr><td>表＋JOIN・厳密な取引（会計・在庫）</td><td>RDS / Aurora（リレーショナル）</td></tr>
+   <tr><td>キーで引くだけ（番号で1件を一発取り出し）・超大量・サーバーレス</td><td>DynamoDB（NoSQL）</td></tr>
+   <tr><td>よく使うデータを一瞬で（セッション・キャッシュ）</td><td>ElastiCache（インメモリ）</td></tr>
+   <tr><td>大量データの集計分析（DWH・レポート）</td><td>Redshift（列指向）</td></tr>
+   <tr><td>つながり・関係をたどる（レコメンド・人脈）</td><td>Neptune（グラフ）</td></tr>
+   <tr><td>時刻つきの計測値（IoT・モニタリング）</td><td>Timestream（時系列）</td></tr>
+   <tr><td>MongoDBから移したい</td><td>DocumentDB</td></tr>
+   <tr><td>Cassandraから移したい</td><td>Keyspaces</td></tr>
+  </table>
+  <div class="decide">迷ったら ／ まず<b>「表とJOINが要るか（→RDB）」「キーで引くだけか（→DynamoDB）」</b>を判定。そのうえで「速さ重視＝ElastiCache」「集計＝Redshift」「関係＝Neptune」「時系列＝Timestream」と特殊用途を当てる。</div>`},
+  {h:"⑥ リージョン・AZ・サブネット — 試験での言い換えに注意",body:`<p style="margin-bottom:10px">可用性・DRの問題は、この「場所の階層」と<b>問題文の言い換え</b>が分かると一気に解ける。</p>
+  <table class="gtbl">
+   <tr><th>用語</th><th>意味（ざっくり）</th></tr>
+   <tr><td>リージョン（Region）</td><td>世界各地の大きな地域（東京・大阪・バージニアなど）。リージョンを跨ぐ＝地理的に遠い別の場所</td></tr>
+   <tr><td>アベイラビリティゾーン（AZ）</td><td>1つのリージョンの中にある、電源・ネットワークが独立した複数の拠点。<b>各AZは1つ以上のデータセンターでできている</b>。AZ同士は数km〜数十km離れ高速回線でつながる</td></tr>
+   <tr><td>サブネット（Subnet）</td><td>VPC（自分の街）を区切った区画。<b>1サブネット＝1つのAZ</b>に属する。外と通じるパブリックと、奥のプライベートがある</td></tr>
+  </table>
+  <div class="decide">🚨試験の言い換え ／ 問題文の<b>「データセンター障害」「単一施設の障害」≒ AZ障害</b> → 答えは<b>マルチAZ</b>（別AZにスタンバイ・自動フェイルオーバーで数分以内）。<b>「リージョン全体の災害」「地域災害」</b> → マルチリージョン／Aurora Global Database。「データセンター」に釣られてGlobal Databaseを選ぶと<b>過剰でコスト高</b>になる引っかけ。</div>`},
+  {h:"⑦ サーバーレス・Lambda関数・実行ロールとは",body:`<ul>
+   <li><span class="nm">サーバー</span>普段アプリは「ずっと起動しているサーバー（EC2など）」の上で動く。電源を入れっぱなしで待ち受け、リクエストが来たら処理する。<b>動いていなくても起動中は課金</b>。</li>
+   <li><span class="nm">サーバーレス（serverless）</span>サーバーを自分で用意・管理せず、<b>イベントが来た時だけAWSが裏で一瞬だけ動かして</b>くれる方式。待ち受けの常駐がない＝<b>アイドル中はほぼ無料、使った時間だけ課金</b>。「サーバーが無い」のではなく「サーバーを意識しなくていい」の意味。</li>
+   <li><span class="nm">Lambda関数（Lambda function）</span>Lambdaに登録した<b>処理ひとかたまりのコード</b>。"関数"はプログラム用語で「入力を受け取り、処理して、結果を返すひとまとまり」のこと。例＝「画像がS3にアップされたらサムネイルを作る」コードを1つの関数として置いておく。イベント（ファイル到着・APIアクセス等）で自動起動し、最大15分で終わる。</li>
+   <li><span class="nm">実行ロール（execution role）</span>Lambda関数が他のAWSサービス（DynamoDB・S3など）を<b>触るための権限</b>。Lambda自身にIAMロールをアタッチして「このロールの許可の範囲で動いていい」と渡す。鍵を手渡すのでなく、バッジを付けるイメージ。</li>
+  </ul>
+  <div class="decide">決め手 ／ <b>LambdaにDynamoDBやS3を操作させたい</b> → <b>実行ロール（IAMロール）</b>に必要な許可（例: dynamodb:PutItem）を付けてLambdaにアタッチする。<b>アクセスキーをコードに書く・環境変数に埋め込むのは誤り</b>（漏洩リスク）。EC2に権限を渡す時も同じくIAMロールをアタッチする。</div>`},
+  {h:"⑧ 静的サイトと動的サイト（S3ホスティング＋CloudFrontの王道）",body:`<ul>
+   <li><span class="nm">静的サイト（static）</span>HTML/CSS/JS/画像などで、<b>誰がいつ見ても同じ中身</b>。サーバー側で毎回作らず、完成品を返すだけ。会社案内・ランディングページ・ドキュメントなど。</li>
+   <li><span class="nm">動的サイト（dynamic）</span>ユーザーやタイミングで<b>中身が変わる</b>。サーバーが毎回データを取って組み立てる。ログイン後の画面・検索結果・ECのカートなど。</li>
+  </ul>
+  <p style="margin:8px 0 10px"><b>静的サイトはサーバー（EC2）が要らない。</b>S3に置くだけで「<b>S3静的ウェブサイトホスティング</b>」として配信できる（サーバーレス＝激安・無限スケール）。世界中へ速く＋安くは、<b>S3（置き場＝オリジン）＋ CloudFront（CDN）</b>。CloudFrontが各地のエッジにキャッシュ→物理距離が縮み全ユーザーに速く、オリジン（S3）へのアクセスも減ってさらに安い。</p>
+  <div class="decide">決め手 ／ <b>静的サイト・グローバル・速く・コスト効率</b> → <b>S3静的ホスティング＋CloudFront</b>（独自ドメインはRoute 53で向ける）。EC2でWebサーバーを並べるのは<b>動的サイト</b>向きで、静的サイトには割高・過剰になる引っかけ。</div>`},
+  {h:"⑨ 問題文の「時間の言い方」で同期／非同期を見分ける",body:`<p style="margin-bottom:10px">可用性やコストの問題は、<b>どれくらい急ぐか</b>の言い回しで答えの方向が決まる。これは知識でなく「読み方のコツ」。</p>
+  <table class="gtbl">
+   <tr><th>問題文の言い回し</th><th>意味</th><th>向かう答え</th></tr>
+   <tr><td>リアルタイムに／即座に／ミリ秒・秒以内に</td><td>同期・すぐ返す</td><td>低遅延の直接処理・キャッシュ（ElastiCache等）</td></tr>
+   <tr><td>○時間以内に／夜間バッチで／最終的に</td><td>急がない・あとで処理でOK</td><td>キューに溜めて非同期処理＝疎結合（SQS＋Lambda）</td></tr>
+  </table>
+  <p style="margin:8px 0 10px">「12時間以内に処理」のような<b>緩い時間要件</b>は「キューに溜めて順に処理していい」の合図。常時フル稼働のEC2を並べるのは<b>割高・運用も重い</b>のでバツになりやすい。あわせて<b>「種類ごとに分類・振り分け」</b>は <b>SNSのフィルターポリシー</b>（属性で別キューへ）か <b>EventBridgeのルール</b>でルーティングする。</p>
+  <div class="decide">決め手 ／ <b>緩い時間要件＋費用対効果・運用効率</b> → <b>SQSで受けて Lambda で処理</b>（サーバーレス）。<b>分類が要る</b> → SNSフィルターポリシー or EventBridgeルールで種別ごとに振り分け。「すぐ」と書いていないのにリアルタイム構成や常時稼働サーバーを選ぶと過剰。</div>`},
+  {h:"⑩ S3のプレフィックスとリクエスト性能（3,500 PUT/秒の壁）",body:`<ul>
+   <li><span class="nm">プレフィックス（prefix）</span>オブジェクトのキー（パスのような名前）の区切り部分。例 <b>uploads/2026/img1.jpg</b> の <b>uploads/2026/</b>。フォルダのように見えるがS3は実際には階層を持たず、この文字列の並びでさばく単位を分けている。</li>
+   <li><span class="nm">リクエスト性能はプレフィックス単位</span>S3は<b>1プレフィックスあたり毎秒 PUT/POST/COPY/DELETE 3,500件・GET/HEAD 5,500件</b>まで自動でさばける。1つのプレフィックスに集中させるとここが頭打ちになる。</li>
+  </ul>
+  <p style="margin:8px 0 10px"><b>3,500 PUT/秒を超えたいなら、オブジェクトを複数のプレフィックスに分散する。</b>プレフィックスの数だけ上限が足し算される（2つで7,000／秒、N個でN×3,500）。</p>
+  <div class="decide">決め手 ／ <b>S3のPUT/GETが性能上限に当たる</b> → 複数プレフィックスに分散。<b>「ファイル管理がしやすい方式で」</b>とあれば、昔の<b>ランダムなハッシュ接頭辞は不要</b>（今のS3は自動でプレフィックス単位にスケール）。<b>日付やカテゴリなど意味のあるプレフィックス</b>（2026/06/・orders/・images/ 等）で分ければ、性能も出て管理もしやすい。</div>`},
+  {h:"⑪ 暗号化したAMI/スナップショットを別アカウントと共有する手順",body:`<p style="margin-bottom:10px">暗号化リソースのクロスアカウント共有は<b>「リソースの共有」＋「KMS鍵の共有」の2点セット</b>。AMIだけ共有しても、鍵を共有しないと相手は復号できず起動できない。</p>
+  <ul>
+   <li><span class="nm">手順1：鍵を共有</span>暗号化に使った<b>KMSカスタマー管理キー（CMK）のキーポリシー</b>に相手アカウントを追加し、<b>kms:Decrypt / kms:DescribeKey / kms:CreateGrant</b> 等を許可（相手側IAMでも同キーへの権限を付ける）。</li>
+   <li><span class="nm">手順2：AMIを共有</span><b>AMIの起動許可（launch permission）に相手のアカウントIDを追加</b>。紐づくEBSスナップショットも共有される。</li>
+   <li><span class="nm">手順3：相手が利用</span>共有AMIから起動、または自社キーでコピー（再暗号化）して使う。</li>
+  </ul>
+  <div class="decide">決め手 ／ <b>暗号化AMI/スナップショットを別アカウントへ</b> → ①CMKのキーポリシーで相手に復号権限 ②AMIの起動許可に相手アカウントID。<b>制約＝AWS管理のデフォルト鍵（aws/ebs）は共有できない</b>。<b>カスタマー管理キー（CMK）が必須</b>（問題文に「カスタマー管理キー」とあれば共有可能の合図）。鍵の共有を忘れると相手が復号できず起動失敗、が引っかけ。</div>`},
+/*HATSU*/ ]},
+{ico:"⚖️",t:"並べて比較（似た三兄弟以上の見分け）",
+ story:`2つで迷うものは後ろの「対決カード」で見分ける。でも購入オプションが4種、ロードバランサーが3種のように、3つ以上が横並びのものはスラッシュでまとめると区別がつかない。ここは表で一気に見比べる。設問で一番困るALB対NLBもここ。`,
+ notes:[
+  {h:"⚖️ ロードバランサー3種（ALB／NLB／GWLB・設問頻出）",body:`<table class="gtbl">
+   <tr><th>種類</th><th>レイヤー</th><th>振り分け方</th><th>強み・こんな時</th></tr>
+   <tr><td>ALB</td><td>L7（HTTP/HTTPS）</td><td>URLパス・ホスト名・ヘッダーの中身を見て振り分け</td><td>WAF連携。/api と /img を別ターゲットへ。普通のWebアプリ・マイクロサービス</td></tr>
+   <tr><td>NLB</td><td>L4（TCP/UDP）</td><td>IP・ポートでそのまま流す（中身は見ない）</td><td>超低遅延・固定IP・毎秒数百万接続・送信元IP保持。非HTTP・ゲーム・IoT・極端な性能</td></tr>
+   <tr><td>GWLB</td><td>L3</td><td>経路上に透過的に挿入</td><td>サードパーティのファイアウォール/IDSをインラインで検査させたい</td></tr>
+   </table>
+   <div class="decide">設問の決め手 ／ <b>HTTP・URLパスやホスト名で振り分け・WAF</b>→ALB ／ <b>TCP/UDP・固定IP・超低遅延・数百万接続・送信元IP保持</b>→NLB ／ <b>セキュリティ製品を経路に挟む</b>→GWLB。「L7で中身を見るか、L4でそのまま流すか」がALB対NLBの一語。</div>`},
+  {h:"💰 EC2購入オプション4種（それぞれ別物）",body:`<table class="gtbl">
+   <tr><th>種類</th><th>割引</th><th>約束（コミット）</th><th>中断</th><th>向いてる仕事</th></tr>
+   <tr><td>オンデマンド</td><td>なし（定価）</td><td>なし</td><td>されない</td><td>短期・予測不能・とりあえず動かす</td></tr>
+   <tr><td>リザーブド（RI）</td><td>最大〜72%</td><td>1〜3年・インスタンスタイプ等を固定</td><td>されない</td><td>常時稼働で構成が決まっている定常負荷</td></tr>
+   <tr><td>Savings Plans</td><td>最大〜72%</td><td>1〜3年・「1時間あたりの利用額」をコミット（構成は自由）</td><td>されない</td><td>常時稼働だがインスタンスを変える可能性がある</td></tr>
+   <tr><td>スポット</td><td>最大〜90%</td><td>なし</td><td>される（追い出される）</td><td>中断OKのバッチ・ステートレスワーカー</td></tr>
+   </table>
+   <div class="decide">決め手 ／ <b>短期・とりあえず</b>→オンデマンド ／ <b>ずっと使う・構成固定</b>→RI ／ <b>ずっと使うが構成を変えるかも</b>→Savings Plans ／ <b>中断OKで激安</b>→スポット。RIとSavings Plansの差は「固定するか・金額だけ約束して柔軟か」。</div>`},
+  {h:"👁 まず全体像：監視・記録・検知・調査（似た顔ぶれを一望）",body:`<p style="margin-bottom:10px">セキュリティ・運用系は「何かを見ている」サービスが多くて混同しやすい。実は<b>何を見ているか</b>で4グループに分かれる。GuardDutyらの「検知4兄弟」は、この中の<b>検知</b>グループ。</p>
+  <table class="gtbl">
+   <tr><th>グループ</th><th>サービス</th><th>何を見る・する（一語で）</th></tr>
+   <tr><td>監視（性能）</td><td>CloudWatch</td><td>CPU・エラー数などの数値とログ → 今どう動いているか</td></tr>
+   <tr><td>記録（証跡）</td><td>CloudTrail</td><td>誰がいつどのAPIを叩いたか → 操作の履歴</td></tr>
+   <tr><td>記録（構成）</td><td>Config</td><td>リソースの設定が今どうか・基準に沿うか → 状態</td></tr>
+   <tr><td>追跡（遅延）</td><td>X-Ray</td><td>リクエストがどこで何秒かかったか → 遅延の経路</td></tr>
+   <tr><td>検知</td><td>GuardDuty</td><td>攻撃の挙動を検知 → 現行犯</td></tr>
+   <tr><td>検知</td><td>Inspector</td><td>既知の弱点（CVE）をスキャン → 弱点</td></tr>
+   <tr><td>検知</td><td>Macie</td><td>S3の機密データ（PII）を発見 → 中身</td></tr>
+   <tr><td>調査</td><td>Detective</td><td>検知の後に誰がなぜを相関分析 → 事後捜査</td></tr>
+   <tr><td>集約</td><td>Security Hub</td><td>検知結果を1か所に集約・俯瞰（自分では検知しない）</td></tr>
+   <tr><td>助言</td><td>Trusted Advisor</td><td>コスト/セキュリティ/性能の改善点を指摘（実行はしない）</td></tr>
+  </table>
+  <div class="decide">特に取り違えやすいのはこの3つ ／ <b>今の動き（数値・性能）＝CloudWatch</b> ／ <b>過去の操作＝CloudTrail</b> ／ <b>設定の状態＝Config</b>。あとは上の表のとおり。1対1の詳しい対比は後ろの「🎛 司令室」章にある。</div>`},
+  {h:"🔍 検知・調査の4兄弟（GuardDuty／Inspector／Macie／Detective）",body:`<table class="gtbl">
+   <tr><th>サービス</th><th>何を探す・する</th><th>対象</th><th>あだ名</th></tr>
+   <tr><td>GuardDuty</td><td>攻撃の挙動・脅威を検知（不審な通信やAPI）</td><td>各種ログ（VPC Flow・CloudTrail・DNS）</td><td>見回りの番犬</td></tr>
+   <tr><td>Inspector</td><td>既知の弱点（脆弱性CVE）をスキャン</td><td>EC2・コンテナ・Lambda</td><td>設備点検の探偵</td></tr>
+   <tr><td>Macie</td><td>機密データ（個人情報PII）を発見・分類</td><td>S3の中身</td><td>中身の鑑定士</td></tr>
+   <tr><td>Detective</td><td>検知の後に「誰が・なぜ・どう」を相関分析</td><td>検知済みインシデント</td><td>刑事</td></tr>
+   </table>
+   <div class="decide">決め手 ／ <b>不審な挙動・攻撃</b>→GuardDuty ／ <b>弱点CVE・パッチ漏れ</b>→Inspector ／ <b>S3の機密データ</b>→Macie ／ <b>検知の後の原因調査</b>→Detective。4人の報告を集約・俯瞰するのがSecurity Hub。</div>`},
+  {h:"🔑 API Gatewayの認可方式（コール元の誰を認証するか）",body:`<table class="gtbl">
+   <tr><th>方式</th><th>誰を認証する</th><th>こんな時</th></tr>
+   <tr><td>IAM認可（AWS_IAM）</td><td>呼び出し元のIAMユーザー/ロール（SigV4署名）</td><td>AWSサービス間・アプリ間連携。IAMポリシーで権限管理</td></tr>
+   <tr><td>Cognito オーソライザー</td><td>アプリのエンドユーザー（toC）のトークン</td><td>一般利用者のサインイン付きAPI</td></tr>
+   <tr><td>Lambda オーソライザー</td><td>独自トークン/OAuth/JWTを自前ロジックで検証</td><td>既存の独自認証・サードパーティトークン</td></tr>
+   <tr><td>リソースポリシー</td><td>送信元IP・VPC・アカウント</td><td>特定のIP/VPC/アカウントだけ許可</td></tr>
+   </table>
+   <div class="decide">決め手 ／ <b>AWS内のアプリ間・コール元のIAMで権限管理</b> → <b>IAM認可</b>（呼び出し元のIAMロール/ユーザーに <b>execute-api:Invoke</b> をIAMポリシーで付与） ／ <b>エンドユーザー認証</b>→Cognito ／ <b>独自トークン検証</b>→Lambdaオーソライザー ／ <b>IP/VPC/アカウント制限</b>→リソースポリシー。「アプリ間連携でコール元に権限」と来たらIAM認可。</div>`},
+/*HATSU2*/ ]},
+{ico:"🗄",t:"倉庫街（ストレージ）",
+ story:`データの倉庫街を歩く。表通りで客がひっきりなしに出入りする巨大倉庫が <span class="who">S3</span>。その地下には年に数回しか開けない最安の金庫 <span class="who">Glacier</span> がある。路地裏には、机にぴったり付いた引き出し <span class="who">EBS</span>、フロアのみんなで使う共用書庫 <span class="who">EFS</span>、作業台に置きっぱなしで電源を切ると消える走り書き <span class="who">インスタンスストア</span>。倉庫選びは「誰が使うか・いつ消えるか・どれだけ速いか」で決まる。`,
+ pairs:[
+  {a:"インスタンスストア",b:"EBS",key:"停止で消えるか残るか",
+   scene:`キャッシュ専用サーバーをインスタンスストアにしたら爆速になった。ところが再起動したら中身が全部消えて青ざめた。消えて困るデータはEBSに移し、消えてもいい一時領域だけインスタンスストアに残した。`,
+   tale:`<span class="a">インスタンスストア</span>はホスト直結の作業机。超高速だが電源を切ると消える使い捨て。<span class="b">EBS</span>はネットワーク接続の引き出しで、停止しても中身が残る永続ブロック。消えて困るなら<span class="b">EBS</span>、消えていい高速一時領域なら<span class="a">インスタンスストア</span>。`},
+  {a:"gp3",b:"gp2",key:"バーストに頼るか",
+   tale:`<span class="a">gp3</span>は容量と切り離してIOPS/スループットを自分で設定でき、性能が一定。<span class="b">gp2</span>は容量に応じた性能＋バーストクレジット制で、クレジットが切れると性能がガクッと落ちる。安定をコスト効率よく出すなら<span class="a">gp3</span>。`},
+  {a:"gp3（汎用SSD）",b:"io2 Block Express",key:"超高IOPSが要るか",
+   scene:`io2 Block Expressは桁違いに速いけど、その分とにかく高い。普段の業務DBはgp3でIOPSを固定すれば十分で、月末バッチのバースト枯れも防げる。わざわざ高いio2を奢るのは「一瞬の遅延でも取引が飛ぶ」決済DBみたいな本当にシビアな一台だけ。だから普段はgp3、ここぞでio2、と使い分けるかな。`,
+   tale:`大半のワークロードは<span class="a">gp3</span>で足りる。サブミリ秒・99.999%耐久・極めて高いIOPSが要るミッションクリティカルDBだけ<span class="b">io2 Block Express</span>。「一貫した性能を安く」なら<span class="a">gp3</span>、「最上位の性能」なら<span class="b">io2</span>。`},
+  {a:"st1（スループットHDD）",b:"sc1（Cold HDD）",key:"アクセス頻度",
+   tale:`<span class="a">st1</span>は頻繁に読む大容量シーケンシャル（ログ・ビッグデータ・ストリーミング）。<span class="b">sc1</span>はめったに触らないコールドデータ向けの最安HDD。よく処理するなら<span class="a">st1</span>、滅多に見ないなら<span class="b">sc1</span>。`},
+  {a:"プロビジョンドIOPS SSD",b:"st1（HDD）",key:"ランダムかシーケンシャルか",
+   tale:`<span class="a">io1/io2</span>は高IOPSのランダムI/O向け最上位SSD（DB用）。<span class="b">st1</span>は大容量を一気に流すシーケンシャルスループット向けHDD。要件が高IOPSなら<span class="a">SSD</span>、大量を順に流すなら<span class="b">st1</span>。`},
+  {a:"EBS",b:"EFS",key:"1台専用かみんなで共有か",
+   tale:`<span class="a">EBS</span>は1台のEC2に付く引き出し（基本そのインスタンス専用）。<span class="b">EFS</span>は複数のサーバーから同時マウントできる共用書庫（LinuxのNFS）。複数台で同じファイルを共有するなら<span class="b">EFS</span>。`},
+  {a:"EFS",b:"FSx for Windows",key:"LinuxのNFSかWindowsのSMBか",
+   scene:`Linuxの解析サーバー10台で同じデータセットを共有したくてEFSをマウントした。別の案件ではWindowsの部門ファイルサーバー（AD認証つき）を移したくて、EFSが使えずFSx for Windowsに載せ替えた。`,
+   tale:`<span class="a">EFS</span>はLinux向けのNFS共有。<span class="b">FSx for Windows</span>はSMB・NTFS ACL・Active Directory統合のWindowsファイルサーバー。WindowsファイルサーバーをそのままAWSへ、なら<span class="b">FSx for Windows</span>。`},
+  {a:"FSx for Windows",b:"FSx for Lustre",key:"Windowsファイル共有かHPCか",
+   tale:`同じFSxでも別物。<span class="a">FSx for Windows</span>はWindowsのSMB/NTFS/AD向け。<span class="b">FSx for Lustre</span>はHPC・機械学習向けの超高速並列ファイルシステム。用途が全く違う。`},
+  {a:"FSx for Lustre",b:"EFS",key:"超高スループットが要るか",
+   tale:`<span class="a">FSx for Lustre</span>は数百GB/秒級・サブミリ秒・S3連携のHPC/ML向け。<span class="b">EFS</span>は汎用NFS共有で高同時実行はできるがHPCの超高スループットには届かない。「汎用NFSでは性能が足りない」と来たら<span class="a">Lustre</span>。`},
+  {a:"FSx for NetApp ONTAP",b:"FSx for Windows / EFS",key:"マルチプロトコル＋ONTAP機能",
+   tale:`<span class="a">NetApp ONTAP</span>はNFSとSMBの両対応＋スナップショット/クローン/重複排除といったONTAP機能を維持できる。<span class="b">FSx for Windows（SMB専用）/EFS（NFS専用）</span>は片方のプロトコルしか持たない。既存NetApp運用を活かすなら<span class="a">ONTAP</span>。`},
+  {a:"S3 Glacier Deep Archive",b:"Glacier Flexible Retrieval",key:"取り出しの速さ",
+   tale:`<span class="a">Deep Archive</span>は最安だが取り出しに数時間〜（年数回の長期保管）。<span class="b">Flexible Retrieval</span>はやや高いが取り出しが速め（たまに出すアーカイブ）。`},
+  {a:"S3 Intelligent-Tiering",b:"EFSライフサイクル（EFS-IA）",key:"対象がS3かEFSか",
+   tale:`<span class="a">S3 Intelligent-Tiering</span>はS3オブジェクトの階層を自動最適化（アクセス予測不能向き）。<span class="b">EFSライフサイクル</span>はEFSの低頻度ファイルをEFS-IAへ自動移行。対象がS3かEFSかで使う機能が違う。`},
+  {a:"S3 Transfer Acceleration",b:"CloudFront",key:"上り（アップロード）か下り（配信）か",
+   scene:`海外拠点から本社S3への大容量アップロードが遅く、Transfer Accelerationを有効にしたら数分で終わった。逆に世界中のユーザーへ動画を配る方は、CloudFrontでエッジに置いて配信を速くした。上りと下りで道具が違う。`,
+   tale:`<span class="a">Transfer Acceleration</span>は遠隔地からS3への「アップロード（上り）」を高速化。<span class="b">CloudFront</span>はS3からの「ダウンロード（配信・下り）」をエッジでキャッシュ高速化。方向が逆。`}
+ ]},
+{ico:"🚚",t:"引っ越しと出張所（データ移行・ハイブリッド）",
+ story:`オンプレからAWSへの引っ越しを請け負う業者たちがいる。回線でコツコツ運ぶ <span class="who">DataSync</span>、トラックに積んで物理搬送する <span class="who">Snowball</span>、サーバーを丸ごと運ぶ <span class="who">MGN</span>、データベースだけ運ぶ <span class="who">DMS</span>。引っ越し後もオンプレに残る出張所が <span class="who">Storage Gateway</span>。「何を・どうやって運ぶか／運ぶのか住み続けるのか」で担当が分かれる。`,
+ pairs:[
+  {a:"DataSync",b:"Snowball Edge",key:"オンラインか物理搬送か",
+   scene:`回線が太い拠点はDataSyncで夜間に差分同期を回し続けた。回線が細い地方DCの500TBは、オンラインだと数か月かかるのでSnowballに積んで物理搬送した。`,
+   tale:`<span class="a">DataSync</span>はネットワーク越しに転送（回線が十分・継続的な差分同期も得意）。<span class="b">Snowball</span>はデバイスにコピーして物理輸送（回線が細い・数十TB以上の1回限り）。`},
+  {a:"DataSync",b:"Storage Gateway",key:"運ぶのか住み続けるのか",
+   tale:`<span class="a">DataSync</span>はデータを移行・同期する「引っ越し業者」。<span class="b">Storage Gateway</span>はオンプレのプロトコル（SMB/NFS/iSCSI）を保ったままクラウドを使い続ける「出張所」＋ローカルキャッシュ。`},
+  {a:"MGN（Application Migration Service）",b:"DMS",key:"サーバー丸ごとかDBか",
+   scene:`古い業務サーバー群はアプリごとMGNでEC2へ引っ越し、動作はそのまま変わらなかった。中で動くOracleだけはDMSでAuroraへ移した。サーバーとDBで担当が分かれる。`,
+   tale:`<span class="a">MGN</span>はOS・アプリ込みのサーバーをブロックレベルでEC2へリフト＆シフト。<span class="b">DMS</span>はデータベースの論理移行（スキーマ・行データ・継続レプリケーション）。対象が違う。`},
+  {a:"DMS",b:"SCT（Schema Conversion Tool）",key:"データかスキーマ変換か",
+   scene:`Oracle→PostgreSQLの移行で、行データはDMSが継続レプリケーションで運び続け、その裏でSCTがストアドプロシージャの構文を変換した。両方そろって初めて業務を止めずに移れた。`,
+   tale:`<span class="a">DMS</span>はデータの移行と継続レプリケーション（CDC）。<span class="b">SCT</span>はOracle→PostgreSQLのようにスキーマやストアドプロシージャの構文を異種エンジン間で変換。異種移行は両方使う。`},
+  {a:"DRS（Elastic Disaster Recovery）",b:"MGN",key:"継続DRか一度きり移行か",
+   tale:`<span class="a">DRS</span>は継続レプリケーションで災害復旧を「繰り返し」使う（平常時ステージング・障害時起動）。<span class="b">MGN</span>は引っ越しが終われば役目終了の「一度きり」。継続DRなら<span class="a">DRS</span>、移行なら<span class="b">MGN</span>。`},
+  {a:"Transfer Family",b:"EC2自前SFTP",key:"マネージドか自前運用か",
+   tale:`<span class="a">Transfer Family</span>はマネージドSFTPエンドポイントで直接S3保存・サーバー運用不要。<span class="b">EC2自前SFTP</span>は構築・パッチ・スケール・S3コピーを全部自分で抱える。`},
+  {a:"File Gateway / Volume Gateway",b:"Tape Gateway",key:"ファイル/ブロックかテープか",
+   tale:`<span class="a">File Gateway</span>はSMB/NFSのファイルをS3に、<span class="a">Volume Gateway</span>はiSCSIブロックをAWSへ。<span class="b">Tape Gateway</span>は仮想テープ（VTL）でテープバックアップソフトを置き換え。「テープ運用の移行」なら<span class="b">Tape Gateway</span>。`},
+  {a:"Migration Hub",b:"個別ツールの進捗確認",key:"横断ダッシュボードか",
+   tale:`<span class="a">Migration Hub</span>はMGN/DMS等の進捗を1つのダッシュボードで横断追跡＋計画。<span class="b">個別確認</span>は各コンソールをバラバラに見て手集約（大規模だと全体像が見えない）。`},
+  {a:"Data Lifecycle Manager（DLM）",b:"AWS Backup",key:"EBS世代管理だけか横断か",
+   tale:`<span class="a">DLM</span>はEBSスナップショット/AMIの作成・保持・削除をタグ＋スケジュールで自動化（EBS中心・手軽）。<span class="b">AWS Backup</span>はRDS/EFS/DynamoDB等も含めた複数サービス横断の一元バックアップ。`}
+ ]},
+{ico:"🚀",t:"オンプレからの引っ越し（今これを使っているなら）",
+ story:`「今、社内（オンプレミス）で何を使っているか」で、AWSでの引っ越し先が変わる。同じ"データベース"でもOracleとMongoDBでは行き先が別だし、同じ"ファイル共有"でもWindowsのSMBとLinuxのNFSでは別のサービスになる。設問では<span class="who">現行製品の名前</span>がそのままヒント。ここは「今これ → AWSだとこれ」の対応を並べる。`,
+ pairs:[
+  {a:"Oracle / SQL Server（商用RDB）",b:"RDS（同エンジン）/ Aurora＋DMS＋SCT",key:"ライセンス維持か脱・商用か",
+   scene:`そのままなら同エンジンのRDS（ライセンス込み）に載せて移行は最小で済む。だが商用DBの高いライセンスを脱したいので、思い切ってAurora PostgreSQLへ寄せた。行データはDMSが運び続け、ストアドプロシージャの構文はSCTが変換した。同じか・変えるかで手間とコストが逆。`,
+   tale:`<span class="a">Oracle/SQL Server</span>をそのまま使い続けるなら同エンジンの<span class="a">RDS</span>へ（移行は軽いがライセンス費は残る）。コスト削減で別エンジンに変えるなら<span class="b">Aurora（PostgreSQL等）＋DMS（データ移行）＋SCT（スキーマ・構文変換）</span>。脱・商用ライセンスの定番ルート。`},
+  {a:"MySQL / PostgreSQL（オープンソースRDB）",b:"RDS / Aurora",key:"互換でそのまま載せ替え",
+   scene:`自前サーバーで運用していたMySQLのバックアップ・パッチ・冗長化が重荷だった。同じエンジンのRDSにほぼそのまま載せて運用から解放された。性能と可用性をもっと上げたい基幹だけ、互換のAuroraに引き上げた。`,
+   tale:`<span class="a">MySQL/PostgreSQL</span>はマネージドの<span class="b">RDS（同エンジン）または Aurora（互換・高性能）</span>へ、ほぼ無改修で移せる。運用を任せたいだけならRDS、性能・可用性も強化したいならAurora。`},
+  {a:"Apache Kafka（自前運用）",b:"Amazon MSK",key:"Kafka資産をそのまま活かすか",
+   scene:`Kafkaのブローカー運用（増設・パッチ・障害対応）に専任が張り付いていた。MSKに移したらプロデューサー／コンシューマーのコードはそのままで、ブローカー運用だけAWSに預けられた。新規でゼロから組むならKinesisも候補だが、既存Kafka資産があるならMSK。`,
+   tale:`<span class="a">Apache Kafka</span>を使っているなら、Kafka互換でブローカー運用をマネージドに任せる<span class="b">Amazon MSK</span>へ。コードや既存トピック資産を活かせる。AWSネイティブで運用をさらに軽くしたい新規なら<span class="b">Kinesis</span>も選択肢。`},
+  {a:"MongoDB（ドキュメントDB）",b:"Amazon DocumentDB",key:"MongoDB API互換でコード最小変更",
+   scene:`MongoDBで動くアプリを、ドライバもクエリもそのままで移したかった。MongoDB互換のDocumentDBにしたらアプリ側の書き換えがほぼ要らなかった。超大量スケールが本命ならDynamoDBだが、それは作り直しになるので既存資産を優先した。`,
+   tale:`<span class="a">MongoDB</span>を使っているなら、MongoDB互換でアプリをほぼそのまま移せる<span class="b">Amazon DocumentDB</span>へ。AWS独自で超スケールする<span class="b">DynamoDB</span>に作り替える手もあるが再設計が要る。変更を最小にするなら互換のDocumentDB。`},
+  {a:"Cassandra（ワイドカラムDB）",b:"Amazon Keyspaces",key:"CQL互換でそのまま移すか",
+   scene:`オンプレCassandraのCQLクエリを書き換えずに移したくてKeyspacesにした。サーバーレスでノード運用も消えた。DynamoDBの方がスケールするがCQLは使えず作り直しになるため、既存クエリ資産を活かす道を選んだ。`,
+   tale:`<span class="a">Cassandra</span>を使っているなら、Cassandra/CQL互換の<span class="b">Amazon Keyspaces</span>へ。クエリ資産をそのまま移せてノード運用も不要。<span class="b">DynamoDB</span>は非互換で再設計が要る。Cassandra資産を活かすならKeyspaces。`},
+  {a:"NetApp ONTAP（オンプレNAS）",b:"FSx for NetApp ONTAP",key:"ONTAP機能とマルチプロトコルを維持",
+   scene:`オンプレのNetAppでスナップショット・クローン・重複排除を回し、NFSとSMBの両方から同じ領域を使っていた。片方のプロトコルしか持てないFSx WindowsやEFSでは足りず、ONTAP機能ごと移せるFSx for NetApp ONTAPにした。既存運用を変えたくない時の答え。`,
+   tale:`<span class="a">NetApp ONTAP</span>を使っているなら、NFS/SMB両対応＋スナップショット・クローン・重複排除を維持できる<span class="b">FSx for NetApp ONTAP</span>へ。片方のプロトコルしか持たないFSx Windows/EFSでは置き換えきれない。`},
+  {a:"Windowsファイルサーバー（SMB共有）",b:"FSx for Windows File Server",key:"SMB/NTFS/AD統合をそのまま",
+   scene:`部門の共有ドライブ（Word/Excel・NTFS権限・AD認証）をクラウドへ移したかった。SMBとAD統合をそのまま持てるFSx for Windowsに載せたら、利用者はドライブ文字すら変えずに使い続けられた。LinuxのNFS共有とは別サービスになる。`,
+   tale:`<span class="a">WindowsのSMB共有（ファイルサーバー）</span>を使っているなら、SMB・NTFS ACL・Active Directory統合をマネージドで提供する<span class="b">FSx for Windows File Server</span>へ。Windowsの共有資産をそのまま移せる。`},
+  {a:"Active Directory（社内認証基盤）",b:"AWS Managed Microsoft AD",key:"既存ADと信頼を結ぶか丸ごと移すか",
+   scene:`社内ADで全社のログインを回していた。AWS側のWindowsサーバーやFSxもAD認証させたくて、AWS Managed Microsoft ADを立てて既存ADと信頼関係を結んだ。小規模に既存ADへ橋渡しするだけならAD Connectorで足りる場面もある。`,
+   tale:`<span class="a">オンプレのActive Directory</span>を使っているなら、フルマネージドの本物のADである<span class="b">AWS Managed Microsoft AD</span>を立てて既存ADと信頼関係を結ぶ（または丸ごと移す）。既存ADへ中継するだけなら<span class="b">AD Connector</span>という軽い選択肢もある。`},
+  {a:"NFS共有（Linux）",b:"Amazon EFS",key:"LinuxのNFSをマネージドで共有",
+   scene:`複数のLinuxサーバーから同じディレクトリをNFSでマウントして共有していた。EFSにしたら複数台から同時マウントできて、容量も使った分だけ自動で伸びた。1台専用でいいならEBSの方が安いが、共有が要件ならEFS。`,
+   tale:`<span class="a">LinuxのNFS共有</span>を使っているなら、複数サーバーから同時マウントでき容量が自動伸縮する<span class="b">Amazon EFS</span>へ。WindowsのSMB共有なら行き先はFSx for Windowsになる（プロトコルで分かれる）。`},
+/*MIG*/ ]},
+{ico:"🏪",t:"データベース専門店街",
+ story:`専門店が軒を連ねる。定食屋の <span class="who">RDS</span>、その高級店 <span class="who">Aurora</span>、24時間無人で無限にさばくコンビニ <span class="who">DynamoDB</span>。少し奥には専門店が並ぶ。人脈をたどる <span class="who">Neptune</span>、時計だけ扱う <span class="who">Timestream</span>、MongoDBそっくりの <span class="who">DocumentDB</span>、Cassandraそっくりの <span class="who">Keyspaces</span>。前段で注文を覚えておく給仕が <span class="who">ElastiCache</span>。「データの形とアクセスの仕方」で店を選ぶ。`,
+ pairs:[
+  {a:"DynamoDB",b:"RDS/Aurora",key:"アクセスパターン",
+   scene:`カートのセッションのようにキーで引くだけの超大量アクセスはDynamoDBにしたら無限にスケールした。一方、複雑なJOINと厳密な会計トランザクションが要る基幹はAuroraに置いた。先にアクセスの仕方を見て店を選ぶ。`,
+   tale:`<span class="a">DynamoDB</span>はキー中心・サーバーレス・ほぼ無限スケール（JOINや複雑トランザクションは苦手）。<span class="b">RDS/Aurora</span>は複雑なJOIN・厳密なトランザクション・リレーショナルな整合性が要るとき。先にアクセスパターンを見て選ぶ。`},
+  {a:"DynamoDB オンデマンドキャパシティ",b:"プロビジョンドキャパシティ（＋Auto Scaling）",key:"予測不能・急増か予測可能・定常か",
+   scene:`午前はほぼ動かず、午後から増え、夕方は読み書きが読めず短時間で急増する——プロビジョンド＋Auto Scalingは段階的にしか追従できず、急なスパイクで容量不足になったり、余裕を持たせると無駄が出たりした。オンデマンドに変えたら、設定なしで瞬時にスパイクを吸収し、動かない午前は課金もほぼゼロになった。`,
+   tale:`<span class="a">オンデマンドキャパシティ</span>は事前設定なしでリクエストに応じて瞬時に伸縮・使った分だけ課金（予測不能・スパイク・断続的な負荷に最適）。<span class="b">プロビジョンドキャパシティ（＋Auto Scaling）</span>は読み書き容量を事前に決めて安くする方式で、Auto Scalingは段階的にしか追従せず急なスパイクに弱い（負荷が予測可能で定常なら割安）。読めない急増＋コスト最適化なら<span class="a">オンデマンド</span>。`},
+  {a:"Aurora",b:"RDS（標準エンジン）",key:"高性能・高可用を強く求めるか",
+   tale:`<span class="a">Aurora</span>はクラウド最適化で高性能・ストレージ自動拡張・高可用（商用DB級をマネージドで）。<span class="b">RDS標準</span>は通常のMySQL/PostgreSQLをマネージド化（十分だが性能・スケールは控えめ）。`},
+  {a:"リードレプリカ",b:"マルチAZ配置",key:"性能か可用性か",
+   scene:`参照ばかりで重かったレポート画面用にリードレプリカを足したら、本番DBの負荷が下がって全体が軽くなった。別件の「AZ障害でも止めない」要件にはマルチAZを使った。スタンバイは普段読めないので役割が違う。`,
+   tale:`<span class="a">リードレプリカ</span>は読み取り専用コピーで参照クエリを分散（性能）。<span class="b">マルチAZ</span>は別AZの同期スタンバイで自動フェイルオーバー（可用性）。スタンバイは通常読み取りに使えない。役割が違う。`},
+  {a:"ElastiCache",b:"リードレプリカ",key:"同じデータの繰り返しか多様なクエリか",
+   tale:`<span class="a">ElastiCache</span>は同一データの繰り返し参照をインメモリでミリ秒未満に（セッション/ホットデータ）。<span class="b">リードレプリカ</span>は多様な読み取りクエリを複数DBに負荷分散。`},
+  {a:"Redis",b:"Memcached",key:"高機能・永続化か単純・水平か",
+   scene:`ログイン状態を保つセッションストアは、フェイルオーバーと永続化が要るのでRedisにした。単純な計算結果を並列でさばくだけの一時キャッシュはMemcachedで十分だった。`,
+   tale:`<span class="a">Redis</span>は永続化・レプリケーション・データ構造・Pub/Subなど高機能（高可用なセッションストア向き）。<span class="b">Memcached</span>はシンプルなキーバリューでマルチスレッド水平スケール（フェイルオーバーなし）。`},
+  {a:"MemoryDB",b:"ElastiCache for Redis",key:"プライマリDBか前段キャッシュか",
+   tale:`<span class="a">MemoryDB</span>はRedis互換で耐久性があり、データを失わないプライマリDBとして使える。<span class="b">ElastiCache for Redis</span>は主にキャッシュ用途（高速だが永続DB前提でない）。`},
+  {a:"DocumentDB",b:"DynamoDB",key:"MongoDB互換か",
+   tale:`<span class="a">DocumentDB</span>はMongoDB互換でアプリのAPIをそのまま移せる。<span class="b">DynamoDB</span>はAWS独自で超スケールするがMongoDB APIではない。MongoDB資産を活かすなら<span class="a">DocumentDB</span>。`},
+  {a:"Keyspaces",b:"DynamoDB",key:"Cassandra互換か",
+   tale:`<span class="a">Keyspaces</span>はCassandra/CQL互換でCassandraアプリをそのまま移せる。<span class="b">DynamoDB</span>はCQLが使えず再設計が要る。Cassandra資産を活かすなら<span class="a">Keyspaces</span>。`},
+  {a:"Neptune（グラフ）",b:"RDBのJOIN",key:"関係を多段にたどるか",
+   scene:`「友達の友達がいいねした商品」をRDBのJOINで何段もたどったら、結合が爆発して遅くて使い物にならなかった。関係をたどるのが本質だったのでNeptuneに移したら一瞬で返った。`,
+   tale:`<span class="a">Neptune</span>は関係（エッジ）を一級市民として保持し多段の探索が高速。<span class="b">RDBのJOIN</span>は深い多段探索で結合爆発して遅い。レコメンドや人脈のような関係性中心なら<span class="a">Neptune</span>。`},
+  {a:"Timestream",b:"DynamoDB/RDB",key:"時系列に特化か汎用か",
+   tale:`<span class="a">Timestream</span>は時系列専用（高頻度取り込み・時間範囲集計・自動階層化）。<span class="b">DynamoDB/RDB</span>は汎用で時系列関数や階層化を自前で作る必要がある。IoT計測の時系列なら<span class="a">Timestream</span>。`},
+  {a:"互換サービスへ移行",b:"別種DBへ移行",key:"変更最小か再設計か",
+   tale:`MongoDB→<span class="a">DocumentDB</span>、Cassandra→<span class="a">Keyspaces</span>は互換でコード変更最小。<span class="b">DynamoDBやRDSへ移す</span>と書き換え・再設計が要る。「変更最小で移行」なら互換サービス。`}
+ ]},
+{ico:"⚙️",t:"計算工房（コンピュート）",
+ story:`仕事を処理する工房がいくつもある。呼ばれた時だけ来て15分で帰る出張職人 <span class="who">Lambda</span>、常駐するコンテナ職人 <span class="who">Fargate</span>、自分で道具（EC2）を揃える親方 <span class="who">EC2起動タイプ</span>。雇い方も色々で、激安だが追い出される日雇い <span class="who">スポット</span>、年間契約で割安の <span class="who">リザーブド</span>。「どれだけ手を抜きたいか・中断されて平気か」で選ぶ。`,
+ pairs:[
+  {a:"Lambda",b:"Fargate",key:"15分・イベント駆動か常駐か",
+   scene:`サムネ生成APIをLambdaにしたら、誰も使わない深夜は請求ゼロ、昼の急増も勝手に並列起動でさばけた。やがて常駐させたい長時間処理が出てきた時だけ、コンテナのFargateへ引っ越した。`,
+   tale:`<span class="a">Lambda</span>は最大15分・イベント駆動・実行時間課金・アイドルほぼ無料（不定期/バースト）。<span class="b">Fargate</span>はコンテナを常時/長時間動かす（15分超や常駐ワーカー）。数秒の不定期処理なら<span class="a">Lambda</span>。`},
+  {a:"ECS on Fargate",b:"EKS",key:"AWSネイティブかKubernetesか",
+   scene:`社内の小さなAPI群をECS on Fargateで動かし始めたら、Kubernetesを学ばずに半日で本番に乗った。別チームは既にk8s資産を持っていたので、そちらはEKSで揃えた。`,
+   tale:`<span class="a">ECS</span>はAWSネイティブでシンプル・k8s知識不要。<span class="b">EKS</span>はKubernetes互換でエコシステム/移植性が要るとき（運用知識が必要）。「k8sに縛られずシンプルに」なら<span class="a">ECS</span>。`},
+  {a:"Fargate",b:"EC2起動タイプ",key:"サーバーレスかノード管理か",
+   tale:`<span class="a">Fargate</span>はサーバーレスでEC2を持たず管理ゼロ・タスク単位課金。<span class="b">EC2起動タイプ</span>は基盤のEC2を自分で用意・パッチ・スケールする代わりに細かい制御やコスト最適化ができる。`},
+  {a:"App Runner",b:"ECS on Fargate",key:"全自動か自分で構成するか",
+   tale:`<span class="a">App Runner</span>はイメージ指定だけでビルド/デプロイ/LB/自動スケール/HTTPSを全自動（最小の手間）。<span class="b">ECS on Fargate</span>はサーバーレスでもクラスタ/サービス/ALB/スケールを自分で構成する。`},
+  {a:"Elastic Beanstalk",b:"手動でEC2/ELB/ASG構成",key:"自動構築＋制御の余地",
+   tale:`<span class="a">Elastic Beanstalk</span>はコードアップロードで環境一式を自動構築・管理しつつ、必要なら基盤にも踏み込める。<span class="b">手動構成</span>は全リソースを作り込む（柔軟だが手間大）。`},
+  {a:"AWS Batch",b:"Lambda",key:"重い長時間バッチか軽量か",
+   tale:`<span class="a">AWS Batch</span>は大量・長時間・高リソースのバッチをキューで自動スケール実行。<span class="b">Lambda</span>は15分制限の軽量イベント処理（重い計算ジョブには不向き）。`},
+  {a:"スポット",b:"オンデマンド／リザーブド・Savings Plans",key:"中断耐性か常時稼働か",
+   scene:`スポットは最大9割引で激安だけど、AWSの都合で突然追い出される。止まると困る本番APIには怖くて使えない。でも夜間の動画一括変換みたいに「中断されてもSQSに伝票が残って拾い直せる」仕事なら、追い出されても痛くない。だから常時応答のAPIはオンデマンドで守り、中断OKのバッチだけスポットに寄せて費用を7割落とすかな。`,
+   tale:`<span class="a">スポット</span>は最大約90%引きだが中断され得る（中断耐性のあるバッチ/ステートレス）。<span class="b">オンデマンド</span>は中断なしだが最も高く、<span class="b">RI/Savings Plans</span>は1〜3年コミットで割引（定常負荷）。「中断されてもいい・コスト最優先」ならスポット。`},
+  {a:"オンデマンド＋スポット混在",b:"全スポット",key:"ベースを守るか",
+   tale:`<span class="a">混在</span>はベースをオンデマンドで安定確保＋追加をスポットで安く（安定とコストの両立）。<span class="b">全スポット</span>は最安だがベースまで中断リスク。クリティカルな常時容量は中断させない設計が要点。`},
+  {a:"Fargate Spot",b:"通常のFargate",key:"タスクの中断耐性",
+   tale:`<span class="a">Fargate Spot</span>は大幅割引だが中断され得る（中断耐性のあるバッチ/ステートレスワーカー）。<span class="b">通常Fargate</span>は中断されない（常時応答が必要なAPI）。`},
+  {a:"クラスタープレイスメントグループ",b:"スプレッドプレイスメントグループ",key:"低遅延か障害分離か",
+   tale:`<span class="a">クラスター</span>は同一AZで近接配置し低遅延・高帯域（HPC・密な通信）。<span class="b">スプレッド</span>は別ハードに分散し障害を分離（少数の重要インスタンスの可用性）。`},
+  {a:"スプレッド",b:"パーティション",key:"少数の重要かか大規模分散か",
+   tale:`<span class="a">スプレッド</span>は各インスタンスを別ハードに分散（少数の重要インスタンスの同時障害回避）。<span class="b">パーティション</span>はラック単位で分離（HDFS/Cassandra等の大規模分散システム向け）。`},
+  {a:"プロビジョニング済み同時実行",b:"予約済み同時実行（Reserved Concurrency）",key:"コールドスタート対策か上限制御か",
+   tale:`<span class="a">プロビジョニング済み</span>は実行環境を事前にウォーム待機（コールドスタート対策・低レイテンシ）。<span class="b">予約済み</span>は同時実行数の上限/確保（他関数との取り合い制御や下流保護）。`},
+  {a:"予測スケーリング",b:"動的スケーリング（ターゲット追跡）",key:"先回りか反応か",
+   scene:`毎朝9時の一斉ログインに、ターゲット追跡だけだと増やし始めが間に合わず最初の数分が遅かった。過去の波を学ぶ予測スケーリングを併用したら、9時前に席を用意できて詰まりが消えた。`,
+   tale:`<span class="a">予測スケーリング</span>は過去傾向から需要を予測し急増前に先回りで増やす（周期的負荷）。<span class="b">ターゲット追跡</span>は今の負荷を見てから増減（反応的）。立ち上がりに間に合わせたいなら予測を併用。`},
+  {a:"SQS＋Auto Scaling（キュー長でスケール）",b:"固定台数 / CPUだけでスケール",key:"未処理ジョブ量に応じて増減するか",
+   scene:`ステートレスな並列ジョブをSQSに溜め、EC2のAuto Scalingグループをキューの深さ（未処理メッセージ数）に連動させた。ジョブが増えればワーカーが増え、キューが空けば最小台数まで縮む。最初はCPU使用率だけでスケールさせたが、I/O待ちが多いジョブでは台数が負荷に合わず、未処理ジョブが滞留した。`,
+   tale:`<span class="a">SQS＋Auto Scaling</span>は、キュー長（ApproximateNumberOfMessagesVisible、できれば「バックログ÷インスタンス数」）をターゲット追跡の指標にして、<b>未処理ジョブ量に正確に追従</b>して増減する。ステートレス＋疎結合の並列処理の定石。<span class="b">固定台数やCPUだけ</span>では処理待ちジョブ量を反映できず、過不足が出る。`},
+  {a:"WorkSpaces",b:"AppStream 2.0",key:"デスクトップごとかアプリ単位か",
+   tale:`<span class="a">WorkSpaces</span>は従業員にフル仮想デスクトップ（VDI/DaaS）を提供。<span class="b">AppStream 2.0</span>は特定アプリだけをストリーミング配信。デスクトップ環境ごとなら<span class="a">WorkSpaces</span>。`}
+ ]},
+{ico:"🛣",t:"道路と関所（ネットワーク）",
+ story:`VPCという街と外をつなぐ道路網。街から外へ出る一方通行の出口 <span class="who">NAT Gateway</span>、双方向の正門 <span class="who">IGW</span>。AWSの店へ街の中の専用通路で直行する <span class="who">VPCエンドポイント</span>。多数の街を束ねる中央交差点 <span class="who">Transit Gateway</span>。外部拠点とは、専用の高速道路 <span class="who">Direct Connect</span> か、一般道に暗号トンネルを掘る <span class="who">VPN</span> でつなぐ。関所には2種類、入口係の <span class="who">SG</span> とサブネット境界の <span class="who">NACL</span>。`,
+ pairs:[
+  {a:"ゲートウェイ型エンドポイント",b:"インターフェイス型エンドポイント",key:"S3/DynamoDBか多サービスか",
+   scene:`プライベートサブネットからS3への大量転送がNAT Gatewayのデータ処理料金で膨らんでいた。S3はゲートウェイ型エンドポイント（無料）に切り替えたら料金が消えた。SQSやKMSへのプライベート接続には、ENI経由のインターフェイス型を使った。`,
+   tale:`<span class="a">ゲートウェイ型</span>はS3/DynamoDB専用・ルートテーブルに経路追加・追加料金なし。<span class="b">インターフェイス型（PrivateLink）</span>は多数のサービス対応・ENI経由・時間課金＋データ処理料金あり。S3/DynamoDBへ安く繋ぐなら<span class="a">ゲートウェイ型</span>。`},
+  {a:"インターフェイスエンドポイント",b:"NAT Gateway",key:"プライベート到達かネット出口か",
+   tale:`<span class="a">インターフェイスエンドポイント</span>はAWSサービスAPIへENI経由で到達・インターネット不要・NATコスト回避。<span class="b">NAT Gateway</span>はプライベートサブネットからインターネットへ出る出口（データ処理課金あり）。`},
+  {a:"Transit Gateway",b:"VPCピアリング",key:"多数ハブ集約か1対1か",
+   scene:`VPCが3つの頃はピアリングで足りた。20を超えた辺りでピアリングの線とルート設定が組み合わせ的に増えて管理が破綻した。Transit Gatewayの中央ハブに集約したら、ルーティングが一枚で見えるようになった。`,
+   tale:`<span class="a">Transit Gateway</span>は多数のVPC/VPN/DXを中央ハブで集約・一元ルーティング・スケール。<span class="b">VPCピアリング</span>は2VPC間の1対1・推移ルーティング不可（多数だとフルメッシュで破綻）。2つだけなら<span class="b">ピアリング</span>、数十なら<span class="a">TGW</span>。`},
+  {a:"PrivateLink（エンドポイントサービス）",b:"VPCピアリング/TGW",key:"サービス単位公開か網接続か",
+   tale:`<span class="a">PrivateLink</span>はサービス単位でプライベート公開・CIDR重複OK・相手VPCと広く繋がない（SaaS提供向き）。<span class="b">ピアリング/TGW</span>はVPC同士をネットワークとして相互接続（CIDR重複不可・広い到達）。`},
+  {a:"NAT Gateway",b:"NATインスタンス",key:"マネージドか自前か",
+   tale:`<span class="a">NAT Gateway</span>はマネージド・自動スケール・高可用・運用不要。<span class="b">NATインスタンス</span>はEC2自前でパッチ/冗長化/スケールを自分で行う。`},
+  {a:"NAT Gateway",b:"IGW（インターネットゲートウェイ）",key:"外向きのみか双方向か",
+   tale:`<span class="a">NAT Gateway</span>はプライベートサブネットの外向き通信のみ（インバウンド開始不可）。<span class="b">IGW</span>はパブリックサブネットの双方向通信（パブリックIPが必要）。`},
+  {a:"Egress-Only IGW",b:"NAT Gateway",key:"IPv6かIPv4か",
+   tale:`<span class="a">Egress-Only IGW</span>はIPv6のアウトバウンド専用。<span class="b">NAT Gateway</span>はIPv4のアウトバウンド専用。どちらも外向き専用だがプロトコルが違う。`},
+  {a:"Direct Connect",b:"Site-to-Site VPN",key:"専用線か暗号トンネルか",
+   scene:`基幹の安定した低遅延が要る区間はDirect Connectの専用線を引いた。ただ1本だと切れた瞬間に全社が止まるので、コストを抑えるバックアップとしてVPNを併走させた。専用線2本は高すぎて見送った。`,
+   tale:`<span class="a">Direct Connect</span>は専用物理線・インターネット非経由・一貫した帯域と低レイテンシ（高コスト・開通に時間）。<span class="b">VPN</span>はインターネット経由の暗号トンネル・即時/低コストだが性能が不安定。`},
+  {a:"DX＋VPNバックアップ",b:"Direct Connect 2本",key:"コストを抑えて冗長化か",
+   tale:`<span class="a">DX＋VPNバックアップ</span>はコストを抑えつつ単一障害点を解消（バックアップ性能はVPN相当）。<span class="b">DX2本</span>は最も堅牢だが高コスト。要件が「コスト抑制」なら<span class="a">VPNバックアップ</span>。`},
+  {a:"Direct Connect Gateway",b:"通常のDirect Connect",key:"複数リージョン/VPCを束ねるか",
+   tale:`<span class="a">DX Gateway</span>は1つのDXを複数リージョン/複数VPCで共有（グローバル）。<span class="b">通常のDX（VIF直結）</span>は基本同一リージョンの1VPCへ。複数を束ねるなら<span class="a">DX Gateway</span>。`},
+  {a:"Client VPN",b:"Site-to-Site VPN",key:"個人端末か拠点間か",
+   tale:`<span class="a">Client VPN</span>は個々のデバイス/ユーザーからVPCへ（リモートワーカー）。<span class="b">Site-to-Site VPN</span>はオフィスやデータセンターとVPCのネットワーク間接続。`},
+  {a:"セキュリティグループ",b:"ネットワークACL",key:"インスタンス/ステートフルかサブネット/ステートレスか",
+   tale:`<span class="a">SG</span>はインスタンス単位・ステートフル（戻り自動許可）・許可ルールのみ。<span class="b">NACL</span>はサブネット単位・ステートレス（行き戻り両方明記）・許可と拒否の両方が書ける。`},
+  {a:"Network Firewall",b:"WAF",key:"ネットワーク層かL7か",
+   tale:`<span class="a">Network Firewall</span>はVPCのネットワーク層をステートフル検査・ドメインフィルタ・IPS/IDS。<span class="b">WAF</span>はALB/CloudFront/API Gatewayの前でHTTPのSQLi/XSSを防ぐL7専門。`},
+  {a:"Network Firewall",b:"SG/NACL",key:"ドメイン/IPSまで見るか",
+   tale:`<span class="a">Network Firewall</span>はドメインフィルタや侵入検知まで含む高度な検査。<span class="b">SG/NACL</span>はIP/ポート単位の許可拒否のみ（中身は見ない）。`},
+  {a:"Gateway Load Balancer",b:"ALB/NLB",key:"検査アプライアンスの透過挿入か",
+   tale:`<span class="a">GWLB</span>はサードパーティのセキュリティ仮想アプライアンスを経路上に透過挿入（GENEVE・L3）。<span class="b">ALB（L7）/NLB（L4）</span>はアプリへトラフィックを分散する通常のLB。`},
+  {a:"Route 53 Resolver インバウンド",b:"アウトバウンド",key:"オンプレ→AWSかAWS→オンプレか",
+   tale:`<span class="a">インバウンドエンドポイント</span>はオンプレ等のDNSがAWSのプライベートゾーンを解決する入口。<span class="b">アウトバウンドエンドポイント＋転送ルール</span>はAWSのリソースが特定ドメインをオンプレDNSへ転送する出口。双方向なら両方。`},
+  {a:"プライベートホストゾーン",b:"パブリックホストゾーン",key:"内部だけか公開か",
+   tale:`<span class="a">プライベート</span>は指定VPC内部からのみ解決（内部ドメイン・非公開）。<span class="b">パブリック</span>はインターネットから解決（公開ドメイン）。`},
+  {a:"VGW（仮想プライベートゲートウェイ）",b:"CGW（カスタマーゲートウェイ）",key:"AWS側かオンプレ側か",
+   tale:`<span class="a">VGW</span>はAWS（VPC）側のVPN終端。<span class="b">CGW</span>はオンプレ側VPN機器を表すAWS上のリソース（相手の公開IP等）。トンネルはこの2点間に張る。`},
+  {a:"Outposts",b:"Local Zones / Direct Connect",key:"自社施設にAWSを置くか",
+   tale:`<span class="a">Outposts</span>はAWSハードを自社オンプレ施設内に設置（データ所在地・現地処理・同じAPI）。<span class="b">Local Zones</span>はAWS側が大都市圏に置く拠点、<span class="b">Direct Connect</span>は専用線でリージョンへ繋ぐだけ。データを自社施設に残すなら<span class="a">Outposts</span>。`},
+  {a:"NLB",b:"ALB",key:"L4低遅延/固定IPかL7か",
+   tale:`<span class="a">NLB</span>はL4（TCP/UDP）・超低遅延・高スループット・静的IP（非HTTPや極端な性能）。<span class="b">ALB</span>はL7（HTTP/HTTPS）・パス/ホストベースルーティング・WAF連携（Webアプリ）。`}
+ ]},
+{ico:"📡",t:"配達便（配信・DNS・低遅延）",
+ story:`遠くのユーザーに速く届けるための配達網。各地の支店にコピーを置いて配る <span class="who">CloudFront</span>、AWSの高速バックボーンで最短ルートを選ぶ <span class="who">Global Accelerator</span>、ユーザーの近くまで工房ごと出張する <span class="who">Local Zones</span>。入口の案内係 <span class="who">Route 53</span> は、訪問者をどの支店へ送るかを「国で・速さで・主従で」振り分ける。`,
+ pairs:[
+  {a:"CloudFront",b:"Global Accelerator",key:"キャッシュかルート最適化か",
+   scene:`静的サイトの配信はCloudFrontでエッジにキャッシュして速くした。一方、キャッシュできないリアルタイム対戦ゲーム（UDP）は、Global AcceleratorでAWSバックボーンの最短経路に乗せて遅延を詰めた。`,
+   tale:`<span class="a">CloudFront</span>はエッジでコンテンツをキャッシュするCDN（HTTPの静的/動的Web）。<span class="b">Global Accelerator</span>は固定IPでTCP/UDP含む全般・AWSバックボーンで最短ルーティング・高速フェイルオーバー（キャッシュしない）。ゲームや非HTTPなら<span class="b">Global Accelerator</span>。`},
+  {a:"CloudFront",b:"S3 Transfer Acceleration",key:"下り（配信）か上り（アップロード）か",
+   tale:`<span class="a">CloudFront</span>はS3からの配信（下り）を速くする。<span class="b">Transfer Acceleration</span>はS3へのアップロード（上り）を速くする。配信の話で後者を選ぶと罠。`},
+  {a:"Local Zones",b:"Wavelength",key:"都市近接か5G網内か",
+   tale:`<span class="a">Local Zones</span>は特定の大都市圏にコンピュート/ストレージを近接配置（その地域のユーザーへ低遅延）。<span class="b">Wavelength</span>は通信事業者の5Gネットワーク内にAWSを置く（モバイルユーザーへ超低遅延）。5G網内なら<span class="b">Wavelength</span>。`},
+  {a:"Local Zones/Wavelength",b:"CloudFront",key:"任意処理の近接実行かコンテンツ配信か",
+   tale:`<span class="a">Local Zones/Wavelength</span>はユーザー近接で任意のコンピュート/ストレージを低遅延実行。<span class="b">CloudFront</span>はキャッシュ可能なコンテンツのエッジ配信。任意処理を近くで動かすなら前者。`},
+  {a:"CloudFront Functions",b:"Lambda@Edge",key:"超軽量高頻度か重い処理か",
+   tale:`<span class="a">CloudFront Functions</span>は超軽量・超低レイテンシ・高頻度・低コスト（ヘッダー操作/リダイレクト・外部アクセス不可）。<span class="b">Lambda@Edge</span>はより重い処理・外部アクセス可（その分レイテンシ/コスト高）。`},
+  {a:"位置情報（Geolocation）ルーティング",b:"レイテンシールーティング",key:"国で確実か低遅延か",
+   tale:`<span class="a">位置情報</span>はユーザーの所在国/地域で確実に振り分け（ライセンス/コンプライアンス・言語出し分け）。<span class="b">レイテンシ</span>は最も低遅延のリージョンへ（性能最適化で、国の確実な制限はできない）。`},
+  {a:"レイテンシールーティング",b:"フェイルオーバールーティング",key:"アクティブ/アクティブかアクティブ/スタンバイか",
+   tale:`<span class="a">レイテンシ</span>は平常時に最寄り（低遅延）へ振り分け（アクティブ/アクティブ）。<span class="b">フェイルオーバー</span>は主系→障害時に副系へ（普段は使わないスタンバイがある構成）。両方ヘルスチェックと組む。`},
+  {a:"Route 53 フェイルオーバー",b:"ALB",key:"リージョンまたぎかリージョン内か",
+   tale:`<span class="a">Route 53</span>はDNSレベルでリージョンをまたいで切り替え（クライアント設定不要）。<span class="b">ALB</span>は単一リージョン内でAZ/ターゲット間に負荷分散（リージョンまたぎ不可）。`}
+ ]},
+{ico:"🛡",t:"警備会社（セキュリティ）",
+ story:`AWSの街を守る警備会社には個性的な面々がいる。不審な動きを嗅ぎつける見回り役 <span class="who">GuardDuty</span>、建物の弱点（鍵の不良）を点検する設備屋 <span class="who">Inspector</span>、金庫の中身が機密かを調べる鑑定士 <span class="who">Macie</span>、事件後に「誰がなぜ」を追う刑事 <span class="who">Detective</span>。門前ではL7の門番 <span class="who">WAF</span> と、殴り込み（DDoS）を受け止める用心棒 <span class="who">Shield</span> が立つ。鍵の管理は手軽な <span class="who">KMS</span> と専用金庫室 <span class="who">CloudHSM</span>。`,
+ pairs:[
+  {a:"GuardDuty",b:"Inspector",key:"脅威の挙動か脆弱性CVEか",
+   scene:`深夜に見覚えのない国からのAPI呼び出しが続いた——GuardDutyが挙動の異常として検知した。一方、Inspectorは月次スキャンで「このEC2のライブラリに既知のCVEがある」と弱点を先に教えてくれた。攻撃の現行犯か、放置された弱点か。`,
+   tale:`<span class="a">GuardDuty</span>は実際の攻撃挙動（異常API・悪性IP通信・マイニング）を検知。<span class="b">Inspector</span>はEC2/コンテナ/Lambdaの既知の脆弱性（CVE）をスキャンする弱点探し。探すのが脅威か脆弱性かで割る。`},
+  {a:"GuardDuty",b:"Macie",key:"攻撃の挙動かデータの中身か",
+   tale:`<span class="a">GuardDuty</span>はAWS環境の脅威・攻撃挙動を検知（攻撃の話）。<span class="b">Macie</span>はS3内の機密データ（PII）を検出・分類（中身の話）。`},
+  {a:"GuardDuty",b:"Detective",key:"検知か事後の調査か",
+   tale:`<span class="a">GuardDuty</span>は怪しい挙動を見つける（検知）。<span class="b">Detective</span>は検知後に「なぜ・誰が・どう関与したか」を相関分析して根本原因を調査。検知の先の調査なら<span class="b">Detective</span>。`},
+  {a:"Security Hub",b:"GuardDuty / Detective",key:"集約・俯瞰か個別か",
+   tale:`<span class="a">Security Hub</span>は複数サービス/アカウントの検出結果を集約し準拠チェックする統合ダッシュボード。<span class="b">GuardDuty</span>は検知、<span class="b">Detective</span>は調査の個別サービス（結果をHubに送る側）。`},
+  {a:"WAF",b:"Shield",key:"L7アプリ攻撃かL3/4 DDoSか",
+   scene:`公開直後のECサイトに、SQLインジェクションの不正リクエストと大量アクセスが同時に来た。WAFが怪しい文字列を弾き、Shieldが物量を受け止める。層が違うので、片方だけでは守りきれなかった。`,
+   tale:`<span class="a">WAF</span>はアプリ層（L7）でリクエストの中身を見てSQLi/XSSを遮断。<span class="b">Shield</span>はネットワーク層（L3/L4）のDDoSを緩和。層が違うので両方を組み合わせる。`},
+  {a:"Shield Standard",b:"Shield Advanced",key:"無料の基本緩和か・有料の高度対策＋コスト保護か",
+   scene:`長時間のDDoSでAuto Scalingが攻撃トラフィックに反応して増え続け、スケーリング費用が膨らんだ。Shield Advancedを有効にしたら、攻撃由来のスケーリング課金が「DDoSコスト保護」でクレジット返金され、24/7のDDoS対応チームの支援も付いた。標準のShield Standardは無料で基本的な緩和はするが、コスト保護や高度対策は付かない。`,
+   tale:`<span class="a">Shield Standard</span>は全利用者に無料・自動で付く基本的なL3/4 DDoS緩和（追加対策なし）。<span class="b">Shield Advanced</span>は有料で、大規模・高度なDDoS対策＋24/7対応チーム＋WAF込み＋<b>DDoSコスト保護（攻撃中に膨らんだELB/EC2/Route 53等のスケーリング課金をクレジットで返金）</b>。<b>DDoSでコストが増えた・それを抑えたい</b>なら<span class="b">Shield Advanced</span>（＋WAFのレートベースルールで過剰リクエストを遮断）。`},
+  {a:"Firewall Manager",b:"WAF単体",key:"横断一元か単一リソースか",
+   tale:`<span class="a">Firewall Manager</span>はOrganizations配下の全アカウント・新規リソースにWAF/SG等のポリシーを一元適用・維持。<span class="b">WAF単体</span>は1つのリソース（ALB/CloudFront等）に設定するだけ。`},
+  {a:"KMS",b:"CloudHSM",key:"マネージド共有か専用・単独制御か",
+   scene:`普通の暗号化はKMSで手軽に済ませた。だが規制で「鍵は自社だけが触れる専用ハードで管理せよ」と言われた案件では、シングルテナントのCloudHSMを立てた。手軽さより単独制御が要るかで分かれる。`,
+   tale:`<span class="a">KMS</span>はマネージドで手軽だが基盤は共有・AWSも運用に関与。<span class="b">CloudHSM</span>はシングルテナント専用HSM・FIPS 140-2 Level 3・顧客が鍵を単独完全制御（AWSアクセス不可）。規制で専用HSM/完全単独制御なら<span class="b">CloudHSM</span>、通常は<span class="a">KMS</span>。`},
+  {a:"マルチリージョンキー",b:"単一リージョンKMSキー",key:"リージョン跨ぎで復号するか",
+   tale:`<span class="a">マルチリージョンキー</span>は複数リージョンに同じ鍵マテリアルのレプリカ・跨いでそのまま復号（再暗号化不要）。<span class="b">単一リージョンキー</span>はそのリージョン限定・移動時に復号→再暗号化が要る。`},
+  {a:"Secrets Manager",b:"Parameter Store",key:"自動ローテーションが要るか",
+   scene:`DBパスワードを設定ファイルに平文で書いていて、手動更新が面倒で何年も変えていなかった。Secrets Managerに移したら定期ローテーションが自動で回るようになった。ただの環境変数（更新不要）は無料のParameter Storeで十分だった。`,
+   tale:`<span class="a">Secrets Manager</span>は認証情報の保管＋RDS等と統合した自動ローテーション（有料）。<span class="b">Parameter Store</span>は設定値/シークレットの保管（標準は無料）だが自動ローテーションはない。定期更新が要るなら<span class="a">Secrets Manager</span>。`},
+  {a:"IAMロール（AssumeRole）",b:"IAMユーザーのアクセスキー",key:"一時か長期か",
+   tale:`<span class="a">IAMロール</span>は期限つき一時認証情報・キー共有不要・クロスアカウントの定石。<span class="b">アクセスキー</span>は長期で漏洩・棚卸しリスクが高く共有は非推奨。`},
+  {a:"AssumeRole＋External ID",b:"長期アクセスキー共有",key:"なりすまし防止か",
+   tale:`<span class="a">AssumeRole</span>は一時認証で必要な権限だけ・期限切れする。<span class="a">External ID</span>はサードパーティ経由のなりすまし（confused deputy）を防ぐ合言葉。<span class="b">長期キー共有</span>は漏洩リスクが高く非推奨。`},
+  {a:"リソースベースポリシー",b:"アイデンティティベースポリシー",key:"クロスアカウントを直接許可するか",
+   tale:`<span class="a">リソースベース</span>はリソース側（S3バケット等）に付け、別アカウントのプリンシパルをPrincipal指定で直接許可できる。<span class="b">アイデンティティベース</span>はIAMユーザー/ロール側に付ける（別アカウントへはAssumeRoleが要る）。クロスアカウントを直接許可するなら<span class="a">リソースベース</span>。`},
+  {a:"許可境界（permission boundary）",b:"SCP",key:"個人エンティティか組織アカウントか",
+   tale:`<span class="a">許可境界</span>は個々のIAMユーザー/ロールが持てる権限の上限（主に権限委譲の制御）。<span class="b">SCP</span>はOrganizationsでアカウント全体に強制する上限。どちらも上限だが対象が違う。`},
+  {a:"SCP",b:"IAMポリシー",key:"許可の上限か個別の付与か",
+   tale:`<span class="a">SCP</span>は組織/OU/アカウントにかける許可の上限（管理者でも超えられない）。<span class="b">IAMポリシー</span>はアカウント内で個々のユーザー/ロールに許可を付与。実効権限は両者の重なり。`},
+  {a:"IAM Identity Center",b:"Amazon Cognito",key:"社員SSOかアプリ利用者認証か",
+   tale:`<span class="a">IAM Identity Center</span>は社員の複数AWSアカウントへのSSO・AD連携・権限セット。<span class="b">Cognito</span>はアプリのエンドユーザー（toC）のサインアップ/サインイン。`},
+  {a:"IAM条件キー（Condition）",b:"セキュリティグループ",key:"認可条件かネットワークか",
+   tale:`<span class="a">IAM条件キー</span>はMFA有無・送信元IP・時間など「誰がどんな状況で操作できるか」を制御。<span class="b">SG</span>はネットワークのIP/ポート通過可否（MFAや操作条件は表現できない）。`},
+  {a:"VPCエンドポイント＋ポリシー限定",b:"パブリック化",key:"経路を絞るか誰でもか",
+   tale:`<span class="a">VPCエンドポイント＋バケットポリシー</span>でインターネットに出さず特定VPCのみに絞る（安全）。<span class="b">パブリック化</span>は誰でもアクセス可（機密データに不可）。経路を絞るのが正解。`}
+ ]},
+{ico:"🔬",t:"分析ラボ（データ分析）",
+ story:`流れ込むデータを扱うラボ。蛇口から流れるデータを受ける2人——保管して何度も読ませる <span class="who">Kinesis Data Streams</span> と、ただ下流へ流し込む <span class="who">Firehose</span>。溜まったデータを調べる側には、その場でSQLを投げる気軽な <span class="who">Athena</span> と、常駐の本格分析室 <span class="who">Redshift</span>。下ごしらえ役が <span class="who">Glue</span>、見せる係が <span class="who">QuickSight</span>、ログを全文検索する <span class="who">OpenSearch</span>。`,
+ pairs:[
+  {a:"Kinesis Data Streams",b:"Kinesis Data Firehose",key:"保持・複数読み・リプレイか配信だけか",
+   scene:`IoTのテレメトリを、リアルタイム異常検知とS3への蓄積で同時に読みたかった。Data Streamsなら複数のコンシューマーが同じ流れを別々のペースで読め、数日後にロジックを変えて先頭から読み直せた。単にS3へ流すだけならFirehoseで全自動にできた。`,
+   tale:`<span class="a">Data Streams</span>は保持期間内でデータを持ち、複数コンシューマーが独立に読む・リプレイ可（シャード管理あり）。<span class="b">Firehose</span>はS3/Redshift/OpenSearchへバッファ配信するだけ・リプレイ不可・ほぼ全自動。`},
+  {a:"Kinesis Data Streams",b:"SQS",key:"複数が読めるか1つが消すか",
+   tale:`<span class="a">Data Streams</span>は同じデータを複数が読め、保持期間内で再読み込み可。<span class="b">SQS</span>は1メッセージを基本1コンシューマーが処理して削除・リプレイ不可。`},
+  {a:"Amazon MSK",b:"Kinesis Data Streams",key:"Kafka資産を活かすか",
+   tale:`<span class="a">MSK</span>はApache Kafka互換で既存Kafka資産を活かす（ブローカー運用はAWS）。<span class="b">Kinesis</span>はAWSネイティブでKafka非互換だがよりサーバーレスで運用が軽い。既存Kafkaがあるなら<span class="a">MSK</span>。`},
+  {a:"Athena",b:"Redshift",key:"サーバーレスのアドホックか本格DWHか",
+   scene:`月に数回しか見ないログ分析のためにDWHを常時立てるのは無駄だった。AthenaでS3に直接SQLを投げたら、使った分だけの課金で済んだ。毎日大量の集計を回す経営ダッシュボードは、常駐のRedshiftにロードして安定させた。`,
+   tale:`<span class="a">Athena</span>はS3に直接SQL・サーバーレス・スキャン量課金（低頻度のアドホック）。<span class="b">Redshift</span>はクラスタを常時稼働しデータをロードして使う本格DWH（大規模/高頻度）。`},
+  {a:"Redshift",b:"RDS",key:"OLAP（分析）かOLTP（取引）か",
+   tale:`<span class="a">Redshift</span>は列指向・分散並列で大規模集計分析（OLAP）。<span class="b">RDS</span>は行指向でトランザクション処理（OLTP）。大量データの集計分析なら<span class="a">Redshift</span>。`},
+  {a:"Redshift Spectrum",b:"Redshiftへの全ロード",key:"ロードせず直接クエリか",
+   tale:`<span class="a">Spectrum</span>はS3のデータをロードせず直接クエリし、ロード済みテーブルと結合（コールドデータのロードコスト回避）。<span class="b">全ロード</span>はDWHに取り込むためストレージコストと手間が増える。`},
+  {a:"AWS Glue",b:"Amazon EMR",key:"サーバーレスETLかクラスタ制御か",
+   scene:`複数ソースのデータを定期的に整える標準的なETLは、サーバーレスのGlueに任せたらクラスタ管理から解放された。一方、特殊なフレームワークで細かくチューニングしたい大規模処理は、EMRでクラスタを自分で立てた。`,
+   tale:`<span class="a">Glue</span>はサーバーレスETL・クローラーでスキーマ自動カタログ・スケジュールジョブ・管理不要。<span class="b">EMR</span>はHadoop/Sparkクラスタを構築して細かく制御（常時/長時間/特殊フレームワーク・クラスタ管理あり）。`},
+  {a:"AWS Glue",b:"Lambda",key:"大規模Sparkか軽量か",
+   tale:`<span class="a">Glue</span>はSparkベースの大規模分散ETL。<span class="b">Lambda</span>は15分制限の軽量イベント処理で大規模変換には不向き。`},
+  {a:"Glue DataBrew",b:"Glue（ETLジョブ）",key:"ノーコードかコードか",
+   tale:`<span class="a">DataBrew</span>はノーコードの視覚的データ準備・レシピ再利用（非エンジニア向け）。<span class="b">Glueジョブ</span>はPySpark等のコードを書く本格ETL（エンジニア向け）。`},
+  {a:"QuickSight",b:"Athena/Redshift",key:"見せるか計算するか",
+   tale:`<span class="a">QuickSight</span>は可視化・ダッシュボードのBI層（見せる）。<span class="b">Athena/Redshift</span>はSQLを実行する分析エンジン（計算する）。QuickSightはこれらをデータソースにする。`},
+  {a:"OpenSearch Service",b:"Athena",key:"全文検索かSQLか",
+   tale:`<span class="a">OpenSearch</span>は全文検索エンジン＋Kibana的可視化でログを探索・リアルタイム分析。<span class="b">Athena</span>はS3上のデータにSQLでアドホック/バッチ分析。`},
+  {a:"OpenSearch Service",b:"CloudWatch Logs",key:"高度な全文検索か基本フィルタか",
+   tale:`<span class="a">OpenSearch</span>は高度な全文検索・可視化・アラート。<span class="b">CloudWatch Logs</span>は集約・保持・基本フィルタ（Logs Insights）。大規模な全文検索探索なら<span class="a">OpenSearch</span>。`},
+  {a:"Managed Service for Apache Flink",b:"Athena/Redshift",key:"ストリーム継続集計かバッチか",
+   tale:`<span class="a">Managed Flink</span>はストリームに対する継続的なリアルタイム集計/異常検知。<span class="b">Athena/Redshift</span>は溜めたデータへのバッチ/オンデマンドSQL（リアルタイムのストリーム集計ではない）。`},
+  {a:"Lake Formation",b:"IAM/S3ポリシー個別管理",key:"列/行レベルの一元管理か",
+   tale:`<span class="a">Lake Formation</span>はテーブル/列/行レベルの権限を一元定義し複数分析サービスへ統一適用。<span class="b">個別ポリシー</span>はサービス/部門ごとに書く必要があり煩雑で列/行レベルの統一が難しい。`},
+  {a:"Timestream",b:"Redshift",key:"時系列の取り込みか大規模分析か",
+   tale:`<span class="a">Timestream</span>は秒単位の時系列計測値の取り込み・時間範囲集計に特化。<span class="b">Redshift</span>は構造化データの大規模分析（DWH）向けで高頻度の時系列取り込みには過剰。`}
+ ]},
+{ico:"🏥",t:"保険プラン（可用性・DR）",
+ story:`災害にどう備えるかは「保険のグレード」で考える。掛け金最安・復旧は数時間の <span class="who">バックアップ&リストア</span>、心臓だけ動かしておく <span class="who">パイロットライト</span>、縮小版を常時温めておく <span class="who">ウォームスタンバイ</span>、両拠点をフル稼働させる最高級の <span class="who">アクティブ/アクティブ</span>。守る範囲も「同じ街の別ビル（AZ）」か「別の街（リージョン）」かで分かれる。`,
+ pairs:[
+  {a:"マルチAZ",b:"マルチリージョン",key:"AZ障害かリージョン災害か",
+   scene:`単一AZで動かしていたWebとDBが、AZ障害でまるごと止まった。マルチAZにして別AZにスタンバイを置いたら自動で切り替わるようになった。リージョン全体の災害まで備える要件ではなかったので、コストのかかるマルチリージョンは見送った。`,
+   tale:`<span class="a">マルチAZ</span>は同一リージョン内の複数AZに分散しAZ障害に耐える（基本の高可用・コスト合理的）。<span class="b">マルチリージョン</span>はリージョン全体の災害に備える（より高コスト）。「AZ障害・リージョン内」なら<span class="a">マルチAZ</span>で十分。`},
+  {a:"クロスリージョンリードレプリカ",b:"マルチAZスタンバイ",key:"リージョンをまたぐか",
+   tale:`<span class="a">クロスリージョンRR</span>は別リージョンで読み取り可・昇格でリージョンDR。<span class="b">マルチAZスタンバイ</span>は同一リージョンの別AZ・普段は読めない・AZ障害対策。またぐかどうかが違い。`},
+  {a:"Aurora Global Database",b:"RDS/AuroraマルチAZ",key:"リージョン災害かAZ障害か",
+   tale:`<span class="a">Global Database</span>は複数リージョン間で1秒未満レプリケーション・リージョン災害対応・高速昇格。<span class="b">マルチAZ</span>は同一リージョンの別AZにスタンバイ（リージョン災害は守れない）。`},
+  {a:"DynamoDB Global Tables",b:"Aurora Global Database",key:"全リージョンで書けるか",
+   tale:`<span class="a">DynamoDB Global Tables</span>は全リージョンで読み書き可能なマルチアクティブ・双方向自動レプリケーション。<span class="b">Aurora Global Database</span>は書き込みは原則1リージョン・他は読み取り＋災害時昇格。「全リージョンで書ける」のが<span class="a">Global Tables</span>。`},
+  {a:"バックアップ&リストア",b:"ウォームスタンバイ",key:"RTO数時間か数分か",
+   scene:`社内ツールは「半日止まっても許容」だったので、最安のバックアップ&リストアにした。一方、止まると売上が消えるECは、縮小版を別リージョンで常時温めるウォームスタンバイにして数分で戻せるようにした。許せるダウンタイムで掛け金が変わる。`,
+   tale:`<span class="a">バックアップ&リストア</span>は平常時は何も動かさずバックアップ保管のみ（最安・RTO数時間）。<span class="b">ウォームスタンバイ</span>は縮小版を常時稼働（高め・RTO数分）。要件が緩く安くなら<span class="a">バックアップ&リストア</span>。`},
+  {a:"パイロットライト",b:"バックアップ&リストア",key:"DBだけ常時複製するか",
+   tale:`<span class="a">パイロットライト</span>はコアDBだけ別リージョンで常時複製（RPO数分）・アプリは障害時起動。<span class="b">バックアップ&リストア</span>は定期バックアップのみ（RPO数時間〜）。DBを失いたくないがフル稼働は避けたいなら<span class="a">パイロットライト</span>。`},
+  {a:"ウォームスタンバイ",b:"マルチサイト アクティブ/アクティブ",key:"縮小待機か常時フル稼働か",
+   tale:`<span class="a">ウォームスタンバイ</span>は縮小版を待機（コスト抑制・RTO数分）。<span class="b">アクティブ/アクティブ</span>は両リージョン常時フル稼働（RPO/RTOほぼゼロだが最高コスト）。`},
+  {a:"クロスリージョンレプリケーション（CRR）",b:"バージョニング",key:"別リージョンか同一バケット世代か",
+   tale:`<span class="a">CRR</span>は別リージョンのバケットへ自動複製（リージョン災害・地理分散）。<span class="b">バージョニング</span>は同一バケット内で複数世代を保持（誤削除/上書き対策で、リージョン障害は守れない）。`},
+  {a:"AWS Backup",b:"S3クロスリージョンレプリケーション",key:"複数サービス横断かS3だけか",
+   tale:`<span class="a">AWS Backup</span>はRDS/EBS/DynamoDB/EFS等を横断一元管理＋別リージョンコピー＋Vault Lock。<span class="b">S3 CRR</span>はS3オブジェクト限定の複製（他サービスのバックアップ管理はできない）。`},
+  {a:"Backup Vault Lock",b:"S3 Object Lock",key:"対象がバックアップかS3か",
+   tale:`<span class="a">Backup Vault Lock</span>はAWS Backupのバックアップを保持期間中削除/改ざん不可にするWORM。<span class="b">S3 Object Lock</span>はS3オブジェクトへの同様のWORM。対象が違う。`},
+  {a:"Object Lock コンプライアンスモード",b:"ガバナンスモード",key:"ルートでも消せないか",
+   tale:`<span class="a">コンプライアンスモード</span>は保持期間中ルートでも削除/変更不可（規制・ランサム最強）。<span class="b">ガバナンスモード</span>は特別な権限を持つ者は解除可能。改ざん絶対不可なら<span class="a">コンプライアンスモード</span>。`},
+  {a:"別アカウント保管（隔離）",b:"同一アカウント保管",key:"侵害されても残るか",
+   tale:`<span class="a">別アカウント・別リージョンのVaultへコピー</span>すれば本番が侵害されても隔離されて残る（ランサム/内部不正対策）。<span class="b">同一アカウント</span>は侵害されるとバックアップも消されうる。`},
+  {a:"PITR（ポイントインタイムリカバリ）",b:"マルチAZ/リードレプリカ",key:"巻き戻せるか",
+   tale:`<span class="a">PITR</span>は時間軸で壊れる前の任意時点に巻き戻す（論理障害・誤操作）。<span class="b">マルチAZ/リードレプリカ</span>は複製なので誤更新もそのまま伝播し巻き戻せない（物理障害・可用性）。`},
+  {a:"PITR（継続バックアップ）",b:"オンデマンド/手動バックアップ",key:"任意の時点か取得時点だけか・運用負荷",
+   scene:`DynamoDBを「直近24時間の任意の時点に戻したい」要件で、最初はLambda＋cronで定期スナップショットを取る案を考えたが、スケジュール管理と保持の運用が重く、しかも取得した時刻にしか戻せなかった。PITRをオンにしたら、ワンクリックで継続バックアップが回り、過去35日の任意の秒へ運用の手間なく復元できた。`,
+   tale:`<span class="a">PITR</span>はワンクリックで有効化する継続バックアップで、<b>過去35日の任意の時点（秒単位）</b>に復元できマネージドで運用オーバーヘッドが最小。<span class="b">オンデマンド/手動バックアップ</span>はスケジュールや保持を自前管理（オーバーヘッド大）で、<b>取得した時点にしか戻せない</b>。「任意の時点＋運用負荷を抑える」なら<span class="a">PITR</span>。`},
+  {a:"DRS（Elastic Disaster Recovery）",b:"MGN",key:"継続DRか一度きり移行か",
+   scene:`オンプレのVM群とMySQLをまるごとAWSへDRしたかった。要件は自動フェイルオーバー・RTO15分・本番を止めずにフェイルオーバーを試せること。DRSは各サーバーをブロックレベルで継続レプリケーションし、低コストのステージング領域に待機させ、障害時に数分でフル性能のEC2として起動できた。しかも本番に影響を与えずDR訓練（リカバリ検証）を何度でも実施できた。`,
+   tale:`<span class="a">DRS</span>は<b>AWS Replication Agent</b>をソースのVMに入れ、変更分だけを<b>増分（incremental）で継続レプリケーション</b>して災害復旧を繰り返し使う（平常時は低コストのステージングで待機・障害時に数分〜十数分のRTOで起動・<b>本番を止めずにDR訓練/リカバリ検証ができる</b>）。サーバー（VM＋その上のDB）丸ごとのDRに最適。<span class="b">MGN</span>は移行が終われば役目終了の一度きり。継続DR・テスト可能・低RTOなら<span class="a">DRS</span>、引っ越しなら<span class="b">MGN</span>。`}
+ ]},
+{ico:"🎛",t:"司令室（運用・ガバナンス・コスト）",
+ story:`街全体を見渡す司令室。リソースの状態を常に記録する <span class="who">Config</span>、誰が何のAPIを叩いたかの台帳 <span class="who">CloudTrail</span>、アプリの動きを測る <span class="who">CloudWatch</span>、遅延の原因を追うトレーサー <span class="who">X-Ray</span>。新しい区画を標準仕様で一気に立ち上げる <span class="who">Control Tower</span>、予算の見張り番 <span class="who">Budgets</span>。「状態を見るか・行為を追うか・先回りか事後か」で道具が分かれる。`,
+ pairs:[
+  {a:"AWS Config",b:"CloudTrail",key:"構成の状態かAPIの行為か",
+   scene:`「いつの間にかS3バケットが公開設定になっていた」のを、Configが構成のドリフトとして捉えた。「誰がその設定を変えたのか」は、CloudTrailのAPIログで犯人と時刻が分かった。状態を見るのと行為を追うのは別の道具。`,
+   tale:`<span class="a">Config</span>はリソースの構成と準拠状態を継続評価・履歴管理。<span class="b">CloudTrail</span>はAPIコールの監査ログ（誰が・いつ・何を）。状態を見るなら<span class="a">Config</span>、行為を追うなら<span class="b">CloudTrail</span>。`},
+  {a:"CloudTrail",b:"CloudWatch Logs",key:"API監査かアプリログか",
+   tale:`<span class="a">CloudTrail</span>はAWS API操作の監査証跡。<span class="b">CloudWatch Logs</span>はアプリ/OS/サービスが出力するログの集約・監視。`},
+  {a:"CloudTrail",b:"VPCフローログ",key:"API操作か通信メタデータか",
+   tale:`<span class="a">CloudTrail</span>はAPI操作者と操作内容。<span class="b">VPCフローログ</span>はネットワーク通信のメタデータ（送信元/宛先IP・ポート・許可/拒否）。`},
+  {a:"X-Ray",b:"CloudWatch / CloudTrail",key:"分散トレースか監視/監査か",
+   tale:`<span class="a">X-Ray</span>はリクエストをサービス間でトレースし区間レイテンシ/ボトルネックを可視化。<span class="b">CloudWatch</span>はメトリクス/ログ監視、<span class="b">CloudTrail</span>はAPI監査。アプリのレイテンシ原因特定なら<span class="a">X-Ray</span>。`},
+  {a:"Patch Manager",b:"Inspector",key:"適用するか検出するか",
+   tale:`<span class="a">Patch Manager</span>はパッチを自動で当てる実行役。<span class="b">Inspector</span>は脆弱性（CVE）を検出するスキャナーで適用はしない。「適用」が要件なら<span class="a">Patch Manager</span>。`},
+  {a:"Patch Manager",b:"Trusted Advisor",key:"実行かアドバイスか",
+   tale:`<span class="a">Patch Manager</span>はパッチを当てて未適用を可視化する実行役。<span class="b">Trusted Advisor</span>はコスト/セキュリティ/性能の改善点を指摘するだけ（実行はしない）。`},
+  {a:"AWS Config（検出）",b:"SSM Automation（修復）",key:"検出か自動修復か",
+   tale:`<span class="a">Config</span>は構成が基準から逸脱していないか継続評価（検出）。<span class="b">SSM Automation</span>は定型運用作業を自動実行（修復）。Configの修復アクションでSSM Automationを呼び、検出→自動修復をつなぐ。`},
+  {a:"Control Tower",b:"Organizations",key:"土台の自動構築か束ねる基盤か",
+   tale:`<span class="a">Control Tower</span>はランディングゾーン（ログ集約・ガードレール・SSO込みの土台）を自動構築。<span class="b">Organizations</span>はアカウントの束ね＋SCPの基盤（Control Towerはこの上に成り立つ）。`},
+  {a:"Account Factory",b:"CloudFormation StackSets",key:"標準アカウント払い出しかテンプレ配布か",
+   tale:`<span class="a">Account Factory</span>は標準化アカウントを自動払い出し（Control Towerの一部）。<span class="b">StackSets</span>は複数アカウント/リージョンへテンプレを配る汎用部品。`},
+  {a:"Resource Access Manager（RAM）",b:"CloudFormation StackSets",key:"実体1つを共有か複製か",
+   tale:`<span class="a">RAM</span>は1つのリソースを複数アカウントで共有（実体は1つ・所有は集約）。<span class="b">StackSets</span>は同じテンプレを各アカウントに複製（実体が複数できる）。`},
+  {a:"AWS Budgets",b:"Cost Explorer",key:"先回り通知か事後分析か",
+   tale:`<span class="a">Budgets</span>は予算としきい値アラートで超過を事前通知（先回り）。<span class="b">Cost Explorer</span>は過去のコストを可視化・分析（事後）。`},
+  {a:"Cost Anomaly Detection",b:"CloudWatch請求アラーム",key:"ML異常検知か固定しきい値か",
+   tale:`<span class="a">Cost Anomaly Detection</span>は機械学習で平常から外れた異常増を自動検知。<span class="b">CloudWatch請求アラーム</span>は合計請求額が固定しきい値を超えたら通知（単純）。`},
+  {a:"CloudFormation",b:"手作業/CLI手順書",key:"再現可能か手順依存か",
+   tale:`<span class="a">CloudFormation</span>は宣言的テンプレートで再現可能・スタック一括管理・ドリフト検出。<span class="b">手作業/CLI手順書</span>は手順依存で再現性・バージョン管理が弱い。`},
+  {a:"StackSets",b:"通常のStack",key:"組織横断展開か単一か",
+   tale:`<span class="a">StackSets</span>は1テンプレを多数のアカウント/リージョンへ一斉展開・更新（横断）。<span class="b">通常のStack</span>は単一アカウント/リージョン内の管理。`},
+  {a:"Service Catalog",b:"広範なIAM権限付与",key:"標準化セルフサービスか何でも作れるか",
+   tale:`<span class="a">Service Catalog</span>は承認済みの標準構成だけをセルフサービスで作らせる（権限を絞りガバナンス維持）。<span class="b">広範なIAM付与</span>は何でも作れてガバナンスが効かない。`},
+  {a:"Session Manager",b:"踏み台（Bastion）/SSH",key:"ポートレスか攻撃面が残るか",
+   tale:`<span class="a">Session Manager</span>はSSHポート開放・踏み台不要でIAM認可＋ログ監査付きのシェル（ポートレス）。<span class="b">踏み台/SSH</span>はポート開放・鍵管理・踏み台運用が残り攻撃面が増える。`}
+ ]},
+{ico:"🔗",t:"伝令と仲介（アプリ統合・疎結合）",
+ story:`サービス同士を直接つながず、間に立つ仲介役がいる。伝票を溜めて1人ずつ処理させる <span class="who">SQS</span>、放送で一斉に知らせる <span class="who">SNS</span>、出来事を聞きつけて各所へ振り分ける <span class="who">EventBridge</span>、多段の段取りを順序立てて仕切る <span class="who">Step Functions</span>。「溜めるか・配るか・ルーティングか・順序管理か」で役割が分かれる。`,
+ pairs:[
+  {a:"SQS",b:"SNS",key:"溜めるか一斉配信か",
+   scene:`注文の急増でバックエンドが落ちかけた。間にSQSを挟んで伝票を溜め、ワーカーが自分のペースで処理したらスパイクを吸収できた。一方、1つの注文確定を在庫・メール・分析へ同時に知らせたい時は、SNSで一斉配信した。`,
+   tale:`<span class="a">SQS</span>はメッセージを溜めてワーカーが順に取り出すキュー（疎結合・スパイク吸収）。<span class="b">SNS</span>は発行したメッセージを購読者へ一斉配信するpub/sub（溜めない）。`},
+  {a:"SQS 標準キュー（Standard）",b:"SQS FIFOキュー",key:"重複して届きうるか・厳密に1回＆順序か",
+   scene:`SQSには重複を入れていないのに、RDSに時々同じレコードが二重に保存される——標準キューは「少なくとも1回（at-least-once）」配信なので、まれに同じメッセージが2回ワーカーに届き、2回処理されるのが原因（処理が可視性タイムアウトより長引き、メッセージが再表示されて二重処理されるパターンもある）。順序と一意性が要るならFIFOキュー（重複排除）に替える。または処理側を冪等（同じメッセージを2回処理しても結果が1回分になる＝一意キーでupsertする等）にして受け止める。`,
+   tale:`<span class="a">標準キュー</span>は「少なくとも1回（at-least-once）」配信＝まれに重複して届く・順序保証なし・ほぼ無制限スループット。<span class="b">FIFOキュー</span>は順序保証＋重複排除で実質1回だけ処理（スループットに上限）。重複が困るなら<span class="b">FIFO</span>、コストやスループットを優先して標準のまま使うなら処理を冪等にする。`},
+  {a:"Amazon MQ",b:"SQS/SNS",key:"既存ブローカー移行か新規クラウドネイティブか",
+   tale:`<span class="a">Amazon MQ</span>はActiveMQ/RabbitMQ互換・JMS/AMQP等の標準プロトコル（既存アプリの無改修移行）。<span class="b">SQS/SNS</span>はAWS独自・サーバーレスでスケーラブル（新規開発向き）。既存ブローカーの移行なら<span class="a">MQ</span>。`},
+  {a:"Amazon SES",b:"Amazon SNS",key:"本格メール配信か通知か",
+   tale:`<span class="a">SES</span>はメール送信に特化（到達率・SPF/DKIM/DMARC・バウンス管理・HTMLメール）。<span class="b">SNS</span>はpub/subの通知（SMS/メール/HTTPへの簡易fan-out）。本格的なメール配信なら<span class="a">SES</span>。`},
+  {a:"EventBridge",b:"Step Functions",key:"ルーティングかオーケストレーションか",
+   tale:`<span class="a">EventBridge</span>はイベントを発生源から切り離して各所へルーティング（疎結合・1対多）。<span class="b">Step Functions</span>は多段処理を順序・分岐・リトライ付きで確実に実行（オーケストレーション）。組み合わせて使う。`},
+  {a:"Step Functions",b:"Lambdaチェーン",key:"状態管理が組み込みか自前か",
+   tale:`<span class="a">Step Functions</span>はワークフローを宣言的に定義しリトライ/分岐/並列/状態管理/可視化を組み込みで提供。<span class="b">Lambdaチェーン</span>は各関数が次を直接呼び、エラー制御・状態管理を自前で散らばらせ複雑化。多段の制御なら<span class="a">Step Functions</span>。`},
+  {a:"EventBridge Scheduler",b:"EventBridge ルール（イベントバス）",key:"時刻起動かイベント起動か",
+   tale:`<span class="a">EventBridge Scheduler</span>は時刻ベースの大規模スケジュール実行（cron/一回限り・多数ターゲット直接呼び出し）。<span class="b">EventBridgeルール</span>はイベント（状態変化）に応じたルーティング。「いつ起動するか」の契機で割る。`},
+  {a:"EventBridge Pipes",b:"EventBridge イベントバス（ルール）",key:"1対1＋変換か1対多か",
+   tale:`<span class="a">Pipes</span>は1ソース→1ターゲットのポイントツーポイント統合（フィルタ＋エンリッチ＋変換をコードレスに）。<span class="b">イベントバス</span>は多数のソース/ターゲットをルールで分配（1対多）。`},
+  {a:"AppSync（GraphQL）",b:"API Gateway（REST）",key:"GraphQL/リアルタイムか固定RESTか",
+   tale:`<span class="a">AppSync</span>はGraphQLで複数ソースを集約・必要なデータだけ1回取得・リアルタイム購読・オフライン同期（モバイル/SPA）。<span class="b">API Gateway（REST）</span>はエンドポイント単位のREST（複数呼び出しになりがち）。`},
+  {a:"WebSocket API",b:"REST API（ポーリング）",key:"双方向リアルタイムか",
+   tale:`<span class="a">WebSocket API</span>は持続接続で双方向・サーバープッシュ（チャット/通知/ライブ）。<span class="b">REST API</span>は一方向で、更新検知はポーリングの擬似的（遅延と無駄）。双方向リアルタイムなら<span class="a">WebSocket</span>。`},
+  {a:"SNSフィルターポリシー",b:"全配信＋各自破棄",key:"絞り込んで配るか",
+   tale:`<span class="a">フィルターポリシー</span>はメッセージ属性で各サブスクライバーに必要なものだけ配信（無駄なし）。<span class="b">全配信＋各自破棄</span>は不要メッセージも届けてから捨てる（無駄な受信・処理）。`}
+ ]},
+{ico:"🎯",t:"キーワード逆引き早見表（この言葉が出たらコレ）",
+ lookup:[
+  ["中断されてもいい・コスト最優先","EC2 スポットインスタンス"],
+  ["15分以内・イベント駆動・アイドルほぼ無料","Lambda"],
+  ["サーバー管理したくない＋Kubernetes不要","ECS on Fargate"],
+  ["OSを自分で管理したい・OSにフルアクセス","EC2（自前構築）"],
+  ["イメージ指定だけで全自動デプロイ","App Runner"],
+  ["大量・長時間の計算バッチ","AWS Batch"],
+  ["毎日決まった時刻に増える","スケジュールドスケーリング"],
+  ["過去の傾向から先回りで増やす","予測スケーリング"],
+  ["数分以内に復旧・リージョン災害（DB）","Aurora Global Database"],
+  ["AZ障害に耐える（リージョン内で十分）","マルチAZ"],
+  ["全リージョンで読み書き（マルチアクティブ）","DynamoDB Global Tables"],
+  ["読み取りを分散して性能を上げたい","リードレプリカ"],
+  ["誤操作・論理障害を巻き戻したい","PITR（ポイントインタイムリカバリ）"],
+  ["専用線・一貫した帯域・低レイテンシ","Direct Connect"],
+  ["すぐ・安く・バックアップ回線","Site-to-Site VPN"],
+  ["S3/DynamoDBへプライベート＋追加料金なし","ゲートウェイ型VPCエンドポイント"],
+  ["多数のVPCをハブで集約","Transit Gateway"],
+  ["アップロード（上り）が遅い","S3 Transfer Acceleration"],
+  ["配信（下り）が遅い","CloudFront"],
+  ["非HTTP・ゲーム・固定IP・経路最適化","Global Accelerator"],
+  ["国・地域で確実に出し分け","Route 53 位置情報ルーティング"],
+  ["普段使わない副系へ障害時だけ切替","Route 53 フェイルオーバールーティング"],
+  ["SQLインジェクション・XSS","WAF"],
+  ["大量トラフィックのDDoS","Shield"],
+  ["VPCのネットワーク層でドメインフィルタ/IPS","Network Firewall"],
+  ["不審な挙動・攻撃を検知","GuardDuty"],
+  ["既知の脆弱性（CVE）をスキャン","Inspector"],
+  ["S3内の機密データ（PII）を検出","Macie"],
+  ["検知の後に「誰がなぜ」を調査","Detective"],
+  ["複数のセキュリティ結果を集約・俯瞰","Security Hub"],
+  ["認証情報の自動ローテーション","Secrets Manager"],
+  ["設定値・シークレットを安く保管","Parameter Store"],
+  ["専用HSM・鍵を完全に単独制御","CloudHSM"],
+  ["別アカウントのプリンシパルを直接許可","リソースベースポリシー"],
+  ["組織全体に禁止のガードレール","SCP（Organizations）"],
+  ["社員の複数アカウントへのSSO","IAM Identity Center"],
+  ["アプリのエンドユーザー認証（toC）","Amazon Cognito"],
+  ["保持して複数が独立に読む・リプレイ","Kinesis Data Streams"],
+  ["S3等へバッファ配信するだけ・全自動","Kinesis Data Firehose"],
+  ["既存Kafka資産を活かす","Amazon MSK"],
+  ["S3に直接SQL・サーバーレス・アドホック","Athena"],
+  ["本格DWH・大規模/高頻度の分析","Redshift"],
+  ["S3をロードせず直接クエリ","Redshift Spectrum"],
+  ["サーバーレスETL・スキーマ自動カタログ","AWS Glue"],
+  ["ノーコードでデータ準備","Glue DataBrew"],
+  ["ログの全文検索・可視化（Kibana相当）","OpenSearch Service"],
+  ["ストリームの継続的リアルタイム集計","Managed Service for Apache Flink"],
+  ["列/行レベルの権限を一元管理","Lake Formation"],
+  ["時系列（IoT計測値）","Timestream"],
+  ["関係・つながりの探索（グラフ）","Neptune"],
+  ["MongoDB互換で移行","DocumentDB"],
+  ["Cassandra互換で移行","Keyspaces"],
+  ["プライマリDBになる耐久Redis","MemoryDB"],
+  ["セッション共有・ホットデータのキャッシュ","ElastiCache"],
+  ["EBSスナップショットの世代管理だけ","Data Lifecycle Manager（DLM）"],
+  ["複数サービス横断のバックアップ一元化","AWS Backup"],
+  ["サーバーを丸ごとEC2へ移行","MGN（Application Migration Service）"],
+  ["DBの論理移行・継続レプリケーション（CDC）","DMS"],
+  ["異種DBのスキーマ・構文を変換","SCT"],
+  ["継続レプリケーションの災害復旧","DRS（Elastic Disaster Recovery）"],
+  ["回線が細い・物理搬送で大容量","Snowball Edge"],
+  ["ネットワーク経由の継続的な差分同期","DataSync"],
+  ["オンプレのプロトコルのまま使い続ける","Storage Gateway"],
+  ["マネージドSFTPで直接S3保存","Transfer Family"],
+  ["WindowsのSMB/NTFS/AD共有","FSx for Windows"],
+  ["HPC/MLの超高速並列ファイル","FSx for Lustre"],
+  ["自社施設にAWSを置く（データ所在地）","Outposts"],
+  ["改ざん絶対不可（ルートでも消せない）","S3 Object Lock コンプライアンスモード"],
+  ["移行ツールの進捗を横断で追跡","Migration Hub"],
+  // LK
+ ]}
+];
+// scene補完：物語のない対決ペアに「こんな場面」を後付けする（a|b で対応）
+const SCENES={
+"gp3|gp2":`gp2のままだと月末バッチでバーストクレジットが切れ、その日だけ急に遅くなった。gp3に替えてIOPSを必要分だけ固定したら速度が一定になり、料金はむしろ下がった。普段は迷わずgp3でいい。`,
+"st1（スループットHDD）|sc1（Cold HDD）":`毎晩集計するログ基盤は、大容量を安く流せるst1にした。一方、3年前の監査用ログは年に一度開くかどうかなので、最安のsc1へ落として保管料を最小にした。触る頻度で棚を分ける。`,
+"プロビジョンドIOPS SSD|st1（HDD）":`注文DBは小さなランダム読み書きが多く、HDDだと詰まったのでio2にした。逆にバックアップを丸ごと順番に書き出す処理はst1で十分速く、SSDは過剰だった。普段はst1、本当にIOPSが要る一台だけSSD。`,
+"EBS|EFS":`EBSを2台目のサーバーにも付けようとして「共有できない」と気づいた。複数のWebサーバーで同じ画像フォルダを見たかったのでEFSに移した。1台しか使わない起動ディスクはEBSのままで安い。`,
+"FSx for Windows|FSx for Lustre":`部門の共有ドライブ（AD権限つきWord/Excel）はFSx for Windowsにそのまま載った。別の機械学習チームが「数百GB/秒で読みたい」と言うので、そこだけFSx for Lustreを使い分けた。普段使いにLustreは高すぎる。`,
+"FSx for Lustre|EFS":`解析の入力データをEFSに置いたら、台数を増やしても帯域が頭打ちで計算待ちになった。S3連携のFSx for Lustreに替えたら一気に流れた。汎用NFSで足りる日常共有はEFSのままで安い。`,
+"FSx for NetApp ONTAP|FSx for Windows / EFS":`オンプレNetAppでスナップショットと重複排除を運用し、NFSとSMBの両方から同じ領域を使っていた。片方しか持てないFSx WindowsやEFSでは足りず、ONTAP機能ごと移せるFSx for NetApp ONTAPにした。既存運用を変えたくない時の答え。`,
+"S3 Glacier Deep Archive|Glacier Flexible Retrieval":`法令で7年保管だが普段は絶対に見ない契約書は、最安のDeep Archiveに入れた。一方、たまに監査で数時間以内に出す記録はFlexibleにした。待てる時間で段を選ぶ。`,
+"S3 Intelligent-Tiering|EFSライフサイクル（EFS-IA）":`アクセスが読めないユーザー投稿画像はIntelligent-Tieringに任せ、S3が自動で安い階層へ移してくれた。EFS上の古い共有ファイルはEFSライフサイクルでEFS-IAへ自動移行した。対象がS3かEFSかで使う機能が違うだけ。`,
+"DataSync|Storage Gateway":`本社の数十TBを一度クラウドへ寄せる時はDataSyncで夜間に同期した。だが工場の検査装置は今後もオンプレのNFSにファイルを吐き続けるので、そこはStorage Gatewayで「使い続けながら実体はS3」にした。運ぶのか住み続けるのかで道具が分かれる。`,
+"DRS（Elastic Disaster Recovery）|MGN":`一度きりのサーバー引っ越しはMGNでEC2に上げて完了した。別件の基幹は「常に複製しておいて災害時に起こす」DRが要件だったのでDRSにした。終わって役目が終わるか、ずっと備え続けるか。`,
+"Transfer Family|EC2自前SFTP":`取引先がSFTPで送ってくる仕組みをEC2上のsftpdで運用していたら、パッチと冗長化が重荷だった。Transfer Familyに替えたらサーバー管理ゼロで直接S3に届くようになった。`,
+"File Gateway / Volume Gateway|Tape Gateway":`社内ファイルサーバーの実体をS3へ寄せたい時はFile Gateway。一方、長年バックアップソフトでテープに取っていた運用はそのまま活かしたかったので、仮想テープのTape Gatewayで物理テープだけ無くした。`,
+"Migration Hub|個別ツールの進捗確認":`数百台の移行でMGNとDMSのコンソールを別々に見ていたら、全体がどこまで進んだか分からなくなった。Migration Hubに集約したら一枚で進捗が見えた。小規模なら個別で足りるが、大規模だと横断ダッシュボードが効く。`,
+"Data Lifecycle Manager（DLM）|AWS Backup":`EBSのスナップショットを毎日取って古いのを消すだけならDLMで十分だった。後からRDSやEFSもまとめて世代管理・別リージョン保管したくなり、横断のAWS Backupに移した。対象がEBSだけか複数サービスかで選ぶ。`,
+"Aurora|RDS（標準エンジン）":`小さな社内アプリのMySQLは普通のRDSで十分で、コストも控えめだった。アクセスが伸びて高可用と読み取り性能が必要になった基幹だけAuroraに上げた。最初から全部Auroraは過剰になりがち。`,
+"ElastiCache|リードレプリカ":`同じ人気商品の情報を何万回も引く部分はElastiCacheに載せてミリ秒未満で返した。一方、いろいろな条件の検索が多いレポートはリードレプリカで複数DBに分散した。同じ問い合わせの繰り返しか、多様なクエリかで使い分ける。`,
+"MemoryDB|ElastiCache for Redis":`セッションの一時キャッシュはElastiCache for Redisで足りた。だが「この注文キューはRedisの速さで、かつ絶対に消えてはいけない」要件が出てきて、耐久性のあるMemoryDBをプライマリにした。消えて困るかどうかが分かれ目。`,
+"DocumentDB|DynamoDB":`既存のMongoDBアプリをコードほぼそのままで移したかったのでDocumentDBにした。新規でAWS前提の超大量アクセスならDynamoDBだが、MongoDBのAPI資産があるなら互換のDocumentDBが楽。`,
+"Keyspaces|DynamoDB":`オンプレCassandraのCQLクエリをそのまま動かしたくてKeyspacesにした。DynamoDBの方がスケールするがCQLは使えず作り直しになる。Cassandra資産を活かすなら互換のKeyspaces。`,
+"Timestream|DynamoDB/RDB":`センサーが秒単位で吐く計測値をRDBに入れたら、時間範囲の集計が重くて自前で苦労した。時系列専用のTimestreamに移したら取り込みも範囲集計も素直に速かった。`,
+"互換サービスへ移行|別種DBへ移行":`MongoDB→DocumentDB、Cassandra→Keyspacesは互換なのでコード変更が最小で済んだ。一方、思い切ってDynamoDBやRDSへ作り替える案は性能は出るが再設計が要り、納期に間に合わなかった。変更を最小にしたい移行では互換サービス。`,
+"Fargate|EC2起動タイプ":`コンテナを動かすのにEC2ノードのパッチやスケールが面倒で、Fargateにして基盤管理から解放された。ただ特殊なGPUや細かいコスト最適化が要るワークロードだけ、あえてEC2起動タイプで自分で握った。`,
+"App Runner|ECS on Fargate":`小さなWeb APIを早く出したくて、イメージを指すだけのApp Runnerにしたら半日で公開できた。要件が増えて細かいネットワークやサイドカーが必要になった時にECS on Fargateへ移した。手間ゼロか作り込みかのトレードオフ。`,
+"Elastic Beanstalk|手動でEC2/ELB/ASG構成":`デモ用アプリはBeanstalkにコードを上げるだけで環境一式ができて速かった。本番で細かく制御したくなった時は中のEC2/ELB/ASGを直接触った。Beanstalkは「全自動だが中も触れる」のが効く。`,
+"AWS Batch|Lambda":`毎晩の動画エンコードは数時間かかり、15分制限のLambdaでは無理だったのでAWS Batchにした。逆にアップロード時のサムネ生成は数秒なのでLambdaで十分。処理の長さと重さで割る。`,
+"オンデマンド＋スポット混在|全スポット":`本番APIを全部スポットにしたら、まとめて追い出された時間に応答が落ちて事故になった。常時必要なベースはオンデマンドで確保し、上乗せ分だけスポットにする混在に変えたら、安さと安定を両立できた。`,
+"Fargate Spot|通常のFargate":`夜間のバッチ処理タスクはFargate Spotで大幅に安くした。中断されてもキューから拾い直せる作りだから痛くない。常時応答が要る本番APIタスクは通常のFargateで守った。`,
+"クラスタープレイスメントグループ|スプレッドプレイスメントグループ":`ノード間で密に通信するHPCジョブは、クラスターで同一AZに近接させて遅延を詰めた。一方、少数の重要サーバーは同時に落ちては困るので、スプレッドで別ハードに散らした。狙いが速度か障害分離かで逆になる。`,
+"スプレッド|パーティション":`数台の重要インスタンスを別ハードに分けたいだけならスプレッドで足りた。CassandraやHDFSのような大規模分散クラスタはラック単位で分けたかったのでパーティションにした。規模で選ぶ。`,
+"プロビジョニング済み同時実行|予約済み同時実行（Reserved Concurrency）":`ログイン関数が朝の一斉アクセスでコールドスタートし、最初の数百人が遅かった。プロビジョニング済み同時実行で事前にウォーム待機させたら解消した。別の関数は下流DBを守るため予約済み同時実行で上限を絞った。目的が速さか上限制御かで別物。`,
+"WorkSpaces|AppStream 2.0":`在宅勤務者にWindowsデスクトップごと配るのはWorkSpacesにした。一方、社外の取引先に一つのCADアプリだけ触らせたい時は、デスクトップを渡さずAppStream 2.0でそのアプリだけ配信した。`,
+"インターフェイスエンドポイント|NAT Gateway":`プライベートサブネットからSQSやKMSを呼ぶのに、最初はNAT Gateway経由でインターネットに出ていてデータ処理料金がかさんだ。インターフェイスエンドポイントでAWS内に直結したら、ネットに出ずコストも下がった。`,
+"PrivateLink（エンドポイントサービス）|VPCピアリング/TGW":`自社SaaSを顧客VPCに見せるのに、ピアリングだとCIDRが重複して繋げない顧客がいた。PrivateLinkでサービス1点だけ公開したら、ネットワーク同士を繋がずに済み重複も問題なくなった。広く繋ぐならTGW、サービスだけ見せるならPrivateLink。`,
+"NAT Gateway|NATインスタンス":`昔EC2で立てたNATインスタンスが単一障害点で、落ちると全プライベートサブネットが外に出られなくなった。マネージドのNAT Gatewayに替えたらスケールも冗長も任せられた。今あえて自前NATを選ぶ理由はほぼない。`,
+"NAT Gateway|IGW（インターネットゲートウェイ）":`Webサーバーは外から入れたいのでIGW付きのパブリックサブネットに置いた。裏のアプリ/DBは外から入られたくないがパッチ取得で外には出たいので、プライベートサブネット＋NAT Gatewayにした。双方向か外向きだけかで分ける。`,
+"Egress-Only IGW|NAT Gateway":`IPv6で構成したサブネットから外向きだけ通したい時、NATではなくEgress-Only IGWを使った。IPv4側は従来どおりNAT Gateway。やることは同じ「外向き専用」だがプロトコルで道具が違う。`,
+"DX＋VPNバックアップ|Direct Connect 2本":`専用線が1本だと切れた瞬間に全社が止まるので冗長化したかった。DX2本は堅いが高すぎたので、コスト要件に合わせDX＋VPNバックアップにした。バックアップ性能はVPN相当だが、止まらないことが優先だった。`,
+"Direct Connect Gateway|通常のDirect Connect":`最初は1リージョンの1VPCに専用線を引いただけだった。拠点が増えて複数リージョン・複数VPCから同じDXを使いたくなり、Direct Connect Gatewayで束ねた。`,
+"Client VPN|Site-to-Site VPN":`在宅の社員一人ひとりの端末からVPCに入れたい時はClient VPNにした。支社オフィスのネットワークごと丸ごと繋ぐ別案件はSite-to-Site VPNにした。個人端末か拠点間かで違う。`,
+"セキュリティグループ|ネットワークACL":`特定のサーバーだけポートを開ける細かい制御はSG（ステートフルで戻りは自動許可）で済ませた。サブネット全体で特定IPを明示的に拒否したい時だけNACL（拒否ルールが書ける）を足した。普段はSG、拒否やサブネット境界だけNACL。`,
+"Network Firewall|WAF":`ALBの前でSQLインジェクションを弾くのはWAFの仕事だった。だが「VPCから出る通信を許可ドメインだけに絞る」「侵入検知をかける」のはWAFでは無理で、Network Firewallを入れた。層と狙いが違うので併用した。`,
+"Network Firewall|SG/NACL":`IPとポートの許可拒否はSG/NACLで足りたが、「このドメインへの通信だけ許す」というFQDN単位の制御はSG/NACLでは表現できなかった。Network Firewallで初めてドメインフィルタが効いた。`,
+"Gateway Load Balancer|ALB/NLB":`通常のトラフィック分散はALB/NLBで足りた。だが全通信をサードパーティのファイアウォール製品に通して検査させたい時は、経路に透過挿入できるGWLBが要った。アプリ分散か検査アプライアンス挿入かで違う。`,
+"Route 53 Resolver インバウンド|アウトバウンド":`オンプレのDNSからAWSのプライベートゾーン名を引きたい時はインバウンドエンドポイント。逆にAWS側から社内ドメインをオンプレDNSへ転送したい時はアウトバウンド。双方向に名前解決したくて結局両方置いた。`,
+"プライベートホストゾーン|パブリックホストゾーン":`社外に公開するドメインはパブリックホストゾーンで誰でも解決できるようにした。内部だけで使うapi.internalのような名前は、指定VPC内からしか引けないプライベートホストゾーンにした。`,
+"VGW（仮想プライベートゲートウェイ）|CGW（カスタマーゲートウェイ）":`VPN設定で、AWS側の終端がVGW、オンプレのルーター側を表すのがCGW（相手の公開IPを登録）。両方を定義して初めて2点間にトンネルが張れた。どちら側の話かを取り違えやすい。`,
+"Outposts|Local Zones / Direct Connect":`規制で「データは自社建屋から出すな」と言われた処理だけ、AWSのハードを自社DCに置くOutpostsにした。単に近くで低遅延ならLocal Zones、繋ぐだけならDXで足りる。データを自社施設に留める必要があるかが分かれ目。`,
+"NLB|ALB":`普通のWebアプリはパスやホスト名で振り分けるALBにした。一方、固定IPと超低遅延が要るゲームのTCP/UDP通信はNLBにした。中身を見て振り分けるか、そのまま高速に流すか。`,
+"CloudFront|S3 Transfer Acceleration":`世界中のユーザーに動画を配る下りはCloudFrontでエッジにキャッシュした。逆に海外拠点から本社S3へ大容量を上げる上りが遅い件は、Transfer Accelerationで速くした。配信なのにアップロード高速化を選ぶと的外れになる。`,
+"Local Zones|Wavelength":`その大都市圏のユーザーへ低遅延で届けたい時はLocal Zonesに処理を寄せた。携帯網（5G）の中のユーザーに超低遅延で届ける案件だけ、通信事業者網内のWavelengthを使った。5G網の中かどうかで分かれる。`,
+"Local Zones/Wavelength|CloudFront":`キャッシュできる静的コンテンツを速く配るならCloudFrontで十分だった。ユーザーの近くで「任意の計算やゲームサーバー」を動かす必要が出た時だけ、Local Zones/Wavelengthに寄せた。`,
+"CloudFront Functions|Lambda@Edge":`リクエストヘッダーの書き換えや簡単なリダイレクトは、超軽量・激安のCloudFront Functionsで処理した。外部APIを呼んだり重い加工が要る部分だけLambda@Edgeに任せた。軽い高頻度処理にLambda@Edgeは過剰でコストも高い。`,
+"位置情報（Geolocation）ルーティング|レイテンシールーティング":`ライセンスの都合で「日本からのアクセスは必ず日本のサイトへ」出す必要があり、位置情報ルーティングにした。性能最適化が目的の別サイトは、最も速いリージョンへ送るレイテンシールーティングにした。国で確実に分けるか、速さで分けるか。`,
+"レイテンシールーティング|フェイルオーバールーティング":`平常時に世界中から最寄りリージョンへ振るのはレイテンシールーティング。主系が落ちた時だけ副系へ切り替えるDR用途はフェイルオーバールーティング。普段から両方使うか、片方は待機かで違う。`,
+"Route 53 フェイルオーバー|ALB":`AZをまたいだ振り分けはALBで足りたが、リージョンごと落ちた時に別リージョンへ切り替えるのはALBでは無理で、DNSレベルのRoute 53フェイルオーバーにした。切り替えの範囲がリージョン内かまたぎかで違う。`,
+"GuardDuty|Macie":`不審なAPIや悪性IPとの通信を捕まえるのはGuardDuty（攻撃の話）。一方、S3バケットにうっかり個人情報が入っていないかを調べるのはMacie（中身の話）。狙いが攻撃の検知か、データの中身かで分かれる。`,
+"GuardDuty|Detective":`GuardDutyが「怪しい挙動」を鳴らした後、「誰がどう関わって、どこから始まったか」を時系列で追うのにDetectiveを使った。検知で終わらず、その先の捜査が要る時はDetective。`,
+"Security Hub|GuardDuty / Detective":`GuardDuty・Inspector・Macieの通知がバラバラに来て全体像が見えなかった。Security Hubに集約したら、組織全体のセキュリティ状態と準拠チェックが一画面で俯瞰できた。Hub自身は検知せず束ねる役。`,
+"Firewall Manager|WAF単体":`1つのALBにWAFを付けるだけならWAF単体で済んだ。だがアカウントが何十もあり、新しく作られるリソースにも自動で同じルールを効かせたかったので、Firewall Managerで組織横断に一元適用した。`,
+"マルチリージョンキー|単一リージョンKMSキー":`あるリージョンで暗号化したバックアップを別リージョンでそのまま復号したくて、マルチリージョンキーにした。1リージョン内で完結するなら単一リージョンキーで十分で、跨ぐ時だけ再暗号化の手間が消えるのが効く。`,
+"IAMロール（AssumeRole）|IAMユーザーのアクセスキー":`EC2からS3を読むのに、最初はアクセスキーを環境変数に置いていて漏洩が怖かった。IAMロールをアタッチしたら、期限つきの一時キーが自動発行されキー管理そのものが消えた。長期キーの共有はやめる。`,
+"AssumeRole＋External ID|長期アクセスキー共有":`外部の監視ベンダーに権限を渡すのに、長期キーを共有するのは危険だった。AssumeRole＋External ID（合言葉）にして、なりすましを防ぎつつ必要な権限だけ一時的に渡した。`,
+"リソースベースポリシー|アイデンティティベースポリシー":`別アカウントのロールにS3バケットを直接使わせたい時は、バケット側のリソースベースポリシーでPrincipalを指定した。自アカウント内のユーザーに権限を付けるだけならアイデンティティベースで足りる。クロスアカウントを直接許すかどうか。`,
+"許可境界（permission boundary）|SCP":`開発者に「ロールは作れるが、付けられる権限はここまで」と上限を課すのに許可境界を使った。組織全体でアカウントごと禁止事項を強制する時はSCP。どちらも上限だが、個人エンティティか組織アカウントかで対象が違う。`,
+"SCP|IAMポリシー":`あるOU配下では誰もリージョンXを使えないようにSCPで蓋をした。その中で個々のユーザーに何を許すかはIAMポリシーで付けた。実際に使える権限は「SCPの上限」と「IAMの付与」の重なりだけ。`,
+"IAM Identity Center|Amazon Cognito":`社員が複数のAWSアカウントに一度のログインで入れるようIAM Identity Center（AD連携）を入れた。一方、自社アプリの一般利用者のサインアップ／ログインはCognitoにした。社員か、アプリのエンドユーザーかで別物。`,
+"IAM条件キー（Condition）|セキュリティグループ":`「MFAしている時だけ」「この社内IPからだけ」操作を許すのはIAMの条件キーで表現した。SGはIPとポートの通過可否しか見ないので、MFAや時間帯の条件は書けない。認可の条件かネットワークかで別。`,
+"VPCエンドポイント＋ポリシー限定|パブリック化":`S3の機密データに外から触れないよう、VPCエンドポイント経由＋バケットポリシーで特定VPCだけに絞った。手っ取り早くパブリック化する案も出たが、誰でも読めてしまうので機密では論外だった。経路を絞るのが正解。`,
+"Kinesis Data Streams|SQS":`同じイベントを「リアルタイム検知」と「S3蓄積」の複数の処理で別々に読みたかったのでData Streamsにした（保持期間内で再読みもできる）。1件を1ワーカーが処理して消すだけの単純なジョブ分配ならSQSで十分だった。`,
+"Amazon MSK|Kinesis Data Streams":`オンプレのKafkaで動いていたアプリをコードそのままで移したくてMSKにした。新規でAWS前提・運用を軽くしたいならKinesisだが、既存Kafka資産があるならMSKが楽。`,
+"Redshift|RDS":`日々の注文を処理するトランザクションはRDS（行指向・OLTP）。それを溜めて経営レポートで大量集計する基盤はRedshift（列指向・OLAP）にした。取引処理か大規模分析かでエンジンが逆。`,
+"Redshift Spectrum|Redshiftへの全ロード":`よく使う直近データだけRedshiftに載せ、めったに触らない数年分のコールドデータはS3に置いたままSpectrumで直接クエリした。全部ロードするとストレージ代と手間がかさむので、ロードせず結合できるのが効いた。`,
+"AWS Glue|Lambda":`複数ソースを突き合わせる大規模なETLはSparkベースのGlueで回した。小さな変換やイベント単位の軽い処理はLambdaで足りる。15分を超える重い変換にLambdaは向かない。`,
+"Glue DataBrew|Glue（ETLジョブ）":`データアナリストがコードを書かずに前処理したい部分は、視覚的に操作できるDataBrewにした。エンジニアがPySparkで本格的に組む定期ETLはGlueジョブにした。書く人とコード量で分ける。`,
+"QuickSight|Athena/Redshift":`グラフやダッシュボードで「見せる」のはQuickSight。その裏でSQLを実際に「計算する」のはAthenaやRedshift。QuickSightはこれらをデータソースにするだけで、計算エンジンではない。`,
+"OpenSearch Service|Athena":`障害調査でログを全文検索して素早く絞り込むのはOpenSearch。S3に溜めたデータへ時々SQLでアドホック分析するならAthena。探索的な全文検索か、SQL分析かで分かれる。`,
+"OpenSearch Service|CloudWatch Logs":`ログを集めて基本的なフィルタで見るだけならCloudWatch Logsで足りた。だが大量ログを高度に全文検索し、ダッシュボードやアラートまで作り込む段階でOpenSearchに移した。`,
+"Managed Service for Apache Flink|Athena/Redshift":`流れてくるデータに対して「今この瞬間」の異常をリアルタイム集計するのはManaged Flink。溜めた後にまとめて分析するのはAthena/Redshift。ストリームの継続集計かバッチかで違う。`,
+"Lake Formation|IAM/S3ポリシー個別管理":`部門ごとにS3ポリシーを手で書いていたら、列や行レベルの細かい権限が揃わず破綻しかけた。Lake Formationで一元定義したら、複数の分析サービスに同じ権限が統一適用された。`,
+"Timestream|Redshift":`IoTの計測値を秒単位で取り込む基盤はTimestreamにした。Redshiftは大規模分析向きで、高頻度の時系列取り込みには過剰だった。データが時系列か汎用分析かで選ぶ。`,
+"クロスリージョンリードレプリカ|マルチAZスタンバイ":`AZ障害に耐えるだけならマルチAZスタンバイ（同一リージョン・普段は読めない）で足りた。リージョンごと落ちた時に別リージョンで読み取りも提供しDRにもしたい要件では、クロスリージョンリードレプリカにした。またぐかどうか。`,
+"Aurora Global Database|RDS/AuroraマルチAZ":`同一リージョンのAZ障害対策ならマルチAZで十分だった。リージョン災害に1秒未満の遅延で備え、別リージョンへ高速に昇格したい基幹だけAurora Global Databaseにした。コストが上がるので必要な範囲に絞った。`,
+"DynamoDB Global Tables|Aurora Global Database":`各リージョンのユーザーがそれぞれ書き込む全世界アプリは、全リージョンで書けるDynamoDB Global Tablesにした。書き込みは1リージョンでよく、読みと災害昇格が要るだけならAurora Global Databaseで足りる。`,
+"パイロットライト|バックアップ&リストア":`「半日止まっても許容」の社内系は最安のバックアップ&リストア。だが「DBだけは絶対に失えない」基幹は、コアDBを別リージョンへ常時複製するパイロットライトにした。フル稼働は避けつつDBの損失だけ防ぐ折衷。`,
+"ウォームスタンバイ|マルチサイト アクティブ/アクティブ":`数分での復旧でよいシステムは縮小版を温めるウォームスタンバイにしてコストを抑えた。ダウンタイムゼロが売上に直結する決済だけ、両リージョン常時フル稼働のアクティブ/アクティブにした。RTO要件で掛け金が変わる。`,
+"クロスリージョンレプリケーション（CRR）|バージョニング":`誤削除や上書きから守るだけならバージョニングで世代を残せば足りた。リージョン災害にも備える要件では、別リージョンへ複製するCRRを足した。バージョニングは同一バケット内なのでリージョン障害は守れない。`,
+"AWS Backup|S3クロスリージョンレプリケーション":`S3だけ別リージョンに複製するならCRRで足りた。RDS/EBS/DynamoDB/EFSまで横断して一元バックアップし、別リージョンコピーとロックまでかけたい時はAWS Backupにした。`,
+"Backup Vault Lock|S3 Object Lock":`S3オブジェクトを保持期間中消せなくするのはS3 Object Lock。AWS Backupで取ったバックアップ自体を改ざん・削除不可にするのはBackup Vault Lock。守る対象がS3かバックアップかで道具が違う。`,
+"Object Lock コンプライアンスモード|ガバナンスモード":`運用ミスでの削除を防ぐだけならガバナンスモード（特権者は解除可）で足りた。だがランサムや規制で「ルートでも消せない」必要がある証跡は、コンプライアンスモードにした。解除できる余地を残すかどうか。`,
+"別アカウント保管（隔離）|同一アカウント保管":`本番アカウントにだけバックアップを置いていたら、「侵害されたらバックアップごと消される」と気づいた。別アカウント・別リージョンのVaultへコピーして隔離した。内部不正やランサムでも最後の砦が残る。`,
+"PITR（ポイントインタイムリカバリ）|マルチAZ/リードレプリカ":`誤って大量データを更新した時、複製であるマルチAZやリードレプリカには誤更新もそのまま伝わっていて戻せなかった。PITRで壊れる直前の時点に巻き戻して救った。複製は可用性、巻き戻しはPITR。`,
+"DRS（Elastic Disaster Recovery）|MGN":`継続的に複製して災害時に何度でも起こすDRはDRS。引っ越しが終われば不要になる一度きりの移行はMGN。繰り返し備えるのか、一回で終わるのか。`,
+"CloudTrail|CloudWatch Logs":`「誰がこのIAM設定を変えたか」を追うのはCloudTrail（API監査）。アプリが出すエラーログを集めて監視するのはCloudWatch Logs。AWSへの操作か、アプリの出力かで分かれる。`,
+"CloudTrail|VPCフローログ":`操作した人と内容を知りたいならCloudTrail。どのIPからどのポートへ通信が許可/拒否されたかを知りたいならVPCフローログ。API操作か通信メタデータかで別の証跡。`,
+"X-Ray|CloudWatch / CloudTrail":`「ページが遅い、どの区間で時間を食っているか」を突き止めるのに、サービス間をトレースするX-Rayを使った。CloudWatchは数値監視、CloudTrailはAPI監査で、区間ごとの遅延原因までは見えない。`,
+"Patch Manager|Inspector":`Inspectorが「このEC2に既知の脆弱性がある」と検出した。実際にパッチを当てて直すのはPatch Manager。検出するだけか、適用までやるかで役割が違う。`,
+"Patch Manager|Trusted Advisor":`Trusted Advisorはコストやセキュリティの改善点を指摘するだけだった。パッチ未適用を可視化し実際に当てるのはPatch Manager。助言止まりか実行役か。`,
+"AWS Config（検出）|SSM Automation（修復）":`Configが「このセキュリティグループが基準から外れた」と検出した。それを受けてSSM Automationが自動で設定を戻した。検出と修復をつなげて、逸脱を放置しない仕組みにした。`,
+"Control Tower|Organizations":`アカウントを束ねてSCPをかける土台がOrganizations。その上にログ集約・ガードレール・SSO込みの標準環境を自動構築するのがControl Tower。ゼロから手で組むより、Control Towerで一気に立てた。`,
+"Account Factory|CloudFormation StackSets":`新部門に標準仕様のアカウントを払い出すのはControl TowerのAccount Factory。既存の複数アカウントへ同じテンプレートを配るのはStackSets。アカウント発行かテンプレ配布かで違う。`,
+"Resource Access Manager（RAM）|CloudFormation StackSets":`1つのTransit Gatewayを複数アカウントで共有したい時はRAM（実体は1つ）。各アカウントに同じリソースを複製したい時はStackSets（実体が複数できる）。共有か複製かで分かれる。`,
+"AWS Budgets|Cost Explorer":`予算を決めて超えそうな段階で通知したいのはBudgets（先回り）。先月何にいくらかかったかを掘り下げて分析するのはCost Explorer（事後）。`,
+"Cost Anomaly Detection|CloudWatch請求アラーム":`「合計が一定額を超えたら通知」はCloudWatch請求アラームで単純に組めた。だが普段の傾向から外れた異常な増え方を自動で捕まえたい時は、機械学習のCost Anomaly Detectionにした。`,
+"CloudFormation|手作業/CLI手順書":`手順書を見ながらCLIで環境を作っていたら、人によって差が出て再現できなかった。CloudFormationのテンプレートにしたら、同じ環境を何度でも一発で作れてドリフトも検出できた。`,
+"StackSets|通常のStack":`1つのアカウント内ならStackで足りた。組織の何十アカウント・複数リージョンへ同じ構成を一斉展開・更新する段階でStackSetsにした。`,
+"Service Catalog|広範なIAM権限付与":`現場に広い権限を渡したら、各自バラバラの構成を作ってガバナンスが崩れた。Service Catalogで承認済みの構成だけセルフサービスで作らせるようにしたら、自由度を保ちつつ統制が効いた。`,
+"Session Manager|踏み台（Bastion）/SSH":`SSHポートを開けた踏み台サーバーは攻撃対象で、鍵管理も面倒だった。Session Managerに替えたらポートを開けずIAM認可＋操作ログ付きでシェルに入れた。攻撃面が減るのが効く。`,
+"Amazon MQ|SQS/SNS":`オンプレでActiveMQ/RabbitMQを使うアプリを無改修で移したくてAmazon MQにした。新規でサーバーレスにスケールさせたいならSQS/SNSだが、既存ブローカーの標準プロトコル資産があるならMQ。`,
+"Amazon SES|Amazon SNS":`顧客への請求書メールはSESで送った（到達率・SPF/DKIM・バウンス管理つき）。一方、システム障害をSMSやメールで関係者にfan-outで知らせるのはSNS。本格的なメール配信か、通知かで分かれる。`,
+"EventBridge|Step Functions":`「注文確定」イベントを在庫・通知・分析の各所へ振り分けるのはEventBridge（疎結合のルーティング）。その後の「在庫確保→決済→出荷指示」を順序・リトライ付きで確実に流すのはStep Functions。両方を組み合わせた。`,
+"Step Functions|Lambdaチェーン":`Lambdaが次のLambdaを直接呼ぶ作りにしたら、途中で失敗した時のリトライや状態管理がコードに散らばって追えなくなった。Step Functionsにしたら順序・分岐・リトライが宣言的に書け、どこで止まったか一目で分かった。`,
+"EventBridge Scheduler|EventBridge ルール（イベントバス）":`毎朝9時にバッチを起動するような時刻起動はEventBridge Scheduler。状態変化（S3にファイルが来た等）に反応して動かすのはイベントバスのルール。起動の契機が時刻かイベントか。`,
+"EventBridge Pipes|EventBridge イベントバス（ルール）":`1つのソースから1つのターゲットへ、間でフィルタと変換だけ挟みたい時はPipes（コードレスの点と点）。多数のソース／ターゲットへルールで配るのはイベントバス。1対1か1対多か。`,
+"AppSync（GraphQL）|API Gateway（REST）":`モバイルアプリで複数のデータソースを1回の問い合わせで必要な分だけ取りたくてAppSync（GraphQL）にした。リアルタイム購読も使えた。エンドポイント単位の素直なRESTで足りるならAPI Gateway。`,
+"WebSocket API|REST API（ポーリング）":`チャットの新着をRESTのポーリングで取りに行っていたら、無駄な通信と遅延が増えた。WebSocket APIで双方向の持続接続にしたら、サーバーから即プッシュできた。双方向リアルタイムならWebSocket。`,
+"SNSフィルターポリシー|全配信＋各自破棄":`全サブスクライバーに全メッセージを送って各自で要否を判定していたら、無駄な受信と処理が多かった。SNSのフィルターポリシーで属性ごとに必要なものだけ配ったら、下流が軽くなった。`,
+/*SCN*/};
+DATA.forEach(ch=>{(ch.pairs||[]).forEach(p=>{const k=p.a+'|'+p.b;if(!p.scene&&SCENES[k])p.scene=SCENES[k];});});
+// __RENDER__
+const root=document.getElementById('chapters');
+const hitEl=document.getElementById('hit');
+const noresEl=document.getElementById('nores');
+
+// ---- 設問ロード（V1〜V4を非同期で読み集約）----
+let ALLQ=[],READY=false;
+const SRC={'questions.js':'V1','questions_v2.js':'V2','questions_v3.js':'V3','questions_v4.js':'V4'};
+function srcLabel(q){return SRC[q._src]||'';}
+async function loadQ(){
+  for(const f of Object.keys(SRC)){
+    try{
+      const t=await fetch(f).then(r=>r.text());
+      const arr=new Function(t+'\n;return QUESTIONS;')();
+      arr.forEach(q=>{q._src=f;q._gi=ALLQ.length;ALLQ.push(q);});
+    }catch(e){console.warn('load fail',f,e);}
+  }
+  READY=true;
+  render(document.getElementById('q').value);
+}
+
+// ---- 比較テキストを左右に割る（最初のbスパンで分割）----
+function splitTale(t){
+  const i=t.indexOf('<span class="b">');
+  if(i<0)return [t,''];
+  return [t.slice(0,i).trim(), t.slice(i).trim()];
+}
+// ---- ペアから検索トークンを抽出 ----
+function toks(s){
+  return s.replace(/[（(][^）)]*[)）]/g,'')
+    .split(/[\/／＋\+・,、]|\son\s|\sor\s/i)
+    .map(x=>x.trim()).filter(x=>x.length>=2);
+}
+// ---- 関連問題を上位3件 ----
+function related(p){
+  if(!READY)return [];
+  const ts=toks(p.a).concat(toks(p.b));
+  const sc=[];
+  ALLQ.forEach(q=>{
+    let s=0;
+    (q.cards||[]).forEach(c=>ts.forEach(t=>{if(c.indexOf(t)>=0||t.indexOf(c)>=0)s+=3;}));
+    const txt=(q.scenario||'')+' '+((q.options||[]).join(' '));
+    ts.forEach(t=>{if(txt.indexOf(t)>=0)s+=1;});
+    if(s>0)sc.push({q,s});
+  });
+  sc.sort((a,b)=>b.s-a.s);
+  return sc.slice(0,3).map(x=>x.q);
+}
+
+function render(filter){
+  filter=(filter||'').trim().toLowerCase();
+  root.innerHTML='';let shown=0;
+  DATA.forEach(ch=>{
+    let body='';let any=false;
+    if(ch.pairs) ch.pairs.forEach(p=>{
+      const hay=(p.a+' '+p.b+' '+p.key+' '+p.tale+' '+(p.scene||'')).toLowerCase();
+      if(filter&&hay.indexOf(filter)<0)return;
+      any=true;shown++;
+      const sp=splitTale(p.tale);
+      let rel='';
+      const rq=related(p);
+      if(rq.length){
+        rel='<span class="rellbl">🔗 関連する問題（クリックで開く）</span>';
+        rq.forEach(q=>{
+          const head=(q.scenario||'').replace(/<[^>]+>/g,'').slice(0,30);
+          rel+='<button class="relq" data-qi="'+q._gi+'"><span class="tag">'+srcLabel(q)+'</span>'+head+'…</button>';
+        });
+      }
+      body+='<div class="pair"><table class="cmp">'
+        +'<tr><th class="ca">🔵 '+p.a+'</th><th class="cb">🔴 '+p.b+'</th></tr>'
+        +'<tr><td class="da">'+sp[0]+'</td><td class="db">'+sp[1]+'</td></tr>'
+        +'<tr><td class="keyrow" colspan="2">決め手: '+p.key+'</td></tr>'
+        +(p.scene?'<tr><td class="scenerow" colspan="2"><span class="ttl">📖 こんな場面</span>'+p.scene+'</td></tr>':'')
+        +(rel?'<tr><td class="relrow" colspan="2">'+rel+'</td></tr>':'')
+        +'</table></div>';
+    });
+    if(ch.lookup){
+      let rows='';
+      ch.lookup.forEach(r=>{
+        const hay=(r[0]+' '+r[1]).toLowerCase();
+        if(filter&&hay.indexOf(filter)<0)return;
+        any=true;shown++;
+        rows+='<tr><td class="k">'+r[0]+'</td><td>'+r[1]+'</td></tr>';
+      });
+      if(rows)body+='<table class="lookup"><tr><th>'+(ch.lkhead||'この言葉が出たら')+'</th><th>'+(ch.lkhead2||'これ')+'</th></tr>'+rows+'</table>';
+    }
+    if(ch.notes){
+      ch.notes.forEach(n=>{
+        const hay=(n.h+' '+n.body).toLowerCase();
+        if(filter&&hay.indexOf(filter)<0)return;
+        any=true;shown++;
+        body+='<div class="note-blk"><h3>'+n.h+'</h3><div class="note-body">'+n.body+'</div></div>';
+      });
+    }
+    if(filter&&!any)return;
+    let h='<h2><span class="ico">'+ch.ico+'</span>'+ch.t+'</h2>';
+    if(ch.story&&(!filter))h+='<div class="story">'+ch.story+'</div>';
+    const sec=document.createElement('div');sec.className='chapter';
+    sec.innerHTML=h+body;root.appendChild(sec);
+  });
+  if(filter){hitEl.textContent=shown+' 件ヒット';noresEl.style.display=shown?'none':'block';}
+  else{hitEl.textContent='';noresEl.style.display='none';}
+}
+
+// ---- モーダル（関連問題を開く／戻る）----
+function openModal(gi){
+  const q=ALLQ[gi];if(!q)return;
+  const ans=Array.isArray(q.answer)?q.answer:[q.answer];
+  let opts='';
+  (q.options||[]).forEach((o,i)=>{opts+='<div class="mopt'+(ans.indexOf(i)>=0?' ok':'')+'">'+String.fromCharCode(65+i)+'. '+o+'</div>';});
+  document.getElementById('mbox').innerHTML=
+    '<button class="mclose">×</button>'
+    +'<div class="mcat">'+srcLabel(q)+' ／ '+(q.cat||'')+'</div>'
+    +'<div class="msc">'+(q.scenario||'')+'</div>'
+    +'<div class="mask">'+(q.ask||'')+'</div>'+opts
+    +'<div class="mexp"><b>決め手</b>：'+(q.keypoint||'')+'<br><br>'+(q.explain||'')
+    +(q.elim?'<br><br><b>消去法</b>：'+q.elim:'')+'</div>'
+    +'<button class="mback">← 山あて帳に戻る</button>';
+  document.getElementById('modal').classList.add('on');
+}
+function closeModal(){document.getElementById('modal').classList.remove('on');}
+root.addEventListener('click',e=>{const b=e.target.closest('.relq');if(b)openModal(+b.dataset.qi);});
+document.getElementById('modal').addEventListener('click',e=>{
+  if(e.target.id==='modal'||e.target.classList.contains('mclose')||e.target.classList.contains('mback'))closeModal();
+});
+
+render('');
+document.getElementById('q').addEventListener('input',e=>render(e.target.value));
+loadQ();
+</script>
+</body>
+</html>
