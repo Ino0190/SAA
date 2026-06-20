@@ -378,6 +378,7 @@ function renderHome(){
   const know=CARDS.filter(c=>judged[c.name]==='know').length;
   $('hstat').textContent='覚えた '+know+'/'+CARDS.length;
   $('bar').style.width=(CARDS.length?know/CARDS.length*100:0)+'%';
+  refreshWrongCard();
 }
 
 // ===== 開始 =====
@@ -480,6 +481,60 @@ function prev(){ if(idx>0){idx--;renderCard();} }
 function resetJudge(){
   if(!confirm('「覚えた／まだ」の記録を全部消します。よろしいですか？')) return;
   judged={}; saveJudge(); renderHome(); showToast('仕分けをリセットしました');
+}
+
+// ===== ドリルで間違えた所を優先 =====
+// ドリル(index.html)の進捗 saa_drill_progress_v1_<bank> の wrong[id]=true を全バンク集計し、
+// 間違えた問題の cards(キーサービス) に対応する暗記帳カードを優先デッキにする。
+const DRILL_BANKS={main:'questions.js',v2:'questions_v2.js',v3:'questions_v3.js',v4:'questions_v4.js'};
+const _qcache={};
+async function loadBankQ(file){
+  if(_qcache[file])return _qcache[file];
+  try{const t=await fetch(file).then(r=>r.text());_qcache[file]=new Function(t+'\n;return QUESTIONS;')();}
+  catch(e){_qcache[file]=[];}
+  return _qcache[file];
+}
+async function loadWrongServices(){
+  const weights={};
+  for(const bank of Object.keys(DRILL_BANKS)){
+    let prog;
+    try{prog=JSON.parse(localStorage.getItem('saa_drill_progress_v1_'+bank));}catch(e){prog=null;}
+    if(!prog||!prog.wrong)continue;
+    const ids=Object.keys(prog.wrong).filter(id=>prog.wrong[id]);
+    if(!ids.length)continue;
+    const qs=await loadBankQ(DRILL_BANKS[bank]);
+    const byId={};qs.forEach(q=>byId[q.id]=q);
+    ids.forEach(id=>{
+      const q=byId[id];if(!q)return;
+      const w=(prog.wrongCount&&prog.wrongCount[id])||1;
+      (q.cards||[]).forEach(c=>{weights[c]=(weights[c]||0)+w;});
+    });
+  }
+  return weights;
+}
+function matchCard(svc){
+  let c=CARDS.find(x=>x.name===svc||(x.alias||[]).includes(svc));
+  if(c)return c;
+  return CARDS.find(x=>svc.indexOf(x.name)>=0||x.name.indexOf(svc)>=0)||null;
+}
+function wrongDeckFrom(weights){
+  const ranked=Object.entries(weights).sort((a,b)=>b[1]-a[1]);
+  const seen=new Set();const dk=[];
+  ranked.forEach(([svc])=>{const c=matchCard(svc);if(c&&!seen.has(c.name)){seen.add(c.name);dk.push(c);}});
+  return dk;
+}
+async function startWrong(){
+  const dk=wrongDeckFrom(await loadWrongServices());
+  if(!dk.length){showToast('ドリルの間違い記録が見つかりません');return;}
+  deck=dk;idx=0;enterStudy();
+}
+function refreshWrongCard(){
+  const mc=document.getElementById('mcWrong');if(!mc)return;
+  loadWrongServices().then(w=>{
+    const n=wrongDeckFrom(w).length;
+    if(n>0){mc.style.display='';document.getElementById('cntWrong').textContent=n+'種類の用語が復習対象';}
+    else{mc.style.display='none';}
+  });
 }
 
 // ===== AIにきく（プロンプトをコピー） =====
