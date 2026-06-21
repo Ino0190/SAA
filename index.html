@@ -41,6 +41,20 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .catchip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:7px 14px;font-size:14px;cursor:pointer}
 .catchip:active{background:var(--card2)}
 
+/* テーマ別グラフ */
+.themetabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.ttab{font-size:14px;padding:7px 14px;border-radius:18px;border:1px solid var(--line);background:var(--card);color:var(--sub);cursor:pointer;font-family:inherit;font-weight:700}
+.ttab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tbars{display:flex;flex-direction:column;gap:9px}
+.tbar{cursor:pointer}
+.tbar-l{font-size:14px;margin-bottom:3px}
+.tbar-n{color:var(--sub);font-size:12px;margin-left:4px}
+.tbar-track{position:relative;height:22px;background:var(--card);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.tbar-fill{height:100%;border-radius:6px 0 0 6px;transition:width .3s}
+.tbar-v{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:var(--text)}
+.tbar:active .tbar-track{outline:2px solid var(--accent)}
+.themehint{font-size:12px;color:var(--sub);margin-top:8px}
+
 /* 問題 */
 .qmeta{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:10px}
 .qcat{color:var(--blue);font-weight:700}
@@ -241,8 +255,8 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
     <div class="cnt">セキュア20問/回復性17問/高性能15問/コスト13問</div>
   </div>
 
-  <h3 style="margin:22px 0 4px;font-size:16px;color:var(--sub)">テーマ別</h3>
-  <div class="catgrid" id="catGrid"></div>
+  <h3 style="margin:22px 0 4px;font-size:16px;color:var(--sub)">テーマ別の正答率</h3>
+  <div id="themeWrap"></div>
 
   <div style="margin-top:24px;text-align:center">
     <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px" onclick="copyWeakness()">🤖 弱点をAIに相談（コピー）</button>
@@ -317,7 +331,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 <div class="jmask" id="jmask" onclick="if(event.target===this)closeJumon()">
   <div class="jcard">
     <div class="jtitle">📜 ふっかつのじゅもん</div>
-    <p class="jlead">PCとスマホで進捗（学習済み・間違えた回数）を引き継げる。<br>片方で「じゅもんを書き写す」→もう片方で貼り付けて読み込むと、両方の記録が合算される。</p>
+    <p class="jlead">PCとスマホで進捗（学習済み・間違えた回数）を引き継げる。<br><b>A〜D 全セットまとめて</b>持ち運べます。片方で「じゅもんを書き写す」→もう片方で貼り付けて読み込むと、各セットごとに記録が合算されます。</p>
 
     <div class="jsec">
       <div class="jsech">① いまの進捗を じゅもんにする（書き写す側）</div>
@@ -411,21 +425,9 @@ function renderHome(){
   if(cu)cu.textContent=unseen?`残り${unseen}問`:'全部やりました🎉';
   document.getElementById('hStat').textContent=`学習済 ${seen}/${QUESTIONS.length}`;
   document.getElementById('hBar').style.width=(seen/QUESTIONS.length*100)+'%';
-  const cg=document.getElementById('catGrid');cg.innerHTML='';
-  categories().forEach(c=>{
-    const qs=QUESTIONS.filter(q=>q.cat===c);
-    const n=qs.length;
-    const seenQs=qs.filter(q=>progress.seen[q.id]);
-    const correct=seenQs.filter(q=>!progress.wrong[q.id]).length;
-    const rate=seenQs.length?Math.round(correct/seenQs.length*100):null;
-    let col='#9a948a',label='未着手';
-    if(rate!==null){label=rate+'%';col=rate<60?'#b01212':(rate<80?'#ba8425':'#2f7d32');}
-    const chip=document.createElement('div');chip.className='catchip';
-    chip.innerHTML=`${c} <span class="n">(${n})</span> <span style="color:${col};font-weight:700;font-size:13px;margin-left:4px">${label}</span>`;
-    chip.title=seenQs.length?`${c}：${seenQs.length}問中${correct}問 正解`:`${c}：まだ解いていません`;
-    chip.onclick=()=>startMode('cat',c);
-    cg.appendChild(chip);
-  });
+  if(!themeTab)themeTab=currentBank();
+  loadAllBanks(()=>renderThemeGraph());
+  renderThemeGraph();
 }
 
 function startMode(mode,cat){
@@ -928,46 +930,121 @@ function reviewClear(){
 }
 
 /* ===== 弱点をAIに相談するプロンプト生成 ===== */
+// 全バンクの問題を一度だけfetch+評価してキャッシュ
+let ALLBANKS=null,ALLREADY=false,ALLLOADING=false;const ALLCBS=[];
+function loadAllBanks(cb){
+  if(ALLREADY){cb&&cb();return;}
+  if(cb)ALLCBS.push(cb);
+  if(ALLLOADING)return;
+  ALLLOADING=true;ALLBANKS={};
+  const keys=Object.keys(BANKS);let pend=keys.length;
+  keys.forEach(b=>{
+    fetch(BANKS[b].file).then(r=>r.text()).then(t=>{
+      try{ALLBANKS[b]=(new Function(t+'\n;return QUESTIONS;'))();}catch(e){ALLBANKS[b]=[];}
+    }).catch(()=>{ALLBANKS[b]=[];}).then(()=>{
+      if(--pend===0){ALLREADY=true;ALLLOADING=false;ALLCBS.splice(0).forEach(f=>f());}
+    });
+  });
+}
+function bankProgFor(b){return b===currentBank()?progress:readBankProg(b);}
 function buildWeaknessPrompt(){
-  const bank=(typeof BANKS!=='undefined'&&BANKS[currentBank()])?BANKS[currentBank()]:null;
-  const total=QUESTIONS.length;
-  const seen=QUESTIONS.filter(q=>progress.seen[q.id]).length;
-  const seenCorrect=QUESTIONS.filter(q=>progress.seen[q.id]&&!progress.wrong[q.id]).length;
+  // 全セット(A〜D)横断
+  let total=0,seen=0,seenCorrect=0;
+  const cats={};const wrongAll=[];
+  Object.keys(BANKS).forEach(b=>{
+    const arr=ALLBANKS[b]||[];const pr=bankProgFor(b);const label=(BANKS[b].label||b).split('・')[0];
+    arr.forEach(q=>{
+      total++;
+      const isSeen=pr.seen&&pr.seen[q.id];
+      const isWrong=pr.wrong&&pr.wrong[q.id];
+      cats[q.cat]=cats[q.cat]||{n:0,seen:0,cor:0};cats[q.cat].n++;
+      if(isSeen){seen++;cats[q.cat].seen++;if(!isWrong)seenCorrect++,cats[q.cat].cor++;}
+      if(isWrong){const wc=(pr.wrongCount&&pr.wrongCount[q.id])||0;wrongAll.push({bank:label,q,wc});}
+    });
+  });
   const rate=seen?Math.round(seenCorrect/seen*100):0;
-  const cats=categories().map(c=>{
-    const qs=QUESTIONS.filter(q=>q.cat===c);
-    const sq=qs.filter(q=>progress.seen[q.id]);
-    const cor=sq.filter(q=>!progress.wrong[q.id]).length;
-    return {c,n:qs.length,seen:sq.length,cor,rate:sq.length?Math.round(cor/sq.length*100):null};
-  }).sort((a,b)=>{if(a.rate===null)return 1;if(b.rate===null)return -1;return a.rate-b.rate;});
-  const wrong=QUESTIONS.filter(q=>progress.wrong[q.id])
-    .sort((a,b)=>((progress.wrongCount&&progress.wrongCount[b.id])||0)-((progress.wrongCount&&progress.wrongCount[a.id])||0));
-  let s='あなたはAWS認定ソリューションアーキテクト アソシエイト(SAA-C03)の学習コーチです。以下は私のドリル学習の記録です。(1)特に弱い分野トップ3 (2)間違えた問題に共通するつまずきのパターン (3)次にやるべき具体的な復習アクション を、初心者にもわかる日本語で教えてください。\n\n';
-  s+='【問題セット】'+(bank?bank.label:'')+'\n';
+  const catRows=Object.keys(cats).map(c=>({c,...cats[c],rate:cats[c].seen?Math.round(cats[c].cor/cats[c].seen*100):null}))
+    .sort((a,b)=>{if(a.rate===null)return 1;if(b.rate===null)return -1;return a.rate-b.rate;});
+  wrongAll.sort((a,b)=>b.wc-a.wc);
+  let s='あなたはAWS認定ソリューションアーキテクト アソシエイト(SAA-C03)の学習コーチです。以下は私のドリル学習の記録（全セット横断）です。(1)特に弱い分野トップ3 (2)間違えた問題に共通するつまずきのパターン (3)次にやるべき具体的な復習アクション を、初心者にもわかる日本語で教えてください。\n\n';
   s+='【全体】全'+total+'問中 学習済'+seen+'問 / 解いた問題の正答率(いま正解状態の割合)='+rate+'%\n\n';
-  s+='【分野別の正答率（弱い順）】\n';
-  cats.forEach(x=>{s+='- '+x.c+'：'+(x.rate===null?'未着手':x.seen+'問中'+x.cor+'問正解（'+x.rate+'%）')+'（全'+x.n+'問）\n';});
-  s+='\n【いまつまずいている問題（間違いプール '+wrong.length+'問・間違い回数つき）】\n';
-  wrong.forEach((q,i)=>{
-    const wc=(progress.wrongCount&&progress.wrongCount[q.id])||0;
-    const cards=(q.cards||[]).join('・');
-    s+=(i+1)+'. ['+q.cat+']'+(wc>=2?' ✕'+wc+'回':'')+' 問われたこと: '+stripTags(q.ask||'')+' / 決め手: '+stripTags(q.keypoint||'')+(cards?' / 関連: '+cards:'')+'\n';
+  s+='【分野別の正答率（弱い順・全セット合算）】\n';
+  catRows.forEach(x=>{s+='- '+x.c+'：'+(x.rate===null?'未着手':x.seen+'問中'+x.cor+'問正解（'+x.rate+'%）')+'（全'+x.n+'問）\n';});
+  s+='\n【いまつまずいている問題（間違いプール '+wrongAll.length+'問・間違い回数つき）】\n';
+  wrongAll.forEach((w,i)=>{
+    const q=w.q;const cards=(q.cards||[]).join('・');
+    s+=(i+1)+'. ['+w.bank+'/'+q.cat+']'+(w.wc>=2?' ✕'+w.wc+'回':'')+' 問われたこと: '+stripTags(q.ask||'')+' / 決め手: '+stripTags(q.keypoint||'')+(cards?' / 関連: '+cards:'')+'\n';
   });
   return s;
 }
 function copyWeakness(){
-  if(!Object.keys(progress.seen).length){showToast('先に問題を解いてください');return;}
-  const text=buildWeaknessPrompt();
-  const done=()=>showToast('📋 弱点相談プロンプトをコピー。Claude等に貼り付けてください');
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(done).catch(()=>weakFallback(text,done));
-  }else weakFallback(text,done);
+  showToast('⏳ 全セットを集計中…');
+  loadAllBanks(()=>{
+    const text=buildWeaknessPrompt();
+    const done=()=>showToast('📋 弱点相談プロンプトをコピー。Claude等に貼り付けてください');
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(()=>weakFallback(text,done));
+    }else weakFallback(text,done);
+  });
 }
 function weakFallback(text,done){
   const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
   document.body.appendChild(ta);ta.focus();ta.select();
   try{document.execCommand('copy');done&&done();}catch(e){showToast('コピーできませんでした。長押しで選択してください');}
   document.body.removeChild(ta);
+}
+
+/* ===== テーマ別 正答率グラフ（V1〜V4タブ＋全体） ===== */
+let themeTab=null;
+function computeThemeRows(sel){
+  const cats={};
+  const add=(arr,pr)=>{(arr||[]).forEach(q=>{cats[q.cat]=cats[q.cat]||{n:0,seen:0,cor:0};cats[q.cat].n++;
+    if(pr.seen&&pr.seen[q.id]){cats[q.cat].seen++;if(!(pr.wrong&&pr.wrong[q.id]))cats[q.cat].cor++;}});};
+  if(sel==='__all'){Object.keys(BANKS).forEach(b=>add(ALLBANKS[b],bankProgFor(b)));}
+  else{add(sel===currentBank()?QUESTIONS:(ALLBANKS&&ALLBANKS[sel]),bankProgFor(sel));}
+  return Object.keys(cats).map(c=>({c,n:cats[c].n,seen:cats[c].seen,cor:cats[c].cor,
+    rate:cats[c].seen?Math.round(cats[c].cor/cats[c].seen*100):null}))
+    .sort((a,b)=>{if(a.rate===null)return 1;if(b.rate===null)return -1;return a.rate-b.rate;});
+}
+function renderThemeGraph(){
+  const host=document.getElementById('themeWrap');if(!host)return;
+  const sel=themeTab||currentBank();
+  let tabs='<div class="themetabs">'+Object.keys(BANKS).map(b=>
+    `<button class="ttab${sel===b?' on':''}" data-tab="${b}">${(BANKS[b].label||b).split('・')[0]}</button>`).join('')
+    +`<button class="ttab${sel==='__all'?' on':''}" data-tab="__all">全体</button></div>`;
+  if(sel!=='__all'&&sel!==currentBank()&&!ALLREADY){
+    host.innerHTML=tabs+'<div style="color:var(--sub);font-size:14px;padding:10px 2px">読み込み中…</div>';
+    loadAllBanks(()=>renderThemeGraph());return;
+  }
+  if(sel==='__all'&&!ALLREADY){
+    host.innerHTML=tabs+'<div style="color:var(--sub);font-size:14px;padding:10px 2px">読み込み中…</div>';
+    loadAllBanks(()=>renderThemeGraph());return;
+  }
+  const rows=computeThemeRows(sel);
+  const bars=rows.map(r=>{
+    const col=r.rate===null?'#9a948a':(r.rate<60?'#e74c3c':(r.rate<80?'#e0a52e':'#2ecc71'));
+    const w=r.rate===null?0:r.rate;
+    const val=r.rate===null?'未':r.rate+'%';
+    return `<div class="tbar" data-cat="${r.c}" data-bank="${sel}">`
+      +`<div class="tbar-l">${r.c} <span class="tbar-n">${r.seen}/${r.n}</span></div>`
+      +`<div class="tbar-track"><div class="tbar-fill" style="width:${w}%;background:${col}"></div>`
+      +`<span class="tbar-v">${val}</span></div></div>`;
+  }).join('');
+  const hint=sel==='__all'
+    ?'全セット合算。バーをタップでそのセットへ切替を促します。'
+    :'バーをタップでその分野を解く（別セット選択中はまず切替）。';
+  host.innerHTML=tabs+'<div class="tbars">'+bars+'</div><div class="themehint">'+hint+'</div>';
+}
+function themeWrapClick(e){
+  const tb=e.target.closest('.ttab');
+  if(tb){themeTab=tb.dataset.tab;renderThemeGraph();return;}
+  const bar=e.target.closest('.tbar');
+  if(bar){
+    const c=bar.dataset.cat,bank=bar.dataset.bank;
+    if(bank==='__all'){showToast('セット(A〜D)のタブを選んでからタップしてください');return;}
+    if(bank===currentBank()){startMode('cat',c);}
+    else if(confirm((BANKS[bank].label||bank)+' に切り替えますか？（切替後にテーマをタップで開始）')){setBank(bank);}
+  }
 }
 
 /* ===== ふっかつのじゅもん（進捗の端末間引き継ぎ・案B フル） ===== */
@@ -994,16 +1071,39 @@ function decodeJumon(str){
   return JSON.parse(json);
 }
 
+function bankLSKey(b){return 'saa_drill_progress_v1_'+b;}
+function readBankProg(b){
+  try{const p=JSON.parse(localStorage.getItem(bankLSKey(b)))||{};
+    p.seen=p.seen||{};p.wrong=p.wrong||{};p.wrongCount=p.wrongCount||{};p.correctCount=p.correctCount||{};
+    return p;}catch(e){return{seen:{},wrong:{},wrongCount:{},correctCount:{}};}
+}
+function mergeProg(cur,inc){
+  cur=cur||{};inc=inc||{};
+  const merged={seen:{},wrong:{},wrongCount:{},correctCount:{}};
+  const ids=new Set([].concat(
+    Object.keys(cur.seen||{}),Object.keys(inc.seen||{}),
+    Object.keys(cur.wrong||{}),Object.keys(inc.wrong||{}),
+    Object.keys(cur.wrongCount||{}),Object.keys(inc.wrongCount||{}),
+    Object.keys(cur.correctCount||{}),Object.keys(inc.correctCount||{})
+  ));
+  ids.forEach(id=>{
+    if((cur.seen&&cur.seen[id])||(inc.seen&&inc.seen[id]))merged.seen[id]=true;
+    if((cur.wrong&&cur.wrong[id])||(inc.wrong&&inc.wrong[id]))merged.wrong[id]=true;
+    const wc=Math.max((cur.wrongCount&&cur.wrongCount[id])||0,(inc.wrongCount&&inc.wrongCount[id])||0);if(wc)merged.wrongCount[id]=wc;
+    const cc=Math.max((cur.correctCount&&cur.correctCount[id])||0,(inc.correctCount&&inc.correctCount[id])||0);if(cc)merged.correctCount[id]=cc;
+  });
+  return merged;
+}
 function genJumon(){
-  // 持ち運ぶのは進捗4種だけ（弱点データも全部）
-  const payload={
-    seen:progress.seen||{},
-    wrong:progress.wrong||{},
-    wrongCount:progress.wrongCount||{},
-    correctCount:progress.correctCount||{}
-  };
-  document.getElementById('jOut').value=encodeJumon(payload);
-  showToast('📜 じゅもんを出しました。コピーして もう片方の端末へ');
+  // 全問題セット（A〜D）の進捗をまとめて1つのじゅもんにする
+  const banks={};
+  Object.keys(BANKS).forEach(b=>{
+    banks[b]=(b===currentBank())
+      ?{seen:progress.seen||{},wrong:progress.wrong||{},wrongCount:progress.wrongCount||{},correctCount:progress.correctCount||{}}
+      :readBankProg(b);
+  });
+  document.getElementById('jOut').value=encodeJumon({v:2,banks:banks});
+  showToast('📜 全セット分のじゅもんを出しました。コピーしてもう片方の端末へ');
 }
 
 function copyJumon(){
@@ -1026,35 +1126,30 @@ function applyJumon(){
   if(!v.trim()){showToast('じゅもんを貼り付けてください');return;}
   let data;
   try{data=decodeJumon(v);}catch(e){alert('じゅもんが ちがうようです。コピーミスや欠けがないか確認してください。');return;}
-  if(!data||typeof data!=='object'||!data.seen){alert('じゅもんの中身が読み取れませんでした。');return;}
-  // マージ（合算）＝過去の履歴を消さずに足し合わせる
-  const cur={
-    seen:progress.seen||{},wrong:progress.wrong||{},
-    wrongCount:progress.wrongCount||{},correctCount:progress.correctCount||{}
-  };
-  const inc=data;
-  const merged={seen:{},wrong:{},wrongCount:{},correctCount:{}};
-  const allIds=new Set([
-    ...Object.keys(cur.seen),...Object.keys(inc.seen||{}),
-    ...Object.keys(cur.wrong),...Object.keys(inc.wrong||{}),
-    ...Object.keys(cur.wrongCount),...Object.keys(inc.wrongCount||{}),
-    ...Object.keys(cur.correctCount),...Object.keys(inc.correctCount||{})
-  ]);
-  allIds.forEach(id=>{
-    // seen: どちらかが見ていればtrue
-    if(cur.seen[id]||(inc.seen&&inc.seen[id]))merged.seen[id]=true;
-    // wrong: どちらかで「間違い中」ならtrue（安全側で復習に残す）
-    if(cur.wrong[id]||(inc.wrong&&inc.wrong[id]))merged.wrong[id]=true;
-    // 回数: 大きい方を採用（同じじゅもんの二度読みで二重加算しない）
-    const wc=Math.max(cur.wrongCount[id]||0,(inc.wrongCount&&inc.wrongCount[id])||0);
-    if(wc)merged.wrongCount[id]=wc;
-    const cc=Math.max(cur.correctCount[id]||0,(inc.correctCount&&inc.correctCount[id])||0);
-    if(cc)merged.correctCount[id]=cc;
-  });
-  progress=merged;
-  saveProgress();renderHome();
-  closeJumon();
-  showToast('✨ じゅもんを合算しました（履歴は消えません）');
+  if(!data||typeof data!=='object'){alert('じゅもんの中身が読み取れませんでした。');return;}
+  // 全バンク版（v2）：各セットの進捗をそれぞれのlocalStorageへ合算
+  if(data.banks&&typeof data.banks==='object'){
+    let touched=0;
+    Object.keys(data.banks).forEach(b=>{
+      const inc=data.banks[b];if(!inc)return;
+      const cur=(b===currentBank())?progress:readBankProg(b);
+      const merged=mergeProg(cur,inc);
+      localStorage.setItem(bankLSKey(b),JSON.stringify(merged));
+      if(b===currentBank())progress=merged;
+      touched++;
+    });
+    saveProgress();renderHome();closeJumon();
+    showToast('✨ '+touched+'セット分のじゅもんを合算しました（履歴は消えません）');
+    return;
+  }
+  // 旧・単一バンク版：今選んでいるセットに合算
+  if(data.seen){
+    progress=mergeProg(progress,data);
+    saveProgress();renderHome();closeJumon();
+    showToast('✨ じゅもんを合算しました（このセットに反映・履歴は消えません）');
+    return;
+  }
+  alert('じゅもんの中身が読み取れませんでした。');
 }
 function show(id){[...document.querySelectorAll('.screen')].forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
 
@@ -1070,6 +1165,7 @@ function renderBankToggle(){
 }
 function boot(){
   renderBankToggle();
+  const tw=document.getElementById('themeWrap');if(tw&&!tw._wired){tw._wired=1;tw.addEventListener('click',themeWrapClick);}
   renderHome();
 }
 </script>
