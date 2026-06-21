@@ -680,10 +680,10 @@ const QUESTIONS = [
   scenario:"ある企業のセキュリティチームが、AWSアカウント内で「誰が、いつ、どのAPI操作を実行したか」を継続的に記録し、セキュリティ監査に利用する必要があります。具体的には、IAMポリシーの変更、セキュリティグループの変更、S3バケットポリシーの変更など、すべてのAWS API呼び出しをログとして保持する要件があります。",
   ask:'これらの要件を満たすAWSサービスはどれですか。',
   options:[
-    "Amazon CloudWatch（メトリクスとアラームによる性能監視）",
-    "VPC フローログ（ネットワーク通信の記録）",
-    "AWS Config（リソース構成変更の記録）",
-    "AWS CloudTrail（API呼び出しの証跡記録）"
+    "Amazon CloudWatch",
+    "VPC フローログ",
+    "AWS Config",
+    "AWS CloudTrail"
   ],
   answer:3,
   keypoint:'キーワードは「誰が・いつ・どのAPI操作をしたか」「操作の証跡」「操作者と時刻を特定」。性能監視(CloudWatch)でなく操作の監査ログの話。',
@@ -1719,10 +1719,10 @@ QUESTIONS.push(
   scenario:"ある企業が、AWSアカウント内のセキュリティ脅威を継続的に監視する必要があります。不正なAPI呼び出し、悪意のあるIPアドレスからの通信、IAM認証情報の不正使用などの脅威を自動的に検出し、重大度に応じてアラートを生成する必要があります。ソリューションはフルマネージドで、カスタムルールの作成やログの手動分析は不要です。",
   ask:'これらの要件を満たすAWSサービスはどれですか。',
   options:[
-    "Amazon CloudWatch（メトリクスの監視とアラーム）",
-    "AWS WAF（アプリ層の不正リクエスト防御）",
-    "Amazon GuardDuty（脅威の継続検知）",
-    "Amazon Inspector（脆弱性スキャン）"
+    "Amazon CloudWatch",
+    "AWS WAF",
+    "Amazon GuardDuty",
+    "Amazon Inspector"
   ],
   answer:2,
   keypoint:'キーワードは「脅威・不審なAPIコール・既知の悪意あるIPとの通信・侵害の兆候を継続検知」「エージェント不要」「ログ収集や分析ルールを自分で書かない」「マネージド」。脅威検知サービスの話。',
@@ -1743,10 +1743,10 @@ QUESTIONS.push(
   scenario:"ある企業が、多数のAmazon S3バケットに大量の業務ファイルを保存しています。コンプライアンス要件として、S3バケット内にマイナンバー、クレジットカード番号、パスポート番号などの個人識別情報（PII）が含まれていないかを自動的にスキャンし、検出した場合はアラートを生成する必要があります。ソリューションはマネージドで、検出パターンのカスタム定義は不要です。",
   ask:'これらの要件を満たすAWSサービスはどれですか。',
   options:[
-    "Amazon GuardDuty（脅威の検知）",
-    "Amazon Inspector（脆弱性スキャン）",
-    "S3 バケットポリシー（アクセス制御）",
-    "Amazon Macie（機密データの検出・分類）"
+    "Amazon GuardDuty",
+    "Amazon Inspector",
+    "S3 バケットポリシー",
+    "Amazon Macie"
   ],
   answer:3,
   keypoint:'キーワードは「S3の中身」「個人情報・クレジットカード番号などの機密データを発見」「種類と場所を可視化」「自動スキャン」。S3に特化したデータ発見・分類サービスの話。',
@@ -1866,10 +1866,10 @@ QUESTIONS.push(
   scenario:"ある企業が、多数のAmazon EC2インスタンスおよびAmazon ECRのコンテナイメージを運用しています。セキュリティ部門は、稼働中のEC2およびコンテナイメージに既知の脆弱性（CVE）を持つOSパッケージやライブラリが含まれていないかを継続的にスキャンし、検出結果を重大度別にレポートする必要があります。スキャンはマネージドで自動的に実行される必要があります。",
   ask:'これらの要件を満たすAWSサービスはどれですか。',
   options:[
-    "Amazon GuardDuty（脅威の検知）",
-    "Amazon Macie（S3の機密データ検出）",
-    "AWS Systems Manager Patch Manager（パッチ適用と管理）",
-    "Amazon Inspector（EC2・コンテナのCVE脆弱性スキャン）"
+    "Amazon GuardDuty",
+    "Amazon Macie",
+    "AWS Systems Manager Patch Manager",
+    "Amazon Inspector"
   ],
   answer:3,
   keypoint:'キーワードは「EC2・コンテナイメージ」「既知の脆弱性(CVE)を継続スキャン」「危険度つきで可視化」「手動でツールを入れて回らない」「マネージド」。脆弱性評価サービスの話。',
@@ -1922,10 +1922,10 @@ QUESTIONS.push(
   scenario:"ある企業が、多数のAmazon EC2インスタンスを運用しています。コスト管理チームは、各インスタンスのCPU、メモリ、ネットワークの実際の使用率を分析し、オーバープロビジョニングされているインスタンスを特定して適正なインスタンスタイプを推奨するサービスを必要としています。推奨はML分析に基づき、自動的に生成される必要があります。",
   ask:'これらの要件を満たすAWSサービスはどれですか。',
   options:[
-    "AWS Trusted Advisor（コスト最適化チェック）",
-    "AWS Compute Optimizer（実測ベースの最適サイズ推奨）",
-    "Amazon CloudWatch（メトリクスの監視）",
-    "AWS Cost Explorer（コストの可視化・分析）"
+    "AWS Trusted Advisor",
+    "AWS Compute Optimizer",
+    "Amazon CloudWatch",
+    "AWS Cost Explorer"
   ],
   answer:1,
   keypoint:'キーワードは「実際の使用状況(CPU/メモリ/ネットワーク)を分析」「過剰なサイズを発見」「最適なタイプ・サイズを推奨」「実測ベースで自動」。リソース最適化の推奨サービスの話。',

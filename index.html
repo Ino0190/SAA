@@ -49,11 +49,15 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .tbar{cursor:pointer}
 .tbar-l{font-size:14px;margin-bottom:3px}
 .tbar-n{color:var(--sub);font-size:12px;margin-left:4px}
-.tbar-track{position:relative;height:22px;background:var(--card);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.tbar-track{position:relative;height:22px;background:var(--card);border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex}
 .tbar-fill{height:100%;border-radius:6px 0 0 6px;transition:width .3s}
+.tseg{height:100%;transition:width .3s}
 .tbar-v{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:var(--text)}
 .tbar:active .tbar-track{outline:2px solid var(--accent)}
 .themehint{font-size:12px;color:var(--sub);margin-top:8px}
+.tlegend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin:2px 0 10px}
+.tlegend span{display:flex;align-items:center;gap:4px}
+.tlegend i{width:12px;height:12px;border-radius:3px;display:inline-block}
 
 /* 問題 */
 .qmeta{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:10px}
@@ -893,7 +897,9 @@ function buildExpReadonly(q){
   let more=q.deep?'<button class="moreBtn" id="moreBtn" onclick="toggleDeep()">🔍 もっと詳しく（なぜ？）</button><div class="deep" id="deepBox">'+q.deep+'</div>':'';
   let patternLink=q.pattern?'<a class="patternBtn" href="patterns.html#'+q.pattern+'" target="_blank" rel="noopener">🗺️ この構成をアーキ図で見る</a>':'';
   const wc=(progress.wrongCount&&progress.wrongCount[q.id])||0;
-  const wcBadge=wc>=2?`<div class="verdict ng">✕ これまで${wc}回 間違えた</div>`:'';
+  let wcBadge='';
+  if(wc>0)wcBadge='<div class="verdict ng">✕ 間違えた'+(wc>=2?'（'+wc+'回）':'')+'</div>';
+  else if(progress.unsure&&progress.unsure[q.id])wcBadge='<div class="verdict" style="background:#e0a52e;color:#fff">🤔 正解したが自信なし／AIに相談</div>';
   return wcBadge+ansFull
     +`<div class="h">本当に聞かれていたこと</div>${q.keypoint}`
     +`<div class="h">なぜこれが正解か</div>${q.explain}`
@@ -965,16 +971,18 @@ function buildWeaknessPrompt(){
   const rate=seen?Math.round(seenCorrect/seen*100):0;
   const catRows=Object.keys(cats).map(c=>({c,...cats[c],rate:cats[c].seen?Math.round(cats[c].cor/cats[c].seen*100):null}))
     .sort((a,b)=>{if(a.rate===null)return 1;if(b.rate===null)return -1;return a.rate-b.rate;});
-  wrongAll.sort((a,b)=>b.wc-a.wc);
-  let s='あなたはAWS認定ソリューションアーキテクト アソシエイト(SAA-C03)の学習コーチです。以下は私のドリル学習の記録（全セット横断）です。(1)特に弱い分野トップ3 (2)間違えた問題に共通するつまずきのパターン (3)次にやるべき具体的な復習アクション を、初心者にもわかる日本語で教えてください。\n\n';
+  const mistakes=wrongAll.filter(w=>w.wc>0).sort((a,b)=>b.wc-a.wc);
+  const unsures=wrongAll.filter(w=>w.wc===0);
+  let s='あなたはAWS認定ソリューションアーキテクト アソシエイト(SAA-C03)の学習コーチです。以下は私のドリル学習の記録（全セット横断）です。(1)特に弱い分野トップ3 (2)間違えた問題に共通するつまずきのパターン (3)次にやるべき具体的な復習アクション を、初心者にもわかる日本語で教えてください。なお問題は「実際に間違えた」ものと「正解したが自信がなかった/AIに相談した」ものを分けてあります。\n\n';
   s+='【全体】全'+total+'問中 学習済'+seen+'問 / 解いた問題の正答率(いま正解状態の割合)='+rate+'%\n\n';
   s+='【分野別の正答率（弱い順・全セット合算）】\n';
   catRows.forEach(x=>{s+='- '+x.c+'：'+(x.rate===null?'未着手':x.seen+'問中'+x.cor+'問正解（'+x.rate+'%）')+'（全'+x.n+'問）\n';});
-  s+='\n【いまつまずいている問題（間違いプール '+wrongAll.length+'問・間違い回数つき）】\n';
-  wrongAll.forEach((w,i)=>{
-    const q=w.q;const cards=(q.cards||[]).join('・');
-    s+=(i+1)+'. ['+w.bank+'/'+q.cat+']'+(w.wc>=2?' ✕'+w.wc+'回':'')+' 問われたこと: '+stripTags(q.ask||'')+' / 決め手: '+stripTags(q.keypoint||'')+(cards?' / 関連: '+cards:'')+'\n';
-  });
+  const fmt=(w,i)=>{const q=w.q;const cards=(q.cards||[]).join('・');
+    return (i+1)+'. ['+w.bank+'/'+q.cat+']'+(w.wc>=2?' ✕'+w.wc+'回':'')+' 問われたこと: '+stripTags(q.ask||'')+' / 決め手: '+stripTags(q.keypoint||'')+(cards?' / 関連: '+cards:'')+'\n';};
+  s+='\n【A. 実際に間違えた問題（'+mistakes.length+'問・間違い回数つき）＝最優先】\n';
+  mistakes.forEach((w,i)=>{s+=fmt(w,i);});
+  s+='\n【B. 正解したが自信がなかった/AIに相談した問題（'+unsures.length+'問）＝理解の確認用】\n';
+  unsures.forEach((w,i)=>{s+=fmt(w,i);});
   return s;
 }
 function copyWeakness(){
@@ -998,12 +1006,18 @@ function weakFallback(text,done){
 let themeTab=null;
 function computeThemeRows(sel){
   const cats={};
-  const add=(arr,pr)=>{(arr||[]).forEach(q=>{cats[q.cat]=cats[q.cat]||{n:0,seen:0,cor:0};cats[q.cat].n++;
-    if(pr.seen&&pr.seen[q.id]){cats[q.cat].seen++;if(!(pr.wrong&&pr.wrong[q.id]))cats[q.cat].cor++;}});};
+  const add=(arr,pr)=>{(arr||[]).forEach(q=>{
+    const o=cats[q.cat]=cats[q.cat]||{n:0,seen:0,green:0,red:0,yellow:0};o.n++;
+    if(pr.seen&&pr.seen[q.id]){o.seen++;
+      const inPool=pr.wrong&&pr.wrong[q.id];
+      if(!inPool)o.green++;
+      else if(((pr.wrongCount&&pr.wrongCount[q.id])||0)>0)o.red++;
+      else o.yellow++; // 復習プールだが間違えてはいない＝正解後に自信なし/AI相談
+    }});};
   if(sel==='__all'){Object.keys(BANKS).forEach(b=>add(ALLBANKS[b],bankProgFor(b)));}
   else{add(sel===currentBank()?QUESTIONS:(ALLBANKS&&ALLBANKS[sel]),bankProgFor(sel));}
-  return Object.keys(cats).map(c=>({c,n:cats[c].n,seen:cats[c].seen,cor:cats[c].cor,
-    rate:cats[c].seen?Math.round(cats[c].cor/cats[c].seen*100):null}))
+  return Object.keys(cats).map(c=>({c,...cats[c],
+    rate:cats[c].seen?Math.round(cats[c].green/cats[c].seen*100):null}))
     .sort((a,b)=>{if(a.rate===null)return 1;if(b.rate===null)return -1;return a.rate-b.rate;});
 }
 function renderThemeGraph(){
@@ -1022,18 +1036,25 @@ function renderThemeGraph(){
   }
   const rows=computeThemeRows(sel);
   const bars=rows.map(r=>{
-    const col=r.rate===null?'#9a948a':(r.rate<60?'#e74c3c':(r.rate<80?'#e0a52e':'#2ecc71'));
-    const w=r.rate===null?0:r.rate;
+    const seen=r.seen||0;
+    const g=seen?Math.round(r.green/seen*100):0;
+    const y=seen?Math.round(r.yellow/seen*100):0;
+    const rd=seen?Math.max(0,100-g-y):0;
     const val=r.rate===null?'未':r.rate+'%';
+    const seg=seen
+      ?`<div class="tseg" style="width:${g}%;background:#2ecc71"></div><div class="tseg" style="width:${y}%;background:#e0a52e"></div><div class="tseg" style="width:${rd}%;background:#e74c3c"></div>`
+      :'';
     return `<div class="tbar" data-cat="${r.c}" data-bank="${sel}">`
       +`<div class="tbar-l">${r.c} <span class="tbar-n">${r.seen}/${r.n}</span></div>`
-      +`<div class="tbar-track"><div class="tbar-fill" style="width:${w}%;background:${col}"></div>`
-      +`<span class="tbar-v">${val}</span></div></div>`;
+      +`<div class="tbar-track">${seg}<span class="tbar-v">${val}</span></div></div>`;
   }).join('');
+  const legend='<div class="tlegend"><span><i style="background:#2ecc71"></i>正解</span>'
+    +'<span><i style="background:#e0a52e"></i>自信なし/AI相談</span>'
+    +'<span><i style="background:#e74c3c"></i>間違えた</span></div>';
   const hint=sel==='__all'
     ?'全セット合算。バーをタップでそのセットへ切替を促します。'
     :'バーをタップでその分野を解く（別セット選択中はまず切替）。';
-  host.innerHTML=tabs+'<div class="tbars">'+bars+'</div><div class="themehint">'+hint+'</div>';
+  host.innerHTML=tabs+legend+'<div class="tbars">'+bars+'</div><div class="themehint">'+hint+'</div>';
 }
 function themeWrapClick(e){
   const tb=e.target.closest('.ttab');
@@ -1074,8 +1095,8 @@ function decodeJumon(str){
 function bankLSKey(b){return 'saa_drill_progress_v1_'+b;}
 function readBankProg(b){
   try{const p=JSON.parse(localStorage.getItem(bankLSKey(b)))||{};
-    p.seen=p.seen||{};p.wrong=p.wrong||{};p.wrongCount=p.wrongCount||{};p.correctCount=p.correctCount||{};
-    return p;}catch(e){return{seen:{},wrong:{},wrongCount:{},correctCount:{}};}
+    p.seen=p.seen||{};p.wrong=p.wrong||{};p.wrongCount=p.wrongCount||{};p.correctCount=p.correctCount||{};p.unsure=p.unsure||{};
+    return p;}catch(e){return{seen:{},wrong:{},wrongCount:{},correctCount:{},unsure:{}};}
 }
 function mergeProg(cur,inc){
   cur=cur||{};inc=inc||{};

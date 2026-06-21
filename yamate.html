@@ -129,6 +129,9 @@ table.cmp td.relrow{background:#fff;padding:11px 14px}
   border-radius:0;cursor:pointer;font-family:inherit;line-height:1.3}
 .tocchip:hover{background:#21537f;color:#fff}
 .tocact{font-size:13px;padding:6px 10px;border:1px solid #b9b3a5;background:#fff;color:#5e5e5e;cursor:pointer;font-family:inherit}
+.weakbadge{font-size:13px;font-weight:700;color:#fff;background:#b01212;border-radius:0;padding:2px 8px;margin-left:10px;vertical-align:middle}
+.tocchip.weak{border-color:#b01212;color:#b01212;font-weight:700}
+.tocchip.weak:hover{background:#b01212;color:#fff}
 
 /* 対決ペアのカードデッキ（1枚ずつ・スワイプ/◀▶でめくる） */
 .deck{margin-top:8px}
@@ -276,6 +279,16 @@ const DATA=[
    <li><span class="nm">手順3：相手が利用</span>共有AMIから起動、または自社キーでコピー（再暗号化）して使う。</li>
   </ul>
   <div class="decide">決め手 ／ <b>暗号化AMI/スナップショットを別アカウントへ</b> → ①CMKのキーポリシーで相手に復号権限 ②AMIの起動許可に相手アカウントID。<b>制約＝AWS管理のデフォルト鍵（aws/ebs）は共有できない</b>。<b>カスタマー管理キー（CMK）が必須</b>（問題文に「カスタマー管理キー」とあれば共有可能の合図）。鍵の共有を忘れると相手が復号できず起動失敗、が引っかけ。</div>`},
+  {h:"⑫ AMIって何？ 紛らわしい略語（AMI／EBS／ENI／EFS／EMR）",body:`<p style="margin-bottom:10px"><b>AMI（Amazon Machine Image／マシンイメージ）</b>は、EC2（仮想サーバー）を起動するための<b>「ひな型」</b>。OS＋初期設定＋入れておきたいソフトが丸ごと固まった"素"で、パソコンの<b>工場出荷イメージ／リカバリーディスク</b>にあたる。これ1個から<b>同じ構成のEC2を何台でもポンと起動</b>できる。自分で作り込んだEC2をAMI化して使い回したり、別アカウントに共有したりする（中身のディスクはEBSスナップショットとして保存される）。</p>
+  <table class="gtbl">
+   <tr><th>略語</th><th>正式名</th><th>例えると</th></tr>
+   <tr><td>AMI</td><td>Amazon Machine Image</td><td>サーバーの「型紙・工場出荷イメージ」（これから起動する素）</td></tr>
+   <tr><td>EBS</td><td>Elastic Block Store</td><td>サーバーに付ける「外付けディスク」（動いてる中身）</td></tr>
+   <tr><td>ENI</td><td>Elastic Network Interface</td><td>サーバーの「ネットワーク差込口（LANポート）」</td></tr>
+   <tr><td>EFS</td><td>Elastic File System</td><td>複数サーバーで使う「共有フォルダ（Linux）」</td></tr>
+   <tr><td>EMR</td><td>—（Elastic MapReduce）</td><td>Hadoop/Sparkを動かす「ビッグデータ工場」</td></tr>
+  </table>
+  <div class="decide">混同しない ／ <b>AMI＝起動の型紙</b>（まだ動いていない素） ／ <b>EBS＝ディスク</b>（動いてる中身） ／ <b>ENI＝ネットの差込口</b>。「EMI」というサービスはAWSに無い。EMRだけは別物（ビッグデータ）なので注意。</div>`},
 /*HATSU*/ ]},
 {ico:"⚖️",t:"並べて比較（似た三兄弟以上の見分け）",
  story:`2つで迷うものは後ろの「対決カード」で見分ける。でも購入オプションが4種、ロードバランサーが3種のように、3つ以上が横並びのものはスラッシュでまとめると区別がつかない。ここは表で一気に見比べる。設問で一番困るALB対NLBもここ。`,
@@ -365,7 +378,7 @@ const DATA=[
    scene:`海外拠点から本社S3への大容量アップロードが遅く、Transfer Accelerationを有効にしたら数分で終わった。逆に世界中のユーザーへ動画を配る方は、CloudFrontでエッジに置いて配信を速くした。上りと下りで道具が違う。`,
    tale:`<span class="a">Transfer Acceleration</span>は遠隔地からS3への「アップロード（上り）」を高速化。<span class="b">CloudFront</span>はS3からの「ダウンロード（配信・下り）」をエッジでキャッシュ高速化。方向が逆。`}
  ]},
-{ico:"🚚",t:"引っ越しと出張所（データ移行・ハイブリッド）",
+{ico:"🚚",t:"引っ越しと出張所（データ移行・ハイブリッド）",weak:true,
  story:`オンプレからAWSへの引っ越しを請け負う業者たちがいる。回線でコツコツ運ぶ <span class="who">DataSync</span>、トラックに積んで物理搬送する <span class="who">Snowball</span>、サーバーを丸ごと運ぶ <span class="who">MGN</span>、データベースだけ運ぶ <span class="who">DMS</span>。引っ越し後もオンプレに残る出張所が <span class="who">Storage Gateway</span>。「何を・どうやって運ぶか／運ぶのか住み続けるのか」で担当が分かれる。`,
  pairs:[
   {a:"DataSync",b:"Snowball Edge",key:"オンラインか物理搬送か",
@@ -389,7 +402,42 @@ const DATA=[
    tale:`<span class="a">Migration Hub</span>はMGN/DMS等の進捗を1つのダッシュボードで横断追跡＋計画。<span class="b">個別確認</span>は各コンソールをバラバラに見て手集約（大規模だと全体像が見えない）。`},
   {a:"Data Lifecycle Manager（DLM）",b:"AWS Backup",key:"EBS世代管理だけか横断か",
    tale:`<span class="a">DLM</span>はEBSスナップショット/AMIの作成・保持・削除をタグ＋スケジュールで自動化（EBS中心・手軽）。<span class="b">AWS Backup</span>はRDS/EFS/DynamoDB等も含めた複数サービス横断の一元バックアップ。`}
- ]},
+ ],
+ notes:[
+  {h:"🔑 移行ツール早わかり（何を運ぶ・どう運ぶ）",body:`<table class="gtbl">
+   <tr><th>ツール</th><th>運ぶ対象・方法</th><th>合図</th></tr>
+   <tr><td>DataSync</td><td>ファイルをネット越しに転送・同期</td><td>回線あり・継続的な差分同期</td></tr>
+   <tr><td>Snowball</td><td>装置に入れて物理搬送</td><td>回線が細い・数十TB以上を1回で</td></tr>
+   <tr><td>MGN</td><td>サーバー丸ごとEC2へ(リフト＆シフト)</td><td>OS・アプリ込みで一度きり移行</td></tr>
+   <tr><td>DMS</td><td>データベースの中身を移行＋継続反映(CDC)</td><td>DBを止めず移す</td></tr>
+   <tr><td>SCT</td><td>スキーマ/ストアドを別エンジンへ変換</td><td>Oracle→PostgreSQL等の異種移行</td></tr>
+   <tr><td>DRS</td><td>サーバーを継続レプリケーションしてDR</td><td>繰り返し使う災害復旧・RTO数分</td></tr>
+   <tr><td>Storage Gateway</td><td>オンプレのまま実体をクラウドに(橋)</td><td>社内運用を残し容量だけ拡張</td></tr>
+   <tr><td>Migration Hub</td><td>複数移行ツールの進捗を横断管理</td><td>大規模移行の発見・計画・追跡</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>サーバー丸ごと一度きり</b>→MGN ／ <b>DB(異種は+SCT)</b>→DMS(+SCT) ／ <b>継続DR</b>→DRS ／ <b>回線で同期</b>→DataSync ／ <b>物理搬送</b>→Snowball ／ <b>残して併用</b>→Storage Gateway。</div>`},
+  {h:"⚖️ FSx 3種（用途が全く違う）",body:`<table class="gtbl">
+   <tr><th>FSx</th><th>何のため</th><th>合図</th></tr>
+   <tr><td>FSx for Windows</td><td>WindowsのSMB共有(NTFS・AD統合)</td><td>Windowsファイルサーバーを移す</td></tr>
+   <tr><td>FSx for Lustre</td><td>HPC/ML向けの超高速並列FS(S3連携)</td><td>数百GB/秒・サブミリ秒が要る</td></tr>
+   <tr><td>FSx for NetApp ONTAP</td><td>NFS/SMB両対応＋ONTAP機能</td><td>既存NetApp運用をそのまま</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>WindowsのSMB</b>→Windows ／ <b>HPC/MLで超高速</b>→Lustre ／ <b>NetApp互換・マルチプロトコル</b>→NetApp ONTAP。LinuxのNFS共有だけなら(FSxでなく)EFS。</div>`},
+  {h:"⚖️ Storage Gateway 3種 と EBSタイプ",body:`<table class="gtbl">
+   <tr><th>種類</th><th>役割</th></tr>
+   <tr><td>File Gateway</td><td>SMB/NFSのファイルをS3に</td></tr>
+   <tr><td>Volume Gateway</td><td>iSCSIブロックをAWSへ(バックアップ/DR)</td></tr>
+   <tr><td>Tape Gateway</td><td>仮想テープ(VTL)でテープ運用を置き換え</td></tr>
+  </table>
+  <table class="gtbl">
+   <tr><th>EBSタイプ</th><th>こんな時</th></tr>
+   <tr><td>gp3（汎用SSD）</td><td>大半の用途・IOPSを安く固定</td></tr>
+   <tr><td>io2 Block Express（プロビジョンドIOPS）</td><td>最高IOPS・ミッションクリティカルDB</td></tr>
+   <tr><td>st1（スループットHDD）</td><td>大容量シーケンシャル(ログ/ビッグデータ)</td></tr>
+   <tr><td>sc1（Cold HDD）</td><td>めったに触らない最安コールド</td></tr>
+  </table>
+  <div class="decide">決め手 ／ Gatewayは<b>ファイル=File・ブロック=Volume・テープ=Tape</b>。EBSは<b>普段gp3・高IOPSだけio2・大容量順次st1・最安sc1</b>。</div>`},
+/*MIG2*/ ]},
 {ico:"🚀",t:"オンプレからの引っ越し（今これを使っているなら）",
  story:`「今、社内（オンプレミス）で何を使っているか」で、AWSでの引っ越し先が変わる。同じ"データベース"でもOracleとMongoDBでは行き先が別だし、同じ"ファイル共有"でもWindowsのSMBとLinuxのNFSでは別のサービスになる。設問では<span class="who">現行製品の名前</span>がそのままヒント。ここは「今これ → AWSだとこれ」の対応を並べる。`,
  pairs:[
@@ -493,7 +541,7 @@ const DATA=[
   {a:"WorkSpaces",b:"AppStream 2.0",key:"デスクトップごとかアプリ単位か",
    tale:`<span class="a">WorkSpaces</span>は従業員にフル仮想デスクトップ（VDI/DaaS）を提供。<span class="b">AppStream 2.0</span>は特定アプリだけをストリーミング配信。デスクトップ環境ごとなら<span class="a">WorkSpaces</span>。`}
  ]},
-{ico:"🛣",t:"道路と関所（ネットワーク）",
+{ico:"🛣",t:"道路と関所（ネットワーク）",weak:true,
  story:`VPCという街と外をつなぐ道路網。街から外へ出る一方通行の出口 <span class="who">NAT Gateway</span>、双方向の正門 <span class="who">IGW</span>。AWSの店へ街の中の専用通路で直行する <span class="who">VPCエンドポイント</span>。多数の街を束ねる中央交差点 <span class="who">Transit Gateway</span>。外部拠点とは、専用の高速道路 <span class="who">Direct Connect</span> か、一般道に暗号トンネルを掘る <span class="who">VPN</span> でつなぐ。関所には2種類、入口係の <span class="who">SG</span> とサブネット境界の <span class="who">NACL</span>。`,
  pairs:[
   {a:"ゲートウェイ型エンドポイント",b:"インターフェイス型エンドポイント",key:"S3/DynamoDBか多サービスか",
@@ -539,7 +587,34 @@ const DATA=[
    tale:`<span class="a">Outposts</span>はAWSハードを自社オンプレ施設内に設置（データ所在地・現地処理・同じAPI）。<span class="b">Local Zones</span>はAWS側が大都市圏に置く拠点、<span class="b">Direct Connect</span>は専用線でリージョンへ繋ぐだけ。データを自社施設に残すなら<span class="a">Outposts</span>。`},
   {a:"NLB",b:"ALB",key:"L4低遅延/固定IPかL7か",
    tale:`<span class="a">NLB</span>はL4（TCP/UDP）・超低遅延・高スループット・静的IP（非HTTPや極端な性能）。<span class="b">ALB</span>はL7（HTTP/HTTPS）・パス/ホストベースルーティング・WAF連携（Webアプリ）。`}
- ]},
+ ],
+ notes:[
+  {h:"🔑 VPCエンドポイント2型（最頻出・ここで複数問取れる）",body:`<table class="gtbl">
+   <tr><th>型</th><th>対象</th><th>つなぎ方</th><th>料金</th><th>合図</th></tr>
+   <tr><td>ゲートウェイ型</td><td>S3 と DynamoDB だけ</td><td>ルートテーブルに経路を追加</td><td>追加料金なし</td><td>S3/DynamoDBへ安く・NAT回避</td></tr>
+   <tr><td>インターフェイス型（PrivateLink）</td><td>その他の多数のAWSサービス（SQS/KMS等）</td><td>ENI＋セキュリティグループ</td><td>時間課金＋データ処理料金</td><td>S3/DynamoDB以外へプライベート接続</td></tr>
+  </table>
+  <div class="decide">決め手 ／ 対象が<b>S3かDynamoDB</b>→ゲートウェイ型（無料・ルートテーブル） ／ <b>それ以外のサービス</b>→インターフェイス型（ENI＋SG・課金）。「NATのデータ処理料金を削減」「インターネットに出さず」はどちらも該当するので、<b>対象サービスで型を決める</b>のが鉄則。問題文の構成語（ルートテーブル/ENI）も型のヒント。</div>`},
+  {h:"⚖️ 外向き・専用通路の使い分け（NAT／IGW／エンドポイント）",body:`<table class="gtbl">
+   <tr><th>部品</th><th>向き・用途</th><th>こんな時</th></tr>
+   <tr><td>NAT Gateway</td><td>プライベート→インターネットへ外向き(IPv4)</td><td>パッチ取得など外への通信。着信は受けない</td></tr>
+   <tr><td>Egress-Only IGW</td><td>同上のIPv6版（外向き専用）</td><td>IPv6で外向きだけ通したい</td></tr>
+   <tr><td>IGW</td><td>パブリックサブネットの双方向</td><td>外から入れるWeb（パブリックIP必要）</td></tr>
+   <tr><td>VPCエンドポイント</td><td>AWSサービスへ内部直結（ネット非経由）</td><td>S3/SQS等へNATを使わず安全・安く</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>外向き(IPv4)</b>→NAT Gateway ／ <b>外向き(IPv6)</b>→Egress-Only IGW ／ <b>双方向・外から入れる</b>→IGW ／ <b>AWSサービスへ内部だけで</b>→VPCエンドポイント。「着信は拒否・外向きだけ」が出たらNAT系、「AWSのAPIへ安く」はエンドポイント。</div>`},
+  {h:"⚖️ ユーザーに近づける／専用線・VPN（エッジとハイブリッド）",body:`<table class="gtbl">
+   <tr><th>サービス</th><th>何をする</th><th>合図</th></tr>
+   <tr><td>CloudFront</td><td>キャッシュ可能なコンテンツをエッジ配信</td><td>静的/動的Webの配信を速く</td></tr>
+   <tr><td>Global Accelerator</td><td>固定IP＋AWS網で最短ルーティング(非HTTP可)</td><td>TCP/UDP・ゲーム・キャッシュ不可</td></tr>
+   <tr><td>Local Zones</td><td>大都市圏に計算/ストレージを近接配置</td><td>特定都市で一桁ミリ秒</td></tr>
+   <tr><td>Wavelength</td><td>通信事業者の5G網内にAWS</td><td>5Gモバイルユーザーへ超低遅延</td></tr>
+   <tr><td>Direct Connect</td><td>オンプレとの専用物理線</td><td>安定・低遅延・大容量（高コスト）</td></tr>
+   <tr><td>Site-to-Site VPN</td><td>ネット上に暗号トンネル(拠点間)</td><td>安く即日・DXのバックアップ</td></tr>
+   <tr><td>Client VPN</td><td>個人デバイスからVPCへ</td><td>在宅社員のリモートアクセス</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>キャッシュ配信</b>→CloudFront ／ <b>非HTTP・固定IP・経路最適化</b>→Global Accelerator ／ <b>特定都市で近接処理</b>→Local Zones ／ <b>5G網内</b>→Wavelength ／ <b>専用線</b>→DX ／ <b>拠点間トンネル</b>→S2S VPN ／ <b>個人端末</b>→Client VPN。</div>`},
+/*NET*/ ]},
 {ico:"📡",t:"配達便（配信・DNS・低遅延）",
  story:`遠くのユーザーに速く届けるための配達網。各地の支店にコピーを置いて配る <span class="who">CloudFront</span>、AWSの高速バックボーンで最短ルートを選ぶ <span class="who">Global Accelerator</span>、ユーザーの近くまで工房ごと出張する <span class="who">Local Zones</span>。入口の案内係 <span class="who">Route 53</span> は、訪問者をどの支店へ送るかを「国で・速さで・主従で」振り分ける。`,
  pairs:[
@@ -561,7 +636,7 @@ const DATA=[
   {a:"Route 53 フェイルオーバー",b:"ALB",key:"リージョンまたぎかリージョン内か",
    tale:`<span class="a">Route 53</span>はDNSレベルでリージョンをまたいで切り替え（クライアント設定不要）。<span class="b">ALB</span>は単一リージョン内でAZ/ターゲット間に負荷分散（リージョンまたぎ不可）。`}
  ]},
-{ico:"🛡",t:"警備会社（セキュリティ）",
+{ico:"🛡",t:"警備会社（セキュリティ）",weak:true,
  story:`AWSの街を守る警備会社には個性的な面々がいる。不審な動きを嗅ぎつける見回り役 <span class="who">GuardDuty</span>、建物の弱点（鍵の不良）を点検する設備屋 <span class="who">Inspector</span>、金庫の中身が機密かを調べる鑑定士 <span class="who">Macie</span>、事件後に「誰がなぜ」を追う刑事 <span class="who">Detective</span>。門前ではL7の門番 <span class="who">WAF</span> と、殴り込み（DDoS）を受け止める用心棒 <span class="who">Shield</span> が立つ。鍵の管理は手軽な <span class="who">KMS</span> と専用金庫室 <span class="who">CloudHSM</span>。`,
  pairs:[
   {a:"GuardDuty",b:"Inspector",key:"脅威の挙動か脆弱性CVEか",
@@ -605,8 +680,56 @@ const DATA=[
    tale:`<span class="a">IAM条件キー</span>はMFA有無・送信元IP・時間など「誰がどんな状況で操作できるか」を制御。<span class="b">SG</span>はネットワークのIP/ポート通過可否（MFAや操作条件は表現できない）。`},
   {a:"VPCエンドポイント＋ポリシー限定",b:"パブリック化",key:"経路を絞るか誰でもか",
    tale:`<span class="a">VPCエンドポイント＋バケットポリシー</span>でインターネットに出さず特定VPCのみに絞る（安全）。<span class="b">パブリック化</span>は誰でもアクセス可（機密データに不可）。経路を絞るのが正解。`}
- ]},
-{ico:"🔬",t:"分析ラボ（データ分析）",
+ ],
+ notes:[
+  {h:"🔑 セキュリティ早わかり（検知・防御・鍵・認可）",body:`<table class="gtbl">
+   <tr><th>サービス</th><th>何をする（決め手）</th></tr>
+   <tr><td>GuardDuty</td><td>不審な挙動・攻撃を検知（脅威検知）</td></tr>
+   <tr><td>Inspector</td><td>既知の脆弱性(CVE)をスキャン（弱点）</td></tr>
+   <tr><td>Macie</td><td>S3の機密データ(PII)を発見</td></tr>
+   <tr><td>Detective</td><td>検知の後に根本原因を相関分析（調査）</td></tr>
+   <tr><td>Security Hub</td><td>各検知結果を集約・俯瞰</td></tr>
+   <tr><td>WAF</td><td>L7のSQLi/XSSを中身を見て遮断</td></tr>
+   <tr><td>Shield</td><td>L3/4のDDoSを緩和（Advancedはコスト保護）</td></tr>
+   <tr><td>Network Firewall</td><td>VPC層でドメインフィルタ/IPS（ステートフル）</td></tr>
+   <tr><td>Firewall Manager</td><td>組織横断でWAF/SG等を一元適用</td></tr>
+   <tr><td>KMS</td><td>暗号鍵をマネージドで管理（手軽）</td></tr>
+   <tr><td>CloudHSM</td><td>専用HSMで鍵を単独制御（規制対応）</td></tr>
+   <tr><td>Secrets Manager</td><td>認証情報を保管＋自動ローテーション</td></tr>
+   <tr><td>Parameter Store</td><td>設定値/シークレットを安く保管(自動更新なし)</td></tr>
+  </table>
+  <div class="decide">大分け ／ <b>検知</b>(GuardDuty/Inspector/Macie/Detective)・<b>防御の壁</b>(WAF/Shield/Network Firewall)・<b>鍵とシークレット</b>(KMS/CloudHSM/Secrets/Parameter)・<b>認可</b>(IAM系)。まずどの層の話かで仕分ける。</div>`},
+  {h:"⚖️ 鍵とシークレット（KMS／CloudHSM／Secrets Manager／Parameter Store）",body:`<table class="gtbl">
+   <tr><th>サービス</th><th>何のため</th><th>合図</th></tr>
+   <tr><td>KMS</td><td>暗号鍵の作成・管理（共有基盤）</td><td>普通の暗号化・手軽・安い</td></tr>
+   <tr><td>CloudHSM</td><td>専用シングルテナントHSM</td><td>FIPS 140-2 L3・鍵を自社単独制御・規制</td></tr>
+   <tr><td>Secrets Manager</td><td>パスワード等＋自動ローテーション</td><td>「自動でローテーション」が出たら</td></tr>
+   <tr><td>Parameter Store</td><td>設定値/シークレット保管(標準無料)</td><td>更新不要のただの設定値</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>普通の暗号鍵</b>→KMS ／ <b>専用HSM・単独制御・規制</b>→CloudHSM ／ <b>自動ローテーション</b>→Secrets Manager ／ <b>ただの設定値を安く</b>→Parameter Store。</div>`},
+  {h:"⚖️ 守りの層（WAF／Shield／Network Firewall／SG／NACL）",body:`<table class="gtbl">
+   <tr><th>部品</th><th>層・対象</th><th>合図</th></tr>
+   <tr><td>WAF</td><td>L7・HTTPの中身</td><td>SQLi/XSS・ALB/CloudFrontの前</td></tr>
+   <tr><td>Shield</td><td>L3/4・物量</td><td>DDoS・大量アクセス(Advanced=コスト保護)</td></tr>
+   <tr><td>Network Firewall</td><td>VPCネットワーク層</td><td>ドメインフィルタ・IPS/IDS・ステートフル</td></tr>
+   <tr><td>セキュリティグループ</td><td>インスタンス単位・ステートフル</td><td>許可のみ・戻り自動許可</td></tr>
+   <tr><td>ネットワークACL</td><td>サブネット単位・ステートレス</td><td>拒否も書ける・特定IPブロック</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>HTTPの攻撃</b>→WAF ／ <b>DDoS物量</b>→Shield ／ <b>ドメイン/IPSまで</b>→Network Firewall ／ <b>サーバー単位の許可</b>→SG ／ <b>サブネットで拒否も</b>→NACL。</div>`},
+  {h:"⚖️ 認可・IAM（誰に何を許すか）",body:`<table class="gtbl">
+   <tr><th>仕組み</th><th>こんな時</th></tr>
+   <tr><td>IAMロール(AssumeRole)</td><td>EC2/Lambdaや他アカウントに一時権限。長期キー禁止</td></tr>
+   <tr><td>External ID付きAssumeRole</td><td>サードパーティのなりすまし(confused deputy)防止</td></tr>
+   <tr><td>リソースベースポリシー</td><td>別アカウントのプリンシパルを直接許可(S3等)</td></tr>
+   <tr><td>SCP(Organizations)</td><td>組織/アカウント全体に許可の上限(管理者も超えられない)</td></tr>
+   <tr><td>許可境界</td><td>個々のIAMロール/ユーザーが持てる権限の上限</td></tr>
+   <tr><td>IAM条件キー(Condition)</td><td>MFA時のみ・社内IPのみ等の条件付き許可</td></tr>
+   <tr><td>IAM Identity Center</td><td>社員の複数アカウントSSO(AD連携)</td></tr>
+   <tr><td>Cognito</td><td>アプリの一般ユーザー(toC)のサインイン</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>一時権限/クロスアカウント</b>→ロール(+External ID) ／ <b>別アカウントを直接許可</b>→リソースベース ／ <b>組織で禁止</b>→SCP ／ <b>条件付き(MFA/IP)</b>→条件キー ／ <b>社員SSO</b>→Identity Center ／ <b>アプリ利用者</b>→Cognito。長期アクセスキーの配布は避ける。</div>`},
+/*SEC*/ ]},
+{ico:"🔬",t:"分析ラボ（データ分析）",weak:true,
  story:`流れ込むデータを扱うラボ。蛇口から流れるデータを受ける2人——保管して何度も読ませる <span class="who">Kinesis Data Streams</span> と、ただ下流へ流し込む <span class="who">Firehose</span>。溜まったデータを調べる側には、その場でSQLを投げる気軽な <span class="who">Athena</span> と、常駐の本格分析室 <span class="who">Redshift</span>。下ごしらえ役が <span class="who">Glue</span>、見せる係が <span class="who">QuickSight</span>、ログを全文検索する <span class="who">OpenSearch</span>。`,
  pairs:[
   {a:"Kinesis Data Streams",b:"Kinesis Data Firehose",key:"保持・複数読み・リプレイか配信だけか",
@@ -642,7 +765,48 @@ const DATA=[
    tale:`<span class="a">Lake Formation</span>はテーブル/列/行レベルの権限を一元定義し複数分析サービスへ統一適用。<span class="b">個別ポリシー</span>はサービス/部門ごとに書く必要があり煩雑で列/行レベルの統一が難しい。`},
   {a:"Timestream",b:"Redshift",key:"時系列の取り込みか大規模分析か",
    tale:`<span class="a">Timestream</span>は秒単位の時系列計測値の取り込み・時間範囲集計に特化。<span class="b">Redshift</span>は構造化データの大規模分析（DWH）向けで高頻度の時系列取り込みには過剰。`}
- ]},
+ ],
+ notes:[
+  {h:"🔑 分析サービス早わかり（何をする・いつ使う・効用）",body:`<table class="gtbl">
+   <tr><th>サービス</th><th>何をする</th><th>いつ使う（決め手）</th></tr>
+   <tr><td>Kinesis Data Streams</td><td>流れるデータを保持し、複数の処理が独立に読む</td><td>リアルタイム＋複数処理＋過去のリプレイ</td></tr>
+   <tr><td>Kinesis Data Firehose</td><td>S3/Redshift/OpenSearchへバッファして配信するだけ</td><td>とにかくS3へ流したい・全自動で楽したい</td></tr>
+   <tr><td>Athena</td><td>S3のデータに直接SQL（サーバーレス）</td><td>低頻度・アドホック・サーバー立てたくない</td></tr>
+   <tr><td>Redshift</td><td>列指向のデータウェアハウス（常時稼働）</td><td>大規模・高頻度の集計分析・BIの土台</td></tr>
+   <tr><td>Redshift Spectrum</td><td>S3を直接クエリしDWHのテーブルと結合</td><td>コールドデータをロードせず分析</td></tr>
+   <tr><td>Glue</td><td>サーバーレスETL＋スキーマ自動カタログ</td><td>定期的なデータ変換・整形を管理なしで</td></tr>
+   <tr><td>Glue DataBrew</td><td>ノーコードで視覚的にデータ準備</td><td>非エンジニアが整形・レシピ再利用</td></tr>
+   <tr><td>EMR</td><td>Hadoop/Sparkクラスタを立てて処理</td><td>大規模・細かく制御・既存Spark資産</td></tr>
+   <tr><td>OpenSearch</td><td>ログの全文検索・可視化（Kibana相当）</td><td>障害調査・キーワード横断検索</td></tr>
+   <tr><td>Managed Flink</td><td>ストリームに継続クエリ（ウィンドウ集計）</td><td>流れる中でリアルタイム集計・異常検知</td></tr>
+   <tr><td>QuickSight</td><td>BIダッシュボードで見せる</td><td>グラフ化（計算はAthena/Redshiftに任せる）</td></tr>
+   <tr><td>Lake Formation</td><td>データレイクの権限を列/行レベルで一元管理</td><td>複数の分析サービスに統一権限</td></tr>
+  </table>
+  <div class="decide">まず<b>取り込み</b>(Kinesis/Firehose)か<b>蓄積データの分析</b>(Athena/Redshift/EMR)か<b>検索</b>(OpenSearch)かで大きく分ける。次に「サーバーレスで楽か・クラスタで作り込むか」「都度SQLか・常時DWHか」で1つに絞る。</div>`},
+  {h:"⚖️ 取り込み3兄弟（Kinesis Data Streams／Firehose／SQS）",body:`<table class="gtbl">
+   <tr><th>サービス</th><th>複数が独立に読む</th><th>過去のリプレイ</th><th>管理</th><th>向き</th></tr>
+   <tr><td>Data Streams</td><td>できる</td><td>できる（保持期間内）</td><td>シャード管理あり</td><td>リアルタイム＋複数処理＋再読み</td></tr>
+   <tr><td>Firehose</td><td>—（配信専用）</td><td>不可</td><td>ほぼ全自動</td><td>S3等へ流すだけ・楽したい</td></tr>
+   <tr><td>SQS</td><td>基本1つが取って消す</td><td>不可</td><td>フルマネージド</td><td>ジョブを1件ずつ疎結合処理</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>複数が同じデータを別ペースで読む・先頭から読み直す</b>→Data Streams ／ <b>S3等へバッファ配信するだけ</b>→Firehose ／ <b>1件ずつ処理して消す疎結合</b>→SQS。「複数読み・リプレイ」が出たらData Streams一択。</div>`},
+  {h:"⚖️ 「S3のデータを分析」4択（Athena／Redshift／Spectrum／EMR）",body:`<table class="gtbl">
+   <tr><th>サービス</th><th>形</th><th>稼働</th><th>こんな時</th></tr>
+   <tr><td>Athena</td><td>S3に直接SQL</td><td>サーバーレス・スキャン量課金</td><td>低頻度・アドホック・すぐ調べたい</td></tr>
+   <tr><td>Redshift</td><td>列指向DWHにロード</td><td>クラスタ常時稼働</td><td>大規模・高頻度の集計をBIで回す</td></tr>
+   <tr><td>Redshift Spectrum</td><td>S3を直接＋DWHと結合</td><td>Redshiftの拡張</td><td>コールドデータをロードせず結合</td></tr>
+   <tr><td>EMR</td><td>Hadoop/Sparkクラスタ</td><td>クラスタを自分で制御</td><td>既存Spark・細かいチューニング</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>都度SQL・サーバーレス</b>→Athena ／ <b>常時DWHで高頻度集計</b>→Redshift ／ <b>ロードせず直接＋結合</b>→Spectrum ／ <b>Spark等で作り込む</b>→EMR。「サーバー管理なし・使った分だけ」ならAthena、「本格DWH」ならRedshift。</div>`},
+  {h:"⚖️ ETL・データ準備（Glue／DataBrew／EMR）と検索（OpenSearch）",body:`<table class="gtbl">
+   <tr><th>サービス</th><th>誰が・どう</th><th>こんな時</th></tr>
+   <tr><td>Glue</td><td>コード(PySpark)でサーバーレスETL＋カタログ</td><td>定期的な変換を管理なしで・スキーマ自動</td></tr>
+   <tr><td>Glue DataBrew</td><td>ノーコードで視覚的に整形・レシピ化</td><td>アナリストがコードを書かず準備</td></tr>
+   <tr><td>EMR</td><td>Spark/Hadoopクラスタを自分で制御</td><td>大規模・特殊フレームワーク・細かい制御</td></tr>
+   <tr><td>OpenSearch</td><td>全文検索エンジン＋可視化(Kibana相当)</td><td>ログを横断検索・障害調査・ダッシュボード</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>コードでETL</b>→Glue ／ <b>ノーコード準備</b>→DataBrew ／ <b>クラスタ制御の大規模処理</b>→EMR ／ <b>ログの全文検索・可視化</b>→OpenSearch。「サーバーレスETL」ならGlue、「Sparkを自分で」ならEMR。OpenSearchは分析でなく"検索"が主目的の時。</div>`},
+/*ANL*/ ]},
 {ico:"🏥",t:"保険プラン（可用性・DR）",
  story:`災害にどう備えるかは「保険のグレード」で考える。掛け金最安・復旧は数時間の <span class="who">バックアップ&リストア</span>、心臓だけ動かしておく <span class="who">パイロットライト</span>、縮小版を常時温めておく <span class="who">ウォームスタンバイ</span>、両拠点をフル稼働させる最高級の <span class="who">アクティブ/アクティブ</span>。守る範囲も「同じ街の別ビル（AZ）」か「別の街（リージョン）」かで分かれる。`,
  pairs:[
@@ -718,7 +882,7 @@ const DATA=[
   {a:"Session Manager",b:"踏み台（Bastion）/SSH",key:"ポートレスか攻撃面が残るか",
    tale:`<span class="a">Session Manager</span>はSSHポート開放・踏み台不要でIAM認可＋ログ監査付きのシェル（ポートレス）。<span class="b">踏み台/SSH</span>はポート開放・鍵管理・踏み台運用が残り攻撃面が増える。`}
  ]},
-{ico:"🔗",t:"伝令と仲介（アプリ統合・疎結合）",
+{ico:"🔗",t:"伝令と仲介（アプリ統合・疎結合）",weak:true,
  story:`サービス同士を直接つながず、間に立つ仲介役がいる。伝票を溜めて1人ずつ処理させる <span class="who">SQS</span>、放送で一斉に知らせる <span class="who">SNS</span>、出来事を聞きつけて各所へ振り分ける <span class="who">EventBridge</span>、多段の段取りを順序立てて仕切る <span class="who">Step Functions</span>。「溜めるか・配るか・ルーティングか・順序管理か」で役割が分かれる。`,
  pairs:[
   {a:"SQS",b:"SNS",key:"溜めるか一斉配信か",
@@ -745,7 +909,37 @@ const DATA=[
    tale:`<span class="a">WebSocket API</span>は持続接続で双方向・サーバープッシュ（チャット/通知/ライブ）。<span class="b">REST API</span>は一方向で、更新検知はポーリングの擬似的（遅延と無駄）。双方向リアルタイムなら<span class="a">WebSocket</span>。`},
   {a:"SNSフィルターポリシー",b:"全配信＋各自破棄",key:"絞り込んで配るか",
    tale:`<span class="a">フィルターポリシー</span>はメッセージ属性で各サブスクライバーに必要なものだけ配信（無駄なし）。<span class="b">全配信＋各自破棄</span>は不要メッセージも届けてから捨てる（無駄な受信・処理）。`}
- ]},
+ ],
+ notes:[
+  {h:"🔑 疎結合・連携の早わかり（溜める・配る・ルーティング・段取り）",body:`<table class="gtbl">
+   <tr><th>サービス</th><th>何をする（決め手）</th></tr>
+   <tr><td>SQS</td><td>メッセージを溜め1件ずつ処理（スパイク吸収）</td></tr>
+   <tr><td>SNS</td><td>発行を購読者へ一斉配信(pub/sub・1対多)</td></tr>
+   <tr><td>EventBridge</td><td>イベントをルールで各所へルーティング</td></tr>
+   <tr><td>Step Functions</td><td>多段処理を順序・分岐・リトライで可視化</td></tr>
+   <tr><td>EventBridge Scheduler</td><td>大規模スケジュール起動(cron/一回限り)</td></tr>
+   <tr><td>EventBridge Pipes</td><td>1対1のソース→ターゲット＋変換</td></tr>
+   <tr><td>Amazon MQ</td><td>ActiveMQ/RabbitMQ互換(既存ブローカー移行)</td></tr>
+   <tr><td>SES</td><td>本格メール送信(到達率・SPF/DKIM)</td></tr>
+   <tr><td>AppSync</td><td>GraphQLで集約・リアルタイム購読</td></tr>
+   <tr><td>API Gateway</td><td>REST/WebSocketのAPI受付・認可・スロットリング</td></tr>
+  </table>
+  <div class="decide">大分け ／ <b>溜める</b>=SQS・<b>一斉配信</b>=SNS・<b>ルーティング</b>=EventBridge・<b>段取り(状態管理)</b>=Step Functions。まず「溜める/配る/振り分け/順序」のどれかで仕分ける。</div>`},
+  {h:"⚖️ SQS／SNS／EventBridge／Step Functions（最頻出の4択）",body:`<table class="gtbl">
+   <tr><th>サービス</th><th>形</th><th>こんな時</th></tr>
+   <tr><td>SQS</td><td>キュー(溜める・1件ずつ)</td><td>急増を吸収・ワーカーが順に処理</td></tr>
+   <tr><td>SNS</td><td>pub/sub(一斉・1対多)</td><td>1イベントを複数へ同時通知/fan-out</td></tr>
+   <tr><td>EventBridge</td><td>イベントバス(ルール振り分け)</td><td>発生源と受け手を切離しルーティング・将来追加</td></tr>
+   <tr><td>Step Functions</td><td>ワークフロー(順序・分岐・リトライ)</td><td>多段処理を確実に・可視化して管理</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>溜めて1件ずつ</b>→SQS ／ <b>一斉に複数へ</b>→SNS ／ <b>イベントをルールで各所へ</b>→EventBridge ／ <b>順序・リトライの多段</b>→Step Functions。「複数システムが各自処理＋将来追加」はEventBridge、「順序保証の段取り」はStep Functions。</div>`},
+  {h:"⚖️ SQS 標準 vs FIFO（順序と重複）",body:`<table class="gtbl">
+   <tr><th>種類</th><th>順序</th><th>配信</th><th>スループット</th><th>合図</th></tr>
+   <tr><td>標準キュー</td><td>保証なし</td><td>少なくとも1回(まれに重複)</td><td>ほぼ無制限</td><td>順序や重複を気にしない大量処理</td></tr>
+   <tr><td>FIFOキュー</td><td>保証あり</td><td>重複排除(実質1回)</td><td>上限あり</td><td>順序保証＋重複排除が要る</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>順序保証＋重複排除</b>→FIFO ／ <b>極端な高スループット・順序不問</b>→標準。標準で重複が困るなら処理を冪等(一意キーでupsert)にする手もある。</div>`},
+/*INT*/ ]},
 {ico:"🎯",t:"キーワード逆引き早見表（この言葉が出たらコレ）",
  lookup:[
   ["中断されてもいい・コスト最優先","EC2 スポットインスタンス"],
@@ -1048,6 +1242,7 @@ function render(filter){
     const cnt=ch.pairs?ch.pairs.length+' 対':(ch.lookup?ch.lookup.length+' 項':(ch.notes?ch.notes.length+' 項':''));
     const collapsed=!filter;
     let head='<h2 class="chaphd"><span class="ico">'+ch.ico+'</span>'+ch.t
+      +(ch.weak?'<span class="weakbadge">🔴弱点</span>':'')
       +'<span class="cnt">'+cnt+'</span><span class="arw">'+(collapsed?'▶':'▼')+'</span></h2>';
     let inner='';
     if(ch.story&&(!filter))inner+='<div class="story">'+ch.story+'</div>';
@@ -1113,7 +1308,7 @@ function buildTOC(){
   const t=document.getElementById('toc');if(!t)return;
   t.innerHTML='<span class="toclbl">目次（タップでその章を開く）</span>'
     +'<button class="tocact" id="openAll">全部開く</button><button class="tocact" id="closeAll">全部閉じる</button>'
-    +DATA.map((ch,i)=>'<button class="tocchip" data-ci="'+i+'">'+ch.ico+' '+ch.t.replace(/（.*$/,'')+'</button>').join('');
+    +DATA.map((ch,i)=>'<button class="tocchip'+(ch.weak?' weak':'')+'" data-ci="'+i+'">'+(ch.weak?'🔴':'')+ch.ico+' '+ch.t.replace(/（.*$/,'')+'</button>').join('');
 }
 function setAll(collapse){
   document.querySelectorAll('#chapters .chapter').forEach(c=>{
