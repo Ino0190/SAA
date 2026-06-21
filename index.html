@@ -245,7 +245,8 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
   <div class="catgrid" id="catGrid"></div>
 
   <div style="margin-top:24px;text-align:center">
-    <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px" onclick="openJumon()">📜 ふっかつのじゅもん</button>
+    <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px" onclick="copyWeakness()">🤖 弱点をAIに相談（コピー）</button>
+    <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px;margin-left:8px" onclick="openJumon()">📜 ふっかつのじゅもん</button>
     <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px;margin-left:8px" onclick="resetProgress()">進捗をリセット</button>
   </div>
 </section>
@@ -924,6 +925,49 @@ function reviewClear(){
   if(!reviewState.list.length){alert('間違いプールの解説をすべて読み終えました🎉');goHome();return;}
   if(reviewState.idx>=reviewState.list.length)reviewState.idx=reviewState.list.length-1;
   renderReview();
+}
+
+/* ===== 弱点をAIに相談するプロンプト生成 ===== */
+function buildWeaknessPrompt(){
+  const bank=(typeof BANKS!=='undefined'&&BANKS[currentBank()])?BANKS[currentBank()]:null;
+  const total=QUESTIONS.length;
+  const seen=QUESTIONS.filter(q=>progress.seen[q.id]).length;
+  const seenCorrect=QUESTIONS.filter(q=>progress.seen[q.id]&&!progress.wrong[q.id]).length;
+  const rate=seen?Math.round(seenCorrect/seen*100):0;
+  const cats=categories().map(c=>{
+    const qs=QUESTIONS.filter(q=>q.cat===c);
+    const sq=qs.filter(q=>progress.seen[q.id]);
+    const cor=sq.filter(q=>!progress.wrong[q.id]).length;
+    return {c,n:qs.length,seen:sq.length,cor,rate:sq.length?Math.round(cor/sq.length*100):null};
+  }).sort((a,b)=>{if(a.rate===null)return 1;if(b.rate===null)return -1;return a.rate-b.rate;});
+  const wrong=QUESTIONS.filter(q=>progress.wrong[q.id])
+    .sort((a,b)=>((progress.wrongCount&&progress.wrongCount[b.id])||0)-((progress.wrongCount&&progress.wrongCount[a.id])||0));
+  let s='あなたはAWS認定ソリューションアーキテクト アソシエイト(SAA-C03)の学習コーチです。以下は私のドリル学習の記録です。(1)特に弱い分野トップ3 (2)間違えた問題に共通するつまずきのパターン (3)次にやるべき具体的な復習アクション を、初心者にもわかる日本語で教えてください。\n\n';
+  s+='【問題セット】'+(bank?bank.label:'')+'\n';
+  s+='【全体】全'+total+'問中 学習済'+seen+'問 / 解いた問題の正答率(いま正解状態の割合)='+rate+'%\n\n';
+  s+='【分野別の正答率（弱い順）】\n';
+  cats.forEach(x=>{s+='- '+x.c+'：'+(x.rate===null?'未着手':x.seen+'問中'+x.cor+'問正解（'+x.rate+'%）')+'（全'+x.n+'問）\n';});
+  s+='\n【いまつまずいている問題（間違いプール '+wrong.length+'問・間違い回数つき）】\n';
+  wrong.forEach((q,i)=>{
+    const wc=(progress.wrongCount&&progress.wrongCount[q.id])||0;
+    const cards=(q.cards||[]).join('・');
+    s+=(i+1)+'. ['+q.cat+']'+(wc>=2?' ✕'+wc+'回':'')+' 問われたこと: '+stripTags(q.ask||'')+' / 決め手: '+stripTags(q.keypoint||'')+(cards?' / 関連: '+cards:'')+'\n';
+  });
+  return s;
+}
+function copyWeakness(){
+  if(!Object.keys(progress.seen).length){showToast('先に問題を解いてください');return;}
+  const text=buildWeaknessPrompt();
+  const done=()=>showToast('📋 弱点相談プロンプトをコピー。Claude等に貼り付けてください');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>weakFallback(text,done));
+  }else weakFallback(text,done);
+}
+function weakFallback(text,done){
+  const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');done&&done();}catch(e){showToast('コピーできませんでした。長押しで選択してください');}
+  document.body.removeChild(ta);
 }
 
 /* ===== ふっかつのじゅもん（進捗の端末間引き継ぎ・案B フル） ===== */
