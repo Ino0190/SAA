@@ -905,7 +905,7 @@ function renderReview(){
   const ans=ansArr(q);
   const opts=document.getElementById('rvOpts');opts.innerHTML='';
   q.options.forEach((o,i)=>{
-    const d=document.createElement('div');d.className='opt disabled'+(ans.includes(i)?' correct':'');
+    const d=document.createElement('div');d.className='opt';
     d.innerHTML=`<span class="lab">${'ABCDE'[i]}</span><span class="ot">${o}</span>`;
     opts.appendChild(d);
   });
