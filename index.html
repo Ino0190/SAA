@@ -225,6 +225,11 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
     <p>前回ミスした問題を、間違えた回数の多い順に復習。</p>
     <div class="cnt" id="cntWrong"></div>
   </div>
+  <div class="modecard" onclick="startReview()">
+    <h3>📖 間違えた問題の解説を読む</h3>
+    <p>解かずに、ミスした問題の解説だけをじっくり読む。解く時に流し読みした理由を、後でまとめて頭に入れる用。</p>
+    <div class="cnt" id="cntReview"></div>
+  </div>
   <div class="modecard" onclick="startMode('shuffle')">
     <h3>🎲 ランダム10問</h3>
     <p>スキマ時間用。シャッフルで10問。</p>
@@ -262,6 +267,22 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
   <div class="smeta" id="rMeta"></div>
   <div class="msg" id="rMsg"></div>
   <div class="reviewlist" id="rReview"></div>
+</section>
+
+<!-- 間違いの解説を読むモード -->
+<section class="screen" id="scReview">
+  <div class="qmeta"><span class="qcat" id="rvCat"></span><span id="rvIdx"></span></div>
+  <div class="qbody" id="rvBody"></div>
+  <div class="opts" id="rvOpts"></div>
+  <div class="exp on" id="rvExp"></div>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn ghost small" onclick="reviewGo(-1)">◀ 前</button>
+    <button class="btn ghost small" onclick="reviewClear()">✓ もう大丈夫</button>
+    <button class="btn primary" onclick="reviewGo(1)">次 ▶</button>
+  </div>
+  <div style="text-align:center;margin-top:10px">
+    <button class="btn ghost small" style="width:auto;display:inline-block;padding:8px 18px" onclick="goHome()">ホームへ</button>
+  </div>
 </section>
 
 <!-- 聞き流しモード -->
@@ -382,6 +403,7 @@ function renderHome(){
   document.getElementById('cntAll').textContent=`全${QUESTIONS.length}問`;
   const wrongCount=Object.keys(progress.wrong).filter(id=>progress.wrong[id]).length;
   document.getElementById('cntWrong').textContent=wrongCount?`${wrongCount}問たまっています`:'まだありません';
+  const cr=document.getElementById('cntReview');if(cr)cr.textContent=wrongCount?`${wrongCount}問の解説を読む`:'まだありません';
   const seen=Object.keys(progress.seen).length;
   const unseen=QUESTIONS.filter(q=>!progress.seen[q.id]).length;
   const cu=document.getElementById('cntUnseen');
@@ -845,6 +867,64 @@ function stopListen(){
 }
 
 function goHome(){show('scHome');document.getElementById('btnRow').style.display='none';document.getElementById('listenBar').style.display='none';document.getElementById('hTitle').textContent='SAA ドリル';renderHome();}
+
+/* ===== 間違いの解説を読むモード（解かずに弱点の解説だけ読む） ===== */
+let reviewState={list:[],idx:0};
+function startReview(){
+  const list=QUESTIONS.filter(q=>progress.wrong[q.id])
+    .sort((a,b)=>((progress.wrongCount&&progress.wrongCount[b.id])||0)-((progress.wrongCount&&progress.wrongCount[a.id])||0));
+  if(!list.length){alert('間違えた問題はまだありません。まず問題を解いてみましょう。');return;}
+  reviewState={list,idx:0};
+  show('scReview');document.getElementById('btnRow').style.display='none';
+  document.getElementById('hTitle').textContent='間違いの解説を読む';
+  renderReview();
+}
+function buildExpReadonly(q){
+  const ans=ansArr(q);
+  const ansFull=ans.map(i=>`<div class="ansfull"><span class="anslab">正解 ${'ABCDE'[i]}</span> ${stripTags(q.options[i])}</div>`).join('');
+  let elim=q.elim?'<div class="elim"><b>消去法：</b>'+q.elim+'</div>':'';
+  let terms='';
+  if(q.terms){const rows=q.terms.map(t=>'<div class="termrow"><b>'+t.t+'</b>：'+t.d+'</div>').join('');terms='<div class="h">📖 出てきた用語</div><div class="termbox">'+rows+'</div>';}
+  let conf='';
+  if(q.confusion){let cb;if(Array.isArray(q.confusion)){cb=q.confusion.map(c=>'<div class="confpair"><div class="confvs"><b>'+c.a+'</b> ⇔ <b>'+c.b+'</b></div><div class="confd">'+c.d+'</div></div>').join('');}else cb=q.confusion;conf='<div class="confbox"><div class="confh">⚡ 混同注意</div>'+cb+'</div>';}
+  let more=q.deep?'<button class="moreBtn" id="moreBtn" onclick="toggleDeep()">🔍 もっと詳しく（なぜ？）</button><div class="deep" id="deepBox">'+q.deep+'</div>':'';
+  let patternLink=q.pattern?'<a class="patternBtn" href="patterns.html#'+q.pattern+'" target="_blank" rel="noopener">🗺️ この構成をアーキ図で見る</a>':'';
+  const wc=(progress.wrongCount&&progress.wrongCount[q.id])||0;
+  const wcBadge=wc>=2?`<div class="verdict ng">✕ これまで${wc}回 間違えた</div>`:'';
+  return wcBadge+ansFull
+    +`<div class="h">本当に聞かれていたこと</div>${q.keypoint}`
+    +`<div class="h">なぜこれが正解か</div>${q.explain}`
+    +elim+conf+terms+more+patternLink;
+}
+function renderReview(){
+  const q=reviewState.list[reviewState.idx];if(!q){goHome();return;}
+  document.getElementById('rvCat').textContent=q.cat;
+  document.getElementById('rvIdx').textContent=`${reviewState.idx+1} / ${reviewState.list.length}`;
+  const multiHint=isMulti(q)?`<div class="multiHint">✓ ${ansArr(q).length}つ選ぶ問題（複数選択）</div>`:'';
+  document.getElementById('rvBody').innerHTML=multiHint+q.scenario+'<span class="ask">'+q.ask+'</span>';
+  const ans=ansArr(q);
+  const opts=document.getElementById('rvOpts');opts.innerHTML='';
+  q.options.forEach((o,i)=>{
+    const d=document.createElement('div');d.className='opt disabled'+(ans.includes(i)?' correct':'');
+    d.innerHTML=`<span class="lab">${'ABCDE'[i]}</span><span class="ot">${o}</span>`;
+    opts.appendChild(d);
+  });
+  document.getElementById('rvExp').innerHTML=buildExpReadonly(q);
+  window.scrollTo(0,0);
+}
+function reviewGo(d){
+  if(!reviewState.list.length)return;
+  reviewState.idx=(reviewState.idx+d+reviewState.list.length)%reviewState.list.length;
+  renderReview();
+}
+function reviewClear(){
+  const q=reviewState.list[reviewState.idx];if(!q)return;
+  progress.wrong[q.id]=false;saveProgress();
+  reviewState.list.splice(reviewState.idx,1);
+  if(!reviewState.list.length){alert('間違いプールの解説をすべて読み終えました🎉');goHome();return;}
+  if(reviewState.idx>=reviewState.list.length)reviewState.idx=reviewState.list.length-1;
+  renderReview();
+}
 
 /* ===== ふっかつのじゅもん（進捗の端末間引き継ぎ・案B フル） ===== */
 const JUMON_PREFIX='SAAv1:';
