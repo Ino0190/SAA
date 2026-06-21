@@ -404,6 +404,23 @@ const DATA=[
    tale:`<span class="a">DLM</span>はEBSスナップショット/AMIの作成・保持・削除をタグ＋スケジュールで自動化（EBS中心・手軽）。<span class="b">AWS Backup</span>はRDS/EFS/DynamoDB等も含めた複数サービス横断の一元バックアップ。`}
  ],
  notes:[
+  {h:"📖 こんな問題文が出たら（ストレージ移行・状況→サービス）",body:`<table class="gtbl">
+   <tr><th>問題文の状況</th><th>答え</th></tr>
+   <tr><td>OracleをPostgreSQLへ。業務を止めず継続複製(CDC)。スキーマ/ストアド変換も必要</td><td>DMS＋SCT</td></tr>
+   <tr><td>サーバーをOS・アプリ込みで丸ごとEC2へ一度きり移行</td><td>MGN</td></tr>
+   <tr><td>既存サーバーを継続複製しておき災害時に数分で起動・繰り返しDR</td><td>DRS（Elastic Disaster Recovery）</td></tr>
+   <tr><td>回線越しにファイルを継続的に差分同期</td><td>DataSync</td></tr>
+   <tr><td>回線が細い・数十TB以上を一度に。物理装置で搬送</td><td>Snowball</td></tr>
+   <tr><td>社内のSMB/NFS/iSCSI運用は残し、実体をS3に。ローカルキャッシュも</td><td>Storage Gateway</td></tr>
+   <tr><td>機械学習データをS3に。数百ノードから数百GB/秒で並列読み込み</td><td>FSx for Lustre</td></tr>
+   <tr><td>WindowsのSMB共有(AD認証)をそのままAWSへ</td><td>FSx for Windows</td></tr>
+   <tr><td>既存NetApp/ONTAPの機能・NFSとSMB両対応をそのまま活かす</td><td>FSx for NetApp ONTAP</td></tr>
+   <tr><td>複数LinuxからNFSで同時アクセス・容量自動伸縮・フルマネージド</td><td>EFS</td></tr>
+   <tr><td>大容量・順番に読み書き(ログ/ビッグデータ)・スループット重視・低コスト</td><td>EBS st1</td></tr>
+   <tr><td>単一ボリュームで2万IOPSを明示確保したいDB</td><td>EBS プロビジョンドIOPS(io2)</td></tr>
+   <tr><td>多数の移行ツールの進捗を1画面で横断管理・依存関係を発見</td><td>Migration Hub</td></tr>
+  </table>
+  <div class="decide">大別 ／ <b>DB移行</b>=DMS(+異種はSCT)・<b>サーバー移行</b>=MGN・<b>継続DR</b>=DRS・<b>ファイル転送</b>=DataSync/Snowball・<b>残して併用</b>=Storage Gateway・<b>共有FS</b>=FSx/EFS。</div>`},
   {h:"🔑 移行ツール早わかり（何を運ぶ・どう運ぶ）",body:`<table class="gtbl">
    <tr><th>ツール</th><th>運ぶ対象・方法</th><th>合図</th></tr>
    <tr><td>DataSync</td><td>ファイルをネット越しに転送・同期</td><td>回線あり・継続的な差分同期</td></tr>
@@ -589,6 +606,23 @@ const DATA=[
    tale:`<span class="a">NLB</span>はL4（TCP/UDP）・超低遅延・高スループット・静的IP（非HTTPや極端な性能）。<span class="b">ALB</span>はL7（HTTP/HTTPS）・パス/ホストベースルーティング・WAF連携（Webアプリ）。`}
  ],
  notes:[
+  {h:"📖 こんな問題文が出たら（ネットワーク・状況→サービス）",body:`<table class="gtbl">
+   <tr><th>問題文の状況</th><th>答え</th></tr>
+   <tr><td>プライベートのEC2からS3へ大量転送。NATのデータ処理料金が高い。追加料金なしでネット非経由に</td><td>ゲートウェイ型VPCエンドポイント</td></tr>
+   <tr><td>プライベートからSQS/KMS等のAPIを、NAT/ネット経由せずプライベートIP(ENI)で</td><td>インターフェイス型(PrivateLink)</td></tr>
+   <tr><td>プライベートのサーバーが外へパッチ取得は必要、外からは入られたくない。マネージドで</td><td>NAT Gateway</td></tr>
+   <tr><td>IPv6で外向きだけ通したい・着信は防ぐ</td><td>Egress-Only IGW</td></tr>
+   <tr><td>VPCが20個超でピアリングが爆発。ハブに集約しルーティング一元化</td><td>Transit Gateway</td></tr>
+   <tr><td>非HTTP(TCP/UDP)のゲーム。固定IP・遅延/パケットロス改善・キャッシュ不可</td><td>Global Accelerator</td></tr>
+   <tr><td>世界中へ動画/画像をエッジでキャッシュ配信</td><td>CloudFront</td></tr>
+   <tr><td>特定大都市圏で一桁ミリ秒 / 5G携帯網の中で超低遅延</td><td>Local Zones / Wavelength</td></tr>
+   <tr><td>オンプレと安定・低遅延の専用線 / 安く即日の暗号トンネル</td><td>Direct Connect / Site-to-Site VPN</td></tr>
+   <tr><td>在宅社員の個人端末からVPCへ接続</td><td>Client VPN</td></tr>
+   <tr><td>どの通信が許可/拒否されたか記録(送信元/宛先IP・ポート)・監査</td><td>VPCフローログ</td></tr>
+   <tr><td>サードパーティのFW/IDSを経路に透過挿入してインライン検査</td><td>Gateway Load Balancer</td></tr>
+   <tr><td>オンプレDNSとVPCの名前解決を双方向(ハイブリッドDNS)</td><td>Route 53 Resolver</td></tr>
+  </table>
+  <div class="decide">大別 ／ <b>AWSサービスへ内部接続</b>=エンドポイント(S3/DynamoDB=GW型・他=IF型)・<b>外向き</b>=NAT/Egress-Only・<b>束ねる</b>=TGW・<b>速く届ける</b>=CloudFront/GA/LocalZones・<b>オンプレ接続</b>=DX/VPN。</div>`},
   {h:"🔑 VPCエンドポイント2型（最頻出・ここで複数問取れる）",body:`<table class="gtbl">
    <tr><th>型</th><th>対象</th><th>つなぎ方</th><th>料金</th><th>合図</th></tr>
    <tr><td>ゲートウェイ型</td><td>S3 と DynamoDB だけ</td><td>ルートテーブルに経路を追加</td><td>追加料金なし</td><td>S3/DynamoDBへ安く・NAT回避</td></tr>
@@ -682,6 +716,24 @@ const DATA=[
    tale:`<span class="a">VPCエンドポイント＋バケットポリシー</span>でインターネットに出さず特定VPCのみに絞る（安全）。<span class="b">パブリック化</span>は誰でもアクセス可（機密データに不可）。経路を絞るのが正解。`}
  ],
  notes:[
+  {h:"📖 こんな問題文が出たら（セキュリティ・状況→サービス）",body:`<table class="gtbl">
+   <tr><th>問題文の状況</th><th>答え</th></tr>
+   <tr><td>アカウント全体の不審なAPI・侵害された認証情報・不正通信を運用負荷少なく検知</td><td>GuardDuty</td></tr>
+   <tr><td>EC2/コンテナの既知の脆弱性(CVE)を継続スキャン</td><td>Inspector</td></tr>
+   <tr><td>S3に個人情報(PII)が紛れていないか自動で発見・分類</td><td>Macie</td></tr>
+   <tr><td>検知の後、なぜ起きたか・誰が関与したかを相関分析して根本原因調査</td><td>Detective</td></tr>
+   <tr><td>XSS・SQLインジェクション(L7の攻撃)から守る</td><td>WAF</td></tr>
+   <tr><td>大量アクセスのDDoSを緩和(攻撃中のスケーリング費用も補償したい)</td><td>Shield(Advanced)</td></tr>
+   <tr><td>VPCのネットワーク層でドメインフィルタ/IPS・ステートフル検査</td><td>Network Firewall</td></tr>
+   <tr><td>Organizations配下の全アカウントにWAF/SGルールを一元適用</td><td>Firewall Manager</td></tr>
+   <tr><td>専用シングルテナントHSM・鍵を自社単独制御・FIPS 140-2 L3</td><td>CloudHSM</td></tr>
+   <tr><td>DBパスワード等を保管し定期的に自動ローテーション</td><td>Secrets Manager</td></tr>
+   <tr><td>EC2上のアプリに長期キーを持たせず権限を渡す</td><td>IAMロール</td></tr>
+   <tr><td>別アカウント/サードパーティに一時認証情報で必要分だけ・なりすまし防止</td><td>AssumeRole＋External ID</td></tr>
+   <tr><td>MFA時のみ・社内IPのみ操作を許可</td><td>IAM条件キー(Condition)</td></tr>
+   <tr><td>S3を非公開のまま誤削除/改ざんを一定期間不可(WORM)</td><td>S3 Object Lock</td></tr>
+  </table>
+  <div class="decide">大別 ／ <b>検知</b>(GuardDuty攻撃/Inspector弱点/Macie機密/Detective調査)・<b>壁</b>(WAF=L7/Shield=DDoS/Network Firewall=VPC層)・<b>鍵</b>(KMS/CloudHSM/Secrets)・<b>認可</b>(ロール/条件キー/AssumeRole)。</div>`},
   {h:"🔑 セキュリティ早わかり（検知・防御・鍵・認可）",body:`<table class="gtbl">
    <tr><th>サービス</th><th>何をする（決め手）</th></tr>
    <tr><td>GuardDuty</td><td>不審な挙動・攻撃を検知（脅威検知）</td></tr>
@@ -806,6 +858,22 @@ const DATA=[
    <tr><td>OpenSearch</td><td>全文検索エンジン＋可視化(Kibana相当)</td><td>ログを横断検索・障害調査・ダッシュボード</td></tr>
   </table>
   <div class="decide">決め手 ／ <b>コードでETL</b>→Glue ／ <b>ノーコード準備</b>→DataBrew ／ <b>クラスタ制御の大規模処理</b>→EMR ／ <b>ログの全文検索・可視化</b>→OpenSearch。「サーバーレスETL」ならGlue、「Sparkを自分で」ならEMR。OpenSearchは分析でなく"検索"が主目的の時。</div>`},
+  {h:"📖 こんな問題文が出たら（データ分析・状況→サービス）",body:`<table class="gtbl">
+   <tr><th>問題文の状況（こう書かれる）</th><th>答え</th></tr>
+   <tr><td>毎秒数十万件。複数チームが同じデータを別ペースで読む。後で過去分を読み直す</td><td>Kinesis Data Streams</td></tr>
+   <tr><td>ログを手間なくS3へ。変換・圧縮込み。シャード管理やコンシューマーは書きたくない</td><td>Kinesis Data Firehose</td></tr>
+   <tr><td>S3のログを月数回アドホックにSQL。常時サーバーは立てない。使った分だけ</td><td>Athena</td></tr>
+   <tr><td>数十TBを毎日大量集計しBIで。複雑JOIN・常時稼働の本格基盤</td><td>Redshift</td></tr>
+   <tr><td>Redshiftで、滅多に使わない古いデータをロードせずS3のままクエリ・結合</td><td>Redshift Spectrum</td></tr>
+   <tr><td>大量ログをキーワード全文検索・Kibana風に可視化して障害調査</td><td>OpenSearch</td></tr>
+   <tr><td>複数ソースを定期ETL。サーバー管理なし。スキーマ自動カタログ</td><td>Glue</td></tr>
+   <tr><td>既存Hadoop/Sparkをそのまま・クラスタを細かく制御</td><td>EMR</td></tr>
+   <tr><td>アナリストがコードを書かず画面でデータ整形・レシピ再利用</td><td>Glue DataBrew</td></tr>
+   <tr><td>流れ続けるストリームに5分移動平均や異常検知をリアルタイム継続計算</td><td>Managed Flink</td></tr>
+   <tr><td>データレイク(S3)をテーブル/列/行レベルで部門ごとに権限一元管理</td><td>Lake Formation</td></tr>
+   <tr><td>既存KafkaアプリをKafka APIのままAWSへ・ブローカー運用は任せる</td><td>Amazon MSK</td></tr>
+  </table>
+  <div class="decide">迷ったら ／ <b>取り込み</b>(Streams=複数読み・リプレイ／Firehose=流すだけ)・<b>SQL分析</b>(Athena=都度／Redshift=常時DWH／Spectrum=ロードせず)・<b>検索</b>(OpenSearch)・<b>ETL</b>(Glue／DataBrew／EMR)で大別。</div>`},
 /*ANL*/ ]},
 {ico:"🏥",t:"保険プラン（可用性・DR）",
  story:`災害にどう備えるかは「保険のグレード」で考える。掛け金最安・復旧は数時間の <span class="who">バックアップ&リストア</span>、心臓だけ動かしておく <span class="who">パイロットライト</span>、縮小版を常時温めておく <span class="who">ウォームスタンバイ</span>、両拠点をフル稼働させる最高級の <span class="who">アクティブ/アクティブ</span>。守る範囲も「同じ街の別ビル（AZ）」か「別の街（リージョン）」かで分かれる。`,
@@ -911,6 +979,19 @@ const DATA=[
    tale:`<span class="a">フィルターポリシー</span>はメッセージ属性で各サブスクライバーに必要なものだけ配信（無駄なし）。<span class="b">全配信＋各自破棄</span>は不要メッセージも届けてから捨てる（無駄な受信・処理）。`}
  ],
  notes:[
+  {h:"📖 こんな問題文が出たら（疎結合・連携・状況→サービス）",body:`<table class="gtbl">
+   <tr><th>問題文の状況</th><th>答え</th></tr>
+   <tr><td>注文の急増でバックエンドが落ちる。間に挟んで溜め、ワーカーが順に処理</td><td>SQS</td></tr>
+   <tr><td>1つのイベントを在庫・通知・分析へ同時配信。将来受け手が増える</td><td>SNS</td></tr>
+   <tr><td>発生源と受け手を切り離し、イベントをルールで各所へ振り分け</td><td>EventBridge</td></tr>
+   <tr><td>多段処理を順序・分岐・リトライ付きで確実に・可視化して管理</td><td>Step Functions</td></tr>
+   <tr><td>受付順を保証＋同じメッセージを二度処理しない(重複排除)・高スループットは不要</td><td>SQS FIFOキュー</td></tr>
+   <tr><td>処理が可視性タイムアウトより長引いて再配信・二重処理。空ポーリングも無駄</td><td>可視性タイムアウト延長＋ロングポーリング</td></tr>
+   <tr><td>既存のActiveMQ/RabbitMQアプリを無改修で移行</td><td>Amazon MQ</td></tr>
+   <tr><td>到達率・SPF/DKIM管理つきで本格的にメール送信</td><td>SES</td></tr>
+   <tr><td>数百万規模のcron/一回限りスケジュールでAWSターゲットを直接起動</td><td>EventBridge Scheduler</td></tr>
+  </table>
+  <div class="decide">大別 ／ <b>溜める</b>=SQS・<b>一斉配信</b>=SNS・<b>ルールで振り分け</b>=EventBridge・<b>順序の段取り</b>=Step Functions・<b>順序+重複排除</b>=FIFO。</div>`},
   {h:"🔑 疎結合・連携の早わかり（溜める・配る・ルーティング・段取り）",body:`<table class="gtbl">
    <tr><th>サービス</th><th>何をする（決め手）</th></tr>
    <tr><td>SQS</td><td>メッセージを溜め1件ずつ処理（スパイク吸収）</td></tr>
