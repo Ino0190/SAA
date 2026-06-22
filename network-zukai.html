@@ -1063,7 +1063,7 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 <h2 style="font-size:20px;color:#183251;margin-top:24px;margin-bottom:6px">具体例：Webアプリが攻撃される一連の流れで、各サービスがどこで働くか</h2>
 <p style="font-size:16px;color:#121212;margin-bottom:10px">左から時間の流れ。<b>事前に固める → 入口で防ぐ → すり抜けを検知 → 結果を集約 → 事後に調査</b>。同じ「セキュリティ」でも働く<b>タイミング</b>が違う（だからInspector＝事前／Detective＝事後で別物）。</p>
 <div class="stage">
-<svg viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<svg viewBox="0 0 1000 335" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
 <defs><marker id="tl" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
 <line x1="20" y1="40" x2="960" y2="40" stroke="#5e5e5e" stroke-width="2.5" marker-end="url(#tl)"/>
 <text x="20" y="28" font-size="14" font-weight="700" fill="#5e5e5e">時間の流れ →</text>
@@ -1086,10 +1086,17 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 <line x1="385" y1="141" x2="413" y2="129" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tl)"/>
 <line x1="585" y1="129" x2="598" y2="129" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tl)"/>
 <line x1="770" y1="129" x2="788" y2="135" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tl)"/>
-<rect x="20" y="236" width="960" height="44" fill="#fafafa" stroke="#ba8425" stroke-dasharray="5 3"/><text x="500" y="263" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7a471a">Firewall Manager｜①〜②の防御ルール(WAF/SG等)を全アカウントに横断で一律適用・新規にも自動</text>
-<text x="40" y="312" font-size="13" fill="#121212">物語：①Inspectorで弱点を塞ぎMacieで機密の場所を把握しConfigで設定を点検 → ②攻撃が来たらWAF/Shield/Network Firewallが入口で弾く</text>
-<text x="40" y="336" font-size="13" fill="#121212">→ ③それでもすり抜けた不審な動きをGuardDutyが検知 → ④Security Hubに結果が集まる → ⑤Detectiveで侵入経路を、CloudTrailで操作者を調べる</text>
-<text x="40" y="366" font-size="12.5" fill="#5e5e5e">Inspector(事前に穴を探す=予防) と Detective(事後に原因を追う=捜査) は名前が似ても働く時間が正反対</text>
+<rect x="12" y="80" width="186" height="124" fill="none" stroke="#1f9d55" stroke-dasharray="5 3" stroke-width="1.5"/>
+<rect x="205" y="80" width="186" height="124" fill="none" stroke="#ba8425" stroke-dasharray="5 3" stroke-width="1.5"/>
+<rect x="409" y="100" width="182" height="58" fill="none" stroke="#1f9d55" stroke-dasharray="5 3" stroke-width="1.5"/>
+<text x="105" y="216" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f6b3d">検知/構成の結果は</text>
+<text x="105" y="232" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f6b3d">→ Security Hubが集約</text>
+<text x="500" y="176" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6b3d">↑これもSecurity Hubへ</text>
+<text x="298" y="216" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a471a">Firewall Manager 一律適用</text>
+<text x="298" y="232" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a471a">（＋SG・DNS FW）</text>
+<text x="40" y="262" font-size="13" fill="#121212">物語：①Inspectorで弱点を塞ぎMacieで機密の場所を把握しConfigで設定を点検 → ②攻撃が来たらWAF/Shield/Network Firewallが入口で弾く</text>
+<text x="40" y="286" font-size="13" fill="#121212">→ ③それでもすり抜けた不審な動きをGuardDutyが検知 → ④Security Hubに結果が集まる → ⑤Detectiveで侵入経路を、CloudTrailで操作者を調べる</text>
+<text x="40" y="314" font-size="12.5" fill="#5e5e5e">横断の2レイヤー＝緑枠(検知/構成の結果)を束ねるのがSecurity Hub ／ 金枠(防御ルール)を全アカウントに配るのがFirewall Manager（束ねる対象が違う）</text>
 </svg>
 </div>
 <div class="btns" id="secBtns">
@@ -1182,6 +1189,237 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
   document.getElementById('secBtns').addEventListener('click',e=>{
     const b=e.target.closest('button'); if(!b)return;
     document.querySelectorAll('#secBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
+<h1 style="margin-top:56px">認証・アクセス制御・暗号化（誰に権限を／鍵をどう持つ／公開をどう防ぐ）</h1>
+<p class="lead">セキュリティの中でも「検知・防御」とは別の、<b>認証・アクセス制御・暗号化</b>の地図。模試の最弱ドメインがここ。「誰に権限を渡すか」「鍵を誰が持つか」「公開をどう防ぐか」の3グループで整理する。下のボタンで状況を押すと該当が強調される。</p>
+<div class="btns" id="authBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="iamrole">EC2等に長期キーを持たせず権限を渡す</button>
+<button data-k="idc">社員を社内ID(AD)でSSO・IAMユーザーを増やさない</button>
+<button data-k="cognito">アプリの利用者(一般ユーザー)をログインさせる</button>
+<button data-k="sts">別アカウントに一時権限だけ渡す</button>
+<button data-k="kms">鍵を手軽にマネージドで管理・暗号化</button>
+<button data-k="cloudhsm">専有HSMで鍵を完全自社制御(FIPS L3)</button>
+<button data-k="presign">非公開のまま期限付きで一時アクセス</button>
+<button data-k="blockpublic">うっかり公開をアカウント全体で一律禁止</button>
+<button data-k="objectlock">管理者すら一定期間消せない(WORM)</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 620" id="authSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="ab" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<!-- Q1→3目的 -->
+<line x1="180" y1="300" x2="226" y2="115" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/>
+<line x1="180" y1="310" x2="226" y2="333" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/>
+<line x1="180" y1="320" x2="226" y2="505" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/>
+<!-- 権限→4葉（線＋条件ラベル） -->
+<line x1="384" y1="100" x2="648" y2="44" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/><text x="470" y="44" font-size="11" fill="#5e5e5e">自AWS内のEC2/Lambda</text>
+<line x1="384" y1="108" x2="648" y2="100" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/><text x="470" y="92" font-size="11" fill="#5e5e5e">社員のSSO(既存AD)</text>
+<line x1="384" y1="116" x2="648" y2="156" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/><text x="470" y="140" font-size="11" fill="#5e5e5e">アプリの利用者(一般)</text>
+<line x1="384" y1="124" x2="648" y2="212" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/><text x="470" y="200" font-size="11" fill="#5e5e5e">別アカウント/外部</text>
+<!-- 鍵→2葉 -->
+<line x1="384" y1="326" x2="648" y2="300" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/><text x="470" y="292" font-size="11" fill="#5e5e5e">手軽・共有(マルチテナント)でOK</text>
+<line x1="384" y1="340" x2="648" y2="360" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/><text x="470" y="356" font-size="11" fill="#b01212">シングルテナント/専有HW/FIPS L3なら</text>
+<!-- 公開→3葉 -->
+<line x1="384" y1="500" x2="648" y2="446" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/><text x="470" y="438" font-size="11" fill="#5e5e5e">一時的に見せる</text>
+<line x1="384" y1="510" x2="648" y2="502" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/><text x="470" y="494" font-size="11" fill="#5e5e5e">未然に一律禁止</text>
+<line x1="384" y1="520" x2="648" y2="558" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ab)"/><text x="470" y="548" font-size="11" fill="#5e5e5e">消されたくない(WORM)</text>
+<!-- ルート -->
+<rect x="20" y="270" width="160" height="80" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="100" y="304" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">何をしたい？</text><text x="100" y="326" text-anchor="middle" font-size="10.5" fill="#7a471a">権限/鍵/公開対策</text>
+<!-- 中間ノード -->
+<rect x="226" y="78" width="158" height="56" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="305" y="102" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">🔑 権限を渡す</text><text x="305" y="121" text-anchor="middle" font-size="10.5" fill="#5e5e5e">誰に渡す/誰がログイン？</text>
+<rect x="226" y="305" width="158" height="56" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="305" y="329" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6b3d">🔒 鍵を持つ</text><text x="305" y="348" text-anchor="middle" font-size="10.5" fill="#1f6b3d">どこまで自社管理？</text>
+<rect x="226" y="482" width="158" height="56" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="305" y="506" text-anchor="middle" font-size="13" font-weight="700" fill="#b01212">🚪 公開を防ぐ</text><text x="305" y="525" text-anchor="middle" font-size="10.5" fill="#b01212">何を防ぐ？</text>
+<!-- 葉：権限 -->
+<g class="acn" data-k="iamrole"><rect x="650" y="20" width="330" height="48" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="665" y="41" font-size="13" font-weight="700" fill="#183251">IAMロール</text><text x="665" y="60" font-size="10.5" fill="#5e5e5e">EC2/Lambdaに一時権限・長期キー不要</text></g>
+<g class="acn" data-k="idc"><rect x="650" y="76" width="330" height="48" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="665" y="97" font-size="13" font-weight="700" fill="#183251">IAM Identity Center</text><text x="665" y="116" font-size="10.5" fill="#5e5e5e">社員のSSO・IAMユーザーを増やさない</text></g>
+<g class="acn" data-k="cognito"><rect x="650" y="132" width="330" height="48" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="665" y="153" font-size="13" font-weight="700" fill="#7a471a">Cognito</text><text x="665" y="172" font-size="10.5" fill="#7a471a">アプリの利用者(toC)のサインアップ/ログイン</text></g>
+<g class="acn" data-k="sts"><rect x="650" y="188" width="330" height="48" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="665" y="209" font-size="12.5" font-weight="700" fill="#7a471a">STS+AssumeRole+External ID</text><text x="665" y="228" font-size="10.5" fill="#7a471a">別アカウント/外部に一時権限・なりすまし防止</text></g>
+<!-- 葉：鍵 -->
+<g class="acn" data-k="kms"><rect x="650" y="276" width="330" height="48" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="665" y="297" font-size="13" font-weight="700" fill="#1f6b3d">KMS</text><text x="665" y="316" font-size="10.5" fill="#1f6b3d">手軽・共有・自動ローテーション・多サービス統合</text></g>
+<g class="acn" data-k="cloudhsm"><rect x="650" y="336" width="330" height="48" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="665" y="357" font-size="13" font-weight="700" fill="#1f6b3d">CloudHSM</text><text x="665" y="376" font-size="10.5" fill="#1f6b3d">専有HW・FIPS 140-2 Level3・自社単独制御</text></g>
+<!-- 葉：公開 -->
+<g class="acn" data-k="presign"><rect x="650" y="422" width="330" height="48" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="665" y="443" font-size="13" font-weight="700" fill="#b01212">署名付きURL</text><text x="665" y="462" font-size="10.5" fill="#b01212">非公開のまま期限付きで本人だけに一時アクセス</text></g>
+<g class="acn" data-k="blockpublic"><rect x="650" y="478" width="330" height="48" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="665" y="499" font-size="13" font-weight="700" fill="#b01212">S3 Block Public Access</text><text x="665" y="518" font-size="10.5" fill="#b01212">うっかり公開をアカウント全体で未然に禁止</text></g>
+<g class="acn" data-k="objectlock"><rect x="650" y="534" width="330" height="48" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="665" y="555" font-size="13" font-weight="700" fill="#b01212">S3 Object Lock（WORM）</text><text x="665" y="574" font-size="10.5" fill="#b01212">一定期間は管理者すら削除・改ざん不可</text></g>
+</svg>
+</div>
+<div class="panel" id="authPanel" style="margin-top:14px">ボタンを押すと、その要件に合うサービスだけ強調されます。</div>
+<table>
+<caption>こう問われたら（決め手）</caption>
+<tr><th>要件</th><th>サービス</th></tr>
+<tr><td>EC2/Lambdaに長期キーを持たせず権限を渡す</td><td class="svc">IAMロール</td></tr>
+<tr><td>社員を社内ID(AD)でSSO・IAMユーザーを大量に作らない・長期認証情報を発行しない</td><td class="svc">IAM Identity Center</td></tr>
+<tr><td>アプリの利用者(エンドユーザー・toC)のサインアップ/ログイン</td><td class="svc">Cognito</td></tr>
+<tr><td>別アカウント/サードパーティに一時権限だけ・なりすまし(confused deputy)防止</td><td class="svc">STS + AssumeRole + External ID</td></tr>
+<tr><td>鍵を手軽にマネージド管理・自動ローテーション・多サービス統合</td><td class="svc">KMS</td></tr>
+<tr><td>専有シングルテナントHSM・FIPS 140-2 Level3・自社単独制御</td><td class="svc">CloudHSM</td></tr>
+<tr><td>非公開のまま期限付きで本人だけにアクセス許可</td><td class="svc">署名付きURL</td></tr>
+<tr><td>うっかり公開をアカウント全体で一律ブロック</td><td class="svc">S3 Block Public Access</td></tr>
+<tr><td>一定期間は管理者すら削除/改ざん不可(WORM)</td><td class="svc">S3 Object Lock</td></tr>
+</table>
+<p style="font-size:16px;margin-top:12px;color:#121212">迷う対の決め手：<b>KMS（共有・手軽・マルチテナント）↔ CloudHSM（専有HW・FIPS L3・シングルテナント・AWSにも触らせない）</b>＝「専有/FIPS Level3/シングルテナント」ならCloudHSM、他は全部KMS／<b>IAMロール（自AWS内に権限）↔ STS+AssumeRole（別アカウントに一時権限）</b>／<b>Cognito（アプリのお客さんの認証・toC）↔ IAM Identity Center（社員のAWS SSO・社内）</b>。</p>
+
+<h2 style="font-size:20px;color:#183251;margin-top:28px;margin-bottom:6px">紛らわしい3つ：Secrets Manager / Parameter Store / Systems Manager</h2>
+<p style="font-size:16px;color:#121212;margin-bottom:8px">名前が似てるが別物。「秘密を自動更新」「設定値を安く」「サーバーを運用」で分かれる。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 250" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="sm" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<line x1="190" y1="100" x2="488" y2="48" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#sm)"/><text x="300" y="40" font-size="11.5" fill="#5e5e5e">秘密を安全に＋定期自動更新</text>
+<line x1="190" y1="112" x2="488" y2="120" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#sm)"/><text x="300" y="108" font-size="11.5" fill="#5e5e5e">設定値/簡単な秘密を安く</text>
+<line x1="190" y1="124" x2="488" y2="192" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#sm)"/><text x="300" y="186" font-size="11.5" fill="#5e5e5e">サーバーを運用(接続/パッチ/コマンド)</text>
+<rect x="20" y="80" width="170" height="80" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="105" y="116" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">何をしたい？</text><text x="105" y="138" text-anchor="middle" font-size="10.5" fill="#7a471a">秘密/設定/運用</text>
+<rect x="490" y="24" width="490" height="50" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="505" y="46" font-size="13.5" font-weight="700" fill="#b01212">Secrets Manager</text><text x="505" y="65" font-size="11" fill="#b01212">秘密(DB認証情報/APIキー)の保管＋自動ローテーション(看板)・有料</text>
+<rect x="490" y="96" width="490" height="50" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="505" y="118" font-size="13.5" font-weight="700" fill="#183251">Parameter Store（SSM）</text><text x="505" y="137" font-size="11" fill="#5e5e5e">設定値や簡単な秘密を保管・基本無料・自動ローテーションなし</text>
+<rect x="490" y="168" width="490" height="58" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="505" y="190" font-size="13.5" font-weight="700" fill="#1f6b3d">Systems Manager（SSM）</text><text x="505" y="208" font-size="11" fill="#1f6b3d">サーバー運用の道具箱：Session Manager(踏み台/SSHキーなし接続・監査)</text><text x="505" y="222" font-size="11" fill="#1f6b3d">・Patch Manager(一括パッチ)・Run Command(一斉実行)</text>
+</svg>
+</div>
+<table>
+<caption>こう問われたら（決め手）</caption>
+<tr><th>要件</th><th>サービス</th></tr>
+<tr><td>認証情報を安全に保管＋<b>定期的に自動ローテーション</b></td><td class="svc">Secrets Manager</td></tr>
+<tr><td>設定値・接続先URL・簡単な秘密を<b>無料で</b>保管（ローテーション不要）</td><td class="svc">Parameter Store</td></tr>
+<tr><td><b>SSHキーや踏み台なし</b>でEC2にシェル接続・ポートを開けない・操作を監査</td><td class="svc">Systems Manager（Session Manager）</td></tr>
+<tr><td>多数のサーバーにOSパッチを一括適用</td><td class="svc">Systems Manager（Patch Manager）</td></tr>
+</table>
+<p style="font-size:16px;margin-top:10px;color:#121212">決め手：<b>自動ローテーション/DB認証情報の定期更新＝Secrets Manager</b>／<b>設定値を安く・ローテ不要＝Parameter Store</b>／<b>踏み台なし接続・パッチ・コマンド実行＝Systems Manager</b>。たとえ＝Secrets Manager(鍵を取り替えてくれる金庫)／Parameter Store(設定を入れる引き出し)／Systems Manager(サーバーの管理人室)。</p>
+
+<script>
+(function(){
+  const notes={
+    iamrole:'EC2やLambdaにアクセスキー(長期認証情報)を置くと漏洩リスク。<b>IAMロール</b>を付与すれば一時認証情報が自動で配られ、鍵を持たせずに権限を渡せる。「長期キーを持たせない/置かない」と来たら必ずこれ。',
+    idc:'既存の社内ID(Active Directory)と連携して<b>社員</b>がSSOログイン。<b>IAM Identity Center</b>ならIAMユーザーを大量に作らず、長期認証情報も発行しない。「既存ID」「社員のSSO」が合図。<b>アプリの利用者(toC)のログインはCognito</b>＝混同注意。',
+    cognito:'<b>アプリの利用者（エンドユーザー＝あなたのサービスのお客さん）</b>のサインアップ/ログイン・ソーシャルログインを担う → <b>Cognito</b>。AWSを操作する権限(IAM系)とは別レイヤー。「アプリのユーザー認証」「toC」ならこれ。社員のAWS SSOはIAM Identity Center。',
+    sts:'別アカウントやサードパーティに、長期キーを渡さず<b>必要な権限だけ一時的に</b>。<b>STS + AssumeRole</b>でロールを引き受けさせ、<b>External ID</b>でconfused deputy(なりすまし)を防ぐ。',
+    kms:'鍵をマネージドで手軽に管理・自動ローテーション・多くのAWSサービスと統合・CloudTrailで鍵使用を監査 → <b>KMS</b>。マルチテナント(共有)。',
+    cloudhsm:'専有のシングルテナントHSMで鍵を完全に自社制御・<b>FIPS 140-2 Level3</b>・AWSの管理アクセスを排除 → <b>CloudHSM</b>。厳格なコンプラ要件向け。「専有」「FIPS Level3」が合図。',
+    presign:'S3を非公開のまま、特定の人に<b>期限付きで一時アクセス</b>を許す → <b>署名付きURL</b>。バケット公開もIAMユーザー乱造もしない。',
+    blockpublic:'バケットがうっかり公開されるのを、個別の見張りでなく<b>アカウント全体で一律ブロック</b> → <b>S3 Block Public Access</b>。事後検知でなく上位で禁止。',
+    objectlock:'読み取りは許可しつつ、一定期間は<b>管理者すら削除・改ざんできない</b>ようにする → <b>S3 Object Lock(WORM)</b>。権限でなく技術的に不変を強制。',
+    all:'3グループで覚える＝🔑権限を渡す(IAMロール/Identity Center/Cognito/STS+AssumeRole)・🔒鍵(KMS共有/CloudHSM専有)・🚪公開を防ぐ(署名付きURL/Block Public Access/Object Lock)。'
+  };
+  const svg=document.getElementById('authSvg');
+  const panel=document.getElementById('authPanel');
+  const nodes=svg.querySelectorAll('.acn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.25';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('authBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#authBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
+<h1 style="margin-top:56px">高可用アーキの組み立て方（複数AZ・Auto Scaling・可用性の使い分け）</h1>
+<p class="lead">本番は「複数サービスを組み合わせた高可用構成」がよく出る（最多の間違いもここ）。<b>Web3層を複数AZに分散＋DBは自動フェイルオーバー＋需要に自動追従＋平常時コスト</b>の4条件を1つずつ潰す。まず典型構成の地図。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 430" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="ha" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<text x="500" y="30" text-anchor="middle" font-size="14" fill="#5e5e5e">ユーザー</text>
+<rect x="430" y="40" width="140" height="34" fill="#edf2f4" stroke="#21537f"/><text x="500" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">Route 53 (DNS)</text>
+<line x1="500" y1="74" x2="500" y2="92" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ha)"/>
+<rect x="410" y="94" width="180" height="34" fill="#edf2f4" stroke="#21537f"/><text x="500" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">ALB（複数AZに分散）</text>
+<rect x="40" y="150" width="430" height="250" fill="#eaf3ea" stroke="#1f9d55" stroke-dasharray="5 3"/><text x="60" y="172" font-size="13" font-weight="700" fill="#1f6b3d">アベイラビリティゾーン A</text>
+<rect x="530" y="150" width="430" height="250" fill="#eaf3ea" stroke="#1f9d55" stroke-dasharray="5 3"/><text x="550" y="172" font-size="13" font-weight="700" fill="#1f6b3d">アベイラビリティゾーン C</text>
+<line x1="460" y1="128" x2="240" y2="186" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ha)"/>
+<line x1="540" y1="128" x2="760" y2="186" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ha)"/>
+<rect x="120" y="190" width="270" height="60" fill="#fff" stroke="#21537f"/><text x="255" y="214" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">EC2（Auto Scaling）</text><text x="255" y="234" text-anchor="middle" font-size="11" fill="#5e5e5e">需要に応じ自動で増減</text>
+<rect x="610" y="190" width="270" height="60" fill="#fff" stroke="#21537f"/><text x="745" y="214" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">EC2（Auto Scaling）</text><text x="745" y="234" text-anchor="middle" font-size="11" fill="#5e5e5e">需要に応じ自動で増減</text>
+<rect x="120" y="300" width="270" height="74" fill="#fff" stroke="#b01212"/><text x="255" y="326" text-anchor="middle" font-size="13" font-weight="700" fill="#b01212">RDS プライマリ</text><text x="255" y="346" text-anchor="middle" font-size="11" fill="#5e5e5e">読み書き</text><text x="255" y="363" text-anchor="middle" font-size="11" fill="#5e5e5e">(またはAuroraライター)</text>
+<rect x="610" y="300" width="270" height="74" fill="#fff" stroke="#b01212" stroke-dasharray="4 2"/><text x="745" y="326" text-anchor="middle" font-size="13" font-weight="700" fill="#b01212">RDS スタンバイ</text><text x="745" y="346" text-anchor="middle" font-size="11" fill="#5e5e5e">同期・障害時に自動昇格</text><text x="745" y="363" text-anchor="middle" font-size="11" fill="#5e5e5e">(またはAuroraリーダー)</text>
+<line x1="390" y1="337" x2="608" y2="337" stroke="#b01212" stroke-width="1.5" marker-end="url(#ha)"/><text x="500" y="330" text-anchor="middle" font-size="11" fill="#b01212">同期レプリ/自動フェイルオーバー</text>
+<text x="500" y="418" text-anchor="middle" font-size="12.5" fill="#121212">4条件チェック：①複数AZ(AZ-A/C両方) ②DB自動フェイルオーバー(マルチAZ) ③需要追従(Auto Scaling) ④平常時コスト(過剰な別リージョンは避ける)</text>
+</svg>
+</div>
+
+<h2 style="font-size:20px;color:#183251;margin-top:28px;margin-bottom:6px">可用性の手立ての使い分け（混同しやすい）</h2>
+<p style="font-size:16px;color:#121212;margin-bottom:8px">「止めない」のか「読み取りを速く分散」か「リージョン災害に備える」かで道具が違う。下のボタンで状況を押すと該当が強調される。</p>
+<div class="btns" id="haBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="multiaz">DBを止めない・障害時に自動で切替</button>
+<button data-k="readreplica">DBの読み取りが多くて重い・分散したい</button>
+<button data-k="aurorarep">Aurora・AZ障害でも数分で書き込み再開</button>
+<button data-k="global">リージョンまるごとの災害に備える</button>
+<button data-k="r53fail">リージョン障害時にDNSで自動切替</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 390" id="haSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="hb" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<!-- 分岐線 -->
+<line x1="180" y1="175" x2="648" y2="52" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#hb)"/>
+<text x="300" y="120" font-size="12.5" font-weight="700" fill="#1f6b3d">読み取りを分散</text>
+<line x1="180" y1="210" x2="248" y2="250" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#hb)"/>
+<text x="120" y="245" font-size="12.5" font-weight="700" fill="#b01212">止めない/災害(可用性)</text>
+<line x1="430" y1="240" x2="648" y2="150" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#hb)"/>
+<line x1="430" y1="250" x2="648" y2="212" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#hb)"/>
+<text x="455" y="200" font-size="12" font-weight="700" fill="#183251">AZ(1つのDC)障害</text>
+<line x1="430" y1="275" x2="648" y2="290" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#hb)"/>
+<line x1="430" y1="285" x2="648" y2="346" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#hb)"/>
+<text x="455" y="324" font-size="12" font-weight="700" fill="#7a471a">リージョンまるごと災害</text>
+<!-- 決定ノード -->
+<rect x="20" y="150" width="160" height="84" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="100" y="186" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">何がしたい？</text><text x="100" y="208" text-anchor="middle" font-size="11" fill="#7a471a">分散？止めない？</text>
+<rect x="250" y="226" width="180" height="74" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="340" y="258" text-anchor="middle" font-size="13.5" font-weight="700" fill="#7a471a">どの範囲の障害？</text><text x="340" y="280" text-anchor="middle" font-size="11" fill="#7a471a">AZ？リージョン？</text>
+<!-- 葉 -->
+<g class="hn" data-k="readreplica"><rect x="650" y="24" width="330" height="56" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="665" y="48" font-size="13.5" font-weight="700" fill="#1f6b3d">リードレプリカ</text><text x="665" y="68" font-size="11" fill="#1f6b3d">読み取り専用コピーに分散（可用性目的ではない）</text></g>
+<g class="hn" data-k="multiaz"><rect x="650" y="122" width="330" height="56" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="665" y="146" font-size="13.5" font-weight="700" fill="#183251">マルチAZ（RDS）</text><text x="665" y="166" font-size="11" fill="#5e5e5e">別AZに同期の待機系・自動フェイルオーバー</text></g>
+<g class="hn" data-k="aurorarep"><rect x="650" y="184" width="330" height="56" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="665" y="208" font-size="13.5" font-weight="700" fill="#1f6b3d">Auroraレプリカ昇格</text><text x="665" y="228" font-size="11" fill="#1f6b3d">別AZのリーダーが数分で書き込み役に昇格</text></g>
+<g class="hn" data-k="global"><rect x="650" y="262" width="330" height="56" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="665" y="286" font-size="13.5" font-weight="700" fill="#7a471a">Global Database / Global Tables</text><text x="665" y="306" font-size="11" fill="#7a471a">複数リージョンに複製（AZ障害には過剰）</text></g>
+<g class="hn" data-k="r53fail"><rect x="650" y="320" width="330" height="56" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="665" y="344" font-size="13.5" font-weight="700" fill="#b01212">Route 53 フェイルオーバー</text><text x="665" y="364" font-size="11" fill="#b01212">ヘルスチェックでDNSを別リージョンへ自動切替</text></g>
+</svg>
+</div>
+<div class="panel" id="haPanel" style="margin-top:14px">ボタンを押すと、その目的に合う手立てだけ強調されます。</div>
+
+<table>
+<caption>Auto Scaling の種類（#3で頻出）</caption>
+<tr><th>種類</th><th>使いどころ</th></tr>
+<tr><td class="svc">ターゲット追跡</td><td>CPU使用率などを目標値に保つよう自動調整（一番よく使う既定）</td></tr>
+<tr><td class="svc">ステップ</td><td>しきい値の段階ごとに増減幅を変える（細かく制御）</td></tr>
+<tr><td class="svc">スケジュール</td><td><b>急増の時刻が予測できる</b>・決まった時刻に事前増設（セール開始等）</td></tr>
+<tr><td class="svc">予測スケーリング</td><td>過去の波からMLが先回りして事前にスケール（立ち上がりの遅れをなくす）</td></tr>
+</table>
+<p style="font-size:16px;margin-top:10px;color:#121212">混同の決め手：<b>止めない=マルチAZ</b>／<b>読み取り分散=リードレプリカ</b>／<b>AZ障害で数分再開=Auroraレプリカ昇格</b>／<b>リージョン災害=Global</b>／<b>DNSで自動切替=Route 53フェイルオーバー</b>。「データセンター(=AZ)障害」はマルチAZ/Auroraレプリカで足り、Global Databaseは過剰（頻出のひっかけ）。</p>
+
+<script>
+(function(){
+  const notes={
+    multiaz:'DBを止めたくない。別AZに<b>同期の待機系</b>を持ち、本体が壊れたら自動でそちらへ切替(フェイルオーバー) → <b>マルチAZ</b>。待機系は普段読み書きに使わない＝読み取り分散ではない(最頻出のひっかけ)。',
+    readreplica:'読み取り(表示・検索)が多くてDBが重い。<b>読み取り専用コピー</b>に分散して軽くする → <b>リードレプリカ</b>。書き込みは本体のまま。止めない目的のマルチAZとは別。',
+    aurorarep:'Auroraで、別AZに置いたリーダー(レプリカ)が、ライターのAZ障害時に<b>数分で昇格</b>して書き込みを再開 → <b>Auroraレプリカ昇格</b>。同一リージョンのAZ障害ならこれで十分(Global Databaseは過剰)。',
+    global:'リージョン<b>まるごとの災害</b>に備え複数リージョンに複製 → <b>Aurora Global Database / DynamoDB Global Tables</b>。AZ障害程度には過剰＝ひっかけ選択肢になりやすい。',
+    r53fail:'リージョン障害時に、ドメインへのアクセスを<b>DNSレベルでヘルスチェックして別リージョンへ自動切替</b> → <b>Route 53 フェイルオーバールーティング</b>。クライアントの設定変更は不要。'
+  };
+  const svg=document.getElementById('haSvg');
+  const panel=document.getElementById('haPanel');
+  const nodes=svg.querySelectorAll('.hn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.28';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('haBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#haBtns button').forEach(x=>x.classList.toggle('on',x===b));
     apply(b.dataset.k);
   });
   apply('all');
