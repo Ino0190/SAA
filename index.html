@@ -40,6 +40,11 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .catgrid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .catchip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:7px 14px;font-size:14px;cursor:pointer}
 .catchip:active{background:var(--card2)}
+.xpick{display:flex;flex-direction:column;gap:10px}
+.xchip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.15s}
+.xchip:active{transform:scale(.98);background:var(--card2)}
+.xchip b{font-size:15px;color:var(--accent);font-weight:700}
+.xchip.xall{border-color:var(--accent);font-weight:700}
 
 /* テーマ別グラフ */
 .themetabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
@@ -246,6 +251,11 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
     <p>前回ミスした問題を、間違えた回数の多い順に復習。</p>
     <div class="cnt" id="cntWrong"></div>
   </div>
+  <div class="modecard" onclick="openCrossWrong()" style="border-color:var(--accent)">
+    <h3 style="color:var(--accent)">🌐 全セット横断で間違いを解き直す</h3>
+    <p>A〜D全バンクの間違いを分野で絞って解き直す。正解すれば各セットの「間違えた問題」から外れ、数字が動く。データ分析だけ・ネットワークだけ、と弱点を集中攻撃できる。</p>
+    <div class="cnt" id="cntCross"></div>
+  </div>
   <div class="modecard" onclick="startReview()">
     <h3>📖 間違えた問題の解説を読む</h3>
     <p>解かずに、ミスした問題の解説だけをじっくり読む。解く時に流し読みした理由を、後でまとめて頭に入れる用。</p>
@@ -289,6 +299,29 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
   <div class="smeta" id="rMeta"></div>
   <div class="msg" id="rMsg"></div>
   <div class="reviewlist" id="rReview"></div>
+</section>
+
+<!-- 10問ごとの小休止 -->
+<section class="screen result" id="scBreak">
+  <div style="font-size:48px;margin-bottom:8px">☕</div>
+  <div class="msg" id="brkMsg" style="font-size:22px;font-weight:700"></div>
+  <div class="smeta" id="brkSub" style="margin:10px 0 24px"></div>
+  <button class="btn primary" onclick="resumeQuiz()">続ける ▶</button>
+  <div style="text-align:center;margin-top:12px">
+    <button class="btn ghost small" style="width:auto;display:inline-block;padding:8px 18px" onclick="finish()">ここまでの結果を見る</button>
+  </div>
+  <div style="text-align:center;margin-top:8px">
+    <button class="btn ghost small" style="width:auto;display:inline-block;padding:8px 18px" onclick="goHome()">ホームへ</button>
+  </div>
+</section>
+
+<!-- 全セット横断 間違い分野ピッカー -->
+<section class="screen" id="scXpick">
+  <p style="font-size:16px;color:var(--sub);margin:4px 0 14px">解き直したい分野を選んでください。正解すると、その問題が属するセットの「間違えた問題」から外れます。</p>
+  <div id="xpickWrap" class="xpick"></div>
+  <div style="text-align:center;margin-top:18px">
+    <button class="btn ghost small" style="width:auto;display:inline-block;padding:8px 18px" onclick="goHome()">ホームへ</button>
+  </div>
 </section>
 
 <!-- 間違いの解説を読むモード -->
@@ -433,8 +466,13 @@ function renderHome(){
   document.getElementById('hStat').textContent=`学習済 ${seen}/${QUESTIONS.length}`;
   document.getElementById('hBar').style.width=(seen/QUESTIONS.length*100)+'%';
   if(!themeTab)themeTab=currentBank();
-  loadAllBanks(()=>renderThemeGraph());
+  loadAllBanks(()=>{renderThemeGraph();updateCrossCount();});
   renderThemeGraph();
+}
+function updateCrossCount(){
+  const el=document.getElementById('cntCross');if(!el)return;
+  const n=collectCrossWrong('').length;
+  el.textContent=n?`全セット合計 ${n}問たまっています`:'まだありません';
 }
 
 function startMode(mode,cat){
@@ -506,8 +544,17 @@ function nextQ(){
   if(!state.answered){revealAnswer();return;}
   state.idx++;
   if(state.idx>=state.list.length){finish();return;}
+  if(state.idx%10===0){showBreak();return;} // 10問ごとに小休止
   renderQ();
 }
+function showBreak(){
+  show('scBreak');document.getElementById('btnRow').style.display='none';
+  const remain=state.list.length-state.idx;
+  document.getElementById('brkMsg').textContent=`${state.idx}問おつかれさま☕`;
+  document.getElementById('brkSub').textContent=`このセッション ${state.session.correct}/${state.session.total}問正解 ・ 残り${remain}問`;
+  window.scrollTo(0,0);
+}
+function resumeQuiz(){show('scQuiz');document.getElementById('btnRow').style.display='flex';renderQ();}
 
 function revealAnswer(){
   const q=state.list[state.idx];
@@ -516,15 +563,18 @@ function revealAnswer(){
   const correct=arrEq(ans,sel); // 単一・複数とも集合一致で採点
   state.session.total++;
   if(correct)state.session.correct++;else state.session.wrongIds.push(q.id);
-  // 記録
-  progress.seen[q.id]=true;
-  progress.wrong[q.id]=!correct; // 正解したら false に上書き（復習リストから外れる）
+  // 記録（横断モード=xwrong では問題が属するバンクのLSへ書き戻す）
+  const tgtBank=(state.mode==='xwrong'&&q._bank)?q._bank:currentBank();
+  const pr=(tgtBank===currentBank())?progress:readBankProg(tgtBank);
+  pr.seen[q.id]=true;
+  pr.wrong[q.id]=!correct; // 正解したら false に上書き（復習リストから外れる）
   // 累計回数（裏で蓄積＝本当の弱点が見える）
-  progress.wrongCount=progress.wrongCount||{};
-  progress.correctCount=progress.correctCount||{};
-  if(correct)progress.correctCount[q.id]=(progress.correctCount[q.id]||0)+1;
-  else progress.wrongCount[q.id]=(progress.wrongCount[q.id]||0)+1;
-  saveProgress();
+  pr.wrongCount=pr.wrongCount||{};
+  pr.correctCount=pr.correctCount||{};
+  if(correct)pr.correctCount[q.id]=(pr.correctCount[q.id]||0)+1;
+  else pr.wrongCount[q.id]=(pr.wrongCount[q.id]||0)+1;
+  if(tgtBank===currentBank())saveProgress();
+  else writeBankProg(tgtBank,pr);
   // 選択肢色付け（正解＝緑／選んだが不正解＝赤）
   [...document.querySelectorAll('#qOpts .opt')].forEach(o=>{
     const oi=+o.dataset.i;o.classList.add('disabled');o.onclick=null;
@@ -598,8 +648,10 @@ function finish(){
   if(state.session.wrongIds.length){
     rv.innerHTML='<h3 style="font-size:15px;color:var(--sub);margin:18px 0 8px">間違えた問題</h3>';
     state.session.wrongIds.forEach(id=>{
-      const q=QUESTIONS.find(x=>x.id===id);
-      const wc=(progress.wrongCount&&progress.wrongCount[id])||0;
+      const q=state.list.find(x=>x.id===id)||QUESTIONS.find(x=>x.id===id);
+      if(!q)return;
+      const tgt=(state.mode==='xwrong'&&q._bank)?bankProgFor(q._bank):progress;
+      const wc=(tgt.wrongCount&&tgt.wrongCount[id])||0;
       const badge=wc>=2?` <span style="color:var(--ng)">✕${wc}回目</span>`:'';
       const d=document.createElement('div');d.className='ritem';
       d.innerHTML=`<div class="rc">${q.cat}${badge}</div>${q.ask}`;
@@ -651,11 +703,15 @@ opts,
 }
 
 function markUnsure(id,silent){
-  // 「自信がなかった」＝正解でも復習プールに入れる
-  progress.wrong[id]=true;
-  progress.unsure=progress.unsure||{};
-  progress.unsure[id]=true;
-  saveProgress();
+  // 「自信がなかった」＝正解でも復習プールに入れる（横断モードは問題のバンクへ）
+  const xq=state.list.find(x=>x.id===id);
+  const tgtBank=(state.mode==='xwrong'&&xq&&xq._bank)?xq._bank:currentBank();
+  const pr=(tgtBank===currentBank())?progress:readBankProg(tgtBank);
+  pr.wrong[id]=true;
+  pr.unsure=pr.unsure||{};
+  pr.unsure[id]=true;
+  if(tgtBank===currentBank())saveProgress();
+  else writeBankProg(tgtBank,pr);
   const b=document.getElementById('unsureBtn');
   if(b){b.textContent='✓ 復習に入れました';b.classList.add('done');b.disabled=true;}
   if(!silent)showToast('🤔 自信なしとして復習リストに追加しました');
@@ -877,6 +933,51 @@ function stopListen(){
 }
 
 function goHome(){show('scHome');document.getElementById('btnRow').style.display='none';document.getElementById('listenBar').style.display='none';document.getElementById('hTitle').textContent='SAA ドリル';renderHome();}
+
+/* ===== 全セット横断で間違いを解き直すモード（採点は各問のバンクへ書き戻す） ===== */
+// 全バンクから wrong の問題を集める。各問に _bank と _wc を付与し、cat で絞れる。
+function collectCrossWrong(catFilter){
+  const out=[];
+  Object.keys(BANKS).forEach(b=>{
+    const arr=ALLBANKS[b]||[];
+    const pr=bankProgFor(b);
+    arr.forEach(q=>{
+      if(pr.wrong&&pr.wrong[q.id]){
+        if(catFilter&&q.cat!==catFilter)return;
+        const wc=(pr.wrongCount&&pr.wrongCount[q.id])||0;
+        out.push(Object.assign({},q,{_bank:b,_wc:wc}));
+      }
+    });
+  });
+  out.sort((a,b)=>(b._wc||0)-(a._wc||0));
+  return out;
+}
+function openCrossWrong(){
+  showToast('⏳ 全セットの間違いを集計中…');
+  loadAllBanks(()=>renderCrossPick());
+}
+function renderCrossPick(){
+  const all=collectCrossWrong('');
+  const wrap=document.getElementById('xpickWrap');
+  if(!all.length){wrap.innerHTML='<p style="font-size:16px;color:var(--sub)">全セットを通して、間違いプールは空です🎉 まず問題を解いてみましょう。</p>';show('scXpick');document.getElementById('hTitle').textContent='横断で間違いを解き直す';return;}
+  // 分野ごとに件数集計（多い順）
+  const byCat={};all.forEach(q=>{byCat[q.cat]=(byCat[q.cat]||0)+1;});
+  const cats=Object.keys(byCat).sort((a,b)=>byCat[b]-byCat[a]);
+  let html='<div class="xchip xall" onclick="startCross(\'\')">🌐 全分野 <b>'+all.length+'問</b></div>';
+  html+=cats.map(c=>'<div class="xchip" onclick="startCross(\''+c.replace(/'/g,"\\'")+'\')">'+c+' <b>'+byCat[c]+'問</b></div>').join('');
+  wrap.innerHTML=html;
+  show('scXpick');document.getElementById('hTitle').textContent='横断で間違いを解き直す';
+}
+function startCross(cat){
+  const list=collectCrossWrong(cat);
+  if(!list.length){alert('この分野の間違いはありません。');return;}
+  state.mode='xwrong';
+  state.list=list;state.idx=0;
+  state.session={correct:0,total:0,wrongIds:[]};
+  show('scQuiz');document.getElementById('btnRow').style.display='flex';
+  document.getElementById('hTitle').textContent='横断復習：'+(cat||'全分野');
+  renderQ();
+}
 
 /* ===== 間違いの解説を読むモード（解かずに弱点の解説だけ読む） ===== */
 let reviewState={list:[],idx:0};
@@ -1117,6 +1218,11 @@ function readBankProg(b){
   try{const p=JSON.parse(localStorage.getItem(bankLSKey(b)))||{};
     p.seen=p.seen||{};p.wrong=p.wrong||{};p.wrongCount=p.wrongCount||{};p.correctCount=p.correctCount||{};p.unsure=p.unsure||{};
     return p;}catch(e){return{seen:{},wrong:{},wrongCount:{},correctCount:{},unsure:{}};}
+}
+// 横断モードで他バンクの進捗を書き戻す。現バンクなら live progress を更新して保存。
+function writeBankProg(b,pr){
+  if(b===currentBank()){progress=pr;saveProgress();}
+  else localStorage.setItem(bankLSKey(b),JSON.stringify(pr));
 }
 function mergeProg(cur,inc){
   cur=cur||{};inc=inc||{};
