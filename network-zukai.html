@@ -47,7 +47,344 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 <a class="active" href="network-zukai.html">🧭 図解</a>
 <a href="mock-exam.html">📝 模試</a>
 </nav>
-<h1>VPCの出入り口 図解</h1>
+<h1 id="compute" style="margin-top:56px">コンピュートの選び方（EC2 / Fargate / Lambda）</h1>
+<p class="lead">軸は1本＝<b>「どこまで自分で管理するか（自由）↔ どこまでAWSに任せるか（手軽）」</b>。左ほど自由で手間大、右ほど手軽で制約あり。下のボタンで「こう問われたら」を押すと該当が強調される。</p>
+<div class="btns" id="cmpBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="ec2">OSを自分で管理・特殊設定・常時稼働・GPU</button>
+<button data-k="eks">Kubernetes/k8sを使いたい</button>
+<button data-k="ecs">コンテナ管理（AWS独自・k8s不要）</button>
+<button data-k="fargate">コンテナだがサーバー管理したくない</button>
+<button data-k="lambda">イベント駆動・短時間・たまに動く・管理ゼロ</button>
+<button data-k="apprunner">コンテナWebを丸ごと最小手間で</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 300" id="cmpSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="cm" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<line x1="40" y1="60" x2="960" y2="60" stroke="#5e5e5e" stroke-width="2.5" marker-end="url(#cm)"/>
+<text x="40" y="44" font-size="14" font-weight="700" fill="#183251">自由・自分で管理（手間大）</text>
+<text x="960" y="44" text-anchor="end" font-size="14" font-weight="700" fill="#b01212">手軽・AWS任せ（制約あり）</text>
+<g class="cn" data-k="ec2"><rect x="30" y="90" width="160" height="150" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="110" y="116" text-anchor="middle" font-size="16" font-weight="700" fill="#183251">EC2</text><text x="110" y="142" text-anchor="middle" font-size="12.5" fill="#5e5e5e">仮想サーバーを</text><text x="110" y="160" text-anchor="middle" font-size="12.5" fill="#5e5e5e">まるごと借りる</text><text x="110" y="184" text-anchor="middle" font-size="12.5" fill="#5e5e5e">OS・パッチも自分</text><text x="110" y="214" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a471a">💰起動時間ぶん</text><text x="110" y="230" text-anchor="middle" font-size="11" fill="#7a471a">(アイドルも課金)</text></g>
+<g class="cn" data-k="ecs"><rect x="210" y="90" width="150" height="70" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="285" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#183251">ECS</text><text x="285" y="140" text-anchor="middle" font-size="12" fill="#5e5e5e">AWS独自のコンテナ管理</text></g>
+<g class="cn" data-k="eks"><rect x="210" y="170" width="150" height="70" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="285" y="198" text-anchor="middle" font-size="15" font-weight="700" fill="#183251">EKS</text><text x="285" y="220" text-anchor="middle" font-size="12" fill="#5e5e5e">Kubernetes(k8s)</text></g>
+<g class="cn" data-k="fargate"><rect x="400" y="90" width="170" height="150" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="485" y="118" text-anchor="middle" font-size="16" font-weight="700" fill="#1f6b3d">Fargate</text><text x="485" y="146" text-anchor="middle" font-size="12.5" fill="#1f6b3d">コンテナを動かす</text><text x="485" y="164" text-anchor="middle" font-size="12.5" fill="#1f6b3d">サーバー管理なし</text><text x="485" y="190" text-anchor="middle" font-size="11.5" fill="#1f6b3d">ECS/EKSの土台に選ぶ</text><text x="485" y="216" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a471a">💰使用量×時間</text><text x="485" y="232" text-anchor="middle" font-size="11" fill="#7a471a">(単価やや高・無駄少)</text></g>
+<g class="cn" data-k="lambda"><rect x="610" y="90" width="180" height="150" fill="#fdeaea" stroke="#b01212" stroke-width="2"/><text x="700" y="118" text-anchor="middle" font-size="16" font-weight="700" fill="#b01212">Lambda</text><text x="700" y="144" text-anchor="middle" font-size="12.5" fill="#b01212">コードだけ置く</text><text x="700" y="162" text-anchor="middle" font-size="12.5" fill="#b01212">イベント時だけ動く</text><text x="700" y="186" text-anchor="middle" font-size="11.5" fill="#b01212">管理ゼロ・最大15分</text><text x="700" y="214" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a471a">💰実行回数×時間</text><text x="700" y="230" text-anchor="middle" font-size="11" fill="#7a471a">(アイドル無料)</text></g>
+<g class="cn" data-k="apprunner"><rect x="810" y="90" width="160" height="150" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="890" y="120" text-anchor="middle" font-size="15" font-weight="700" fill="#7a471a">App Runner</text><text x="890" y="150" text-anchor="middle" font-size="12.5" fill="#7a471a">コンテナWebを</text><text x="890" y="170" text-anchor="middle" font-size="12.5" fill="#7a471a">丸ごと最小手間</text><text x="890" y="196" text-anchor="middle" font-size="12" fill="#7a471a">LB/スケール/HTTPS込み</text></g>
+</svg>
+</div>
+<div class="panel" id="cmpPanel" style="margin-top:14px">ボタンを押すと、その状況で選ぶべきサービスだけ強調されます。</div>
+<table>
+<caption>判断3問（順に当てるだけ）</caption>
+<tr><th>問い</th><th>Yesなら</th></tr>
+<tr><td>① OSを自分で触る必要がある？（特殊設定・常時稼働・GPU）</td><td class="svc">EC2</td></tr>
+<tr><td>② コンテナを使う？ サーバー管理はしたくない？</td><td class="svc">Fargate（k8sならEKS on Fargate）</td></tr>
+<tr><td>③ イベントで短時間動くだけ？（ゼロもある・管理ゼロ）</td><td class="svc">Lambda（最大15分に注意）</td></tr>
+</table>
+<p style="font-size:16px;margin-top:10px;color:#121212">たとえ：<b>EC2＝一軒家</b>（全部自分で管理）／<b>Fargate＝家具付き賃貸</b>（建物の管理は大家）／<b>Lambda＝必要な時だけのレンタルスペース</b>（使った分だけ・長居は不可）。</p>
+
+<h2 style="font-size:20px;color:#183251;margin-top:28px;margin-bottom:6px">コンテナは2層構造（EC2とECSは別の層）</h2>
+<p style="font-size:16px;color:#121212;margin-bottom:10px"><b>ECS/EKS＝コンテナを束ねて管理する司令塔</b>。実際にコンテナを動かす<b>土台</b>として、EC2（自分のサーバー群）か Fargate（サーバー管理なし）を選ぶ。だからEC2とECSは「どっちか」でなく<b>別の層</b>。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 250" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="ns" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<rect x="330" y="20" width="340" height="64" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
+<text x="500" y="48" text-anchor="middle" font-size="16" font-weight="700" fill="#183251">ECS / EKS（コンテナの管理・司令塔）</text>
+<text x="500" y="70" text-anchor="middle" font-size="12.5" fill="#5e5e5e">配置・再起動・増減を差配（k8sならEKS）</text>
+<text x="500" y="108" text-anchor="middle" font-size="13.5" font-weight="700" fill="#5e5e5e">↓ コンテナを動かす土台を選ぶ</text>
+<line x1="420" y1="84" x2="320" y2="148" stroke="#5e5e5e" stroke-width="2" marker-end="url(#ns)"/>
+<line x1="580" y1="84" x2="690" y2="148" stroke="#5e5e5e" stroke-width="2" marker-end="url(#ns)"/>
+<rect x="120" y="150" width="320" height="80" fill="#fafafa" stroke="#21537f" stroke-width="2"/>
+<text x="280" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#183251">EC2 起動タイプ</text>
+<text x="280" y="203" text-anchor="middle" font-size="12.5" fill="#5e5e5e">自分のEC2サーバー群の上で動かす</text>
+<text x="280" y="221" text-anchor="middle" font-size="12.5" fill="#5e5e5e">OS/パッチ/スケールは自分で管理</text>
+<rect x="560" y="150" width="320" height="80" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/>
+<text x="720" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#1f6b3d">Fargate</text>
+<text x="720" y="203" text-anchor="middle" font-size="12.5" fill="#1f6b3d">サーバーを持たない（サーバーレス）</text>
+<text x="720" y="221" text-anchor="middle" font-size="12.5" fill="#1f6b3d">下のEC2の管理はAWS任せ</text>
+</svg>
+</div>
+<p style="font-size:16px;margin-top:10px;color:#121212">見分け：<b>コンテナを使う</b>→ECS（k8sならEKS）。その上で<b>サーバー管理したくない</b>→Fargate、<b>EC2を細かく制御したい</b>→EC2起動タイプ。コンテナを使わず<b>普通のサーバー1台でOSを触りたい</b>→そのままEC2。</p>
+<script>
+(function(){
+  const notes={
+    ec2:'OSにログインして設定/パッチ/ミドルウェアを自分で握りたい・特殊なカーネル設定・常時べったり稼働・GPU等の特定インスタンス → <b>EC2</b>。マネージド(RDS/Fargate/Lambda)はOSを触れないので、OS管理が要る時点で全部消えてEC2一択。',
+    ecs:'コンテナを管理したい・Kubernetesまでは要らない（AWS独自でシンプルに） → <b>ECS</b>。',
+    eks:'Kubernetes（k8s）のエコシステムをそのまま使いたい → <b>EKS</b>。',
+    fargate:'コンテナは使いたいが、その下のEC2（サーバー）のパッチ/スケール/管理をやりたくない → <b>Fargate</b>。ECSやEKSの「土台」として選ぶサーバーレス実行環境。',
+    lambda:'イベント駆動・短時間の処理・トラフィックがゼロもバーストもある・アイドル時に課金したくない・サーバー管理ゼロ → <b>Lambda</b>。ただし最大実行時間15分。長時間バッチには不向き。',
+    apprunner:'コンテナのWeb API/アプリを最小の手間で。VPC/LB/クラスタ/スケールを自分で組まず、イメージ指定だけでビルド〜デプロイ〜LB〜自動スケール〜HTTPS → <b>App Runner</b>。',
+    all:'軸は1本＝管理の自由度↔手軽さ。①OS触る?→EC2 ②コンテナでサーバー管理したくない?→Fargate ③イベントで短時間だけ?→Lambda、の3問で切れる。'
+  };
+  const svg=document.getElementById('cmpSvg');
+  const panel=document.getElementById('cmpPanel');
+  const nodes=svg.querySelectorAll('.cn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.3';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('cmpBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#cmpBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
+<h1 id="database" style="margin-top:56px">データベースの選び方（移行先・目的別）</h1>
+<p class="lead">DBは<b>「データの形」</b>で行き先が決まる。まずリレーショナル（JOIN・トランザクション）か、それ以外（NoSQL・専用）か。下のボタンで「こういうデータ/要件」を押すと該当DBが強調される。</p>
+<div class="btns" id="dbBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="rds">既存RDBをエンジンそのままマネージド化</button>
+<button data-k="aurora">MySQL/PostgreSQLを高性能に・脱Oracleライセンス</button>
+<button data-k="dynamodb">キーで1件・JOIN不要・自動スケール・1桁ミリ秒</button>
+<button data-k="documentdb">MongoDB互換・JSONドキュメント</button>
+<button data-k="keyspaces">Cassandra・CQLのまま</button>
+<button data-k="neptune">関係性・つながり・レコメンド・不正検知</button>
+<button data-k="timestream">時系列・計測値・IoT</button>
+<button data-k="elasticache">インメモリ・超高速キャッシュ</button>
+<button data-k="qldb">改ざん不可の台帳・取引履歴</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 600" id="dbSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="tg" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<!-- 分岐線 -->
+<line x1="200" y1="285" x2="248" y2="155" stroke="#5e5e5e" stroke-width="2" marker-end="url(#tg)"/>
+<text x="212" y="210" font-size="13" font-weight="700" fill="#1f6b3d">Yes</text>
+<line x1="200" y1="320" x2="248" y2="425" stroke="#5e5e5e" stroke-width="2" marker-end="url(#tg)"/>
+<text x="212" y="385" font-size="13" font-weight="700" fill="#b01212">No</text>
+<line x1="420" y1="140" x2="518" y2="110" stroke="#5e5e5e" stroke-width="2" marker-end="url(#tg)"/>
+<text x="430" y="120" font-size="12" fill="#5e5e5e">そのまま</text>
+<line x1="420" y1="168" x2="518" y2="178" stroke="#5e5e5e" stroke-width="2" marker-end="url(#tg)"/>
+<text x="430" y="200" font-size="12" fill="#5e5e5e">別エンジン</text>
+<line x1="420" y1="420" x2="538" y2="281" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
+<line x1="420" y1="423" x2="538" y2="325" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
+<line x1="420" y1="426" x2="538" y2="369" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
+<line x1="420" y1="428" x2="538" y2="413" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
+<line x1="420" y1="430" x2="538" y2="457" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
+<line x1="420" y1="432" x2="538" y2="501" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
+<line x1="420" y1="435" x2="538" y2="545" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
+<!-- 決定ノード -->
+<rect x="20" y="255" width="180" height="90" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="110" y="293" text-anchor="middle" font-size="15" font-weight="700" fill="#7a471a">リレーショナル？</text><text x="110" y="316" text-anchor="middle" font-size="12" fill="#7a471a">JOIN・トランザクション</text>
+<rect x="250" y="120" width="170" height="70" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="335" y="150" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">エンジンを</text><text x="335" y="172" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">変える？</text>
+<rect x="250" y="390" width="170" height="70" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="335" y="420" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">データの形で</text><text x="335" y="442" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">選ぶ</text>
+<!-- リレーショナルの行き先 -->
+<g class="db" data-k="rds"><rect x="520" y="82" width="250" height="54" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="535" y="106" font-size="14" font-weight="700" fill="#183251">RDS（6エンジン）</text><text x="535" y="125" font-size="11.5" fill="#5e5e5e">そのまま＝DMSだけ</text></g>
+<g class="db" data-k="aurora"><rect x="520" y="150" width="250" height="54" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="535" y="174" font-size="14" font-weight="700" fill="#1f6b3d">Aurora（MySQL/PG互換）</text><text x="535" y="193" font-size="11.5" fill="#1f6b3d">別エンジン＝DMS＋SCT</text></g>
+<!-- 目的別の葉 -->
+<g class="db" data-k="dynamodb"><rect x="540" y="262" width="430" height="38" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="555" y="286" font-size="13" fill="#183251"><tspan font-weight="700">DynamoDB</tspan>　キー値・スキーマレス・自動スケール・1桁ms</text></g>
+<g class="db" data-k="documentdb"><rect x="540" y="306" width="430" height="38" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="555" y="330" font-size="13" fill="#183251"><tspan font-weight="700">DocumentDB</tspan>　ドキュメント（MongoDB互換・JSON）</text></g>
+<g class="db" data-k="keyspaces"><rect x="540" y="350" width="430" height="38" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="555" y="374" font-size="13" fill="#183251"><tspan font-weight="700">Keyspaces</tspan>　ワイドカラム（Cassandra・CQL）</text></g>
+<g class="db" data-k="neptune"><rect x="540" y="394" width="430" height="38" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="555" y="418" font-size="13" fill="#183251"><tspan font-weight="700">Neptune</tspan>　グラフ（関係性・レコメンド・不正検知）</text></g>
+<g class="db" data-k="timestream"><rect x="540" y="438" width="430" height="38" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="555" y="462" font-size="13" fill="#7a471a"><tspan font-weight="700">Timestream</tspan>　時系列（計測値・IoT・時間クエリ）</text></g>
+<g class="db" data-k="elasticache"><rect x="540" y="482" width="430" height="38" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="555" y="506" font-size="13" fill="#b01212"><tspan font-weight="700">ElastiCache / MemoryDB</tspan>　インメモリ・超高速キャッシュ</text></g>
+<g class="db" data-k="qldb"><rect x="540" y="526" width="430" height="38" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="555" y="550" font-size="13" fill="#183251"><tspan font-weight="700">QLDB</tspan>　台帳（改ざん不可の取引履歴）</text></g>
+</svg>
+</div>
+<div class="panel" id="dbPanel" style="margin-top:14px">ボタンを押すと、そのデータ/要件に合うDBだけ強調されます。</div>
+<script>
+(function(){
+  const notes={
+    rds:'既存のリレーショナルDBを、エンジンはそのままにマネージド化（OS/パッチ/バックアップをAWSに任せる） → <b>RDS</b>（Oracle/SQL Server/MySQL/PostgreSQL/MariaDB）。移行はエンジン同じなので <b>DMSだけ</b>。',
+    aurora:'MySQL/PostgreSQL互換で高性能・自動スケール・複数AZ。商用ライセンス（Oracle/SQL Server）から脱却したい → <b>Aurora</b>。異種移行は <b>DMS＋SCT</b>、SQL ServerはBabelfishでアプリ改修減。',
+    dynamodb:'キーで1件アクセス中心・JOIN不要・スキーマレス・予測不能な増減に自動追従・1桁ミリ秒・サーバーレス従量課金 → <b>DynamoDB</b>。',
+    documentdb:'MongoDB互換・JSONドキュメントをそのまま → <b>DocumentDB</b>。',
+    keyspaces:'Cassandra・CQLのまま、マネージド/サーバーレスで → <b>Keyspaces</b>。',
+    neptune:'エンティティ間の複雑な関係を低レイテンシでたどる・ソーシャルグラフ/レコメンド/不正検知 → <b>Neptune</b>（グラフDB）。',
+    timestream:'タイムスタンプ付き計測値を毎秒大量に・時間ベースのクエリ・古いデータは自動で安価階層へ → <b>Timestream</b>（時系列DB）。',
+    elasticache:'インメモリで超高速・複数サーバーで共有・キャッシュ層。複雑なデータ型や永続化/レプリケーション重視なら <b>MemoryDB</b> → <b>ElastiCache（Redis/Memcached）</b>。',
+    qldb:'変更不能で検証可能な取引履歴・改ざん不可の台帳 → <b>QLDB</b>。',
+    all:'判断＝①リレーショナル(JOIN/トランザクション)?→RDS/Aurora（エンジン変えるかでSCT要否）②NoSQL/特殊?→データの形で目的別DB。決め手はいつも「データの形」。'
+  };
+  const svg=document.getElementById('dbSvg');
+  const panel=document.getElementById('dbPanel');
+  const nodes=svg.querySelectorAll('.db');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.3';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('dbBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#dbBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
+<div class="stage">
+<table>
+<caption>目的別データベース早見表（データの形 → 行き先）</caption>
+<tr><th>データの形 / 要件</th><th>サービス</th><th>こう書かれたら</th></tr>
+<tr><td>リレーショナル（表＋関係）</td><td class="svc">RDS / Aurora</td><td>JOIN・トランザクション・複雑クエリ・会計/在庫/受発注</td></tr>
+<tr><td>キー値・スキーマレス</td><td class="svc">DynamoDB</td><td>キーで1件・JOIN不要・予測不能な増減に自動追従・1桁ミリ秒・サーバーレス従量</td></tr>
+<tr><td>ドキュメント</td><td class="svc">DocumentDB</td><td><b>MongoDB</b>互換・JSONドキュメント</td></tr>
+<tr><td>ワイドカラム</td><td class="svc">Keyspaces</td><td><b>Cassandra</b>・CQLのまま</td></tr>
+<tr><td>グラフ（関係性）</td><td class="svc">Neptune</td><td>つながりをたどる・ソーシャル/レコメンド/不正検知</td></tr>
+<tr><td>時系列</td><td class="svc">Timestream</td><td>計測値を毎秒大量・時間クエリ・IoT・古いデータ自動安価化</td></tr>
+<tr><td>インメモリ</td><td class="svc">ElastiCache / MemoryDB</td><td>超高速キャッシュ・複数サーバーで共有（永続化重視はMemoryDB）</td></tr>
+<tr><td>台帳（改ざん不可）</td><td class="svc">QLDB</td><td>変更不能で検証可能な取引履歴</td></tr>
+</table>
+</div>
+
+<div class="stage">
+<table>
+<caption>リレーショナルDBの移行（エンジンを変えるか）</caption>
+<tr><th>状況</th><th>道具</th><th>例</th></tr>
+<tr><td>エンジンそのまま（同種）</td><td class="svc">DMS だけ</td><td>Oracle→RDS for Oracle、MySQL→RDS/Aurora MySQL</td></tr>
+<tr><td>別エンジンへ（異種）</td><td class="svc">DMS ＋ SCT</td><td><b>Oracle→Aurora PostgreSQL</b>（スキーマ/ストアド変換が必要）</td></tr>
+<tr><td>移行中もダウンタイム最小</td><td class="svc">DMSのCDC</td><td>本番を止めず継続レプリケーション</td></tr>
+<tr><td>SQL Server→Auroraでアプリ改修を減らす</td><td class="svc">Babelfish</td><td>T-SQLをそのままAuroraで受ける</td></tr>
+</table>
+<p style="font-size:16px;margin-top:12px;color:#121212">決め手：まず<b>「データの形」</b>（リレーショナル/ドキュメント/グラフ/時系列/キー値…）。リレーショナルなら次に<b>「エンジンを変えるか」</b>＝変えない→DMSだけ、変える→DMS＋SCT。</p>
+</div>
+
+<h1 id="storage-migration" style="margin-top:56px">ストレージ移行・データ移送の早見表</h1>
+<p class="lead">「どこから・何を・どう運ぶか」で道具が決まる。混同しやすい4グループ（移送ツール／FSx／Storage Gateway／EBSタイプ）を決め手つきで並べる。</p>
+
+<p style="font-size:16px;color:#121212;margin-bottom:8px">まずは移送ツール。<b>オンプレ → どのツール → AWSのどこ</b>へ。下のボタンで「こう運びたい」を押すと該当ツールが強調される。</p>
+<div class="btns" id="mvBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="datasync">オンラインで大量ファイルを同期</button>
+<button data-k="snowball">巨大/回線が細い・オフラインで運ぶ</button>
+<button data-k="dms">DBを止めずに移行（同/異種エンジン）</button>
+<button data-k="mgn">サーバーを丸ごとそのまま移行</button>
+<button data-k="drs">災害対策（DR）として複製</button>
+<button data-k="gateway">オンプレから常設でAWSストレージを使う</button>
+<button data-k="transfer">既存のSFTP運用をそのまま</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 470" id="mvSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="mv" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<rect x="20" y="60" width="150" height="386" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/>
+<text x="95" y="240" text-anchor="middle" font-size="17" font-weight="700" fill="#7a471a">オンプレミス</text>
+<text x="95" y="266" text-anchor="middle" font-size="13" fill="#7a471a">/ 既存環境</text>
+<rect x="830" y="66" width="150" height="56" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="905" y="100" text-anchor="middle" font-size="15" font-weight="700" fill="#1f6b3d">S3</text>
+<rect x="830" y="140" width="150" height="56" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="905" y="174" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">EFS / FSx</text>
+<rect x="830" y="270" width="150" height="56" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="905" y="304" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">RDS / Aurora</text>
+<rect x="830" y="350" width="150" height="56" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="905" y="384" text-anchor="middle" font-size="15" font-weight="700" fill="#1f6b3d">EC2</text>
+<g class="mn" data-k="datasync"><rect x="400" y="62" width="220" height="46" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="510" y="82" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">DataSync</text><text x="510" y="100" text-anchor="middle" font-size="11.5" fill="#5e5e5e">オンライン高速転送→S3/EFS/FSx</text></g>
+<g class="mn" data-k="snowball"><rect x="400" y="116" width="220" height="46" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="510" y="136" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">Snowball</text><text x="510" y="154" text-anchor="middle" font-size="11.5" fill="#5e5e5e">物理デバイス・オフライン→S3</text></g>
+<g class="mn" data-k="gateway"><rect x="400" y="170" width="220" height="46" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="510" y="190" text-anchor="middle" font-size="13.5" font-weight="700" fill="#7a471a">Storage Gateway</text><text x="510" y="208" text-anchor="middle" font-size="11.5" fill="#7a471a">File/Volume/Tape・常設の橋→S3</text></g>
+<g class="mn" data-k="transfer"><rect x="400" y="224" width="220" height="46" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="510" y="244" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">Transfer Family</text><text x="510" y="262" text-anchor="middle" font-size="11.5" fill="#5e5e5e">マネージドSFTP→S3/EFS</text></g>
+<g class="mn" data-k="dms"><rect x="400" y="278" width="220" height="46" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="510" y="298" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">DMS（＋SCT）</text><text x="510" y="316" text-anchor="middle" font-size="11.5" fill="#1f6b3d">DB移行・継続複製→RDS/Aurora</text></g>
+<g class="mn" data-k="mgn"><rect x="400" y="332" width="220" height="46" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="510" y="352" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">MGN</text><text x="510" y="370" text-anchor="middle" font-size="11.5" fill="#5e5e5e">サーバー丸ごと→EC2</text></g>
+<g class="mn" data-k="drs"><rect x="400" y="386" width="220" height="46" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="510" y="406" text-anchor="middle" font-size="14" font-weight="700" fill="#b01212">DRS</text><text x="510" y="424" text-anchor="middle" font-size="11.5" fill="#b01212">災害対策の継続複製→EC2</text></g>
+<line x1="170" y1="85" x2="398" y2="85" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="170" y1="139" x2="398" y2="139" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="170" y1="193" x2="398" y2="193" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="170" y1="247" x2="398" y2="247" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="170" y1="301" x2="398" y2="301" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="170" y1="355" x2="398" y2="355" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="170" y1="409" x2="398" y2="409" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="620" y1="85" x2="828" y2="92" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="620" y1="90" x2="828" y2="160" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="620" y1="139" x2="828" y2="98" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="620" y1="193" x2="828" y2="104" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="620" y1="247" x2="828" y2="168" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="620" y1="301" x2="828" y2="298" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="620" y1="355" x2="828" y2="374" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+<line x1="620" y1="409" x2="828" y2="382" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
+</svg>
+</div>
+<div class="panel" id="mvPanel" style="margin-top:14px">ボタンを押すと、その運び方に合うツールだけ強調されます。</div>
+<script>
+(function(){
+  const notes={
+    datasync:'オンライン（ネット/専用線）で大量のNFS/SMBファイルを高速転送・定期同期したい → <b>DataSync</b>。継続的な同期にも向く。',
+    snowball:'データが巨大／回線が細くてネットだと何ヶ月もかかる → <b>Snowball</b>。物理デバイスを送ってもらいオフラインで運ぶ。',
+    dms:'DBを止めずに移行・移行中も継続レプリケーション（CDC）。異なるエンジン間（Oracle→PostgreSQL等）なら <b>SCTでスキーマ変換</b>を併用 → <b>DMS（＋SCT）</b>。',
+    mgn:'既存サーバーをコード変更なしでブロックレベルごとAWSへ（リフト&シフト） → <b>MGN</b>。行き先はEC2。',
+    drs:'オンプレ/他環境の災害対策（DR）。普段は最小、障害時にEC2で起動。RPO秒〜分・RTO数分 → <b>DRS</b>。',
+    gateway:'オンプレから常設でAWSストレージを使う橋。File（NFS/SMB→S3）/ Volume（iSCSI→S3・EBS復元）/ Tape（仮想テープ→S3/Glacier） → <b>Storage Gateway</b>。',
+    transfer:'既存のSFTP/FTPS/FTP運用をそのままS3/EFSに繋ぎたい → <b>Transfer Family</b>。',
+    all:'オンプレ→ツール→AWSの行き先で道具が決まる。オフライン/巨大→Snowball、オンライン同期→DataSync、DB→DMS(+SCT)、サーバー丸ごと→MGN、DR→DRS、常設の橋→Storage Gateway。'
+  };
+  const svg=document.getElementById('mvSvg');
+  const panel=document.getElementById('mvPanel');
+  const nodes=svg.querySelectorAll('.mn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.3';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('mvBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#mvBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
+<div class="stage">
+<table>
+<caption>① データ移送ツール（オンプレ↔AWS・DB移行）</caption>
+<tr><th>ツール</th><th>何をする</th><th>こう書かれたら</th></tr>
+<tr><td class="svc">DataSync</td><td>オンライン（ネット/専用線経由）で大量ファイルを高速転送・継続同期</td><td>NFS/SMBの大量ファイルを<b>オンラインで</b>S3/EFS/FSxへ移す・定期同期</td></tr>
+<tr><td class="svc">Snowball / Snow</td><td>物理デバイスを送ってもらいデータを入れて送り返す（オフライン）</td><td>回線が細い/データが巨大で<b>ネットだと何ヶ月もかかる</b>・オフライン移送</td></tr>
+<tr><td class="svc">DMS</td><td>DBを移行・移行中も継続レプリケーション（CDC）でダウンタイム最小</td><td>DBを止めずに移行・継続複製</td></tr>
+<tr><td class="svc">DMS + SCT</td><td>SCTでスキーマ/ストアド変換＋DMSで継続移送</td><td><b>異なるDBエンジン間</b>（Oracle→PostgreSQL等）の移行</td></tr>
+<tr><td class="svc">MGN</td><td>サーバーをブロックレベルで丸ごとAWSへ（リフト&シフト）</td><td>既存サーバーを<b>コード変更なし</b>でそのままEC2へ移行</td></tr>
+<tr><td class="svc">DRS</td><td>継続レプリケーションでDR専用（普段は最小・障害時に起動）</td><td>オンプレ/他環境の<b>災害対策（DR）</b>・RPO秒〜分・RTO数分</td></tr>
+<tr><td class="svc">Transfer Family</td><td>マネージドのSFTP/FTPS/FTPエンドポイント→S3/EFS</td><td>既存の<b>SFTP</b>運用をそのままS3に繋ぎたい</td></tr>
+<tr><td class="svc">Migration Hub</td><td>構成の自動発見＋複数移行ツールの進捗を1画面で横断管理</td><td>移行の<b>計画・発見・一元追跡</b></td></tr>
+</table>
+</div>
+
+<div class="stage">
+<table>
+<caption>② FSx 3種（マネージドの共有ファイルストレージ）</caption>
+<tr><th>種類</th><th>用途</th><th>こう書かれたら</th></tr>
+<tr><td class="svc">FSx for Windows</td><td>Windows向け共有（SMB / NTFS / Active Directory連携）</td><td><b>Windows・SMB・AD</b>連携の共有ファイル</td></tr>
+<tr><td class="svc">FSx for Lustre</td><td>HPC/ML向け超高速並列ファイルシステム・S3連携</td><td><b>HPC/機械学習</b>・数百GB/秒・S3のデータを並列処理</td></tr>
+<tr><td class="svc">FSx for NetApp ONTAP</td><td>ONTAP機能・NFSとSMBの両方（マルチプロトコル）</td><td>既存<b>NetApp/ONTAP</b>依存・NFSとSMB両対応で移行</td></tr>
+</table>
+</div>
+
+<div class="stage">
+<table>
+<caption>③ Storage Gateway 3種（オンプレからAWSストレージを使う橋）</caption>
+<tr><th>種類</th><th>見え方</th><th>こう書かれたら</th></tr>
+<tr><td class="svc">File Gateway</td><td>NFS/SMBのファイル共有に見える → 中身はS3</td><td>オンプレから<b>ファイル(NFS/SMB)</b>として使い実体はS3</td></tr>
+<tr><td class="svc">Volume Gateway</td><td>iSCSIのブロックボリュームに見える → S3バックアップ・EBS復元</td><td>オンプレの<b>iSCSIブロック</b>・頻用分はローカルキャッシュ・DR</td></tr>
+<tr><td class="svc">Tape Gateway</td><td>仮想テープに見える → 実体はS3/Glacier</td><td>既存の<b>テープバックアップ</b>運用をクラウドへ</td></tr>
+</table>
+</div>
+
+<div class="stage">
+<table>
+<caption>④ EBSボリュームタイプ（EC2のディスク）</caption>
+<tr><th>タイプ</th><th>性質</th><th>こう書かれたら</th></tr>
+<tr><td class="svc">gp3 (汎用SSD)</td><td>バランス型・コスパ良い既定</td><td>特に要件なし・<b>標準</b>のSSD</td></tr>
+<tr><td class="svc">io2 (プロビジョンドIOPS SSD)</td><td>高IOPSを明示的に確保・低遅延</td><td><b>高い一定IOPS</b>（数万IOPS）・基幹DB</td></tr>
+<tr><td class="svc">st1 (スループット最適化HDD)</td><td>大容量・シーケンシャル・高スループット・安い</td><td><b>ログ/ビッグデータ</b>・連続読み書き・コスト重視</td></tr>
+<tr><td class="svc">sc1 (コールドHDD)</td><td>最安・アクセス頻度が低い大容量</td><td>めったに使わない大容量を<b>最安</b>で</td></tr>
+</table>
+<p style="font-size:16px;margin-top:12px;color:#121212">移送の最速の切り方：<b>「オフライン/巨大/回線細い」→Snowball</b>、<b>「オンラインでファイル同期」→DataSync</b>、<b>「DB・異種エンジン」→DMS(+SCT)</b>、<b>「サーバー丸ごと」→MGN</b>、<b>「DR目的」→DRS</b>。</p>
+</div>
+
+<h1 id="vpc">VPCの出入り口 図解</h1>
 <p class="lead">「結局インターネットと繋がるのはどこ？ データはどこを通る？ どこで止まる？」を1本ずつ光らせて確認する。ボタンを押すとその経路だけ強調される。</p>
 
 <div class="btns" id="btns">
@@ -162,7 +499,73 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 <tr><td class="svc">Interfaceエンドポイント<br>(PrivateLink)</td><td><b>繋がらない</b>（ENI＝プライベートIP）</td><td>内→SQS/KMS等のAPI</td><td>—</td><td>プライベートからAWSのAPIをネット経由せず呼びたい</td></tr>
 </table>
 
-<h1 style="margin-top:56px">CloudFront vs Global Accelerator</h1>
+<h1 id="lb" style="margin-top:56px">ロードバランサー3種（ALB / NLB / GWLB）</h1>
+<p class="lead">大量のアクセスを複数サーバーに振り分ける装置。<b>どの層（レイヤー）で振り分けるか</b>で使い分ける。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="lb" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#21537f"/></marker></defs>
+<!-- ALB -->
+<rect x="20" y="20" width="300" height="260" fill="#fafafa" stroke="#d8dee6"/>
+<text x="170" y="50" text-anchor="middle" font-size="18" font-weight="700" fill="#21537f">ALB（L7）</text>
+<text x="170" y="74" text-anchor="middle" font-size="14" fill="#5e5e5e">中身（URL）を見て賢く振り分け</text>
+<rect x="120" y="92" width="100" height="40" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
+<text x="170" y="117" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">ALB</text>
+<line x1="150" y1="132" x2="95" y2="178" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
+<line x1="190" y1="132" x2="245" y2="178" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
+<rect x="55" y="180" width="80" height="38" fill="#eaf3ea" stroke="#1f9d55"/><text x="95" y="204" text-anchor="middle" font-size="13" fill="#1f6b3d">/api 群</text>
+<rect x="205" y="180" width="80" height="38" fill="#eaf3ea" stroke="#1f9d55"/><text x="245" y="204" text-anchor="middle" font-size="13" fill="#1f6b3d">/img 群</text>
+<text x="170" y="256" text-anchor="middle" font-size="13.5" font-weight="700" fill="#b01212">HTTP/HTTPS・パスで振り分け</text>
+<!-- NLB -->
+<rect x="350" y="20" width="300" height="260" fill="#fafafa" stroke="#d8dee6"/>
+<text x="500" y="50" text-anchor="middle" font-size="18" font-weight="700" fill="#21537f">NLB（L4）</text>
+<text x="500" y="74" text-anchor="middle" font-size="14" fill="#5e5e5e">中身を見ず超高速・固定IP</text>
+<rect x="450" y="92" width="100" height="40" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
+<text x="500" y="111" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">NLB</text>
+<text x="500" y="126" text-anchor="middle" font-size="11.5" fill="#5e5e5e">固定IP</text>
+<line x1="480" y1="132" x2="430" y2="178" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
+<line x1="520" y1="132" x2="570" y2="178" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
+<rect x="390" y="180" width="80" height="38" fill="#eaf3ea" stroke="#1f9d55"/><text x="430" y="204" text-anchor="middle" font-size="13" fill="#1f6b3d">サーバー</text>
+<rect x="530" y="180" width="80" height="38" fill="#eaf3ea" stroke="#1f9d55"/><text x="570" y="204" text-anchor="middle" font-size="13" fill="#1f6b3d">サーバー</text>
+<text x="500" y="256" text-anchor="middle" font-size="13.5" font-weight="700" fill="#b01212">TCP/UDP・低遅延・固定IP</text>
+<!-- GWLB -->
+<rect x="680" y="20" width="300" height="260" fill="#fafafa" stroke="#d8dee6"/>
+<text x="830" y="50" text-anchor="middle" font-size="18" font-weight="700" fill="#21537f">GWLB</text>
+<text x="830" y="74" text-anchor="middle" font-size="14" fill="#5e5e5e">検査装置を経路に透過挿入</text>
+<rect x="700" y="150" width="60" height="36" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="730" y="173" text-anchor="middle" font-size="12.5" fill="#183251">入口</text>
+<rect x="785" y="142" width="90" height="52" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="830" y="164" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7a471a">FW/IDS</text><text x="830" y="182" text-anchor="middle" font-size="11.5" fill="#7a471a">他社製</text>
+<rect x="900" y="150" width="60" height="36" fill="#eaf3ea" stroke="#1f9d55"/><text x="930" y="173" text-anchor="middle" font-size="12.5" fill="#1f6b3d">出口</text>
+<line x1="760" y1="168" x2="783" y2="168" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
+<line x1="875" y1="168" x2="898" y2="168" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
+<text x="830" y="240" text-anchor="middle" font-size="13.5" font-weight="700" fill="#b01212">全通信を検査装置に通す</text>
+<text x="830" y="260" text-anchor="middle" font-size="13.5" font-weight="700" fill="#b01212">（インライン検査）</text>
+</svg>
+</div>
+<table>
+<caption>LB3種の見分け</caption>
+<tr><th>これと書かれたら</th><th>答え</th></tr>
+<tr><td>HTTP/HTTPS・URLパス/ホスト名で振り分け</td><td class="svc">ALB（L7）</td></tr>
+<tr><td>超高速・低遅延・大量接続・<b>固定IP</b>・TCP/UDP</td><td class="svc">NLB（L4）</td></tr>
+<tr><td><b>サードパーティのFW/IDS/IPSを経路に挟む・インライン検査</b></td><td class="svc">GWLB</td></tr>
+</table>
+
+<h1 id="route53" style="margin-top:56px">Route 53（AWSのDNS）= 名前→IPの変換＋賢い振り分け</h1>
+<p class="lead">DNS＝「ドメイン名 → IPアドレス」を変換する電話帳。Route 53はそのAWS版。ただ返すだけでなく<b>どう返すか</b>を選べる（ルーティングポリシー）。</p>
+<div class="stage">
+<table>
+<caption>ルーティングポリシー（SAA頻出）</caption>
+<tr><th>ポリシー</th><th>何をする</th><th>こう書かれたら</th></tr>
+<tr><td class="svc">フェイルオーバー</td><td>メインが落ちたらヘルスチェックで検知しサブへ切替</td><td><b>障害時に自動で予備へ・DR・可用性</b></td></tr>
+<tr><td class="svc">レイテンシー</td><td>一番応答が速いリージョンへ返す</td><td><b>速い</b>リージョンへ・最小遅延</td></tr>
+<tr><td class="svc">位置情報<br>(Geolocation)</td><td>アクセス元の国/地域で返す先を変える</td><td>特定の国に<b>この言語</b>・地域別コンテンツ</td></tr>
+<tr><td class="svc">加重(Weighted)</td><td>70%こっち30%あっち等の比率で分散</td><td>カナリア・段階リリース・A/Bテスト</td></tr>
+<tr><td class="svc">地理的近接</td><td>地理的に近いリソースへ（バイアス調整可）</td><td>地理的に近い方へ寄せる</td></tr>
+<tr><td class="svc">複数値(Multivalue)</td><td>複数IPを返して簡易分散</td><td>簡易的に複数へ分散</td></tr>
+</table>
+<p style="font-size:16px;margin-top:12px;color:#121212">紛らわしいペア：<b>位置情報</b>＝「<b>近い</b>／国別に言語を変える」、<b>レイテンシー</b>＝「<b>速い</b>」。"国・言語"なら位置情報、"応答速度"ならレイテンシー。</p>
+<p style="font-size:16px;margin-top:10px;color:#121212"><b>Route 53 Resolver</b>＝オンプレとVPCの名前解決を<b>双方向</b>でつなぐハイブリッドDNS。「オンプレのDNSとVPCを相互に名前解決」と来たらこれ（インバウンド/アウトバウンドの2エンドポイント）。</p>
+</div>
+
+<h1 id="cdn" style="margin-top:56px">CloudFront vs Global Accelerator</h1>
 <p class="lead">どっちも「エッジを使って世界中のユーザーを速くする」と説明されるので混同する。違いは一点 ── <b>コンテンツをキャッシュ（コピー）するか／しないか</b>。</p>
 
 <div style="display:flex;flex-wrap:wrap;gap:20px">
@@ -230,73 +633,7 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 </table>
 <p style="font-size:16px;margin-top:14px;color:#121212">最速の切り方：問題文に <b style="color:#b01212">「キャッシュできない」「TCP/UDP」「固定IP」</b> があれば CloudFront は消えて <b>Global Accelerator</b>。<b style="color:#b01212">「静的コンテンツ」「CDN」「キャッシュ」</b> があれば <b>CloudFront</b>。</p>
 
-<h1 style="margin-top:56px">ロードバランサー3種（ALB / NLB / GWLB）</h1>
-<p class="lead">大量のアクセスを複数サーバーに振り分ける装置。<b>どの層（レイヤー）で振り分けるか</b>で使い分ける。</p>
-<div class="stage">
-<svg viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
-<defs><marker id="lb" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#21537f"/></marker></defs>
-<!-- ALB -->
-<rect x="20" y="20" width="300" height="260" fill="#fafafa" stroke="#d8dee6"/>
-<text x="170" y="50" text-anchor="middle" font-size="18" font-weight="700" fill="#21537f">ALB（L7）</text>
-<text x="170" y="74" text-anchor="middle" font-size="14" fill="#5e5e5e">中身（URL）を見て賢く振り分け</text>
-<rect x="120" y="92" width="100" height="40" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
-<text x="170" y="117" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">ALB</text>
-<line x1="150" y1="132" x2="95" y2="178" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
-<line x1="190" y1="132" x2="245" y2="178" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
-<rect x="55" y="180" width="80" height="38" fill="#eaf3ea" stroke="#1f9d55"/><text x="95" y="204" text-anchor="middle" font-size="13" fill="#1f6b3d">/api 群</text>
-<rect x="205" y="180" width="80" height="38" fill="#eaf3ea" stroke="#1f9d55"/><text x="245" y="204" text-anchor="middle" font-size="13" fill="#1f6b3d">/img 群</text>
-<text x="170" y="256" text-anchor="middle" font-size="13.5" font-weight="700" fill="#b01212">HTTP/HTTPS・パスで振り分け</text>
-<!-- NLB -->
-<rect x="350" y="20" width="300" height="260" fill="#fafafa" stroke="#d8dee6"/>
-<text x="500" y="50" text-anchor="middle" font-size="18" font-weight="700" fill="#21537f">NLB（L4）</text>
-<text x="500" y="74" text-anchor="middle" font-size="14" fill="#5e5e5e">中身を見ず超高速・固定IP</text>
-<rect x="450" y="92" width="100" height="40" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
-<text x="500" y="111" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">NLB</text>
-<text x="500" y="126" text-anchor="middle" font-size="11.5" fill="#5e5e5e">固定IP</text>
-<line x1="480" y1="132" x2="430" y2="178" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
-<line x1="520" y1="132" x2="570" y2="178" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
-<rect x="390" y="180" width="80" height="38" fill="#eaf3ea" stroke="#1f9d55"/><text x="430" y="204" text-anchor="middle" font-size="13" fill="#1f6b3d">サーバー</text>
-<rect x="530" y="180" width="80" height="38" fill="#eaf3ea" stroke="#1f9d55"/><text x="570" y="204" text-anchor="middle" font-size="13" fill="#1f6b3d">サーバー</text>
-<text x="500" y="256" text-anchor="middle" font-size="13.5" font-weight="700" fill="#b01212">TCP/UDP・低遅延・固定IP</text>
-<!-- GWLB -->
-<rect x="680" y="20" width="300" height="260" fill="#fafafa" stroke="#d8dee6"/>
-<text x="830" y="50" text-anchor="middle" font-size="18" font-weight="700" fill="#21537f">GWLB</text>
-<text x="830" y="74" text-anchor="middle" font-size="14" fill="#5e5e5e">検査装置を経路に透過挿入</text>
-<rect x="700" y="150" width="60" height="36" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="730" y="173" text-anchor="middle" font-size="12.5" fill="#183251">入口</text>
-<rect x="785" y="142" width="90" height="52" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="830" y="164" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7a471a">FW/IDS</text><text x="830" y="182" text-anchor="middle" font-size="11.5" fill="#7a471a">他社製</text>
-<rect x="900" y="150" width="60" height="36" fill="#eaf3ea" stroke="#1f9d55"/><text x="930" y="173" text-anchor="middle" font-size="12.5" fill="#1f6b3d">出口</text>
-<line x1="760" y1="168" x2="783" y2="168" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
-<line x1="875" y1="168" x2="898" y2="168" stroke="#21537f" stroke-width="3" marker-end="url(#lb)"/>
-<text x="830" y="240" text-anchor="middle" font-size="13.5" font-weight="700" fill="#b01212">全通信を検査装置に通す</text>
-<text x="830" y="260" text-anchor="middle" font-size="13.5" font-weight="700" fill="#b01212">（インライン検査）</text>
-</svg>
-</div>
-<table>
-<caption>LB3種の見分け</caption>
-<tr><th>これと書かれたら</th><th>答え</th></tr>
-<tr><td>HTTP/HTTPS・URLパス/ホスト名で振り分け</td><td class="svc">ALB（L7）</td></tr>
-<tr><td>超高速・低遅延・大量接続・<b>固定IP</b>・TCP/UDP</td><td class="svc">NLB（L4）</td></tr>
-<tr><td><b>サードパーティのFW/IDS/IPSを経路に挟む・インライン検査</b></td><td class="svc">GWLB</td></tr>
-</table>
-
-<h1 style="margin-top:56px">Route 53（AWSのDNS）= 名前→IPの変換＋賢い振り分け</h1>
-<p class="lead">DNS＝「ドメイン名 → IPアドレス」を変換する電話帳。Route 53はそのAWS版。ただ返すだけでなく<b>どう返すか</b>を選べる（ルーティングポリシー）。</p>
-<div class="stage">
-<table>
-<caption>ルーティングポリシー（SAA頻出）</caption>
-<tr><th>ポリシー</th><th>何をする</th><th>こう書かれたら</th></tr>
-<tr><td class="svc">フェイルオーバー</td><td>メインが落ちたらヘルスチェックで検知しサブへ切替</td><td><b>障害時に自動で予備へ・DR・可用性</b></td></tr>
-<tr><td class="svc">レイテンシー</td><td>一番応答が速いリージョンへ返す</td><td><b>速い</b>リージョンへ・最小遅延</td></tr>
-<tr><td class="svc">位置情報<br>(Geolocation)</td><td>アクセス元の国/地域で返す先を変える</td><td>特定の国に<b>この言語</b>・地域別コンテンツ</td></tr>
-<tr><td class="svc">加重(Weighted)</td><td>70%こっち30%あっち等の比率で分散</td><td>カナリア・段階リリース・A/Bテスト</td></tr>
-<tr><td class="svc">地理的近接</td><td>地理的に近いリソースへ（バイアス調整可）</td><td>地理的に近い方へ寄せる</td></tr>
-<tr><td class="svc">複数値(Multivalue)</td><td>複数IPを返して簡易分散</td><td>簡易的に複数へ分散</td></tr>
-</table>
-<p style="font-size:16px;margin-top:12px;color:#121212">紛らわしいペア：<b>位置情報</b>＝「<b>近い</b>／国別に言語を変える」、<b>レイテンシー</b>＝「<b>速い</b>」。"国・言語"なら位置情報、"応答速度"ならレイテンシー。</p>
-<p style="font-size:16px;margin-top:10px;color:#121212"><b>Route 53 Resolver</b>＝オンプレとVPCの名前解決を<b>双方向</b>でつなぐハイブリッドDNS。「オンプレのDNSとVPCを相互に名前解決」と来たらこれ（インバウンド/アウトバウンドの2エンドポイント）。</p>
-</div>
-
-<h1 style="margin-top:56px">データ分析サービスの地図（最重要・ここが一番穴）</h1>
+<h1 id="data-analytics" style="margin-top:56px">データ分析サービスの地図（最重要・ここが一番穴）</h1>
 <p class="lead">データが流れる順番に並べると役割が見える。<b>取り込み → 保存 → 変換(ETL) → クエリ/分析 → 可視化</b>。下のボタンで「こう問われたら」を押すと、該当サービスだけ強調される。</p>
 
 <div class="btns" id="daBtns">
@@ -435,344 +772,7 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 </div>
 <p style="font-size:16px;margin-top:10px;color:#121212">だから「複数チーム/処理が同じデータを別用途・別ペースで」「過去分をリプレイ」と来たら<b>Streams</b>。「とにかくS3へ届けるだけ」なら<b>Firehose</b>、「1件を1回だけ処理」なら<b>SQS</b>。</p>
 
-<h1 style="margin-top:56px">コンピュートの選び方（EC2 / Fargate / Lambda）</h1>
-<p class="lead">軸は1本＝<b>「どこまで自分で管理するか（自由）↔ どこまでAWSに任せるか（手軽）」</b>。左ほど自由で手間大、右ほど手軽で制約あり。下のボタンで「こう問われたら」を押すと該当が強調される。</p>
-<div class="btns" id="cmpBtns">
-<button data-k="all" class="on">全部表示</button>
-<button data-k="ec2">OSを自分で管理・特殊設定・常時稼働・GPU</button>
-<button data-k="eks">Kubernetes/k8sを使いたい</button>
-<button data-k="ecs">コンテナ管理（AWS独自・k8s不要）</button>
-<button data-k="fargate">コンテナだがサーバー管理したくない</button>
-<button data-k="lambda">イベント駆動・短時間・たまに動く・管理ゼロ</button>
-<button data-k="apprunner">コンテナWebを丸ごと最小手間で</button>
-</div>
-<div class="stage">
-<svg viewBox="0 0 1000 300" id="cmpSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
-<defs><marker id="cm" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
-<line x1="40" y1="60" x2="960" y2="60" stroke="#5e5e5e" stroke-width="2.5" marker-end="url(#cm)"/>
-<text x="40" y="44" font-size="14" font-weight="700" fill="#183251">自由・自分で管理（手間大）</text>
-<text x="960" y="44" text-anchor="end" font-size="14" font-weight="700" fill="#b01212">手軽・AWS任せ（制約あり）</text>
-<g class="cn" data-k="ec2"><rect x="30" y="90" width="160" height="150" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="110" y="116" text-anchor="middle" font-size="16" font-weight="700" fill="#183251">EC2</text><text x="110" y="142" text-anchor="middle" font-size="12.5" fill="#5e5e5e">仮想サーバーを</text><text x="110" y="160" text-anchor="middle" font-size="12.5" fill="#5e5e5e">まるごと借りる</text><text x="110" y="184" text-anchor="middle" font-size="12.5" fill="#5e5e5e">OS・パッチも自分</text><text x="110" y="214" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a471a">💰起動時間ぶん</text><text x="110" y="230" text-anchor="middle" font-size="11" fill="#7a471a">(アイドルも課金)</text></g>
-<g class="cn" data-k="ecs"><rect x="210" y="90" width="150" height="70" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="285" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#183251">ECS</text><text x="285" y="140" text-anchor="middle" font-size="12" fill="#5e5e5e">AWS独自のコンテナ管理</text></g>
-<g class="cn" data-k="eks"><rect x="210" y="170" width="150" height="70" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="285" y="198" text-anchor="middle" font-size="15" font-weight="700" fill="#183251">EKS</text><text x="285" y="220" text-anchor="middle" font-size="12" fill="#5e5e5e">Kubernetes(k8s)</text></g>
-<g class="cn" data-k="fargate"><rect x="400" y="90" width="170" height="150" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="485" y="118" text-anchor="middle" font-size="16" font-weight="700" fill="#1f6b3d">Fargate</text><text x="485" y="146" text-anchor="middle" font-size="12.5" fill="#1f6b3d">コンテナを動かす</text><text x="485" y="164" text-anchor="middle" font-size="12.5" fill="#1f6b3d">サーバー管理なし</text><text x="485" y="190" text-anchor="middle" font-size="11.5" fill="#1f6b3d">ECS/EKSの土台に選ぶ</text><text x="485" y="216" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a471a">💰使用量×時間</text><text x="485" y="232" text-anchor="middle" font-size="11" fill="#7a471a">(単価やや高・無駄少)</text></g>
-<g class="cn" data-k="lambda"><rect x="610" y="90" width="180" height="150" fill="#fdeaea" stroke="#b01212" stroke-width="2"/><text x="700" y="118" text-anchor="middle" font-size="16" font-weight="700" fill="#b01212">Lambda</text><text x="700" y="144" text-anchor="middle" font-size="12.5" fill="#b01212">コードだけ置く</text><text x="700" y="162" text-anchor="middle" font-size="12.5" fill="#b01212">イベント時だけ動く</text><text x="700" y="186" text-anchor="middle" font-size="11.5" fill="#b01212">管理ゼロ・最大15分</text><text x="700" y="214" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a471a">💰実行回数×時間</text><text x="700" y="230" text-anchor="middle" font-size="11" fill="#7a471a">(アイドル無料)</text></g>
-<g class="cn" data-k="apprunner"><rect x="810" y="90" width="160" height="150" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="890" y="120" text-anchor="middle" font-size="15" font-weight="700" fill="#7a471a">App Runner</text><text x="890" y="150" text-anchor="middle" font-size="12.5" fill="#7a471a">コンテナWebを</text><text x="890" y="170" text-anchor="middle" font-size="12.5" fill="#7a471a">丸ごと最小手間</text><text x="890" y="196" text-anchor="middle" font-size="12" fill="#7a471a">LB/スケール/HTTPS込み</text></g>
-</svg>
-</div>
-<div class="panel" id="cmpPanel" style="margin-top:14px">ボタンを押すと、その状況で選ぶべきサービスだけ強調されます。</div>
-<table>
-<caption>判断3問（順に当てるだけ）</caption>
-<tr><th>問い</th><th>Yesなら</th></tr>
-<tr><td>① OSを自分で触る必要がある？（特殊設定・常時稼働・GPU）</td><td class="svc">EC2</td></tr>
-<tr><td>② コンテナを使う？ サーバー管理はしたくない？</td><td class="svc">Fargate（k8sならEKS on Fargate）</td></tr>
-<tr><td>③ イベントで短時間動くだけ？（ゼロもある・管理ゼロ）</td><td class="svc">Lambda（最大15分に注意）</td></tr>
-</table>
-<p style="font-size:16px;margin-top:10px;color:#121212">たとえ：<b>EC2＝一軒家</b>（全部自分で管理）／<b>Fargate＝家具付き賃貸</b>（建物の管理は大家）／<b>Lambda＝必要な時だけのレンタルスペース</b>（使った分だけ・長居は不可）。</p>
-
-<h2 style="font-size:20px;color:#183251;margin-top:28px;margin-bottom:6px">コンテナは2層構造（EC2とECSは別の層）</h2>
-<p style="font-size:16px;color:#121212;margin-bottom:10px"><b>ECS/EKS＝コンテナを束ねて管理する司令塔</b>。実際にコンテナを動かす<b>土台</b>として、EC2（自分のサーバー群）か Fargate（サーバー管理なし）を選ぶ。だからEC2とECSは「どっちか」でなく<b>別の層</b>。</p>
-<div class="stage">
-<svg viewBox="0 0 1000 250" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
-<defs><marker id="ns" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
-<rect x="330" y="20" width="340" height="64" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
-<text x="500" y="48" text-anchor="middle" font-size="16" font-weight="700" fill="#183251">ECS / EKS（コンテナの管理・司令塔）</text>
-<text x="500" y="70" text-anchor="middle" font-size="12.5" fill="#5e5e5e">配置・再起動・増減を差配（k8sならEKS）</text>
-<text x="500" y="108" text-anchor="middle" font-size="13.5" font-weight="700" fill="#5e5e5e">↓ コンテナを動かす土台を選ぶ</text>
-<line x1="420" y1="84" x2="320" y2="148" stroke="#5e5e5e" stroke-width="2" marker-end="url(#ns)"/>
-<line x1="580" y1="84" x2="690" y2="148" stroke="#5e5e5e" stroke-width="2" marker-end="url(#ns)"/>
-<rect x="120" y="150" width="320" height="80" fill="#fafafa" stroke="#21537f" stroke-width="2"/>
-<text x="280" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#183251">EC2 起動タイプ</text>
-<text x="280" y="203" text-anchor="middle" font-size="12.5" fill="#5e5e5e">自分のEC2サーバー群の上で動かす</text>
-<text x="280" y="221" text-anchor="middle" font-size="12.5" fill="#5e5e5e">OS/パッチ/スケールは自分で管理</text>
-<rect x="560" y="150" width="320" height="80" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/>
-<text x="720" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#1f6b3d">Fargate</text>
-<text x="720" y="203" text-anchor="middle" font-size="12.5" fill="#1f6b3d">サーバーを持たない（サーバーレス）</text>
-<text x="720" y="221" text-anchor="middle" font-size="12.5" fill="#1f6b3d">下のEC2の管理はAWS任せ</text>
-</svg>
-</div>
-<p style="font-size:16px;margin-top:10px;color:#121212">見分け：<b>コンテナを使う</b>→ECS（k8sならEKS）。その上で<b>サーバー管理したくない</b>→Fargate、<b>EC2を細かく制御したい</b>→EC2起動タイプ。コンテナを使わず<b>普通のサーバー1台でOSを触りたい</b>→そのままEC2。</p>
-<script>
-(function(){
-  const notes={
-    ec2:'OSにログインして設定/パッチ/ミドルウェアを自分で握りたい・特殊なカーネル設定・常時べったり稼働・GPU等の特定インスタンス → <b>EC2</b>。マネージド(RDS/Fargate/Lambda)はOSを触れないので、OS管理が要る時点で全部消えてEC2一択。',
-    ecs:'コンテナを管理したい・Kubernetesまでは要らない（AWS独自でシンプルに） → <b>ECS</b>。',
-    eks:'Kubernetes（k8s）のエコシステムをそのまま使いたい → <b>EKS</b>。',
-    fargate:'コンテナは使いたいが、その下のEC2（サーバー）のパッチ/スケール/管理をやりたくない → <b>Fargate</b>。ECSやEKSの「土台」として選ぶサーバーレス実行環境。',
-    lambda:'イベント駆動・短時間の処理・トラフィックがゼロもバーストもある・アイドル時に課金したくない・サーバー管理ゼロ → <b>Lambda</b>。ただし最大実行時間15分。長時間バッチには不向き。',
-    apprunner:'コンテナのWeb API/アプリを最小の手間で。VPC/LB/クラスタ/スケールを自分で組まず、イメージ指定だけでビルド〜デプロイ〜LB〜自動スケール〜HTTPS → <b>App Runner</b>。',
-    all:'軸は1本＝管理の自由度↔手軽さ。①OS触る?→EC2 ②コンテナでサーバー管理したくない?→Fargate ③イベントで短時間だけ?→Lambda、の3問で切れる。'
-  };
-  const svg=document.getElementById('cmpSvg');
-  const panel=document.getElementById('cmpPanel');
-  const nodes=svg.querySelectorAll('.cn');
-  function apply(k){
-    const set=k==='all'?null:new Set(k.split(','));
-    nodes.forEach(g=>{
-      g.style.transition='opacity .25s';
-      const on=!set||set.has(g.dataset.k);
-      g.style.opacity = on ? '1' : '0.3';
-      const r=g.querySelector('rect');
-      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
-    });
-    panel.innerHTML=notes[k]||'';
-  }
-  document.getElementById('cmpBtns').addEventListener('click',e=>{
-    const b=e.target.closest('button'); if(!b)return;
-    document.querySelectorAll('#cmpBtns button').forEach(x=>x.classList.toggle('on',x===b));
-    apply(b.dataset.k);
-  });
-  apply('all');
-})();
-</script>
-
-<h1 style="margin-top:56px">ストレージ移行・データ移送の早見表</h1>
-<p class="lead">「どこから・何を・どう運ぶか」で道具が決まる。混同しやすい4グループ（移送ツール／FSx／Storage Gateway／EBSタイプ）を決め手つきで並べる。</p>
-
-<p style="font-size:16px;color:#121212;margin-bottom:8px">まずは移送ツール。<b>オンプレ → どのツール → AWSのどこ</b>へ。下のボタンで「こう運びたい」を押すと該当ツールが強調される。</p>
-<div class="btns" id="mvBtns">
-<button data-k="all" class="on">全部表示</button>
-<button data-k="datasync">オンラインで大量ファイルを同期</button>
-<button data-k="snowball">巨大/回線が細い・オフラインで運ぶ</button>
-<button data-k="dms">DBを止めずに移行（同/異種エンジン）</button>
-<button data-k="mgn">サーバーを丸ごとそのまま移行</button>
-<button data-k="drs">災害対策（DR）として複製</button>
-<button data-k="gateway">オンプレから常設でAWSストレージを使う</button>
-<button data-k="transfer">既存のSFTP運用をそのまま</button>
-</div>
-<div class="stage">
-<svg viewBox="0 0 1000 470" id="mvSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
-<defs><marker id="mv" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
-<rect x="20" y="60" width="150" height="386" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/>
-<text x="95" y="240" text-anchor="middle" font-size="17" font-weight="700" fill="#7a471a">オンプレミス</text>
-<text x="95" y="266" text-anchor="middle" font-size="13" fill="#7a471a">/ 既存環境</text>
-<rect x="830" y="66" width="150" height="56" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="905" y="100" text-anchor="middle" font-size="15" font-weight="700" fill="#1f6b3d">S3</text>
-<rect x="830" y="140" width="150" height="56" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="905" y="174" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">EFS / FSx</text>
-<rect x="830" y="270" width="150" height="56" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="905" y="304" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">RDS / Aurora</text>
-<rect x="830" y="350" width="150" height="56" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="905" y="384" text-anchor="middle" font-size="15" font-weight="700" fill="#1f6b3d">EC2</text>
-<g class="mn" data-k="datasync"><rect x="400" y="62" width="220" height="46" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="510" y="82" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">DataSync</text><text x="510" y="100" text-anchor="middle" font-size="11.5" fill="#5e5e5e">オンライン高速転送→S3/EFS/FSx</text></g>
-<g class="mn" data-k="snowball"><rect x="400" y="116" width="220" height="46" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="510" y="136" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">Snowball</text><text x="510" y="154" text-anchor="middle" font-size="11.5" fill="#5e5e5e">物理デバイス・オフライン→S3</text></g>
-<g class="mn" data-k="gateway"><rect x="400" y="170" width="220" height="46" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="510" y="190" text-anchor="middle" font-size="13.5" font-weight="700" fill="#7a471a">Storage Gateway</text><text x="510" y="208" text-anchor="middle" font-size="11.5" fill="#7a471a">File/Volume/Tape・常設の橋→S3</text></g>
-<g class="mn" data-k="transfer"><rect x="400" y="224" width="220" height="46" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="510" y="244" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">Transfer Family</text><text x="510" y="262" text-anchor="middle" font-size="11.5" fill="#5e5e5e">マネージドSFTP→S3/EFS</text></g>
-<g class="mn" data-k="dms"><rect x="400" y="278" width="220" height="46" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="510" y="298" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">DMS（＋SCT）</text><text x="510" y="316" text-anchor="middle" font-size="11.5" fill="#1f6b3d">DB移行・継続複製→RDS/Aurora</text></g>
-<g class="mn" data-k="mgn"><rect x="400" y="332" width="220" height="46" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="510" y="352" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">MGN</text><text x="510" y="370" text-anchor="middle" font-size="11.5" fill="#5e5e5e">サーバー丸ごと→EC2</text></g>
-<g class="mn" data-k="drs"><rect x="400" y="386" width="220" height="46" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="510" y="406" text-anchor="middle" font-size="14" font-weight="700" fill="#b01212">DRS</text><text x="510" y="424" text-anchor="middle" font-size="11.5" fill="#b01212">災害対策の継続複製→EC2</text></g>
-<line x1="170" y1="85" x2="398" y2="85" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="170" y1="139" x2="398" y2="139" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="170" y1="193" x2="398" y2="193" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="170" y1="247" x2="398" y2="247" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="170" y1="301" x2="398" y2="301" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="170" y1="355" x2="398" y2="355" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="170" y1="409" x2="398" y2="409" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="620" y1="85" x2="828" y2="92" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="620" y1="90" x2="828" y2="160" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="620" y1="139" x2="828" y2="98" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="620" y1="193" x2="828" y2="104" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="620" y1="247" x2="828" y2="168" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="620" y1="301" x2="828" y2="298" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="620" y1="355" x2="828" y2="374" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-<line x1="620" y1="409" x2="828" y2="382" stroke="#5e5e5e" stroke-width="2" marker-end="url(#mv)"/>
-</svg>
-</div>
-<div class="panel" id="mvPanel" style="margin-top:14px">ボタンを押すと、その運び方に合うツールだけ強調されます。</div>
-<script>
-(function(){
-  const notes={
-    datasync:'オンライン（ネット/専用線）で大量のNFS/SMBファイルを高速転送・定期同期したい → <b>DataSync</b>。継続的な同期にも向く。',
-    snowball:'データが巨大／回線が細くてネットだと何ヶ月もかかる → <b>Snowball</b>。物理デバイスを送ってもらいオフラインで運ぶ。',
-    dms:'DBを止めずに移行・移行中も継続レプリケーション（CDC）。異なるエンジン間（Oracle→PostgreSQL等）なら <b>SCTでスキーマ変換</b>を併用 → <b>DMS（＋SCT）</b>。',
-    mgn:'既存サーバーをコード変更なしでブロックレベルごとAWSへ（リフト&シフト） → <b>MGN</b>。行き先はEC2。',
-    drs:'オンプレ/他環境の災害対策（DR）。普段は最小、障害時にEC2で起動。RPO秒〜分・RTO数分 → <b>DRS</b>。',
-    gateway:'オンプレから常設でAWSストレージを使う橋。File（NFS/SMB→S3）/ Volume（iSCSI→S3・EBS復元）/ Tape（仮想テープ→S3/Glacier） → <b>Storage Gateway</b>。',
-    transfer:'既存のSFTP/FTPS/FTP運用をそのままS3/EFSに繋ぎたい → <b>Transfer Family</b>。',
-    all:'オンプレ→ツール→AWSの行き先で道具が決まる。オフライン/巨大→Snowball、オンライン同期→DataSync、DB→DMS(+SCT)、サーバー丸ごと→MGN、DR→DRS、常設の橋→Storage Gateway。'
-  };
-  const svg=document.getElementById('mvSvg');
-  const panel=document.getElementById('mvPanel');
-  const nodes=svg.querySelectorAll('.mn');
-  function apply(k){
-    const set=k==='all'?null:new Set(k.split(','));
-    nodes.forEach(g=>{
-      g.style.transition='opacity .25s';
-      const on=!set||set.has(g.dataset.k);
-      g.style.opacity = on ? '1' : '0.3';
-      const r=g.querySelector('rect');
-      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
-    });
-    panel.innerHTML=notes[k]||'';
-  }
-  document.getElementById('mvBtns').addEventListener('click',e=>{
-    const b=e.target.closest('button'); if(!b)return;
-    document.querySelectorAll('#mvBtns button').forEach(x=>x.classList.toggle('on',x===b));
-    apply(b.dataset.k);
-  });
-  apply('all');
-})();
-</script>
-
-<div class="stage">
-<table>
-<caption>① データ移送ツール（オンプレ↔AWS・DB移行）</caption>
-<tr><th>ツール</th><th>何をする</th><th>こう書かれたら</th></tr>
-<tr><td class="svc">DataSync</td><td>オンライン（ネット/専用線経由）で大量ファイルを高速転送・継続同期</td><td>NFS/SMBの大量ファイルを<b>オンラインで</b>S3/EFS/FSxへ移す・定期同期</td></tr>
-<tr><td class="svc">Snowball / Snow</td><td>物理デバイスを送ってもらいデータを入れて送り返す（オフライン）</td><td>回線が細い/データが巨大で<b>ネットだと何ヶ月もかかる</b>・オフライン移送</td></tr>
-<tr><td class="svc">DMS</td><td>DBを移行・移行中も継続レプリケーション（CDC）でダウンタイム最小</td><td>DBを止めずに移行・継続複製</td></tr>
-<tr><td class="svc">DMS + SCT</td><td>SCTでスキーマ/ストアド変換＋DMSで継続移送</td><td><b>異なるDBエンジン間</b>（Oracle→PostgreSQL等）の移行</td></tr>
-<tr><td class="svc">MGN</td><td>サーバーをブロックレベルで丸ごとAWSへ（リフト&シフト）</td><td>既存サーバーを<b>コード変更なし</b>でそのままEC2へ移行</td></tr>
-<tr><td class="svc">DRS</td><td>継続レプリケーションでDR専用（普段は最小・障害時に起動）</td><td>オンプレ/他環境の<b>災害対策（DR）</b>・RPO秒〜分・RTO数分</td></tr>
-<tr><td class="svc">Transfer Family</td><td>マネージドのSFTP/FTPS/FTPエンドポイント→S3/EFS</td><td>既存の<b>SFTP</b>運用をそのままS3に繋ぎたい</td></tr>
-<tr><td class="svc">Migration Hub</td><td>構成の自動発見＋複数移行ツールの進捗を1画面で横断管理</td><td>移行の<b>計画・発見・一元追跡</b></td></tr>
-</table>
-</div>
-
-<div class="stage">
-<table>
-<caption>② FSx 3種（マネージドの共有ファイルストレージ）</caption>
-<tr><th>種類</th><th>用途</th><th>こう書かれたら</th></tr>
-<tr><td class="svc">FSx for Windows</td><td>Windows向け共有（SMB / NTFS / Active Directory連携）</td><td><b>Windows・SMB・AD</b>連携の共有ファイル</td></tr>
-<tr><td class="svc">FSx for Lustre</td><td>HPC/ML向け超高速並列ファイルシステム・S3連携</td><td><b>HPC/機械学習</b>・数百GB/秒・S3のデータを並列処理</td></tr>
-<tr><td class="svc">FSx for NetApp ONTAP</td><td>ONTAP機能・NFSとSMBの両方（マルチプロトコル）</td><td>既存<b>NetApp/ONTAP</b>依存・NFSとSMB両対応で移行</td></tr>
-</table>
-</div>
-
-<div class="stage">
-<table>
-<caption>③ Storage Gateway 3種（オンプレからAWSストレージを使う橋）</caption>
-<tr><th>種類</th><th>見え方</th><th>こう書かれたら</th></tr>
-<tr><td class="svc">File Gateway</td><td>NFS/SMBのファイル共有に見える → 中身はS3</td><td>オンプレから<b>ファイル(NFS/SMB)</b>として使い実体はS3</td></tr>
-<tr><td class="svc">Volume Gateway</td><td>iSCSIのブロックボリュームに見える → S3バックアップ・EBS復元</td><td>オンプレの<b>iSCSIブロック</b>・頻用分はローカルキャッシュ・DR</td></tr>
-<tr><td class="svc">Tape Gateway</td><td>仮想テープに見える → 実体はS3/Glacier</td><td>既存の<b>テープバックアップ</b>運用をクラウドへ</td></tr>
-</table>
-</div>
-
-<div class="stage">
-<table>
-<caption>④ EBSボリュームタイプ（EC2のディスク）</caption>
-<tr><th>タイプ</th><th>性質</th><th>こう書かれたら</th></tr>
-<tr><td class="svc">gp3 (汎用SSD)</td><td>バランス型・コスパ良い既定</td><td>特に要件なし・<b>標準</b>のSSD</td></tr>
-<tr><td class="svc">io2 (プロビジョンドIOPS SSD)</td><td>高IOPSを明示的に確保・低遅延</td><td><b>高い一定IOPS</b>（数万IOPS）・基幹DB</td></tr>
-<tr><td class="svc">st1 (スループット最適化HDD)</td><td>大容量・シーケンシャル・高スループット・安い</td><td><b>ログ/ビッグデータ</b>・連続読み書き・コスト重視</td></tr>
-<tr><td class="svc">sc1 (コールドHDD)</td><td>最安・アクセス頻度が低い大容量</td><td>めったに使わない大容量を<b>最安</b>で</td></tr>
-</table>
-<p style="font-size:16px;margin-top:12px;color:#121212">移送の最速の切り方：<b>「オフライン/巨大/回線細い」→Snowball</b>、<b>「オンラインでファイル同期」→DataSync</b>、<b>「DB・異種エンジン」→DMS(+SCT)</b>、<b>「サーバー丸ごと」→MGN</b>、<b>「DR目的」→DRS</b>。</p>
-</div>
-
-<h1 style="margin-top:56px">データベースの選び方（移行先・目的別）</h1>
-<p class="lead">DBは<b>「データの形」</b>で行き先が決まる。まずリレーショナル（JOIN・トランザクション）か、それ以外（NoSQL・専用）か。下のボタンで「こういうデータ/要件」を押すと該当DBが強調される。</p>
-<div class="btns" id="dbBtns">
-<button data-k="all" class="on">全部表示</button>
-<button data-k="rds">既存RDBをエンジンそのままマネージド化</button>
-<button data-k="aurora">MySQL/PostgreSQLを高性能に・脱Oracleライセンス</button>
-<button data-k="dynamodb">キーで1件・JOIN不要・自動スケール・1桁ミリ秒</button>
-<button data-k="documentdb">MongoDB互換・JSONドキュメント</button>
-<button data-k="keyspaces">Cassandra・CQLのまま</button>
-<button data-k="neptune">関係性・つながり・レコメンド・不正検知</button>
-<button data-k="timestream">時系列・計測値・IoT</button>
-<button data-k="elasticache">インメモリ・超高速キャッシュ</button>
-<button data-k="qldb">改ざん不可の台帳・取引履歴</button>
-</div>
-<div class="stage">
-<svg viewBox="0 0 1000 600" id="dbSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
-<defs><marker id="tg" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
-<!-- 分岐線 -->
-<line x1="200" y1="285" x2="248" y2="155" stroke="#5e5e5e" stroke-width="2" marker-end="url(#tg)"/>
-<text x="212" y="210" font-size="13" font-weight="700" fill="#1f6b3d">Yes</text>
-<line x1="200" y1="320" x2="248" y2="425" stroke="#5e5e5e" stroke-width="2" marker-end="url(#tg)"/>
-<text x="212" y="385" font-size="13" font-weight="700" fill="#b01212">No</text>
-<line x1="420" y1="140" x2="518" y2="110" stroke="#5e5e5e" stroke-width="2" marker-end="url(#tg)"/>
-<text x="430" y="120" font-size="12" fill="#5e5e5e">そのまま</text>
-<line x1="420" y1="168" x2="518" y2="178" stroke="#5e5e5e" stroke-width="2" marker-end="url(#tg)"/>
-<text x="430" y="200" font-size="12" fill="#5e5e5e">別エンジン</text>
-<line x1="420" y1="420" x2="538" y2="281" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
-<line x1="420" y1="423" x2="538" y2="325" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
-<line x1="420" y1="426" x2="538" y2="369" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
-<line x1="420" y1="428" x2="538" y2="413" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
-<line x1="420" y1="430" x2="538" y2="457" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
-<line x1="420" y1="432" x2="538" y2="501" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
-<line x1="420" y1="435" x2="538" y2="545" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tg)"/>
-<!-- 決定ノード -->
-<rect x="20" y="255" width="180" height="90" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="110" y="293" text-anchor="middle" font-size="15" font-weight="700" fill="#7a471a">リレーショナル？</text><text x="110" y="316" text-anchor="middle" font-size="12" fill="#7a471a">JOIN・トランザクション</text>
-<rect x="250" y="120" width="170" height="70" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="335" y="150" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">エンジンを</text><text x="335" y="172" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">変える？</text>
-<rect x="250" y="390" width="170" height="70" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="335" y="420" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">データの形で</text><text x="335" y="442" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">選ぶ</text>
-<!-- リレーショナルの行き先 -->
-<g class="db" data-k="rds"><rect x="520" y="82" width="250" height="54" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="535" y="106" font-size="14" font-weight="700" fill="#183251">RDS（6エンジン）</text><text x="535" y="125" font-size="11.5" fill="#5e5e5e">そのまま＝DMSだけ</text></g>
-<g class="db" data-k="aurora"><rect x="520" y="150" width="250" height="54" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="535" y="174" font-size="14" font-weight="700" fill="#1f6b3d">Aurora（MySQL/PG互換）</text><text x="535" y="193" font-size="11.5" fill="#1f6b3d">別エンジン＝DMS＋SCT</text></g>
-<!-- 目的別の葉 -->
-<g class="db" data-k="dynamodb"><rect x="540" y="262" width="430" height="38" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="555" y="286" font-size="13" fill="#183251"><tspan font-weight="700">DynamoDB</tspan>　キー値・スキーマレス・自動スケール・1桁ms</text></g>
-<g class="db" data-k="documentdb"><rect x="540" y="306" width="430" height="38" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="555" y="330" font-size="13" fill="#183251"><tspan font-weight="700">DocumentDB</tspan>　ドキュメント（MongoDB互換・JSON）</text></g>
-<g class="db" data-k="keyspaces"><rect x="540" y="350" width="430" height="38" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="555" y="374" font-size="13" fill="#183251"><tspan font-weight="700">Keyspaces</tspan>　ワイドカラム（Cassandra・CQL）</text></g>
-<g class="db" data-k="neptune"><rect x="540" y="394" width="430" height="38" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="555" y="418" font-size="13" fill="#183251"><tspan font-weight="700">Neptune</tspan>　グラフ（関係性・レコメンド・不正検知）</text></g>
-<g class="db" data-k="timestream"><rect x="540" y="438" width="430" height="38" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="555" y="462" font-size="13" fill="#7a471a"><tspan font-weight="700">Timestream</tspan>　時系列（計測値・IoT・時間クエリ）</text></g>
-<g class="db" data-k="elasticache"><rect x="540" y="482" width="430" height="38" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="555" y="506" font-size="13" fill="#b01212"><tspan font-weight="700">ElastiCache / MemoryDB</tspan>　インメモリ・超高速キャッシュ</text></g>
-<g class="db" data-k="qldb"><rect x="540" y="526" width="430" height="38" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="555" y="550" font-size="13" fill="#183251"><tspan font-weight="700">QLDB</tspan>　台帳（改ざん不可の取引履歴）</text></g>
-</svg>
-</div>
-<div class="panel" id="dbPanel" style="margin-top:14px">ボタンを押すと、そのデータ/要件に合うDBだけ強調されます。</div>
-<script>
-(function(){
-  const notes={
-    rds:'既存のリレーショナルDBを、エンジンはそのままにマネージド化（OS/パッチ/バックアップをAWSに任せる） → <b>RDS</b>（Oracle/SQL Server/MySQL/PostgreSQL/MariaDB）。移行はエンジン同じなので <b>DMSだけ</b>。',
-    aurora:'MySQL/PostgreSQL互換で高性能・自動スケール・複数AZ。商用ライセンス（Oracle/SQL Server）から脱却したい → <b>Aurora</b>。異種移行は <b>DMS＋SCT</b>、SQL ServerはBabelfishでアプリ改修減。',
-    dynamodb:'キーで1件アクセス中心・JOIN不要・スキーマレス・予測不能な増減に自動追従・1桁ミリ秒・サーバーレス従量課金 → <b>DynamoDB</b>。',
-    documentdb:'MongoDB互換・JSONドキュメントをそのまま → <b>DocumentDB</b>。',
-    keyspaces:'Cassandra・CQLのまま、マネージド/サーバーレスで → <b>Keyspaces</b>。',
-    neptune:'エンティティ間の複雑な関係を低レイテンシでたどる・ソーシャルグラフ/レコメンド/不正検知 → <b>Neptune</b>（グラフDB）。',
-    timestream:'タイムスタンプ付き計測値を毎秒大量に・時間ベースのクエリ・古いデータは自動で安価階層へ → <b>Timestream</b>（時系列DB）。',
-    elasticache:'インメモリで超高速・複数サーバーで共有・キャッシュ層。複雑なデータ型や永続化/レプリケーション重視なら <b>MemoryDB</b> → <b>ElastiCache（Redis/Memcached）</b>。',
-    qldb:'変更不能で検証可能な取引履歴・改ざん不可の台帳 → <b>QLDB</b>。',
-    all:'判断＝①リレーショナル(JOIN/トランザクション)?→RDS/Aurora（エンジン変えるかでSCT要否）②NoSQL/特殊?→データの形で目的別DB。決め手はいつも「データの形」。'
-  };
-  const svg=document.getElementById('dbSvg');
-  const panel=document.getElementById('dbPanel');
-  const nodes=svg.querySelectorAll('.db');
-  function apply(k){
-    const set=k==='all'?null:new Set(k.split(','));
-    nodes.forEach(g=>{
-      g.style.transition='opacity .25s';
-      const on=!set||set.has(g.dataset.k);
-      g.style.opacity = on ? '1' : '0.3';
-      const r=g.querySelector('rect');
-      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
-    });
-    panel.innerHTML=notes[k]||'';
-  }
-  document.getElementById('dbBtns').addEventListener('click',e=>{
-    const b=e.target.closest('button'); if(!b)return;
-    document.querySelectorAll('#dbBtns button').forEach(x=>x.classList.toggle('on',x===b));
-    apply(b.dataset.k);
-  });
-  apply('all');
-})();
-</script>
-
-<div class="stage">
-<table>
-<caption>目的別データベース早見表（データの形 → 行き先）</caption>
-<tr><th>データの形 / 要件</th><th>サービス</th><th>こう書かれたら</th></tr>
-<tr><td>リレーショナル（表＋関係）</td><td class="svc">RDS / Aurora</td><td>JOIN・トランザクション・複雑クエリ・会計/在庫/受発注</td></tr>
-<tr><td>キー値・スキーマレス</td><td class="svc">DynamoDB</td><td>キーで1件・JOIN不要・予測不能な増減に自動追従・1桁ミリ秒・サーバーレス従量</td></tr>
-<tr><td>ドキュメント</td><td class="svc">DocumentDB</td><td><b>MongoDB</b>互換・JSONドキュメント</td></tr>
-<tr><td>ワイドカラム</td><td class="svc">Keyspaces</td><td><b>Cassandra</b>・CQLのまま</td></tr>
-<tr><td>グラフ（関係性）</td><td class="svc">Neptune</td><td>つながりをたどる・ソーシャル/レコメンド/不正検知</td></tr>
-<tr><td>時系列</td><td class="svc">Timestream</td><td>計測値を毎秒大量・時間クエリ・IoT・古いデータ自動安価化</td></tr>
-<tr><td>インメモリ</td><td class="svc">ElastiCache / MemoryDB</td><td>超高速キャッシュ・複数サーバーで共有（永続化重視はMemoryDB）</td></tr>
-<tr><td>台帳（改ざん不可）</td><td class="svc">QLDB</td><td>変更不能で検証可能な取引履歴</td></tr>
-</table>
-</div>
-
-<div class="stage">
-<table>
-<caption>リレーショナルDBの移行（エンジンを変えるか）</caption>
-<tr><th>状況</th><th>道具</th><th>例</th></tr>
-<tr><td>エンジンそのまま（同種）</td><td class="svc">DMS だけ</td><td>Oracle→RDS for Oracle、MySQL→RDS/Aurora MySQL</td></tr>
-<tr><td>別エンジンへ（異種）</td><td class="svc">DMS ＋ SCT</td><td><b>Oracle→Aurora PostgreSQL</b>（スキーマ/ストアド変換が必要）</td></tr>
-<tr><td>移行中もダウンタイム最小</td><td class="svc">DMSのCDC</td><td>本番を止めず継続レプリケーション</td></tr>
-<tr><td>SQL Server→Auroraでアプリ改修を減らす</td><td class="svc">Babelfish</td><td>T-SQLをそのままAuroraで受ける</td></tr>
-</table>
-<p style="font-size:16px;margin-top:12px;color:#121212">決め手：まず<b>「データの形」</b>（リレーショナル/ドキュメント/グラフ/時系列/キー値…）。リレーショナルなら次に<b>「エンジンを変えるか」</b>＝変えない→DMSだけ、変える→DMS＋SCT。</p>
-</div>
-
-<h1 style="margin-top:56px">メッセージング・疎結合の選び方</h1>
+<h1 id="messaging" style="margin-top:56px">メッセージング・疎結合の選び方</h1>
 <p class="lead">SQS / SNS / EventBridge / Step Functions / MQ はどれも「コンポーネントを疎結合でつなぐ」正しい手段。だから消去法が効かない。<b>「何をしたいか」</b>で1つに決める。下のボタンで状況を押すと該当が強調される。</p>
 <div class="btns" id="msgBtns">
 <button data-k="all" class="on">全部表示</button>
@@ -920,7 +920,82 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 })();
 </script>
 
-<h1 style="margin-top:56px">DR戦略の4段階（コスト ↔ 復旧の速さ）</h1>
+<h1 id="performance" style="margin-top:56px">高性能・キャッシュの選び方（何を速くしたい？）</h1>
+<p class="lead">「性能を上げる」手立ては<b>何を速くしたいか</b>で変わる。DBの読み取り／DB接続／APIの入口／HPC計算で道具が違う。下のボタンで状況を押すと該当が強調される。</p>
+<div class="btns" id="perfBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="elasticache">同じDBクエリ結果を使い回し読み取り高速化（汎用）</button>
+<button data-k="dax">DynamoDBの読み取りをマイクロ秒に</button>
+<button data-k="readreplica">DBの読み取り負荷を複数に分散</button>
+<button data-k="rdsproxy">Lambda等の大量接続でDB接続が枯渇</button>
+<button data-k="apigw">APIのリクエスト数を制限・流量制御</button>
+<button data-k="efa">HPCでノード間を超低遅延に</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 430" id="perfSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<text x="20" y="34" font-size="15" font-weight="700" fill="#21537f">🗄 DBの読み取りを速く</text>
+<g class="pfn" data-k="elasticache"><rect x="20" y="46" width="300" height="80" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="170" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">ElastiCache（汎用キャッシュ）</text><text x="170" y="96" text-anchor="middle" font-size="11.5" fill="#1f6b3d">Redis/Memcached・同じ結果を使い回す</text><text x="170" y="114" text-anchor="middle" font-size="11" fill="#5e5e5e">どのDBの前にも置ける・アプリ側で実装</text></g>
+<g class="pfn" data-k="dax"><rect x="340" y="46" width="300" height="80" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="490" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">DAX</text><text x="490" y="96" text-anchor="middle" font-size="11.5" fill="#1f6b3d">DynamoDB専用・マイクロ秒</text><text x="490" y="114" text-anchor="middle" font-size="11" fill="#5e5e5e">コード変更最小で前面に挿す</text></g>
+<g class="pfn" data-k="readreplica"><rect x="660" y="46" width="320" height="80" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="820" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">リードレプリカ</text><text x="820" y="96" text-anchor="middle" font-size="11.5" fill="#5e5e5e">RDS/Auroraの読み取りを複製に分散</text><text x="820" y="114" text-anchor="middle" font-size="11" fill="#b01212">※マルチAZ(可用性)とは別物</text></g>
+<text x="20" y="160" font-size="15" font-weight="700" fill="#21537f">🔌 DB接続を守る</text>
+<g class="pfn" data-k="rdsproxy"><rect x="20" y="172" width="460" height="64" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="250" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">RDS Proxy</text><text x="250" y="220" text-anchor="middle" font-size="11.5" fill="#5e5e5e">コネクションをプールして使い回す・Lambda急増でRDS接続枯渇を防ぐ</text></g>
+<text x="520" y="160" font-size="15" font-weight="700" fill="#21537f">🚪 APIの入口で制御</text>
+<g class="pfn" data-k="apigw"><rect x="520" y="172" width="460" height="64" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="750" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">API Gateway スロットリング</text><text x="750" y="220" text-anchor="middle" font-size="11.5" fill="#7a471a">リクエスト数に上限・使用量プラン（キー別）で下流DBを守る</text></g>
+<text x="20" y="270" font-size="15" font-weight="700" fill="#21537f">🧮 HPC（密結合の並列計算）</text>
+<g class="pfn" data-k="efa"><rect x="20" y="282" width="960" height="64" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="500" y="308" text-anchor="middle" font-size="14" font-weight="700" fill="#b01212">クラスタープレイスメントグループ ＋ EFA</text><text x="500" y="330" text-anchor="middle" font-size="11.5" fill="#b01212">同一AZに密集配置＋OSバイパスの高速NIC＝ノード間を超低遅延・高帯域に（HPC/ML）</text></g>
+<rect x="20" y="360" width="960" height="56" fill="#fafafa" stroke="#d8dee6"/>
+<text x="36" y="382" font-size="12.5" fill="#121212">配信を速く（静的コンテンツ）＝CloudFront ／ 非HTTPのグローバル経路最適化＝Global Accelerator（別の図を参照）</text>
+<text x="36" y="404" font-size="12.5" fill="#b01212">混同注意：マルチAZ＝可用性（待機系・自動フェイルオーバー）／リードレプリカ＝読み取り分散。「読み取りを分散」ならリードレプリカ</text>
+</svg>
+</div>
+<div class="panel" id="perfPanel" style="margin-top:14px">ボタンを押すと、その目的に合う手立てだけ強調されます。</div>
+<table>
+<caption>こう問われたら（決め手）</caption>
+<tr><th>要件</th><th>手立て</th></tr>
+<tr><td>同じクエリ結果を使い回して読み取りを高速化（どのDBでも・汎用）</td><td class="svc">ElastiCache</td></tr>
+<tr><td>DynamoDBの読み取りをマイクロ秒に・コード変更最小</td><td class="svc">DAX</td></tr>
+<tr><td>DB（RDS/Aurora）の読み取り負荷を複数に分散</td><td class="svc">リードレプリカ</td></tr>
+<tr><td>Lambdaの同時実行急増でRDSの接続数が枯渇</td><td class="svc">RDS Proxy</td></tr>
+<tr><td>APIのリクエスト数に上限・クライアント別に流量制御</td><td class="svc">API Gateway（スロットリング/使用量プラン）</td></tr>
+<tr><td>HPCでノード間を極めて低遅延・高帯域に</td><td class="svc">クラスタープレイスメントグループ＋EFA</td></tr>
+<tr><td>可用性のため待機系を別AZに（読み取り分散ではない）</td><td class="svc">マルチAZ</td></tr>
+</table>
+
+<script>
+(function(){
+  const notes={
+    elasticache:'同じクエリ結果やセッションをインメモリに置いて使い回し、DB本体の負荷とレイテンシを下げる（汎用・どのDBの前にも置ける） → <b>ElastiCache</b>（Redis/Memcached）。',
+    dax:'DynamoDB専用のインメモリキャッシュ。読み取りをミリ秒→<b>マイクロ秒</b>に、コード変更を最小で前面に挿す → <b>DAX</b>。',
+    readreplica:'RDS/Auroraの<b>読み取り</b>を複製（レプリカ）に振り分けて負荷分散。書き込みは本体（プライマリ） → <b>リードレプリカ</b>。マルチAZ（可用性）と混同しない。',
+    rdsproxy:'Lambdaの同時実行が急増し、各実行が新規コネクションを張って<b>RDSの接続数が枯渇</b>する→コネクションをプールして使い回す → <b>RDS Proxy</b>。',
+    apigw:'APIへのリクエスト数に上限を設け、クライアント（キー）別に使用量プランで<b>流量制御（スロットリング）</b>して下流のDBを守る → <b>API Gateway</b>。',
+    efa:'HPCの密結合並列計算で、同一AZに<b>クラスタープレイスメントグループ</b>で密集配置し、OSバイパスの高速NIC<b>EFA</b>でノード間を超低遅延・高帯域に。',
+    all:'「何を速くしたいか」で道具が変わる。DB読み取り＝ElastiCache(汎用)/DAX(Dynamo専用)/リードレプリカ(分散)、DB接続＝RDS Proxy、API入口＝スロットリング、HPC＝配置グループ+EFA。配信はCloudFront・経路はGAが別図。'
+  };
+  const svg=document.getElementById('perfSvg');
+  const panel=document.getElementById('perfPanel');
+  const nodes=svg.querySelectorAll('.pfn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.28';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('perfBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#perfBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
+<h1 id="dr" style="margin-top:56px">DR戦略の4段階（コスト ↔ 復旧の速さ）</h1>
 <p class="lead">災害対策は<b>「どれだけ速く復旧したいか（RTO/RPO）」と「平常時にいくら払うか」のトレードオフ</b>。左ほど安いが復旧が遅い、右ほど速いが高い。要件のRTO/RPOに一番近い段を選ぶ。下のボタンで状況を押すと該当が強調される。</p>
 <div class="btns" id="drBtns">
 <button data-k="all" class="on">全部表示</button>
@@ -983,7 +1058,7 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 })();
 </script>
 
-<h1 style="margin-top:56px">セキュリティの検知・防御サービス地図</h1>
+<h1 id="security" style="margin-top:56px">セキュリティの検知・防御サービス地図</h1>
 <p class="lead">セキュリティ系は「<b>何を検知/守るか</b>」でグループに分けると混同しなくなる。特に検知4兄弟（GuardDuty/Inspector/Macie/Detective）は取り違えやすい。下のボタンで「こう問われたら」を押すと該当が強調される。</p>
 <h2 style="font-size:20px;color:#183251;margin-top:24px;margin-bottom:6px">具体例：Webアプリが攻撃される一連の流れで、各サービスがどこで働くか</h2>
 <p style="font-size:16px;color:#121212;margin-bottom:10px">左から時間の流れ。<b>事前に固める → 入口で防ぐ → すり抜けを検知 → 結果を集約 → 事後に調査</b>。同じ「セキュリティ」でも働く<b>タイミング</b>が違う（だからInspector＝事前／Detective＝事後で別物）。</p>
@@ -1107,81 +1182,6 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
   document.getElementById('secBtns').addEventListener('click',e=>{
     const b=e.target.closest('button'); if(!b)return;
     document.querySelectorAll('#secBtns button').forEach(x=>x.classList.toggle('on',x===b));
-    apply(b.dataset.k);
-  });
-  apply('all');
-})();
-</script>
-
-<h1 style="margin-top:56px">高性能・キャッシュの選び方（何を速くしたい？）</h1>
-<p class="lead">「性能を上げる」手立ては<b>何を速くしたいか</b>で変わる。DBの読み取り／DB接続／APIの入口／HPC計算で道具が違う。下のボタンで状況を押すと該当が強調される。</p>
-<div class="btns" id="perfBtns">
-<button data-k="all" class="on">全部表示</button>
-<button data-k="elasticache">同じDBクエリ結果を使い回し読み取り高速化（汎用）</button>
-<button data-k="dax">DynamoDBの読み取りをマイクロ秒に</button>
-<button data-k="readreplica">DBの読み取り負荷を複数に分散</button>
-<button data-k="rdsproxy">Lambda等の大量接続でDB接続が枯渇</button>
-<button data-k="apigw">APIのリクエスト数を制限・流量制御</button>
-<button data-k="efa">HPCでノード間を超低遅延に</button>
-</div>
-<div class="stage">
-<svg viewBox="0 0 1000 430" id="perfSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
-<text x="20" y="34" font-size="15" font-weight="700" fill="#21537f">🗄 DBの読み取りを速く</text>
-<g class="pfn" data-k="elasticache"><rect x="20" y="46" width="300" height="80" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="170" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">ElastiCache（汎用キャッシュ）</text><text x="170" y="96" text-anchor="middle" font-size="11.5" fill="#1f6b3d">Redis/Memcached・同じ結果を使い回す</text><text x="170" y="114" text-anchor="middle" font-size="11" fill="#5e5e5e">どのDBの前にも置ける・アプリ側で実装</text></g>
-<g class="pfn" data-k="dax"><rect x="340" y="46" width="300" height="80" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="490" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">DAX</text><text x="490" y="96" text-anchor="middle" font-size="11.5" fill="#1f6b3d">DynamoDB専用・マイクロ秒</text><text x="490" y="114" text-anchor="middle" font-size="11" fill="#5e5e5e">コード変更最小で前面に挿す</text></g>
-<g class="pfn" data-k="readreplica"><rect x="660" y="46" width="320" height="80" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="820" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">リードレプリカ</text><text x="820" y="96" text-anchor="middle" font-size="11.5" fill="#5e5e5e">RDS/Auroraの読み取りを複製に分散</text><text x="820" y="114" text-anchor="middle" font-size="11" fill="#b01212">※マルチAZ(可用性)とは別物</text></g>
-<text x="20" y="160" font-size="15" font-weight="700" fill="#21537f">🔌 DB接続を守る</text>
-<g class="pfn" data-k="rdsproxy"><rect x="20" y="172" width="460" height="64" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="250" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">RDS Proxy</text><text x="250" y="220" text-anchor="middle" font-size="11.5" fill="#5e5e5e">コネクションをプールして使い回す・Lambda急増でRDS接続枯渇を防ぐ</text></g>
-<text x="520" y="160" font-size="15" font-weight="700" fill="#21537f">🚪 APIの入口で制御</text>
-<g class="pfn" data-k="apigw"><rect x="520" y="172" width="460" height="64" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="750" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">API Gateway スロットリング</text><text x="750" y="220" text-anchor="middle" font-size="11.5" fill="#7a471a">リクエスト数に上限・使用量プラン（キー別）で下流DBを守る</text></g>
-<text x="20" y="270" font-size="15" font-weight="700" fill="#21537f">🧮 HPC（密結合の並列計算）</text>
-<g class="pfn" data-k="efa"><rect x="20" y="282" width="960" height="64" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="500" y="308" text-anchor="middle" font-size="14" font-weight="700" fill="#b01212">クラスタープレイスメントグループ ＋ EFA</text><text x="500" y="330" text-anchor="middle" font-size="11.5" fill="#b01212">同一AZに密集配置＋OSバイパスの高速NIC＝ノード間を超低遅延・高帯域に（HPC/ML）</text></g>
-<rect x="20" y="360" width="960" height="56" fill="#fafafa" stroke="#d8dee6"/>
-<text x="36" y="382" font-size="12.5" fill="#121212">配信を速く（静的コンテンツ）＝CloudFront ／ 非HTTPのグローバル経路最適化＝Global Accelerator（別の図を参照）</text>
-<text x="36" y="404" font-size="12.5" fill="#b01212">混同注意：マルチAZ＝可用性（待機系・自動フェイルオーバー）／リードレプリカ＝読み取り分散。「読み取りを分散」ならリードレプリカ</text>
-</svg>
-</div>
-<div class="panel" id="perfPanel" style="margin-top:14px">ボタンを押すと、その目的に合う手立てだけ強調されます。</div>
-<table>
-<caption>こう問われたら（決め手）</caption>
-<tr><th>要件</th><th>手立て</th></tr>
-<tr><td>同じクエリ結果を使い回して読み取りを高速化（どのDBでも・汎用）</td><td class="svc">ElastiCache</td></tr>
-<tr><td>DynamoDBの読み取りをマイクロ秒に・コード変更最小</td><td class="svc">DAX</td></tr>
-<tr><td>DB（RDS/Aurora）の読み取り負荷を複数に分散</td><td class="svc">リードレプリカ</td></tr>
-<tr><td>Lambdaの同時実行急増でRDSの接続数が枯渇</td><td class="svc">RDS Proxy</td></tr>
-<tr><td>APIのリクエスト数に上限・クライアント別に流量制御</td><td class="svc">API Gateway（スロットリング/使用量プラン）</td></tr>
-<tr><td>HPCでノード間を極めて低遅延・高帯域に</td><td class="svc">クラスタープレイスメントグループ＋EFA</td></tr>
-<tr><td>可用性のため待機系を別AZに（読み取り分散ではない）</td><td class="svc">マルチAZ</td></tr>
-</table>
-
-<script>
-(function(){
-  const notes={
-    elasticache:'同じクエリ結果やセッションをインメモリに置いて使い回し、DB本体の負荷とレイテンシを下げる（汎用・どのDBの前にも置ける） → <b>ElastiCache</b>（Redis/Memcached）。',
-    dax:'DynamoDB専用のインメモリキャッシュ。読み取りをミリ秒→<b>マイクロ秒</b>に、コード変更を最小で前面に挿す → <b>DAX</b>。',
-    readreplica:'RDS/Auroraの<b>読み取り</b>を複製（レプリカ）に振り分けて負荷分散。書き込みは本体（プライマリ） → <b>リードレプリカ</b>。マルチAZ（可用性）と混同しない。',
-    rdsproxy:'Lambdaの同時実行が急増し、各実行が新規コネクションを張って<b>RDSの接続数が枯渇</b>する→コネクションをプールして使い回す → <b>RDS Proxy</b>。',
-    apigw:'APIへのリクエスト数に上限を設け、クライアント（キー）別に使用量プランで<b>流量制御（スロットリング）</b>して下流のDBを守る → <b>API Gateway</b>。',
-    efa:'HPCの密結合並列計算で、同一AZに<b>クラスタープレイスメントグループ</b>で密集配置し、OSバイパスの高速NIC<b>EFA</b>でノード間を超低遅延・高帯域に。',
-    all:'「何を速くしたいか」で道具が変わる。DB読み取り＝ElastiCache(汎用)/DAX(Dynamo専用)/リードレプリカ(分散)、DB接続＝RDS Proxy、API入口＝スロットリング、HPC＝配置グループ+EFA。配信はCloudFront・経路はGAが別図。'
-  };
-  const svg=document.getElementById('perfSvg');
-  const panel=document.getElementById('perfPanel');
-  const nodes=svg.querySelectorAll('.pfn');
-  function apply(k){
-    const set=k==='all'?null:new Set(k.split(','));
-    nodes.forEach(g=>{
-      g.style.transition='opacity .25s';
-      const on=!set||set.has(g.dataset.k);
-      g.style.opacity = on ? '1' : '0.28';
-      const r=g.querySelector('rect');
-      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
-    });
-    panel.innerHTML=notes[k]||'';
-  }
-  document.getElementById('perfBtns').addEventListener('click',e=>{
-    const b=e.target.closest('button'); if(!b)return;
-    document.querySelectorAll('#perfBtns button').forEach(x=>x.classList.toggle('on',x===b));
     apply(b.dataset.k);
   });
   apply('all');

@@ -114,6 +114,8 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .unsureBtn.done{border-color:var(--accent);color:var(--accent);background:rgba(255,153,0,.08)}
 .patternBtn{display:block;margin-top:10px;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;background:var(--card);border:1px solid var(--accent);color:var(--accent);border-radius:12px;padding:13px;font-size:16px;font-weight:700;font-family:inherit}
 .patternBtn:active{background:var(--card2)}
+.zukaiBtn{display:block;margin-top:10px;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;background:var(--card);border:1px solid #38bdf8;color:#38bdf8;border-radius:12px;padding:13px;font-size:16px;font-weight:700;font-family:inherit}
+.zukaiBtn:active{background:var(--card2)}
 .deep{display:none;margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;font-size:15px;line-height:1.85}
 .deep.on{display:block}
 .deep .dh{color:var(--blue);font-weight:700;font-size:16px;margin:14px 0 6px}
@@ -572,7 +574,7 @@ function revealAnswer(){
     ansFull+
     `<div class="h">本当に聞かれていたこと</div>${q.keypoint}`+
     `<div class="h">なぜこれが正解か</div>${q.explain}`+
-    elim+conf+terms+more+patternLink+unsureBtn+aiBtn;
+    elim+conf+terms+more+patternLink+zukaiLink(q)+unsureBtn+aiBtn;
   document.getElementById('btnNext').textContent=
     state.idx+1>=state.list.length?'結果を見る':'次の問題 →';
   document.getElementById('hStat').textContent=`正解 ${state.session.correct}/${state.session.total}`;
@@ -887,6 +889,23 @@ function startReview(){
   document.getElementById('hTitle').textContent='間違いの解説を読む';
   renderReview();
 }
+// カテゴリ → 図解(network-zukai.html)のアンカー
+const CAT2ZUKAI={
+  'コンピュート・コンテナ':'compute','サーバーレス':'compute',
+  'データベース':'database','目的別データベース':'database',
+  'ストレージ移行':'storage-migration','ストレージ':'storage-migration','ストレージ深掘り':'storage-migration',
+  'ネットワーク深掘り':'vpc','配信/CDN':'cdn',
+  'データ分析':'data-analytics',
+  '疎結合':'messaging','アプリ統合・疎結合':'messaging',
+  '高性能':'performance','コンピュート・高性能':'performance',
+  'DR戦略':'dr','高可用DR':'dr','可用性':'dr',
+  'セキュリティ':'security','セキュリティ深掘り':'security'
+};
+function zukaiLink(q){
+  const a=CAT2ZUKAI[q.cat];
+  if(!a)return '';
+  return '<a class="zukaiBtn" href="network-zukai.html#'+a+'" target="_blank" rel="noopener">🧭 関連する図解で見る</a>';
+}
 function buildExpReadonly(q){
   const ans=ansArr(q);
   const ansFull=ans.map(i=>`<div class="ansfull"><span class="anslab">正解 ${'ABCDE'[i]}</span> ${stripTags(q.options[i])}</div>`).join('');
@@ -904,7 +923,7 @@ function buildExpReadonly(q){
   return wcBadge+ansFull
     +`<div class="h">本当に聞かれていたこと</div>${q.keypoint}`
     +`<div class="h">なぜこれが正解か</div>${q.explain}`
-    +elim+conf+terms+more+patternLink;
+    +elim+conf+terms+more+patternLink+zukaiLink(q);
 }
 function renderReview(){
   const q=reviewState.list[reviewState.idx];if(!q){goHome();return;}
