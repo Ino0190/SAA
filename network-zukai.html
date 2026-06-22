@@ -772,6 +772,422 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 <p style="font-size:16px;margin-top:12px;color:#121212">決め手：まず<b>「データの形」</b>（リレーショナル/ドキュメント/グラフ/時系列/キー値…）。リレーショナルなら次に<b>「エンジンを変えるか」</b>＝変えない→DMSだけ、変える→DMS＋SCT。</p>
 </div>
 
+<h1 style="margin-top:56px">メッセージング・疎結合の選び方</h1>
+<p class="lead">SQS / SNS / EventBridge / Step Functions / MQ はどれも「コンポーネントを疎結合でつなぐ」正しい手段。だから消去法が効かない。<b>「何をしたいか」</b>で1つに決める。下のボタンで状況を押すと該当が強調される。</p>
+<div class="btns" id="msgBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="sqs">1対1で溜めてスパイクを吸収・1件ずつ処理</button>
+<button data-k="sqsfifo">順序を保証＋重複を排除</button>
+<button data-k="sns">1つのイベントを多数に一斉配信（1対多）</button>
+<button data-k="eventbridge">発生元と受け手を切り離しイベントで振り分け</button>
+<button data-k="stepfunctions">多段の順序・分岐・リトライを可視化</button>
+<button data-k="mq">既存のKafka/RabbitMQ/AMQPをそのまま移行</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 620" id="msgSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="ms" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+
+<!-- SQS 標準：入れた順と出る順が変わる・重複あり -->
+<g class="msn" data-k="sqs"><rect x="20" y="40" width="470" height="160" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
+<text x="38" y="68" font-size="15" font-weight="700" fill="#183251">SQS（標準キュー）</text>
+<text x="38" y="90" font-size="12" fill="#5e5e5e">入</text>
+<rect x="58" y="78" width="26" height="22" fill="#fff" stroke="#21537f"/><text x="71" y="94" text-anchor="middle" font-size="12" fill="#183251">1</text>
+<rect x="88" y="78" width="26" height="22" fill="#fff" stroke="#21537f"/><text x="101" y="94" text-anchor="middle" font-size="12" fill="#183251">2</text>
+<rect x="118" y="78" width="26" height="22" fill="#fff" stroke="#21537f"/><text x="131" y="94" text-anchor="middle" font-size="12" fill="#183251">3</text>
+<line x1="150" y1="89" x2="200" y2="89" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<rect x="205" y="74" width="70" height="30" fill="#fff" stroke="#21537f"/><text x="240" y="94" text-anchor="middle" font-size="12" fill="#183251">溜める</text>
+<line x1="280" y1="89" x2="320" y2="89" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<text x="335" y="90" font-size="12" fill="#5e5e5e">出</text>
+<rect x="355" y="78" width="26" height="22" fill="#fff" stroke="#b01212"/><text x="368" y="94" text-anchor="middle" font-size="12" fill="#b01212">2</text>
+<rect x="385" y="78" width="26" height="22" fill="#fff" stroke="#b01212"/><text x="398" y="94" text-anchor="middle" font-size="12" fill="#b01212">1</text>
+<rect x="415" y="78" width="26" height="22" fill="#fff" stroke="#b01212"/><text x="428" y="94" text-anchor="middle" font-size="12" fill="#b01212">3</text>
+<rect x="445" y="78" width="26" height="22" fill="#fdeaea" stroke="#b01212" stroke-dasharray="3 2"/><text x="458" y="94" text-anchor="middle" font-size="12" fill="#b01212">1</text>
+<text x="38" y="130" font-size="12.5" fill="#b01212">→ 順番は前後しうる・まれに同じものが重複（点線=ダブり）</text>
+<text x="38" y="154" font-size="12.5" font-weight="700" fill="#183251">超高スループット（無制限）／1件ずつ処理して消える</text>
+<text x="38" y="176" font-size="12" fill="#5e5e5e">「少なくとも1回」配信。重複しても困らない設計に</text></g>
+
+<!-- SQS FIFO：入れた順のまま・重複なし -->
+<g class="msn" data-k="sqsfifo"><rect x="510" y="40" width="470" height="160" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/>
+<text x="528" y="68" font-size="15" font-weight="700" fill="#1f6b3d">SQS FIFO（厳格キュー）</text>
+<text x="528" y="90" font-size="12" fill="#1f6b3d">入</text>
+<rect x="548" y="78" width="26" height="22" fill="#fff" stroke="#1f9d55"/><text x="561" y="94" text-anchor="middle" font-size="12" fill="#1f6b3d">1</text>
+<rect x="578" y="78" width="26" height="22" fill="#fff" stroke="#1f9d55"/><text x="591" y="94" text-anchor="middle" font-size="12" fill="#1f6b3d">2</text>
+<rect x="608" y="78" width="26" height="22" fill="#fff" stroke="#1f9d55"/><text x="621" y="94" text-anchor="middle" font-size="12" fill="#1f6b3d">3</text>
+<line x1="640" y1="89" x2="690" y2="89" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<rect x="695" y="74" width="70" height="30" fill="#fff" stroke="#1f9d55"/><text x="730" y="94" text-anchor="middle" font-size="12" fill="#1f6b3d">順番保持</text>
+<line x1="770" y1="89" x2="810" y2="89" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<text x="825" y="90" font-size="12" fill="#1f6b3d">出</text>
+<rect x="845" y="78" width="26" height="22" fill="#fff" stroke="#1f9d55"/><text x="858" y="94" text-anchor="middle" font-size="12" fill="#1f6b3d">1</text>
+<rect x="875" y="78" width="26" height="22" fill="#fff" stroke="#1f9d55"/><text x="888" y="94" text-anchor="middle" font-size="12" fill="#1f6b3d">2</text>
+<rect x="905" y="78" width="26" height="22" fill="#fff" stroke="#1f9d55"/><text x="918" y="94" text-anchor="middle" font-size="12" fill="#1f6b3d">3</text>
+<text x="528" y="130" font-size="12.5" fill="#1f6b3d">→ 入れた順のまま・重複なし（ちょうど1回）</text>
+<text x="528" y="154" font-size="12.5" font-weight="700" fill="#1f6b3d">スループットに上限あり（〜数千件/秒）</text>
+<text x="528" y="176" font-size="12" fill="#5e5e5e">「順序が命」「二重処理は厳禁」な決済・在庫向け</text></g>
+
+<!-- SNS：1対多 一斉配信 -->
+<g class="msn" data-k="sns"><rect x="20" y="220" width="470" height="160" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
+<text x="38" y="248" font-size="15" font-weight="700" fill="#183251">SNS（一斉配信・1対多・push）</text>
+<rect x="50" y="278" width="70" height="40" fill="#fff" stroke="#21537f"/><text x="85" y="303" text-anchor="middle" font-size="12" fill="#183251">発信1回</text>
+<line x1="120" y1="298" x2="300" y2="270" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<line x1="120" y1="298" x2="300" y2="298" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<line x1="120" y1="298" x2="300" y2="326" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<rect x="305" y="258" width="120" height="24" fill="#eaf3ea" stroke="#1f9d55"/><text x="365" y="275" text-anchor="middle" font-size="11.5" fill="#1f6b3d">購読A（同じ内容）</text>
+<rect x="305" y="286" width="120" height="24" fill="#eaf3ea" stroke="#1f9d55"/><text x="365" y="303" text-anchor="middle" font-size="11.5" fill="#1f6b3d">購読B（同じ内容）</text>
+<rect x="305" y="314" width="120" height="24" fill="#eaf3ea" stroke="#1f9d55"/><text x="365" y="331" text-anchor="middle" font-size="11.5" fill="#1f6b3d">購読C（同じ内容）</text>
+<text x="38" y="362" font-size="12.5" fill="#5e5e5e">同じ1件を全員に複製して配る。SNS→複数SQS＝ファンアウト</text></g>
+
+<!-- EventBridge：内容で振り分け -->
+<g class="msn" data-k="eventbridge"><rect x="510" y="220" width="470" height="160" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/>
+<text x="528" y="248" font-size="15" font-weight="700" fill="#7a471a">EventBridge（内容で振り分け）</text>
+<rect x="540" y="278" width="70" height="40" fill="#fff" stroke="#ba8425"/><text x="575" y="303" text-anchor="middle" font-size="12" fill="#7a471a">イベント</text>
+<rect x="640" y="278" width="80" height="40" fill="#fff" stroke="#ba8425"/><text x="680" y="298" text-anchor="middle" font-size="11.5" fill="#7a471a">ルール</text><text x="680" y="313" text-anchor="middle" font-size="10.5" fill="#7a471a">（条件で判定）</text>
+<line x1="610" y1="298" x2="638" y2="298" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<line x1="720" y1="290" x2="800" y2="268" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<line x1="720" y1="306" x2="800" y2="328" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<rect x="805" y="256" width="150" height="24" fill="#eaf3ea" stroke="#1f9d55"/><text x="880" y="273" text-anchor="middle" font-size="11" fill="#1f6b3d">条件Aに合致→ターゲット1</text>
+<rect x="805" y="316" width="150" height="24" fill="#eaf3ea" stroke="#1f9d55"/><text x="880" y="333" text-anchor="middle" font-size="11" fill="#1f6b3d">条件Bに合致→ターゲット2</text>
+<text x="528" y="362" font-size="12.5" fill="#7a471a">内容（パターン）で行き先が変わる。発生元は受け手を知らない・SaaS連携も</text></g>
+
+<!-- Step Functions：多段＋分岐＋リトライ -->
+<g class="msn" data-k="stepfunctions"><rect x="20" y="400" width="470" height="160" fill="#fdeaea" stroke="#b01212" stroke-width="2"/>
+<text x="38" y="428" font-size="15" font-weight="700" fill="#b01212">Step Functions（多段を可視化）</text>
+<rect x="45" y="452" width="56" height="30" fill="#fff" stroke="#b01212"/><text x="73" y="472" text-anchor="middle" font-size="12" fill="#b01212">①</text>
+<line x1="101" y1="467" x2="123" y2="467" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<rect x="125" y="452" width="56" height="30" fill="#fff" stroke="#b01212"/><text x="153" y="472" text-anchor="middle" font-size="12" fill="#b01212">②</text>
+<line x1="181" y1="467" x2="203" y2="467" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<path d="M205,452 L235,467 L205,482 L175,467 Z" fill="#fff" stroke="#b01212" transform="translate(40,0)"/><text x="245" y="471" text-anchor="middle" font-size="11" fill="#b01212">分岐</text>
+<line x1="285" y1="460" x2="320" y2="450" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<line x1="285" y1="474" x2="320" y2="490" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<rect x="322" y="438" width="56" height="26" fill="#fff" stroke="#b01212"/><text x="350" y="456" text-anchor="middle" font-size="12" fill="#b01212">③a</text>
+<rect x="322" y="478" width="56" height="26" fill="#fff" stroke="#b01212"/><text x="350" y="496" text-anchor="middle" font-size="12" fill="#b01212">③b</text>
+<path d="M153,452 q40,-26 80,0" fill="none" stroke="#b01212" stroke-dasharray="4 3" marker-end="url(#ms)"/><text x="195" y="420" text-anchor="middle" font-size="10.5" fill="#b01212">失敗ならリトライ</text>
+<text x="38" y="534" font-size="12.5" fill="#b01212">順序・分岐・リトライ・状態をコードに埋めず絵で管理</text></g>
+
+<!-- MQ：既存ブローカー移行 -->
+<g class="msn" data-k="mq"><rect x="510" y="400" width="470" height="160" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
+<text x="528" y="428" font-size="15" font-weight="700" fill="#183251">Amazon MQ（既存ブローカー移行）</text>
+<rect x="540" y="452" width="120" height="44" fill="#f4f4ef" stroke="#21537f"/><text x="600" y="472" text-anchor="middle" font-size="11.5" fill="#183251">既存アプリ</text><text x="600" y="488" text-anchor="middle" font-size="10.5" fill="#5e5e5e">RabbitMQ/ActiveMQ</text>
+<line x1="660" y1="474" x2="700" y2="474" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ms)"/>
+<rect x="705" y="452" width="130" height="44" fill="#eaf3ea" stroke="#1f9d55"/><text x="770" y="472" text-anchor="middle" font-size="12" fill="#1f6b3d">Amazon MQ</text><text x="770" y="488" text-anchor="middle" font-size="10.5" fill="#1f6b3d">AMQP/MQTT/STOMP</text>
+<text x="528" y="524" font-size="12.5" fill="#5e5e5e">標準プロトコル対応なのでほぼ改修せずそのまま移行</text>
+<text x="528" y="546" font-size="12" fill="#5e5e5e">新規でAWS流に作るならSQS/SNSが基本</text></g>
+</svg>
+</div>
+<div class="panel" id="msgPanel" style="margin-top:14px">ボタンを押すと、その目的に合うサービスだけ強調されます。</div>
+<table>
+<caption>こう問われたら（決め手）</caption>
+<tr><th>要件</th><th>サービス</th></tr>
+<tr><td>送る側と処理する側を切り離す・スパイクを溜めて吸収・取りこぼさない・1件ずつ</td><td class="svc">SQS</td></tr>
+<tr><td>順序を保証＋重複を排除（高スループットは不要）</td><td class="svc">SQS FIFO</td></tr>
+<tr><td>1つのイベントを<b>複数</b>のシステムが各自処理・発生元は受け手を意識しない</td><td class="svc">SNS（／SNS+SQSファンアウト）</td></tr>
+<tr><td>イベントの内容で行き先を振り分け・多様なAWS/SaaSをターゲットに</td><td class="svc">EventBridge</td></tr>
+<tr><td>複数ステップの順序・分岐・リトライを<b>コードに埋めず可視化</b>して管理</td><td class="svc">Step Functions</td></tr>
+<tr><td>既存の<b>RabbitMQ/ActiveMQ/AMQP</b>をそのまま移行</td><td class="svc">Amazon MQ</td></tr>
+<tr><td>大量ストリームを<b>複数が独立に・別ペースで読む/リプレイ</b></td><td class="svc">Kinesis Data Streams（→データ分析の地図）</td></tr>
+</table>
+
+<script>
+(function(){
+  const notes={
+    sqs:'送る側と処理する側を切り離し、メッセージを<b>溜めてスパイクを吸収</b>・1件ずつ確実に処理（処理したら消える） → <b>SQS</b>。可視性タイムアウトで二重処理を防ぐ。',
+    sqsfifo:'受け付けた<b>順序を保証</b>＋同じメッセージの<b>重複を排除</b>（極端な高スループットは不要） → <b>SQS FIFO</b>。',
+    sns:'1つの発信を<b>複数の購読者へ一斉配信（1対多）</b>・発生元は受け手を意識しない・将来の追加もOK → <b>SNS</b>。各自が確実にコピーを得るには <b>SNS＋複数SQS（ファンアウト）</b>。',
+    eventbridge:'イベントの<b>内容（パターン）を見てルールで行き先を振り分け</b>・多様なAWSサービスやSaaSをターゲットにできる → <b>EventBridge</b>。',
+    stepfunctions:'複数ステップの<b>順序・分岐・リトライ・状態管理</b>を、コードに埋め込まず<b>絵で可視化</b>してオーケストレーション → <b>Step Functions</b>。',
+    mq:'既存の<b>RabbitMQ/ActiveMQ（AMQP/MQTT/STOMP等）</b>の資産を、ほぼ改修せずマネージドへ移行 → <b>Amazon MQ</b>。新規でAWS流に作るならSQS/SNSが基本。',
+    all:'全部「疎結合の正しい手段」。SQS=溜める(1対1)／SNS=配る(1対多)／EventBridge=振り分け／Step Functions=多段を可視化／MQ=既存ブローカー移行。「何をしたいか」で1つに決める。'
+  };
+  const svg=document.getElementById('msgSvg');
+  const panel=document.getElementById('msgPanel');
+  const nodes=svg.querySelectorAll('.msn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.25';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('msgBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#msgBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
+<h1 style="margin-top:56px">DR戦略の4段階（コスト ↔ 復旧の速さ）</h1>
+<p class="lead">災害対策は<b>「どれだけ速く復旧したいか（RTO/RPO）」と「平常時にいくら払うか」のトレードオフ</b>。左ほど安いが復旧が遅い、右ほど速いが高い。要件のRTO/RPOに一番近い段を選ぶ。下のボタンで状況を押すと該当が強調される。</p>
+<div class="btns" id="drBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="backup">RTO/RPO数時間〜でOK・平常時コスト最小</button>
+<button data-k="pilot">普段は最小限だけ起動・障害時に立ち上げ拡大</button>
+<button data-k="warm">縮小版を常時稼働・障害時に拡大（RTO数分）</button>
+<button data-k="multi">常に両系フル稼働・ほぼ無停止（RTO/RPOほぼ0）</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 320" id="drSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<line x1="40" y1="60" x2="960" y2="60" stroke="#5e5e5e" stroke-width="2.5"/>
+<text x="40" y="44" font-size="14" font-weight="700" fill="#1f6b3d">安い・復旧おそい</text>
+<text x="960" y="44" text-anchor="end" font-size="14" font-weight="700" fill="#b01212">高い・復旧はやい</text>
+<g class="drn" data-k="backup"><rect x="30" y="90" width="210" height="180" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/><text x="135" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#1f6b3d">①バックアップ</text><text x="135" y="138" text-anchor="middle" font-size="15" font-weight="700" fill="#1f6b3d">＆リストア</text><text x="135" y="170" text-anchor="middle" font-size="12.5" fill="#1f6b3d">普段は何も動かさない</text><text x="135" y="190" text-anchor="middle" font-size="12.5" fill="#1f6b3d">S3/AWS Backupに保管</text><text x="135" y="210" text-anchor="middle" font-size="12.5" fill="#1f6b3d">障害時に一から復元</text><text x="135" y="244" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1f6b3d">RTO/RPO：時間〜日</text><text x="135" y="262" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1f6b3d">コスト：最安</text></g>
+<g class="drn" data-k="pilot"><rect x="270" y="90" width="210" height="180" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="375" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#183251">②パイロット</text><text x="375" y="138" text-anchor="middle" font-size="15" font-weight="700" fill="#183251">ライト</text><text x="375" y="170" text-anchor="middle" font-size="12.5" fill="#5e5e5e">最小限（DB複製等）だけ</text><text x="375" y="190" text-anchor="middle" font-size="12.5" fill="#5e5e5e">常時動かす（種火）</text><text x="375" y="210" text-anchor="middle" font-size="12.5" fill="#5e5e5e">障害時に残りを起動</text><text x="375" y="244" text-anchor="middle" font-size="12.5" font-weight="700" fill="#183251">RTO/RPO：数十分</text><text x="375" y="262" text-anchor="middle" font-size="12.5" font-weight="700" fill="#183251">コスト：安い</text></g>
+<g class="drn" data-k="warm"><rect x="510" y="90" width="210" height="180" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/><text x="615" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#7a471a">③ウォーム</text><text x="615" y="138" text-anchor="middle" font-size="15" font-weight="700" fill="#7a471a">スタンバイ</text><text x="615" y="170" text-anchor="middle" font-size="12.5" fill="#7a471a">縮小版を常時稼働</text><text x="615" y="190" text-anchor="middle" font-size="12.5" fill="#7a471a">（動く待機系）</text><text x="615" y="210" text-anchor="middle" font-size="12.5" fill="#7a471a">障害時に拡大(スケール)</text><text x="615" y="244" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7a471a">RTO/RPO：数分</text><text x="615" y="262" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7a471a">コスト：中</text></g>
+<g class="drn" data-k="multi"><rect x="750" y="90" width="220" height="180" fill="#fdeaea" stroke="#b01212" stroke-width="2"/><text x="860" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#b01212">④マルチサイト</text><text x="860" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="#b01212">(アクティブ/アクティブ)</text><text x="860" y="170" text-anchor="middle" font-size="12.5" fill="#b01212">両系をフル稼働で運用</text><text x="860" y="190" text-anchor="middle" font-size="12.5" fill="#b01212">常に本番が複数</text><text x="860" y="210" text-anchor="middle" font-size="12.5" fill="#b01212">障害でもほぼ無停止</text><text x="860" y="244" text-anchor="middle" font-size="12.5" font-weight="700" fill="#b01212">RTO/RPO：ほぼ0</text><text x="860" y="262" text-anchor="middle" font-size="12.5" font-weight="700" fill="#b01212">コスト：最高</text></g>
+</svg>
+</div>
+<div class="panel" id="drPanel" style="margin-top:14px">ボタンを押すと、その要件に合うDR戦略だけ強調されます。</div>
+<table>
+<caption>こう問われたら（決め手＝RTO/RPOとコスト）</caption>
+<tr><th>要件</th><th>戦略</th></tr>
+<tr><td>RTO/RPOが数時間〜日でOK・平常時コストを最小に</td><td class="svc">バックアップ＆リストア</td></tr>
+<tr><td>一から起動では間に合わない・でもフル二重投資は避けたい・最小限を常時</td><td class="svc">パイロットライト</td></tr>
+<tr><td><b>RTO数分・RPO数分</b>・動く縮小環境を常時持ち障害時に拡大</td><td class="svc">ウォームスタンバイ</td></tr>
+<tr><td>ほぼ無停止（RTO/RPOほぼ0）・コストは問わない</td><td class="svc">マルチサイト（アクティブ/アクティブ）</td></tr>
+</table>
+<p style="font-size:16px;margin-top:10px;color:#121212">迷ったら：<b>RTO/RPOが緩い→左（安い）</b>、<b>厳しい→右（高い）</b>。「フル二重投資は高すぎるが、一から起動では間に合わない」と書かれていたら真ん中の<b>ウォームスタンバイ</b>が答えになりやすい（#86のパターン）。</p>
+
+<script>
+(function(){
+  const notes={
+    backup:'平常時は何も動かさず、データだけS3/AWS Backupに保管。障害時に一から復元 → <b>バックアップ＆リストア</b>。RTO/RPOは時間〜日と遅いが<b>最安</b>。「RTO/RPO緩い・コスト最小」ならこれ。',
+    pilot:'コアな部分（DBの継続複製など）だけを<b>種火</b>として常時動かし、障害時に残りのサーバーを起動して拡大 → <b>パイロットライト</b>。バックアップより速く、ウォームより安い。',
+    warm:'本番の<b>縮小版を常時稼働</b>させておき（動く待機系）、障害時にスケールアップ/アウトして本番容量に拡大 → <b>ウォームスタンバイ</b>。RTO数分。「フル二重は高い／一から起動は間に合わない」の中間解。',
+    multi:'複数サイトを<b>常にフル稼働（アクティブ/アクティブ）</b>で運用し、片方が落ちてもほぼ無停止 → <b>マルチサイト</b>。RTO/RPOほぼ0だが<b>コスト最高</b>。「コストは問わない・絶対止めない」向け。',
+    all:'軸＝コスト↔復旧速度。RTO/RPOが緩いほど左(安い)、厳しいほど右(高い)。要件のRTO/RPOに一番近い段を選ぶ。'
+  };
+  const svg=document.getElementById('drSvg');
+  const panel=document.getElementById('drPanel');
+  const nodes=svg.querySelectorAll('.drn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.28';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('drBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#drBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
+<h1 style="margin-top:56px">セキュリティの検知・防御サービス地図</h1>
+<p class="lead">セキュリティ系は「<b>何を検知/守るか</b>」でグループに分けると混同しなくなる。特に検知4兄弟（GuardDuty/Inspector/Macie/Detective）は取り違えやすい。下のボタンで「こう問われたら」を押すと該当が強調される。</p>
+<h2 style="font-size:20px;color:#183251;margin-top:24px;margin-bottom:6px">具体例：Webアプリが攻撃される一連の流れで、各サービスがどこで働くか</h2>
+<p style="font-size:16px;color:#121212;margin-bottom:10px">左から時間の流れ。<b>事前に固める → 入口で防ぐ → すり抜けを検知 → 結果を集約 → 事後に調査</b>。同じ「セキュリティ」でも働く<b>タイミング</b>が違う（だからInspector＝事前／Detective＝事後で別物）。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="tl" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<line x1="20" y1="40" x2="960" y2="40" stroke="#5e5e5e" stroke-width="2.5" marker-end="url(#tl)"/>
+<text x="20" y="28" font-size="14" font-weight="700" fill="#5e5e5e">時間の流れ →</text>
+<text x="105" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">①事前に固める</text>
+<text x="298" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#21537f">②入口で防ぐ</text>
+<text x="500" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#b01212">③検知</text>
+<text x="685" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#21537f">④集約</text>
+<text x="875" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">⑤事後に調査</text>
+<rect x="20" y="84" width="170" height="34" fill="#eaf3ea" stroke="#1f9d55"/><text x="105" y="106" text-anchor="middle" font-size="12" fill="#1f6b3d">Inspector｜弱点(脆弱性)を塞ぐ</text>
+<rect x="20" y="124" width="170" height="34" fill="#eaf3ea" stroke="#1f9d55"/><text x="105" y="146" text-anchor="middle" font-size="12" fill="#1f6b3d">Macie｜S3の機密の在処把握</text>
+<rect x="20" y="164" width="170" height="34" fill="#eaf3ea" stroke="#1f9d55"/><text x="105" y="186" text-anchor="middle" font-size="12" fill="#1f6b3d">Config｜設定が基準通りか</text>
+<rect x="213" y="84" width="170" height="34" fill="#edf2f4" stroke="#21537f"/><text x="298" y="106" text-anchor="middle" font-size="12" fill="#183251">WAF｜SQLi/XSSを弾く</text>
+<rect x="213" y="124" width="170" height="34" fill="#edf2f4" stroke="#21537f"/><text x="298" y="146" text-anchor="middle" font-size="12" fill="#183251">Shield｜DDoSを吸収</text>
+<rect x="213" y="164" width="170" height="34" fill="#edf2f4" stroke="#21537f"/><text x="298" y="186" text-anchor="middle" font-size="11.5" fill="#183251">Network Firewall｜不正宛先遮断</text>
+<rect x="415" y="104" width="170" height="50" fill="#fdeaea" stroke="#b01212" stroke-width="2"/><text x="500" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#b01212">GuardDuty</text><text x="500" y="146" text-anchor="middle" font-size="11" fill="#b01212">すり抜けた不審な動きを検知</text>
+<rect x="600" y="104" width="170" height="50" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="685" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">Security Hub</text><text x="685" y="146" text-anchor="middle" font-size="11" fill="#5e5e5e">検知結果を1か所に集約</text>
+<rect x="790" y="84" width="190" height="34" fill="#f4f4ef" stroke="#ba8425"/><text x="885" y="106" text-anchor="middle" font-size="11.5" fill="#7a471a">Detective｜侵入経路を相関分析</text>
+<rect x="790" y="124" width="190" height="34" fill="#f4f4ef" stroke="#ba8425"/><text x="885" y="146" text-anchor="middle" font-size="11.5" fill="#7a471a">CloudTrail｜誰がどのAPIを叩いた</text>
+<line x1="192" y1="141" x2="211" y2="141" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tl)"/>
+<line x1="385" y1="141" x2="413" y2="129" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tl)"/>
+<line x1="585" y1="129" x2="598" y2="129" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tl)"/>
+<line x1="770" y1="129" x2="788" y2="135" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#tl)"/>
+<rect x="20" y="236" width="960" height="44" fill="#fafafa" stroke="#ba8425" stroke-dasharray="5 3"/><text x="500" y="263" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7a471a">Firewall Manager｜①〜②の防御ルール(WAF/SG等)を全アカウントに横断で一律適用・新規にも自動</text>
+<text x="40" y="312" font-size="13" fill="#121212">物語：①Inspectorで弱点を塞ぎMacieで機密の場所を把握しConfigで設定を点検 → ②攻撃が来たらWAF/Shield/Network Firewallが入口で弾く</text>
+<text x="40" y="336" font-size="13" fill="#121212">→ ③それでもすり抜けた不審な動きをGuardDutyが検知 → ④Security Hubに結果が集まる → ⑤Detectiveで侵入経路を、CloudTrailで操作者を調べる</text>
+<text x="40" y="366" font-size="12.5" fill="#5e5e5e">Inspector(事前に穴を探す=予防) と Detective(事後に原因を追う=捜査) は名前が似ても働く時間が正反対</text>
+</svg>
+</div>
+<div class="btns" id="secBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="guardduty">アカウントの脅威を継続検知（不審API・不正通信）</button>
+<button data-k="inspector">EC2/コンテナの脆弱性スキャン</button>
+<button data-k="macie">S3内の個人情報(PII)を発見・分類</button>
+<button data-k="detective">検知の後、根本原因を相関分析・調査</button>
+<button data-k="securityhub">複数のセキュリティ結果を集約・一覧</button>
+<button data-k="config">構成変更の履歴・基準からの逸脱を評価</button>
+<button data-k="cloudtrail">誰がいつどのAPIを呼んだかの監査ログ</button>
+<button data-k="waf">L7のHTTP攻撃(SQLi/XSS)を防ぐ</button>
+<button data-k="shield">DDoS攻撃から守る</button>
+<button data-k="netfw">VPCのネットワーク層FW(FQDN/IPS)</button>
+<button data-k="fwmanager">複数アカウントにFWルールを一元適用</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 470" id="secSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<!-- グループ1: 検知4兄弟 -->
+<text x="40" y="36" font-size="15" font-weight="700" fill="#21537f">🔍 検知・発見（何を見つけるか）</text>
+<g class="scn" data-k="guardduty"><rect x="20" y="48" width="232" height="78" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="136" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#b01212">GuardDuty</text><text x="136" y="96" text-anchor="middle" font-size="11.5" fill="#b01212">脅威の継続検知</text><text x="136" y="113" text-anchor="middle" font-size="11" fill="#5e5e5e">不審API・侵害アカ・不正通信</text></g>
+<g class="scn" data-k="inspector"><rect x="262" y="48" width="232" height="78" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="378" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#b01212">Inspector</text><text x="378" y="96" text-anchor="middle" font-size="11.5" fill="#b01212">脆弱性スキャン</text><text x="378" y="113" text-anchor="middle" font-size="11" fill="#5e5e5e">EC2/コンテナのCVE・設定</text></g>
+<g class="scn" data-k="macie"><rect x="504" y="48" width="232" height="78" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="620" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#b01212">Macie</text><text x="620" y="96" text-anchor="middle" font-size="11.5" fill="#b01212">S3のPII発見・分類</text><text x="620" y="113" text-anchor="middle" font-size="11" fill="#5e5e5e">個人情報・機密データ検出</text></g>
+<g class="scn" data-k="detective"><rect x="746" y="48" width="232" height="78" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="862" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">Detective</text><text x="862" y="96" text-anchor="middle" font-size="11.5" fill="#7a471a">検知の"後"の調査</text><text x="862" y="113" text-anchor="middle" font-size="11" fill="#7a471a">根本原因を相関分析・可視化</text></g>
+<!-- グループ2: 集約・記録 -->
+<text x="40" y="160" font-size="15" font-weight="700" fill="#21537f">📋 集約・記録（まとめる・残す）</text>
+<g class="scn" data-k="securityhub"><rect x="20" y="172" width="310" height="74" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="175" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">Security Hub</text><text x="175" y="220" text-anchor="middle" font-size="11.5" fill="#5e5e5e">各サービスの検知結果を集約・一覧</text><text x="175" y="237" text-anchor="middle" font-size="11" fill="#5e5e5e">ベストプラクティス準拠もチェック</text></g>
+<g class="scn" data-k="config"><rect x="340" y="172" width="310" height="74" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="495" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">Config</text><text x="495" y="220" text-anchor="middle" font-size="11.5" fill="#5e5e5e">構成変更の履歴・基準からの逸脱を評価</text><text x="495" y="237" text-anchor="middle" font-size="11" fill="#5e5e5e">ルールで継続評価＋自動修復</text></g>
+<g class="scn" data-k="cloudtrail"><rect x="660" y="172" width="318" height="74" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="819" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">CloudTrail</text><text x="819" y="220" text-anchor="middle" font-size="11.5" fill="#5e5e5e">誰がいつどのAPIを呼んだか</text><text x="819" y="237" text-anchor="middle" font-size="11" fill="#5e5e5e">操作の監査ログ（証跡）</text></g>
+<!-- グループ3: 防御（守る・ブロック） -->
+<text x="40" y="284" font-size="15" font-weight="700" fill="#21537f">🛡 防御・ブロック（攻撃を止める）</text>
+<g class="scn" data-k="waf"><rect x="20" y="296" width="232" height="80" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="136" y="322" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">WAF</text><text x="136" y="344" text-anchor="middle" font-size="11.5" fill="#1f6b3d">L7のHTTP攻撃を防ぐ</text><text x="136" y="361" text-anchor="middle" font-size="11" fill="#5e5e5e">SQLi/XSS・CloudFront/ALBに付与</text></g>
+<g class="scn" data-k="shield"><rect x="262" y="296" width="232" height="80" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="378" y="322" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">Shield</text><text x="378" y="344" text-anchor="middle" font-size="11.5" fill="#1f6b3d">DDoS攻撃から守る</text><text x="378" y="361" text-anchor="middle" font-size="11" fill="#5e5e5e">Advancedは大規模DDoS+返金</text></g>
+<g class="scn" data-k="netfw"><rect x="504" y="296" width="232" height="80" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="620" y="322" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">Network Firewall</text><text x="620" y="344" text-anchor="middle" font-size="11.5" fill="#1f6b3d">VPCのネットワーク層FW</text><text x="620" y="361" text-anchor="middle" font-size="11" fill="#5e5e5e">FQDNフィルタ・IPS・ステートフル</text></g>
+<g class="scn" data-k="fwmanager"><rect x="746" y="296" width="232" height="80" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="862" y="322" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">Firewall Manager</text><text x="862" y="344" text-anchor="middle" font-size="11.5" fill="#7a471a">FWルールを一元管理</text><text x="862" y="361" text-anchor="middle" font-size="11" fill="#7a471a">Organizations配下に横断適用</text></g>
+<!-- 検知4兄弟メモ -->
+<rect x="20" y="396" width="958" height="58" fill="#fafafa" stroke="#d8dee6"/>
+<text x="36" y="420" font-size="13" font-weight="700" fill="#b01212">検知4兄弟の切り分け</text>
+<text x="36" y="442" font-size="12.5" fill="#121212">脅威（あやしい動き）=GuardDuty／弱点（穴）=Inspector／個人情報の在処=Macie／起きた後の調査=Detective</text>
+</svg>
+</div>
+<div class="panel" id="secPanel" style="margin-top:14px">ボタンを押すと、その目的に合うサービスだけ強調されます。</div>
+<table>
+<caption>こう問われたら（決め手）</caption>
+<tr><th>要件</th><th>サービス</th></tr>
+<tr><td>アカウント全体の脅威を継続検知（不審なAPI・侵害された認証情報・不正通信）</td><td class="svc">GuardDuty</td></tr>
+<tr><td>EC2/コンテナの脆弱性（CVE）・危険な設定をスキャン</td><td class="svc">Inspector</td></tr>
+<tr><td>S3内の個人情報(PII)・機密データを発見して分類</td><td class="svc">Macie</td></tr>
+<tr><td>検知の後、なぜ起きたか・誰が関与したかを相関分析・調査</td><td class="svc">Detective</td></tr>
+<tr><td>複数のセキュリティ検知結果を1か所に集約・準拠状況をチェック</td><td class="svc">Security Hub</td></tr>
+<tr><td>構成変更の履歴・基準からの逸脱を継続評価（必要なら自動修復）</td><td class="svc">Config</td></tr>
+<tr><td>誰がいつどのAPI操作をしたかの監査ログ</td><td class="svc">CloudTrail</td></tr>
+<tr><td>SQLインジェクション/XSSなどL7のHTTP攻撃をブロック</td><td class="svc">WAF</td></tr>
+<tr><td>大規模なDDoS攻撃から守る（スケーリング課金の返金も）</td><td class="svc">Shield（Advanced）</td></tr>
+<tr><td>VPCのネットワーク層でFQDN/IPSフィルタ（SG/NACLを超える）</td><td class="svc">Network Firewall</td></tr>
+<tr><td>多数アカウントに共通のWAF/SGルールを一元適用・自動適用</td><td class="svc">Firewall Manager</td></tr>
+</table>
+<p style="font-size:16px;margin-top:10px;color:#121212">最重要の混同：<b>GuardDuty＝あやしい動きを検知</b>／<b>Inspector＝弱点（脆弱性）を探す</b>／<b>Macie＝個人情報の在処を探す</b>／<b>Detective＝起きた後の原因調査</b>。「検知」した結果を集めるのが<b>Security Hub</b>、誰がやったかの記録が<b>CloudTrail</b>、構成の正しさが<b>Config</b>。</p>
+
+<script>
+(function(){
+  const notes={
+    guardduty:'アカウント全体を継続的に監視して<b>脅威（あやしい動き）を検知</b>＝不審なAPI呼び出し・侵害された認証情報・マルウェア通信など。ログを自動分析、運用負荷低 → <b>GuardDuty</b>。',
+    inspector:'EC2やコンテナイメージの<b>脆弱性（CVE）や危険な設定をスキャン</b>＝「穴」を探す → <b>Inspector</b>。',
+    macie:'S3バケットの中の<b>個人情報(PII)・機密データを発見して分類</b>＝「どこに機密があるか」を探す → <b>Macie</b>。',
+    detective:'GuardDutyなどの検知の<b>後</b>に、なぜ起きたか・誰が関与したかを<b>相関分析して根本原因を調査・可視化</b> → <b>Detective</b>。',
+    securityhub:'GuardDuty/Inspector/Macieなど<b>複数のセキュリティ結果を1か所に集約</b>・ベストプラクティス準拠もチェック → <b>Security Hub</b>。',
+    config:'リソースの<b>構成変更の履歴を記録し、基準（ルール）からの逸脱を継続評価</b>＝必要なら自動修復も → <b>Config</b>。',
+    cloudtrail:'<b>誰がいつどのAPI操作をしたか</b>の監査ログ（証跡）。CloudWatch(性能監視)・Config(構成)と混同注意。「誰がやったか」ならこれ → <b>CloudTrail</b>。',
+    waf:'<b>L7のHTTP攻撃（SQLインジェクション・XSS等）をブロック</b>。CloudFrontやALBに付与。DDoS層別のShieldとは役割が違う → <b>WAF</b>。',
+    shield:'<b>DDoS攻撃から守る</b>。Standardは無料で基本緩和、Advancedは大規模DDoS対応＋攻撃中のスケーリング課金を返金 → <b>Shield</b>。',
+    netfw:'<b>VPCのネットワーク層</b>でステートフル検査・FQDN（ドメイン）フィルタ・IPS（侵入防止）＝SG/NACLを超える高度なFW → <b>Network Firewall</b>。',
+    fwmanager:'Organizations配下の<b>多数アカウントに共通のWAF/SGルールを一元適用</b>・新規リソースにも自動適用 → <b>Firewall Manager</b>。',
+    all:'グループで覚える＝🔍検知(GuardDuty脅威/Inspector脆弱性/Macie個人情報/Detective調査)・📋集約記録(Security Hub集約/Config構成/CloudTrail誰が)・🛡防御(WAF L7攻撃/Shield DDoS/Network FirewallネットワークFW/Firewall Manager一元管理)。'
+  };
+  const svg=document.getElementById('secSvg');
+  const panel=document.getElementById('secPanel');
+  const nodes=svg.querySelectorAll('.scn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.25';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('secBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#secBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
+<h1 style="margin-top:56px">高性能・キャッシュの選び方（何を速くしたい？）</h1>
+<p class="lead">「性能を上げる」手立ては<b>何を速くしたいか</b>で変わる。DBの読み取り／DB接続／APIの入口／HPC計算で道具が違う。下のボタンで状況を押すと該当が強調される。</p>
+<div class="btns" id="perfBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="elasticache">同じDBクエリ結果を使い回し読み取り高速化（汎用）</button>
+<button data-k="dax">DynamoDBの読み取りをマイクロ秒に</button>
+<button data-k="readreplica">DBの読み取り負荷を複数に分散</button>
+<button data-k="rdsproxy">Lambda等の大量接続でDB接続が枯渇</button>
+<button data-k="apigw">APIのリクエスト数を制限・流量制御</button>
+<button data-k="efa">HPCでノード間を超低遅延に</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 430" id="perfSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<text x="20" y="34" font-size="15" font-weight="700" fill="#21537f">🗄 DBの読み取りを速く</text>
+<g class="pfn" data-k="elasticache"><rect x="20" y="46" width="300" height="80" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="170" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">ElastiCache（汎用キャッシュ）</text><text x="170" y="96" text-anchor="middle" font-size="11.5" fill="#1f6b3d">Redis/Memcached・同じ結果を使い回す</text><text x="170" y="114" text-anchor="middle" font-size="11" fill="#5e5e5e">どのDBの前にも置ける・アプリ側で実装</text></g>
+<g class="pfn" data-k="dax"><rect x="340" y="46" width="300" height="80" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="490" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">DAX</text><text x="490" y="96" text-anchor="middle" font-size="11.5" fill="#1f6b3d">DynamoDB専用・マイクロ秒</text><text x="490" y="114" text-anchor="middle" font-size="11" fill="#5e5e5e">コード変更最小で前面に挿す</text></g>
+<g class="pfn" data-k="readreplica"><rect x="660" y="46" width="320" height="80" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="820" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">リードレプリカ</text><text x="820" y="96" text-anchor="middle" font-size="11.5" fill="#5e5e5e">RDS/Auroraの読み取りを複製に分散</text><text x="820" y="114" text-anchor="middle" font-size="11" fill="#b01212">※マルチAZ(可用性)とは別物</text></g>
+<text x="20" y="160" font-size="15" font-weight="700" fill="#21537f">🔌 DB接続を守る</text>
+<g class="pfn" data-k="rdsproxy"><rect x="20" y="172" width="460" height="64" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="250" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">RDS Proxy</text><text x="250" y="220" text-anchor="middle" font-size="11.5" fill="#5e5e5e">コネクションをプールして使い回す・Lambda急増でRDS接続枯渇を防ぐ</text></g>
+<text x="520" y="160" font-size="15" font-weight="700" fill="#21537f">🚪 APIの入口で制御</text>
+<g class="pfn" data-k="apigw"><rect x="520" y="172" width="460" height="64" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="750" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">API Gateway スロットリング</text><text x="750" y="220" text-anchor="middle" font-size="11.5" fill="#7a471a">リクエスト数に上限・使用量プラン（キー別）で下流DBを守る</text></g>
+<text x="20" y="270" font-size="15" font-weight="700" fill="#21537f">🧮 HPC（密結合の並列計算）</text>
+<g class="pfn" data-k="efa"><rect x="20" y="282" width="960" height="64" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="500" y="308" text-anchor="middle" font-size="14" font-weight="700" fill="#b01212">クラスタープレイスメントグループ ＋ EFA</text><text x="500" y="330" text-anchor="middle" font-size="11.5" fill="#b01212">同一AZに密集配置＋OSバイパスの高速NIC＝ノード間を超低遅延・高帯域に（HPC/ML）</text></g>
+<rect x="20" y="360" width="960" height="56" fill="#fafafa" stroke="#d8dee6"/>
+<text x="36" y="382" font-size="12.5" fill="#121212">配信を速く（静的コンテンツ）＝CloudFront ／ 非HTTPのグローバル経路最適化＝Global Accelerator（別の図を参照）</text>
+<text x="36" y="404" font-size="12.5" fill="#b01212">混同注意：マルチAZ＝可用性（待機系・自動フェイルオーバー）／リードレプリカ＝読み取り分散。「読み取りを分散」ならリードレプリカ</text>
+</svg>
+</div>
+<div class="panel" id="perfPanel" style="margin-top:14px">ボタンを押すと、その目的に合う手立てだけ強調されます。</div>
+<table>
+<caption>こう問われたら（決め手）</caption>
+<tr><th>要件</th><th>手立て</th></tr>
+<tr><td>同じクエリ結果を使い回して読み取りを高速化（どのDBでも・汎用）</td><td class="svc">ElastiCache</td></tr>
+<tr><td>DynamoDBの読み取りをマイクロ秒に・コード変更最小</td><td class="svc">DAX</td></tr>
+<tr><td>DB（RDS/Aurora）の読み取り負荷を複数に分散</td><td class="svc">リードレプリカ</td></tr>
+<tr><td>Lambdaの同時実行急増でRDSの接続数が枯渇</td><td class="svc">RDS Proxy</td></tr>
+<tr><td>APIのリクエスト数に上限・クライアント別に流量制御</td><td class="svc">API Gateway（スロットリング/使用量プラン）</td></tr>
+<tr><td>HPCでノード間を極めて低遅延・高帯域に</td><td class="svc">クラスタープレイスメントグループ＋EFA</td></tr>
+<tr><td>可用性のため待機系を別AZに（読み取り分散ではない）</td><td class="svc">マルチAZ</td></tr>
+</table>
+
+<script>
+(function(){
+  const notes={
+    elasticache:'同じクエリ結果やセッションをインメモリに置いて使い回し、DB本体の負荷とレイテンシを下げる（汎用・どのDBの前にも置ける） → <b>ElastiCache</b>（Redis/Memcached）。',
+    dax:'DynamoDB専用のインメモリキャッシュ。読み取りをミリ秒→<b>マイクロ秒</b>に、コード変更を最小で前面に挿す → <b>DAX</b>。',
+    readreplica:'RDS/Auroraの<b>読み取り</b>を複製（レプリカ）に振り分けて負荷分散。書き込みは本体（プライマリ） → <b>リードレプリカ</b>。マルチAZ（可用性）と混同しない。',
+    rdsproxy:'Lambdaの同時実行が急増し、各実行が新規コネクションを張って<b>RDSの接続数が枯渇</b>する→コネクションをプールして使い回す → <b>RDS Proxy</b>。',
+    apigw:'APIへのリクエスト数に上限を設け、クライアント（キー）別に使用量プランで<b>流量制御（スロットリング）</b>して下流のDBを守る → <b>API Gateway</b>。',
+    efa:'HPCの密結合並列計算で、同一AZに<b>クラスタープレイスメントグループ</b>で密集配置し、OSバイパスの高速NIC<b>EFA</b>でノード間を超低遅延・高帯域に。',
+    all:'「何を速くしたいか」で道具が変わる。DB読み取り＝ElastiCache(汎用)/DAX(Dynamo専用)/リードレプリカ(分散)、DB接続＝RDS Proxy、API入口＝スロットリング、HPC＝配置グループ+EFA。配信はCloudFront・経路はGAが別図。'
+  };
+  const svg=document.getElementById('perfSvg');
+  const panel=document.getElementById('perfPanel');
+  const nodes=svg.querySelectorAll('.pfn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.28';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('perfBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#perfBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
 <script>
 const P={
 all:{t:'全体像',b:['<b>IGW</b>がVPCとインターネットを繋ぐ唯一の門。ネットに出る通信は必ずここを通る。','<b>パブリックサブネット</b>＝IGWに繋がる表通り。<b>プライベートサブネット</b>＝IGWに繋がらない奥の部屋。','エンドポイント（Gateway/Interface）はインターネットを通らずAWSサービス網へ直結する別ルート。','ボタンを押すと経路を1本ずつ強調する。']},
