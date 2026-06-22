@@ -153,6 +153,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(15,20,32,.96);backdrop-f
   <a class="navbtn" href="index.html">🎯 ドリル</a>
   <a class="navbtn" href="cards.html">📇 暗記帳</a>
   <a class="navbtn active" href="patterns.html">🗺️ アーキ図</a>
+  <a class="navbtn" href="network-zukai.html">🧭 図解</a>
 </nav>
 
 <div class="intro">
@@ -744,6 +745,18 @@ function switchTab(i){
   document.querySelectorAll('.scn').forEach((s,k)=>s.classList.toggle('on',k===i));
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+// URLハッシュ（例 #q-web）でそのタブを開く（ドリルの「アーキ図で見る」リンクから）
+function openFromHash(){
+  const h=(location.hash||'').replace('#','');
+  if(!h)return;
+  // SCENARIOS は data-scn、QUIZZES は data-quiz
+  const scns=[...document.querySelectorAll('.scn')];
+  const i=scns.findIndex(s=>s.dataset.scn===h||s.dataset.quiz===h);
+  if(i>=0)switchTab(i);
+}
+openFromHash();
+window.addEventListener('hashchange',openFromHash);
 
 // 改善カードのタップ → 開閉 ＋ 図ハイライト
 function clearHot(scnEl){
