@@ -313,27 +313,33 @@ function toggleQli(gi){
   if(el) el.classList.toggle('open');
 }
 
-// 復習プールへ書き込み（バンク別）
+// 復習プールへ書き込み（バンク別）＝模試の正解・間違い両方を進捗に反映
 const SRC_TO_BANK = {'questions.js':'main','questions_v2.js':'v2','questions_v3.js':'v3','questions_v4.js':'v4'};
 function saveWrongToReview(){
   const byBank = {};
   exam.list.forEach((q,i) => {
-    if(!isCorrect(q, exam.answers[i])){
-      const bank = SRC_TO_BANK[q._src] || 'main';
-      (byBank[bank] = byBank[bank] || []).push(q.id);
-    }
+    const bank = SRC_TO_BANK[q._src] || 'main';
+    (byBank[bank] = byBank[bank] || []).push({id:q.id, ok:isCorrect(q, exam.answers[i])});
   });
-  for(const [bank, ids] of Object.entries(byBank)){
+  for(const [bank, items] of Object.entries(byBank)){
     const key = 'saa_drill_progress_v1_' + bank;
     let prog;
     try{ prog = JSON.parse(localStorage.getItem(key)) || {}; }catch(e){ prog = {}; }
     prog.seen = prog.seen || {}; prog.wrong = prog.wrong || {};
     prog.wrongCount = prog.wrongCount || {}; prog.correctCount = prog.correctCount || {};
     prog.unsure = prog.unsure || {};
-    ids.forEach(id => {
+    items.forEach(({id, ok}) => {
       prog.seen[id] = true;
-      prog.wrong[id] = true;
-      prog.wrongCount[id] = (prog.wrongCount[id] || 0) + 1;
+      if(ok){
+        // 模試で正解→学習済み・正答として記録し、間違いプールから外す
+        // ※ドリルで本人が付けた「自信なし(unsure)」は尊重して残す
+        prog.correctCount[id] = (prog.correctCount[id] || 0) + 1;
+        delete prog.wrong[id];
+      } else {
+        // 模試で間違い→間違いプールに入れる
+        prog.wrong[id] = true;
+        prog.wrongCount[id] = (prog.wrongCount[id] || 0) + 1;
+      }
     });
     localStorage.setItem(key, JSON.stringify(prog));
   }
