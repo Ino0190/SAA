@@ -47,6 +47,800 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 <a class="active" href="network-zukai.html">🧭 図解</a>
 <a href="mock-exam.html">📝 模試</a>
 </nav>
+<h1 id="shop" style="margin-top:0">AWSをお店に例えると（全体地図）</h1>
+<p class="lead">AWSは「インターネット上のお店をつくる道具一式」。クラウド＝場所を借りてお店を開く感じ。各サービスは<b>お店の中の役割</b>に対応する。下の地図のクリックで、その役割の詳しい図にジャンプする。</p>
+<div class="stage">
+<svg viewBox="0 0 1080 720" id="shopSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="sm" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<!-- 外（インターネット） -->
+<rect x="0" y="0" width="180" height="720" fill="#eef3f7"/>
+<text x="90" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#5e5e5e">インターネット</text>
+<text x="90" y="76" text-anchor="middle" font-size="34">👥</text>
+<text x="90" y="106" text-anchor="middle" font-size="11" fill="#5e5e5e">世界中のお客さん</text>
+<text x="90" y="158" text-anchor="middle" font-size="28">📱</text>
+<text x="90" y="200" text-anchor="middle" font-size="28">💻</text>
+<text x="90" y="242" text-anchor="middle" font-size="28">🌍</text>
+<line x1="180" y1="250" x2="200" y2="250" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#sm)"/>
+<!-- 看板=Route53（建物の屋根の上） -->
+<g class="snode" data-href="#route53">
+<rect x="220" y="40" width="180" height="56" rx="4" fill="#fff" stroke="#21537f" stroke-width="2"/>
+<text x="310" y="64" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">🪧 看板（Route 53）</text>
+<text x="310" y="84" text-anchor="middle" font-size="11" fill="#5e5e5e">「店の名前→住所(IP)」を教える</text>
+</g>
+<!-- 支店=CloudFront/GA -->
+<g class="snode" data-href="#cdn">
+<rect x="0" y="380" width="160" height="100" rx="4" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/>
+<text x="80" y="406" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6b3d">🏬 近所の支店</text>
+<text x="80" y="426" text-anchor="middle" font-size="11" fill="#1f6b3d">CloudFront(キャッシュ)</text>
+<text x="80" y="442" text-anchor="middle" font-size="11" fill="#1f6b3d">Global Accelerator</text>
+<text x="80" y="462" text-anchor="middle" font-size="11" fill="#1f6b3d">遠い客に近い場所で</text>
+</g>
+<!-- 専用線=DX/VPN -->
+<g class="snode" data-href="#hybrid">
+<rect x="0" y="500" width="160" height="100" rx="4" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/>
+<text x="80" y="526" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">🚏 オフィス直通</text>
+<text x="80" y="546" text-anchor="middle" font-size="11" fill="#5e5e5e">Direct Connect(専用線)</text>
+<text x="80" y="562" text-anchor="middle" font-size="11" fill="#5e5e5e">VPN(暗号化トンネル)</text>
+<text x="80" y="582" text-anchor="middle" font-size="11" fill="#5e5e5e">本社/自社DCから</text>
+</g>
+<!-- 建物（AWSのお店本体） -->
+<rect x="180" y="120" width="900" height="600" rx="10" fill="#fafaf3" stroke="#7a471a" stroke-width="2"/>
+<text x="200" y="146" font-size="13" font-weight="700" fill="#7a471a">🏪 お店（AWS）── クラウドで借りた場所に道具を並べてつくる</text>
+<!-- 入口=VPC/IGW -->
+<g class="snode" data-href="#vpc">
+<rect x="200" y="220" width="120" height="64" rx="4" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/>
+<text x="260" y="244" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">🚪 入口</text>
+<text x="260" y="262" text-anchor="middle" font-size="11" fill="#5e5e5e">VPC / IGW / NAT</text>
+<text x="260" y="278" text-anchor="middle" font-size="11" fill="#5e5e5e">店の敷地と門</text>
+</g>
+<line x1="320" y1="252" x2="358" y2="252" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#sm)"/>
+<!-- 受付=ALB -->
+<g class="snode" data-href="#lb">
+<rect x="360" y="220" width="120" height="64" rx="4" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/>
+<text x="420" y="244" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">🛎️ 受付</text>
+<text x="420" y="262" text-anchor="middle" font-size="11" fill="#5e5e5e">ロードバランサー</text>
+<text x="420" y="278" text-anchor="middle" font-size="11" fill="#5e5e5e">ALB / NLB / GWLB</text>
+</g>
+<line x1="480" y1="252" x2="518" y2="252" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#sm)"/>
+<!-- 店員=EC2/Lambda/ECS（売場） -->
+<g class="snode" data-href="#compute">
+<rect x="520" y="190" width="240" height="124" rx="4" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/>
+<text x="640" y="214" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6b3d">👨‍💼 店員（売場）</text>
+<text x="640" y="236" text-anchor="middle" font-size="11" fill="#1f6b3d">EC2 = 正社員（自由・常時）</text>
+<text x="640" y="254" text-anchor="middle" font-size="11" fill="#1f6b3d">ECS / Fargate = 派遣（コンテナ）</text>
+<text x="640" y="272" text-anchor="middle" font-size="11" fill="#1f6b3d">Lambda = アルバイト（呼ばれた時だけ）</text>
+<text x="640" y="294" text-anchor="middle" font-size="11" fill="#1f6b3d">混んだら自動で増員 = Auto Scaling</text>
+</g>
+<!-- 内線=SQS/SNS/EventBridge -->
+<g class="snode" data-href="#messaging">
+<rect x="800" y="190" width="260" height="124" rx="4" fill="#fffbe6" stroke="#ba8425" stroke-width="1.5"/>
+<text x="930" y="214" text-anchor="middle" font-size="13" font-weight="700" fill="#7a471a">📞 内線・伝言板（疎結合）</text>
+<text x="930" y="236" text-anchor="middle" font-size="11" fill="#7a471a">SQS = 順番に処理する箱</text>
+<text x="930" y="254" text-anchor="middle" font-size="11" fill="#7a471a">SNS = 関係者全員に放送</text>
+<text x="930" y="272" text-anchor="middle" font-size="11" fill="#7a471a">EventBridge = 条件で配り分け</text>
+<text x="930" y="294" text-anchor="middle" font-size="11" fill="#7a471a">Step Functions = 業務フロー</text>
+</g>
+<!-- 矢印 売場→倉庫/レジ帳 -->
+<line x1="600" y1="316" x2="380" y2="370" stroke="#5e5e5e" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#sm)"/>
+<line x1="660" y1="316" x2="600" y2="370" stroke="#5e5e5e" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#sm)"/>
+<!-- 倉庫=S3/EBS/EFS（地下Glacierは別枠） -->
+<g class="snode" data-href="#storage-types">
+<rect x="200" y="370" width="240" height="100" rx="4" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/>
+<text x="320" y="394" text-anchor="middle" font-size="13" font-weight="700" fill="#7a471a">📦 倉庫（モノを置く）</text>
+<text x="320" y="416" text-anchor="middle" font-size="11" fill="#7a471a">棚（S3）= 無限の倉庫・HTTPで出し入れ</text>
+<text x="320" y="434" text-anchor="middle" font-size="11" fill="#7a471a">引き出し（EBS）= 1台専用ディスク</text>
+<text x="320" y="454" text-anchor="middle" font-size="11" fill="#7a471a">共有書庫（EFS / FSx）/ 作業机（消える）</text>
+</g>
+<!-- 地下Glacier（地層図） -->
+<g class="snode" data-href="#storage">
+<rect x="200" y="476" width="240" height="34" rx="4" fill="#e9dcc0" stroke="#8a5a2a" stroke-width="1.5"/>
+<text x="320" y="498" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3a12">⛏️ 地下倉庫＝Glacier（地層・S3クラス図）</text>
+</g>
+<!-- レジ帳=DB -->
+<g class="snode" data-href="#database">
+<rect x="460" y="370" width="260" height="140" rx="4" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/>
+<text x="590" y="394" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">📒 レジ帳（記録）</text>
+<text x="590" y="416" text-anchor="middle" font-size="11" fill="#183251">表（RDS / Aurora）= 行と列で管理</text>
+<text x="590" y="434" text-anchor="middle" font-size="11" fill="#183251">索引（DynamoDB）= キー→値で速い</text>
+<text x="590" y="452" text-anchor="middle" font-size="11" fill="#183251">付箋（ElastiCache）= よく使う物のメモ</text>
+<text x="590" y="470" text-anchor="middle" font-size="11" fill="#183251">専門帳（Redshift / OpenSearch / Neptune）</text>
+<text x="590" y="492" text-anchor="middle" font-size="11" fill="#5e5e5e">火事に備えて<tspan fill="#21537f" font-weight="700">マルチAZ・バックアップ</tspan></text>
+</g>
+<!-- 金庫・警備 -->
+<g class="snode" data-href="#auth">
+<rect x="740" y="370" width="320" height="140" rx="4" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/>
+<text x="900" y="394" text-anchor="middle" font-size="13" font-weight="700" fill="#b01212">🔐 金庫・警備</text>
+<text x="900" y="416" text-anchor="middle" font-size="11" fill="#b01212">社員証（IAM / IAM Identity Center）</text>
+<text x="900" y="434" text-anchor="middle" font-size="11" fill="#b01212">鍵（KMS / CloudHSM）= 暗号化</text>
+<text x="900" y="452" text-anchor="middle" font-size="11" fill="#b01212">警備員（WAF / Shield）= 不正侵入を弾く</text>
+<text x="900" y="470" text-anchor="middle" font-size="11" fill="#b01212">巡回（GuardDuty / Inspector / Macie）</text>
+<text x="900" y="492" text-anchor="middle" font-size="11" fill="#b01212">秘密の保管（Secrets Manager）</text>
+</g>
+<!-- 監視室・録画室（専用図は穴2で作成予定。クリック無効） -->
+<g class="snode-disabled">
+<rect x="200" y="540" width="380" height="140" rx="4" fill="#eef0f2" stroke="#5e5e5e" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="390" y="566" text-anchor="middle" font-size="13" font-weight="700" fill="#5e5e5e">📺 監視室・録画室・管理室</text>
+<text x="390" y="588" text-anchor="middle" font-size="11" fill="#5e5e5e">CloudWatch = メーターと警報（動いてるか）</text>
+<text x="390" y="606" text-anchor="middle" font-size="11" fill="#5e5e5e">CloudTrail = 監視カメラの録画（誰が何をした）</text>
+<text x="390" y="624" text-anchor="middle" font-size="11" fill="#5e5e5e">Config = 設定の履歴・コンプラ追跡</text>
+<text x="390" y="642" text-anchor="middle" font-size="11" fill="#5e5e5e">Systems Manager = お店の管理人（運用）</text>
+<text x="390" y="662" text-anchor="middle" font-size="11" fill="#b01212">※この部屋の専用図はまだ作成中（クリック不可）</text>
+</g>
+<!-- 分析室 -->
+<g class="snode" data-href="#data-analytics">
+<rect x="600" y="540" width="240" height="140" rx="4" fill="#f0e6f4" stroke="#7a3da1" stroke-width="1.5"/>
+<text x="720" y="566" text-anchor="middle" font-size="13" font-weight="700" fill="#5a2d7a">📊 分析室</text>
+<text x="720" y="588" text-anchor="middle" font-size="11" fill="#5a2d7a">取り込み(Kinesis / Firehose)</text>
+<text x="720" y="606" text-anchor="middle" font-size="11" fill="#5a2d7a">変換(Glue / EMR)</text>
+<text x="720" y="624" text-anchor="middle" font-size="11" fill="#5a2d7a">クエリ(Athena / Redshift)</text>
+<text x="720" y="642" text-anchor="middle" font-size="11" fill="#5a2d7a">可視化(QuickSight)</text>
+<text x="720" y="662" text-anchor="middle" font-size="11" fill="#5a2d7a">ML(SageMaker)</text>
+</g>
+<!-- 引っ越し（移行）-->
+<g class="snode" data-href="#storage-migration">
+<rect x="860" y="540" width="200" height="140" rx="4" fill="#fff7ec" stroke="#ba8425" stroke-width="1.5"/>
+<text x="960" y="566" text-anchor="middle" font-size="13" font-weight="700" fill="#7a471a">🚚 引っ越し（移行）</text>
+<text x="960" y="588" text-anchor="middle" font-size="11" fill="#7a471a">DataSync(オンライン同期)</text>
+<text x="960" y="606" text-anchor="middle" font-size="11" fill="#7a471a">Snowball(物理輸送)</text>
+<text x="960" y="624" text-anchor="middle" font-size="11" fill="#7a471a">DMS(DB移行)</text>
+<text x="960" y="642" text-anchor="middle" font-size="11" fill="#7a471a">MGN(サーバー移行)</text>
+<text x="960" y="662" text-anchor="middle" font-size="11" fill="#7a471a">DRS(災害復旧)</text>
+</g>
+<!-- 入口前のラベル：困りごと -->
+<text x="180" y="700" font-size="11" fill="#5e5e5e">↑ 各部屋をクリックでその詳しい図に飛びます（点線=詳細図はまだ無し）</text>
+</svg>
+</div>
+
+<h2 style="font-size:18px;color:#183251;margin-top:24px;margin-bottom:8px">📚 全セクション索引（地図に出てない物もここから）</h2>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+<a href="#shop" class="ix on">🏪 お店全体</a>
+<a href="#aiservices" class="ix">🧠 AIアバター</a>
+<a href="#sgcompare" class="ix">🏪 SG対比</a>
+<a href="#datastream" class="ix">🌊 データの川</a>
+<a href="#microservices" class="ix">🏘️ マイクロサービス</a>
+<a href="#sync-async" class="ix">📞 会話2方式</a>
+<a href="#messaging-types" class="ix">📨 SQS等4種</a>
+<a href="#ops-toolbox" class="ix">🧰 運用の道具箱</a>
+<a href="#quickref" class="ix">📋 早見表</a>
+<a href="#compute" class="ix">コンピュート</a>
+<a href="#database" class="ix">DB</a>
+<a href="#storage" class="ix">S3 地層</a>
+<a href="#storage-types" class="ix">ストレージ3種</a>
+<a href="#storage-migration" class="ix">移行・移送</a>
+<a href="#vpc" class="ix">VPC 入口</a>
+<a href="#lb" class="ix">LB</a>
+<a href="#route53" class="ix">Route 53</a>
+<a href="#cdn" class="ix">CDN / GA</a>
+<a href="#hybrid" class="ix">オンプレ接続</a>
+<a href="#hybrid-map" class="ix">トポロジ図</a>
+<a href="#data-analytics" class="ix">データ分析</a>
+<a href="#messaging" class="ix">メッセージ</a>
+<a href="#performance" class="ix star">⭐ 性能・キャッシュ</a>
+<a href="#dr" class="ix star">⭐ DR 戦略</a>
+<a href="#security" class="ix">セキュ検知</a>
+<a href="#auth" class="ix">認証・暗号化</a>
+<a href="#ha" class="ix star">⭐ 高可用</a>
+</div>
+<style>
+.ix{display:inline-block;padding:6px 12px;border:1px solid #d8dee6;border-radius:6px;text-decoration:none;color:#183251;font-size:14px;background:#fff;font-weight:400}
+.ix:hover{background:#edf2f4;border-color:#21537f}
+.ix.on{background:#21537f;color:#fff;border-color:#21537f;font-weight:700}
+.ix.star{border:2px solid #b01212;color:#b01212;font-weight:700}
+.ix.star:hover{background:#fdeaea}
+</style>
+<p style="font-size:13px;color:#5e5e5e;margin-bottom:24px">⭐ = お店の地図には部屋として描いてないが本番頻出の専門室。「火事に強い建物 = 高可用」「予備の店 = DR」「待ち時間ゼロカウンター = 性能・キャッシュ」と読み替える。</p>
+
+<h2 id="aiservices" style="font-size:20px;color:#183251;margin-top:32px;margin-bottom:8px">🧠 AIサービス＝人間の感覚アバター（6サービス）</h2>
+<p style="font-size:15px;color:#5e5e5e;margin-bottom:12px">AIサービスは<b>人間の感覚を真似る道具</b>と覚える。「画像/PDF→文字＝Textract」みたいな単語の混同が消える。<b>体の部位で位置を覚える</b>。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 540" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="ai" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<!-- 中央のアバター -->
+<circle cx="500" cy="280" r="120" fill="#fafbfd" stroke="#21537f" stroke-width="2"/>
+<text x="500" y="300" text-anchor="middle" font-size="100">🧑</text>
+<text x="500" y="430" text-anchor="middle" font-size="13" font-weight="700" fill="#5e5e5e">AIサービス＝人間の感覚を真似る</text>
+
+<!-- 👁️ Rekognition（目）：上 -->
+<g><rect x="380" y="40" width="240" height="80" rx="6" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/>
+<text x="400" y="80" font-size="32">👁️</text>
+<text x="448" y="70" font-size="14" font-weight="700" fill="#b01212">目 = Rekognition</text>
+<text x="448" y="92" font-size="12" fill="#b01212">写真や動画から</text>
+<text x="448" y="108" font-size="12" fill="#b01212">「顔・物体・テキスト」を見つける</text></g>
+<line x1="500" y1="120" x2="500" y2="158" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ai)"/>
+
+<!-- 📄 Textract（読む・OCR）：左上 -->
+<g><rect x="40" y="120" width="260" height="80" rx="6" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/>
+<text x="60" y="160" font-size="32">📄</text>
+<text x="108" y="150" font-size="14" font-weight="700" fill="#7a471a">読む（OCR）= Textract</text>
+<text x="108" y="172" font-size="12" fill="#7a471a">画像/PDFから</text>
+<text x="108" y="188" font-size="12" fill="#7a471a">「文字を抽出」（手書きOK）</text></g>
+<line x1="300" y1="180" x2="378" y2="240" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ai)"/>
+
+<!-- 👂 Transcribe（耳）：左下 -->
+<g><rect x="40" y="320" width="260" height="80" rx="6" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/>
+<text x="60" y="360" font-size="32">👂</text>
+<text x="108" y="350" font-size="14" font-weight="700" fill="#183251">耳 = Transcribe</text>
+<text x="108" y="372" font-size="12" fill="#5e5e5e">音声を聞いて</text>
+<text x="108" y="388" font-size="12" fill="#5e5e5e">「文字に書き起こす」</text></g>
+<line x1="300" y1="360" x2="378" y2="320" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ai)"/>
+
+<!-- 👄 Polly（口）：右下 -->
+<g><rect x="700" y="320" width="260" height="80" rx="6" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/>
+<text x="720" y="360" font-size="32">👄</text>
+<text x="770" y="350" font-size="14" font-weight="700" fill="#1f6b3d">口 = Polly</text>
+<text x="770" y="372" font-size="12" fill="#1f6b3d">文字を読んで</text>
+<text x="770" y="388" font-size="12" fill="#1f6b3d">「声で読み上げる」</text></g>
+<line x1="700" y1="360" x2="622" y2="320" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ai)"/>
+
+<!-- 🧠 Comprehend（脳）：右上 -->
+<g><rect x="700" y="120" width="260" height="80" rx="6" fill="#f0e6f4" stroke="#7a3da1" stroke-width="1.5"/>
+<text x="720" y="160" font-size="32">🧠</text>
+<text x="770" y="150" font-size="14" font-weight="700" fill="#5a2d7a">脳 = Comprehend</text>
+<text x="770" y="172" font-size="12" fill="#5a2d7a">文章を読んで</text>
+<text x="770" y="188" font-size="12" fill="#5a2d7a">「気持ち・キーフレーズ」を理解</text></g>
+<line x1="700" y1="180" x2="622" y2="240" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ai)"/>
+
+<!-- 🌐 Translate（翻訳家）：下 -->
+<g><rect x="380" y="450" width="240" height="80" rx="6" fill="#fffbe6" stroke="#ba8425" stroke-width="1.5"/>
+<text x="400" y="490" font-size="32">🌐</text>
+<text x="448" y="480" font-size="14" font-weight="700" fill="#7a471a">翻訳家 = Translate</text>
+<text x="448" y="502" font-size="12" fill="#7a471a">文章を</text>
+<text x="448" y="518" font-size="12" fill="#7a471a">「他の言語に直す」</text></g>
+<line x1="500" y1="450" x2="500" y2="402" stroke="#5e5e5e" stroke-width="1.5" marker-start="url(#ai)"/>
+</svg>
+</div>
+<table>
+<caption>混同しやすい3組（Tから始まる/読む系/書く系）</caption>
+<tr><th>混同</th><th>違い</th></tr>
+<tr><td><b>Textract vs Transcribe</b></td><td><b>Text</b>ract = 画像から「テキスト抽出」（OCR） / <b>Trans</b>cribe = 音声から「書き起こす」</td></tr>
+<tr><td><b>Polly vs Transcribe</b></td><td>Polly = <b>文字 → 音声</b>（読み上げ） / Transcribe = <b>音声 → 文字</b>（逆）</td></tr>
+<tr><td><b>Comprehend vs Translate</b></td><td>Comprehend = <b>気持ち・意味を理解</b> / Translate = <b>言語を変換</b></td></tr>
+</table>
+
+<h2 id="sgcompare" style="font-size:20px;color:#183251;margin-top:40px;margin-bottom:8px">🏪 Storage Gateway 2種の対比＝主はどっち？</h2>
+<p style="font-size:15px;color:#5e5e5e;margin-bottom:12px">問題文の<b>「主データはどこか」</b>で2種が決まる。「クラウドで容量増やしたい」=キャッシュ型、「オンプレで運用継続+AWSにバックアップ」=ストアド型。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 380" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="sg" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<!-- 左：キャッシュ型 -->
+<rect x="20" y="20" width="470" height="340" rx="6" fill="#fafbfd" stroke="#21537f" stroke-width="1.5"/>
+<text x="255" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#183251">キャッシュ型（Cached Volume）</text>
+<text x="255" y="72" text-anchor="middle" font-size="12" fill="#5e5e5e">主はクラウド・ローカルにキャッシュだけ</text>
+<!-- オンプレ（小） -->
+<rect x="60" y="100" width="160" height="180" fill="#fff" stroke="#bbb" stroke-width="1.5"/>
+<text x="140" y="124" text-anchor="middle" font-size="13" font-weight="700" fill="#5e5e5e">🏢 オンプレ</text>
+<rect x="80" y="140" width="120" height="60" fill="#fffbe6" stroke="#ba8425"/>
+<text x="140" y="170" text-anchor="middle" font-size="14">📦 キャッシュ</text>
+<text x="140" y="186" text-anchor="middle" font-size="11" fill="#7a471a">よく使う物だけ</text>
+<text x="140" y="266" text-anchor="middle" font-size="11" fill="#5e5e5e">容量小・最近使ったデータのみ</text>
+<!-- 矢印 -->
+<line x1="220" y1="190" x2="290" y2="190" stroke="#5e5e5e" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="255" y="180" text-anchor="middle" font-size="11" fill="#5e5e5e">必要な時に</text>
+<text x="255" y="208" text-anchor="middle" font-size="11" fill="#5e5e5e">取りに行く</text>
+<!-- AWS（大） -->
+<rect x="290" y="80" width="180" height="220" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/>
+<text x="380" y="106" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6b3d">☁️ AWS（S3）</text>
+<rect x="310" y="124" width="140" height="160" fill="#fff" stroke="#1f9d55"/>
+<text x="380" y="200" text-anchor="middle" font-size="32">📚</text>
+<text x="380" y="232" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6b3d">主データ全部</text>
+<text x="380" y="252" text-anchor="middle" font-size="11" fill="#1f6b3d">無限の倉庫</text>
+<text x="255" y="332" text-anchor="middle" font-size="13" font-weight="700" fill="#21537f">いつ使う？</text>
+<text x="255" y="352" text-anchor="middle" font-size="11" fill="#5e5e5e">「オンプレ容量を増やしたい・主はクラウドでOK」</text>
+
+<!-- 右：ストアド型 -->
+<rect x="510" y="20" width="470" height="340" rx="6" fill="#fafbfd" stroke="#b01212" stroke-width="1.5"/>
+<text x="745" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#b01212">ストアド型（Stored Volume）</text>
+<text x="745" y="72" text-anchor="middle" font-size="12" fill="#5e5e5e">主はオンプレ・S3にバックアップ</text>
+<!-- オンプレ（大） -->
+<rect x="540" y="80" width="180" height="220" fill="#fdeaea" stroke="#b01212" stroke-width="2"/>
+<text x="630" y="106" text-anchor="middle" font-size="13" font-weight="700" fill="#7a2018">🏢 オンプレ</text>
+<rect x="560" y="124" width="140" height="160" fill="#fff" stroke="#b01212"/>
+<text x="630" y="200" text-anchor="middle" font-size="32">📚</text>
+<text x="630" y="232" text-anchor="middle" font-size="13" font-weight="700" fill="#7a2018">主データ全部</text>
+<text x="630" y="252" text-anchor="middle" font-size="11" fill="#7a2018">運用継続中</text>
+<!-- 矢印（バックアップ） -->
+<line x1="720" y1="190" x2="790" y2="190" stroke="#5e5e5e" stroke-width="1.5"/>
+<polygon points="790,190 784,186 784,194" fill="#5e5e5e"/>
+<text x="755" y="180" text-anchor="middle" font-size="11" fill="#5e5e5e">バックアップ</text>
+<text x="755" y="208" text-anchor="middle" font-size="11" fill="#5e5e5e">（非同期）</text>
+<!-- AWS（小） -->
+<rect x="790" y="100" width="160" height="180" fill="#fff" stroke="#bbb" stroke-width="1.5"/>
+<text x="870" y="124" text-anchor="middle" font-size="13" font-weight="700" fill="#5e5e5e">☁️ AWS（S3）</text>
+<rect x="810" y="140" width="120" height="60" fill="#f4f4ef" stroke="#ba8425"/>
+<text x="870" y="170" text-anchor="middle" font-size="14">💾 バックアップ</text>
+<text x="870" y="186" text-anchor="middle" font-size="11" fill="#7a471a">DR用の控え</text>
+<text x="870" y="266" text-anchor="middle" font-size="11" fill="#5e5e5e">災害時はここから復元</text>
+<text x="745" y="332" text-anchor="middle" font-size="13" font-weight="700" fill="#b01212">いつ使う？</text>
+<text x="745" y="352" text-anchor="middle" font-size="11" fill="#5e5e5e">「オンプレで普段使い+災害時に備えてS3にバックアップ」</text>
+</svg>
+</div>
+<p style="font-size:16px;margin-top:12px;color:#121212">決め手の<b>1語</b>：問題文に「<b>クラウド容量を増やしたい</b>」「<b>主はクラウド</b>」 → <b>キャッシュ型</b>／「<b>オンプレで運用継続</b>」「<b>DR用バックアップ</b>」 → <b>ストアド型</b>。</p>
+
+<h2 id="datastream" style="font-size:20px;color:#183251;margin-top:40px;margin-bottom:8px">🌊 データの川（Flink ＋ DataZone）</h2>
+<p style="font-size:15px;color:#5e5e5e;margin-bottom:12px">「リアルタイム異常検知＝Flink」「部門間データ共有＝DataZone」を1枚に。<b>データが川のように流れて、見張られて、保管されて、別の部門に売られる</b>。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 380" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="ds" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+<!-- 川（左から右へ流れる） -->
+<path d="M40,180 L900,180" stroke="#21537f" stroke-width="36" fill="none" opacity="0.5"/>
+<path d="M40,180 L900,180" stroke="#21537f" stroke-width="2" stroke-dasharray="8 4" fill="none"/>
+<text x="40" y="210" font-size="11" fill="#5e5e5e">↑データの川（Kinesis/ストリーム）</text>
+<!-- 上流：センサー -->
+<g><rect x="40" y="60" width="140" height="80" rx="6" fill="#fafbfd" stroke="#5e5e5e"/>
+<text x="110" y="86" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">📡 センサー</text>
+<text x="110" y="106" text-anchor="middle" font-size="11" fill="#5e5e5e">工場・端末から</text>
+<text x="110" y="122" text-anchor="middle" font-size="11" fill="#5e5e5e">毎秒データ送信</text></g>
+<line x1="110" y1="140" x2="110" y2="158" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#ds)"/>
+<!-- 川岸の監視員：Flink -->
+<g><rect x="240" y="60" width="200" height="100" rx="6" fill="#f0e6f4" stroke="#7a3da1" stroke-width="2"/>
+<text x="340" y="84" text-anchor="middle" font-size="14" font-weight="700" fill="#5a2d7a">🕵️ 監視員（Flink）</text>
+<text x="340" y="104" text-anchor="middle" font-size="11" fill="#5a2d7a">流れる川を見て</text>
+<text x="340" y="120" text-anchor="middle" font-size="11" fill="#5a2d7a">異常を即検知</text>
+<text x="340" y="140" text-anchor="middle" font-size="11" fill="#b01212">「リアルタイム分析」</text></g>
+<line x1="340" y1="160" x2="340" y2="178" stroke="#7a3da1" stroke-width="2"/>
+<!-- 倉庫：S3 -->
+<g><rect x="500" y="60" width="180" height="100" rx="6" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/>
+<text x="590" y="84" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">📦 倉庫（S3）</text>
+<text x="590" y="104" text-anchor="middle" font-size="11" fill="#7a471a">流れたデータを</text>
+<text x="590" y="120" text-anchor="middle" font-size="11" fill="#7a471a">全部保管</text>
+<text x="590" y="140" text-anchor="middle" font-size="11" fill="#7a471a">データレイク</text></g>
+<line x1="590" y1="160" x2="590" y2="178" stroke="#ba8425" stroke-width="2"/>
+<!-- フリマ市場：DataZone -->
+<g><rect x="720" y="60" width="240" height="100" rx="6" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/>
+<text x="840" y="84" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">🏪 社内のフリマ（DataZone）</text>
+<text x="840" y="104" text-anchor="middle" font-size="11" fill="#1f6b3d">研究開発部門が出品</text>
+<text x="840" y="120" text-anchor="middle" font-size="11" fill="#1f6b3d">→ 生産管理部門が購入</text>
+<text x="840" y="140" text-anchor="middle" font-size="11" fill="#1f6b3d">部門/アカウントを跨ぐ</text></g>
+<!-- 別部門の人 -->
+<g><text x="840" y="240" text-anchor="middle" font-size="40">👨‍💼</text>
+<text x="840" y="270" text-anchor="middle" font-size="11" fill="#5e5e5e">他部門の人</text>
+<line x1="840" y1="220" x2="840" y2="170" stroke="#1f9d55" stroke-width="1.5" marker-end="url(#ds)"/>
+<text x="870" y="200" font-size="10" fill="#1f6b3d">サブスクライブ</text>
+<text x="870" y="214" font-size="10" fill="#1f6b3d">（Athenaで分析）</text></g>
+<!-- 下のまとめ -->
+<text x="500" y="320" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">📡 → 🕵️ → 📦 → 🏪 → 👨‍💼</text>
+<text x="500" y="340" text-anchor="middle" font-size="12" fill="#5e5e5e">取り込み（Streams） → リアルタイム分析（Flink） → 保管（S3） → 共有（DataZone） → 利用（他部門）</text>
+<text x="500" y="362" text-anchor="middle" font-size="11" fill="#b01212">「リアルタイム異常検知」=監視員(Flink) ／ 「部門間共有」=フリマ(DataZone)</text>
+</svg>
+</div>
+
+<h2 id="microservices" style="font-size:20px;color:#183251;margin-top:40px;margin-bottom:8px">🏘️ マイクロサービス＝役割分担した小さな係（VPC Lattice ＋ EKS Auto Mode）</h2>
+<p style="font-size:15px;color:#5e5e5e;margin-bottom:6px"><b>マイクロサービスとは？</b>＝1つの仕事を、役割ごとに分けた小さな係（小さなアプリ）で分業する作り。たとえばオンラインショップなら「注文係・在庫係・決済係・配送係…」と分ける。</p>
+<p style="font-size:15px;color:#5e5e5e;margin-bottom:12px"><b>係どうしは何をしてる？</b>＝1件の仕事（例：1つの注文を完結させる）を、係どうしが順番に会話して仕上げる。下の絵で「1つの注文がぐるぐる係を回って完結する流れ」を見る。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 540" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="ms" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 z" fill="#b01212"/></marker></defs>
+<!-- 上にお客様 -->
+<text x="60" y="70" font-size="30">👤</text>
+<text x="60" y="100" font-size="11" fill="#5e5e5e">お客様</text>
+<text x="60" y="116" font-size="11" fill="#5e5e5e">「買いたい」</text>
+<line x1="100" y1="68" x2="170" y2="68" stroke="#b01212" stroke-width="2" marker-end="url(#ms)"/>
+<text x="135" y="58" text-anchor="middle" font-size="10" fill="#b01212">①注文</text>
+
+<!-- 中央：1件の注文の旅 -->
+<text x="500" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">1件の注文 = 6つの係が会話して完結する</text>
+
+<!-- 注文係（左上・アカウントA） -->
+<rect x="170" y="40" width="200" height="90" rx="8" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
+<text x="270" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">📥 注文受付係</text>
+<text x="270" y="82" text-anchor="middle" font-size="10" fill="#5e5e5e">アカウントA・営業部</text>
+<text x="270" y="102" text-anchor="middle" font-size="11" fill="#183251">「注文を受け取って</text>
+<text x="270" y="118" text-anchor="middle" font-size="11" fill="#183251">他の係に頼む人」</text>
+<!-- 注文係→在庫係 -->
+<line x1="370" y1="80" x2="430" y2="80" stroke="#b01212" stroke-width="2" marker-end="url(#ms)"/>
+<text x="400" y="70" text-anchor="middle" font-size="10" fill="#b01212">②「在庫ある？」</text>
+
+<!-- 在庫係（中央上・アカウントB） -->
+<rect x="430" y="40" width="180" height="90" rx="8" fill="#fdeaea" stroke="#b01212" stroke-width="2"/>
+<text x="520" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#7a2018">📦 在庫係</text>
+<text x="520" y="82" text-anchor="middle" font-size="10" fill="#5e5e5e">アカウントB・物流部</text>
+<text x="520" y="102" text-anchor="middle" font-size="11" fill="#7a2018">「商品があるか</text>
+<text x="520" y="118" text-anchor="middle" font-size="11" fill="#7a2018">教える人」</text>
+<!-- 在庫係→決済係 -->
+<line x1="610" y1="80" x2="670" y2="80" stroke="#b01212" stroke-width="2" marker-end="url(#ms)"/>
+<text x="640" y="70" text-anchor="middle" font-size="10" fill="#b01212">③「ある」</text>
+
+<!-- 決済係（右上・アカウントC） -->
+<rect x="670" y="40" width="200" height="90" rx="8" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/>
+<text x="770" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6b3d">💳 決済係</text>
+<text x="770" y="82" text-anchor="middle" font-size="10" fill="#5e5e5e">アカウントC・経理部</text>
+<text x="770" y="102" text-anchor="middle" font-size="11" fill="#1f6b3d">「お金の引き落とし</text>
+<text x="770" y="118" text-anchor="middle" font-size="11" fill="#1f6b3d">をやる人」</text>
+
+<!-- 中央のVPC Lattice -->
+<rect x="350" y="200" width="300" height="80" rx="8" fill="#fffbe6" stroke="#ba8425" stroke-width="3"/>
+<text x="500" y="226" text-anchor="middle" font-size="16" font-weight="700" fill="#7a471a">📞 社内連絡網（VPC Lattice）</text>
+<text x="500" y="248" text-anchor="middle" font-size="12" fill="#7a471a">部署・アカウントを跨いで「係どうしの会話」を運ぶ</text>
+<text x="500" y="266" text-anchor="middle" font-size="11" fill="#5e5e5e">これが無いと別アカウントの係には喋れない</text>
+
+<!-- 各係から連絡網への線 -->
+<line x1="270" y1="130" x2="380" y2="200" stroke="#ba8425" stroke-width="1.5" stroke-dasharray="3 2"/>
+<line x1="520" y1="130" x2="500" y2="200" stroke="#ba8425" stroke-width="1.5" stroke-dasharray="3 2"/>
+<line x1="770" y1="130" x2="620" y2="200" stroke="#ba8425" stroke-width="1.5" stroke-dasharray="3 2"/>
+<line x1="270" y1="410" x2="380" y2="280" stroke="#ba8425" stroke-width="1.5" stroke-dasharray="3 2"/>
+<line x1="520" y1="410" x2="500" y2="280" stroke="#ba8425" stroke-width="1.5" stroke-dasharray="3 2"/>
+<line x1="770" y1="410" x2="620" y2="280" stroke="#ba8425" stroke-width="1.5" stroke-dasharray="3 2"/>
+
+<!-- 配送係（左下・アカウントB再利用） -->
+<rect x="170" y="350" width="200" height="90" rx="8" fill="#fdeaea" stroke="#b01212" stroke-width="2"/>
+<text x="270" y="372" text-anchor="middle" font-size="13" font-weight="700" fill="#7a2018">🚚 配送係</text>
+<text x="270" y="392" text-anchor="middle" font-size="10" fill="#5e5e5e">アカウントB・物流部</text>
+<text x="270" y="412" text-anchor="middle" font-size="11" fill="#7a2018">「お届け日を決めて</text>
+<text x="270" y="428" text-anchor="middle" font-size="11" fill="#7a2018">梱包指示する人」</text>
+<!-- 決済係→配送係 -->
+<line x1="730" y1="130" x2="370" y2="395" stroke="#b01212" stroke-width="1.5" marker-end="url(#ms)"/>
+<text x="600" y="262" font-size="10" fill="#b01212">④「決済OK→発送して」</text>
+
+<!-- 通知係（中央下・アカウントA） -->
+<rect x="430" y="350" width="180" height="90" rx="8" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
+<text x="520" y="372" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">📧 通知係</text>
+<text x="520" y="392" text-anchor="middle" font-size="10" fill="#5e5e5e">アカウントA・営業部</text>
+<text x="520" y="412" text-anchor="middle" font-size="11" fill="#183251">「お客様にメール</text>
+<text x="520" y="428" text-anchor="middle" font-size="11" fill="#183251">で連絡する人」</text>
+<!-- 配送係→通知係 -->
+<line x1="370" y1="395" x2="430" y2="395" stroke="#b01212" stroke-width="2" marker-end="url(#ms)"/>
+<text x="400" y="385" text-anchor="middle" font-size="10" fill="#b01212">⑤「明日着」</text>
+
+<!-- ログ係（右下・アカウントC） -->
+<rect x="670" y="350" width="200" height="90" rx="8" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/>
+<text x="770" y="372" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6b3d">📝 ログ係</text>
+<text x="770" y="392" text-anchor="middle" font-size="10" fill="#5e5e5e">アカウントC・経理部</text>
+<text x="770" y="412" text-anchor="middle" font-size="11" fill="#1f6b3d">「全部の動きを</text>
+<text x="770" y="428" text-anchor="middle" font-size="11" fill="#1f6b3d">記録する人」</text>
+<!-- 通知係→ログ係 -->
+<line x1="610" y1="395" x2="670" y2="395" stroke="#b01212" stroke-width="2" marker-end="url(#ms)"/>
+<text x="640" y="385" text-anchor="middle" font-size="10" fill="#b01212">⑥「メール送信」</text>
+
+<!-- お客様にメール -->
+<text x="900" y="500" font-size="30">📧</text>
+<text x="920" y="530" text-anchor="middle" font-size="11" fill="#5e5e5e">お客様にメール</text>
+<line x1="610" y1="440" x2="900" y2="495" stroke="#b01212" stroke-width="1.5" marker-end="url(#ms)" stroke-dasharray="3 3"/>
+
+<!-- 下の解説 -->
+<text x="500" y="500" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">1件の注文 → 6つの係が会話 → 完結</text>
+<text x="500" y="518" text-anchor="middle" font-size="11" fill="#5e5e5e">係は別アカウントに分かれてる（部署が違うから）が、連絡網（VPC Lattice）で会話できる</text>
+</svg>
+</div>
+
+<h3 style="font-size:16px;color:#183251;margin-top:20px;margin-bottom:8px">2サービスの役割の違い</h3>
+<table>
+<tr><th>サービス</th><th>役割</th><th>たとえ</th></tr>
+<tr><td class="svc">VPC Lattice</td><td>係どうしが<b>別アカウントを超えて会話できる連絡網</b></td><td>会社の社内インターホン（部署を越えて繋がる）</td></tr>
+<tr><td class="svc">EKS Auto Mode</td><td>各係（マイクロサービス）を<b>動かす土台＝Kubernetes</b>を、AWSが完全に運営</td><td>係が働く<b>事務所をAWSが用意・管理</b>してくれる</td></tr>
+</table>
+<p style="font-size:14px;margin-top:8px;color:#121212">つまり：<b>EKS Auto Mode = 事務所（土台）／VPC Lattice = 事務所どうしを繋ぐ社内インターホン</b>。両方セットで使うのが「マイクロサービスをアカウント超えて運用」の王道。</p>
+
+<h3 style="font-size:16px;color:#183251;margin-top:20px;margin-bottom:8px">なぜわざわざ係に分ける？（モノリス vs マイクロサービス）</h3>
+<div class="stage">
+<svg viewBox="0 0 1000 240" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<!-- モノリス -->
+<rect x="40" y="20" width="440" height="200" rx="8" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/>
+<text x="260" y="50" text-anchor="middle" font-size="14" font-weight="700" fill="#7a2018">😫 モノリス（昔の作り）</text>
+<text x="260" y="74" text-anchor="middle" font-size="11" fill="#7a2018">1人スーパー店員が全部やる</text>
+<text x="260" y="120" text-anchor="middle" font-size="40">🧑‍💼</text>
+<text x="260" y="160" text-anchor="middle" font-size="11" fill="#7a2018">注文・在庫・決済・配送・通知・ログ</text>
+<text x="260" y="178" text-anchor="middle" font-size="11" fill="#7a2018">＝全部1人</text>
+<text x="260" y="206" text-anchor="middle" font-size="11" fill="#b01212">🔴 1箇所だけ忙しい時もアプリ全体を増やす羽目に</text>
+<!-- マイクロサービス -->
+<rect x="520" y="20" width="440" height="200" rx="8" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/>
+<text x="740" y="50" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">😀 マイクロサービス（今の作り）</text>
+<text x="740" y="74" text-anchor="middle" font-size="11" fill="#1f6b3d">役割ごとに分業した小さな係</text>
+<text x="600" y="120" text-anchor="middle" font-size="28">📥</text>
+<text x="660" y="120" text-anchor="middle" font-size="28">📦</text>
+<text x="720" y="120" text-anchor="middle" font-size="28">💳</text>
+<text x="780" y="120" text-anchor="middle" font-size="28">🚚</text>
+<text x="840" y="120" text-anchor="middle" font-size="28">📧</text>
+<text x="900" y="120" text-anchor="middle" font-size="28">📝</text>
+<text x="740" y="160" text-anchor="middle" font-size="11" fill="#1f6b3d">注文・在庫・決済・配送・通知・ログ</text>
+<text x="740" y="178" text-anchor="middle" font-size="11" fill="#1f6b3d">＝それぞれ別の小さなアプリ</text>
+<text x="740" y="206" text-anchor="middle" font-size="11" fill="#1f6b3d">🟢 忙しい係だけ増員できる・更新も独立</text>
+</svg>
+</div>
+<p style="font-size:14px;margin-top:8px;color:#121212">代わりに係どうしの<b>会話の経路</b>が必要 → そこに <b>VPC Lattice</b> の出番。係が動く<b>土台</b>として → <b>EKS Auto Mode</b> の出番。</p>
+<p style="font-size:14px;margin-top:8px;color:#121212">決め手の<b>1語</b>：「<b>マイクロサービス＋複数アカウント＋サービスディスカバリ</b>」=<b>VPC Lattice</b>／「<b>Kubernetes＋運用負荷最小</b>」=<b>EKS Auto Mode</b>。</p>
+
+<h2 id="sync-async" style="font-size:20px;color:#183251;margin-top:40px;margin-bottom:8px">📞 係どうしの会話は2方式（直接喋る vs メモで頼む）</h2>
+<p style="font-size:15px;color:#5e5e5e;margin-bottom:12px">マイクロサービス間通信には<b>2つのやり方</b>がある。「即答えが要るか／頼んで終わりでいいか」で使い分ける。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 380" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="sa1" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#21537f"/></marker>
+<marker id="sa2" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7a471a"/></marker></defs>
+
+<!-- 上：直接喋る（同期） -->
+<rect x="20" y="20" width="960" height="160" rx="8" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
+<text x="500" y="48" text-anchor="middle" font-size="15" font-weight="700" fill="#183251">📞 直接喋る（同期）= VPC Lattice / HTTP / gRPC</text>
+<!-- 注文係 -->
+<rect x="80" y="70" width="160" height="80" rx="6" fill="#fff" stroke="#21537f" stroke-width="1.5"/>
+<text x="160" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">📥 注文受付係</text>
+<text x="160" y="124" text-anchor="middle" font-size="11" fill="#5e5e5e">「在庫ある？」</text>
+<text x="160" y="142" text-anchor="middle" font-size="11" fill="#5e5e5e">↓答えを待つ</text>
+<!-- 矢印1 -->
+<line x1="240" y1="100" x2="380" y2="100" stroke="#21537f" stroke-width="2" marker-end="url(#sa1)"/>
+<text x="310" y="90" text-anchor="middle" font-size="11" fill="#21537f">①「在庫ある？」</text>
+<line x1="380" y1="120" x2="240" y2="120" stroke="#21537f" stroke-width="2" marker-end="url(#sa1)"/>
+<text x="310" y="140" text-anchor="middle" font-size="11" fill="#21537f">②「ある」（即答え）</text>
+<!-- 在庫係 -->
+<rect x="380" y="70" width="160" height="80" rx="6" fill="#fff" stroke="#21537f" stroke-width="1.5"/>
+<text x="460" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">📦 在庫係</text>
+<text x="460" y="124" text-anchor="middle" font-size="11" fill="#5e5e5e">即答え返す</text>
+<!-- まとめ -->
+<text x="780" y="84" font-size="13" font-weight="700" fill="#183251">→ 即答えが必要な時</text>
+<text x="780" y="108" font-size="11" fill="#5e5e5e">・在庫確認・決済確認・認証</text>
+<text x="780" y="128" font-size="11" fill="#5e5e5e">・「結果が分からないと次に進めない」</text>
+<text x="780" y="148" font-size="11" fill="#b01212">⚠ 相手が落ちると会話失敗</text>
+
+<!-- 下：メモで頼む（非同期） -->
+<rect x="20" y="200" width="960" height="160" rx="8" fill="#fffbe6" stroke="#ba8425" stroke-width="2"/>
+<text x="500" y="228" text-anchor="middle" font-size="15" font-weight="700" fill="#7a471a">✉️ メモで頼む（非同期）= SQS / SNS / EventBridge / Step Functions</text>
+<!-- 注文係 -->
+<rect x="80" y="248" width="160" height="80" rx="6" fill="#fff" stroke="#ba8425" stroke-width="1.5"/>
+<text x="160" y="278" text-anchor="middle" font-size="13" font-weight="700" fill="#7a471a">📥 注文受付係</text>
+<text x="160" y="302" text-anchor="middle" font-size="11" fill="#5e5e5e">「メール送って」と</text>
+<text x="160" y="320" text-anchor="middle" font-size="11" fill="#5e5e5e">メモ書いて</text>
+<!-- 矢印1 -->
+<line x1="240" y1="288" x2="370" y2="288" stroke="#ba8425" stroke-width="2" marker-end="url(#sa2)"/>
+<text x="305" y="278" text-anchor="middle" font-size="11" fill="#7a471a">①メモを箱に</text>
+<!-- 箱（SQS） -->
+<rect x="370" y="258" width="100" height="60" rx="4" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/>
+<text x="420" y="284" text-anchor="middle" font-size="14">📦</text>
+<text x="420" y="306" text-anchor="middle" font-size="11" fill="#7a471a">SQS箱</text>
+<!-- 矢印2 -->
+<line x1="470" y1="288" x2="600" y2="288" stroke="#ba8425" stroke-width="2" marker-end="url(#sa2)"/>
+<text x="535" y="278" text-anchor="middle" font-size="11" fill="#7a471a">②後で取り出す</text>
+<!-- 通知係 -->
+<rect x="600" y="248" width="160" height="80" rx="6" fill="#fff" stroke="#ba8425" stroke-width="1.5"/>
+<text x="680" y="278" text-anchor="middle" font-size="13" font-weight="700" fill="#7a471a">📧 通知係</text>
+<text x="680" y="302" text-anchor="middle" font-size="11" fill="#5e5e5e">自分のペースで</text>
+<text x="680" y="320" text-anchor="middle" font-size="11" fill="#5e5e5e">処理</text>
+<!-- まとめ -->
+<text x="800" y="262" font-size="13" font-weight="700" fill="#7a471a">→ 頼んで終わり</text>
+<text x="800" y="286" font-size="11" fill="#5e5e5e">・メール送信・ログ記録</text>
+<text x="800" y="306" font-size="11" fill="#5e5e5e">・「結果は要らない・後で処理OK」</text>
+<text x="800" y="326" font-size="11" fill="#1f6b3d">🟢 相手が落ちても箱に残る・再処理可</text>
+</svg>
+</div>
+<table>
+<caption>使い分けの決め手</caption>
+<tr><th>こんな時</th><th>方式</th></tr>
+<tr><td>「答えが返ってこないと次に進めない」（在庫確認・決済処理・認証）</td><td class="svc">直接喋る（VPC Lattice / HTTP）</td></tr>
+<tr><td>「頼んで終わりでいい」（メール送信・ログ記録・後続処理）</td><td class="svc">メモで頼む（SQS等）</td></tr>
+<tr><td>「処理が時間かかる」「重い処理」</td><td class="svc">メモで頼む（SQS）= 自分は次の仕事へ</td></tr>
+<tr><td>「相手が落ちても再処理したい」「耐障害性」</td><td class="svc">メモで頼む（SQS）= 箱に残る</td></tr>
+</table>
+
+<h2 id="messaging-types" style="font-size:20px;color:#183251;margin-top:40px;margin-bottom:8px">📨 メモで頼む4サービス（SQS / SNS / EventBridge / Step Functions）</h2>
+<p style="font-size:15px;color:#5e5e5e;margin-bottom:12px">「メモで頼む」道具は4種類。<b>誰に届けるか・何を運ぶか</b>で使い分け。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 380" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="mt" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker></defs>
+
+<!-- SQS -->
+<rect x="20" y="20" width="230" height="340" rx="8" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/>
+<text x="135" y="50" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">📦 SQS</text>
+<text x="135" y="68" text-anchor="middle" font-size="11" fill="#7a471a">順番箱（伝言板）</text>
+<text x="135" y="100" text-anchor="middle" font-size="20">👤</text>
+<line x1="135" y1="110" x2="135" y2="138" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#mt)"/>
+<rect x="60" y="140" width="150" height="120" fill="#fff" stroke="#ba8425"/>
+<text x="135" y="158" text-anchor="middle" font-size="11" fill="#7a471a">📋 メモ1</text>
+<text x="135" y="180" text-anchor="middle" font-size="11" fill="#7a471a">📋 メモ2</text>
+<text x="135" y="202" text-anchor="middle" font-size="11" fill="#7a471a">📋 メモ3</text>
+<text x="135" y="224" text-anchor="middle" font-size="11" fill="#7a471a">📋 メモ4</text>
+<text x="135" y="248" text-anchor="middle" font-size="11" fill="#5e5e5e">順番待ち</text>
+<line x1="135" y1="262" x2="135" y2="288" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#mt)"/>
+<text x="135" y="306" text-anchor="middle" font-size="20">👤</text>
+<text x="135" y="328" text-anchor="middle" font-size="11" fill="#7a471a">1人が取り出す</text>
+<text x="135" y="346" text-anchor="middle" font-size="11" fill="#b01212">1対1・順番処理</text>
+
+<!-- SNS -->
+<rect x="270" y="20" width="230" height="340" rx="8" fill="#fdeaea" stroke="#b01212" stroke-width="2"/>
+<text x="385" y="50" text-anchor="middle" font-size="14" font-weight="700" fill="#7a2018">📢 SNS</text>
+<text x="385" y="68" text-anchor="middle" font-size="11" fill="#7a2018">全員に放送（拡声器）</text>
+<text x="385" y="100" text-anchor="middle" font-size="20">👤</text>
+<text x="385" y="118" text-anchor="middle" font-size="11" fill="#7a2018">「セール開始！」</text>
+<line x1="385" y1="128" x2="385" y2="158" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#mt)"/>
+<rect x="320" y="160" width="130" height="50" fill="#fff" stroke="#b01212"/>
+<text x="385" y="190" text-anchor="middle" font-size="22">📣</text>
+<!-- 3方向に発信 -->
+<line x1="320" y1="220" x2="290" y2="280" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#mt)"/>
+<line x1="385" y1="220" x2="385" y2="280" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#mt)"/>
+<line x1="450" y1="220" x2="480" y2="280" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#mt)"/>
+<text x="290" y="298" text-anchor="middle" font-size="18">📧</text>
+<text x="290" y="316" text-anchor="middle" font-size="10" fill="#7a2018">メール</text>
+<text x="385" y="298" text-anchor="middle" font-size="18">📱</text>
+<text x="385" y="316" text-anchor="middle" font-size="10" fill="#7a2018">SMS</text>
+<text x="480" y="298" text-anchor="middle" font-size="18">⚡</text>
+<text x="480" y="316" text-anchor="middle" font-size="10" fill="#7a2018">Lambda</text>
+<text x="385" y="346" text-anchor="middle" font-size="11" fill="#b01212">1対多・全員に同時</text>
+
+<!-- EventBridge -->
+<rect x="520" y="20" width="230" height="340" rx="8" fill="#fffbe6" stroke="#ba8425" stroke-width="2"/>
+<text x="635" y="50" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">📬 EventBridge</text>
+<text x="635" y="68" text-anchor="middle" font-size="11" fill="#7a471a">郵便仕分け係（条件配り分け）</text>
+<text x="635" y="100" text-anchor="middle" font-size="20">👤</text>
+<text x="635" y="118" text-anchor="middle" font-size="11" fill="#7a471a">色んなイベント</text>
+<line x1="635" y1="128" x2="635" y2="158" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#mt)"/>
+<rect x="570" y="160" width="130" height="60" fill="#fff" stroke="#ba8425"/>
+<text x="635" y="180" text-anchor="middle" font-size="11" fill="#7a471a">ルールで仕分け</text>
+<text x="635" y="198" text-anchor="middle" font-size="10" fill="#5e5e5e">「注文系→A」</text>
+<text x="635" y="212" text-anchor="middle" font-size="10" fill="#5e5e5e">「在庫系→B」</text>
+<line x1="585" y1="220" x2="555" y2="280" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#mt)"/>
+<line x1="635" y1="220" x2="635" y2="280" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#mt)"/>
+<line x1="685" y1="220" x2="715" y2="280" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#mt)"/>
+<text x="555" y="298" text-anchor="middle" font-size="11" fill="#7a471a">A係</text>
+<text x="635" y="298" text-anchor="middle" font-size="11" fill="#7a471a">B係</text>
+<text x="715" y="298" text-anchor="middle" font-size="11" fill="#7a471a">C係</text>
+<text x="635" y="346" text-anchor="middle" font-size="11" fill="#b01212">条件で配り分け・AWSサービス連携</text>
+
+<!-- Step Functions -->
+<rect x="770" y="20" width="220" height="340" rx="8" fill="#eaf3ea" stroke="#1f9d55" stroke-width="2"/>
+<text x="880" y="50" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">🎯 Step Functions</text>
+<text x="880" y="68" text-anchor="middle" font-size="11" fill="#1f6b3d">業務フロー司令官</text>
+<rect x="820" y="90" width="120" height="36" rx="4" fill="#fff" stroke="#1f9d55"/>
+<text x="880" y="114" text-anchor="middle" font-size="11" fill="#1f6b3d">①注文確認</text>
+<line x1="880" y1="126" x2="880" y2="142" stroke="#1f9d55" stroke-width="1.5" marker-end="url(#mt)"/>
+<rect x="820" y="142" width="120" height="36" rx="4" fill="#fff" stroke="#1f9d55"/>
+<text x="880" y="166" text-anchor="middle" font-size="11" fill="#1f6b3d">②決済</text>
+<line x1="880" y1="178" x2="880" y2="194" stroke="#1f9d55" stroke-width="1.5" marker-end="url(#mt)"/>
+<rect x="820" y="194" width="120" height="36" rx="4" fill="#fff" stroke="#1f9d55"/>
+<text x="880" y="218" text-anchor="middle" font-size="11" fill="#1f6b3d">③発送</text>
+<line x1="880" y1="230" x2="880" y2="246" stroke="#1f9d55" stroke-width="1.5" marker-end="url(#mt)"/>
+<rect x="820" y="246" width="120" height="36" rx="4" fill="#fff" stroke="#1f9d55"/>
+<text x="880" y="270" text-anchor="middle" font-size="11" fill="#1f6b3d">④通知</text>
+<text x="880" y="304" text-anchor="middle" font-size="10" fill="#b01212">失敗したら⑤キャンセル</text>
+<text x="880" y="324" text-anchor="middle" font-size="11" fill="#1f6b3d">手順全体を管理</text>
+<text x="880" y="346" text-anchor="middle" font-size="11" fill="#b01212">フロー・分岐・リトライ</text>
+</svg>
+</div>
+<table>
+<caption>4サービスの使い分け（決めの1語）</caption>
+<tr><th>サービス</th><th>たとえ</th><th>こう問われたら</th></tr>
+<tr><td class="svc">SQS</td><td>順番箱（伝言板）</td><td>「<b>1対1で順番に処理</b>」「<b>キュー</b>」「<b>耐障害性・再処理</b>」</td></tr>
+<tr><td class="svc">SNS</td><td>全員に放送（拡声器）</td><td>「<b>1つの出来事を関係者全員に通知</b>」「<b>ファンアウト</b>」「メール+SMS+Lambda同時」</td></tr>
+<tr><td class="svc">EventBridge</td><td>郵便仕分け係（条件で配り分け）</td><td>「<b>イベントをルールで振り分け</b>」「<b>AWSサービス連携</b>」「サードパーティSaaSイベント」</td></tr>
+<tr><td class="svc">Step Functions</td><td>業務フロー司令官</td><td>「<b>複数ステップの順番を管理</b>」「<b>分岐・リトライ・並列</b>」「ワークフロー全体」</td></tr>
+</table>
+<p style="font-size:14px;margin-top:8px;color:#121212">混同しやすい3組：</p>
+<ul style="font-size:14px;color:#121212;margin-left:20px">
+<li><b>SQS vs SNS</b>：SQSは<b>1対1（箱から1人が取る）</b>／SNSは<b>1対多（全員に同時に放送）</b></li>
+<li><b>SNS vs EventBridge</b>：SNSは<b>シンプルに全員放送</b>／EventBridgeは<b>条件で振り分け</b>＋AWSサービス間連携が本職</li>
+<li><b>Step Functions vs SQS/SNS/EventBridge</b>：Step Functionsは<b>手順全体を管理する司令官</b>。他3つは「メッセージを運ぶ運搬役」だが、Step Functionsは「<b>運搬役を呼びながら手順を管理する上の人</b>」</li>
+</ul>
+
+<h2 id="ops-toolbox" style="font-size:20px;color:#183251;margin-top:40px;margin-bottom:8px">🧰 運用の道具箱（CFn / Service Catalog / Beanstalk / AWS Backup / X-Ray）</h2>
+<p style="font-size:15px;color:#5e5e5e;margin-bottom:12px">「インフラを自動で建てる」「監視する」「バックアップする」道具。<b>5つの道具箱</b>として並べる。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 360" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<!-- CloudFormation -->
+<g><rect x="20" y="40" width="180" height="280" rx="8" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/>
+<text x="110" y="80" text-anchor="middle" font-size="40">📜</text>
+<text x="110" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">CloudFormation</text>
+<text x="110" y="136" text-anchor="middle" font-size="11" fill="#183251">レシピ（IaC）</text>
+<text x="110" y="170" text-anchor="middle" font-size="10" fill="#5e5e5e">YAMLに書いた</text>
+<text x="110" y="186" text-anchor="middle" font-size="10" fill="#5e5e5e">テンプレートから</text>
+<text x="110" y="202" text-anchor="middle" font-size="10" fill="#5e5e5e">リソース自動作成</text>
+<text x="110" y="240" text-anchor="middle" font-size="10" fill="#b01212">「再現可能なインフラ」</text>
+<text x="110" y="280" text-anchor="middle" font-size="10" fill="#5e5e5e">スタック単位で</text>
+<text x="110" y="294" text-anchor="middle" font-size="10" fill="#5e5e5e">作成・削除</text></g>
+<!-- Service Catalog -->
+<g><rect x="220" y="40" width="180" height="280" rx="8" fill="#fffbe6" stroke="#ba8425" stroke-width="1.5"/>
+<text x="310" y="80" text-anchor="middle" font-size="40">📚</text>
+<text x="310" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#7a471a">Service Catalog</text>
+<text x="310" y="136" text-anchor="middle" font-size="11" fill="#7a471a">レシピ集（メニュー）</text>
+<text x="310" y="170" text-anchor="middle" font-size="10" fill="#5e5e5e">CFnテンプレートを</text>
+<text x="310" y="186" text-anchor="middle" font-size="10" fill="#5e5e5e">「製品」として登録し</text>
+<text x="310" y="202" text-anchor="middle" font-size="10" fill="#5e5e5e">社内に公開</text>
+<text x="310" y="240" text-anchor="middle" font-size="10" fill="#b01212">「セルフサービス」</text>
+<text x="310" y="280" text-anchor="middle" font-size="10" fill="#5e5e5e">バージョン管理</text>
+<text x="310" y="294" text-anchor="middle" font-size="10" fill="#5e5e5e">使用履歴</text></g>
+<!-- Elastic Beanstalk -->
+<g><rect x="420" y="40" width="180" height="280" rx="8" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/>
+<text x="510" y="80" text-anchor="middle" font-size="40">📦</text>
+<text x="510" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6b3d">Elastic Beanstalk</text>
+<text x="510" y="136" text-anchor="middle" font-size="11" fill="#1f6b3d">お店ひと式パッケージ</text>
+<text x="510" y="170" text-anchor="middle" font-size="10" fill="#5e5e5e">アプリのzipを渡すと</text>
+<text x="510" y="186" text-anchor="middle" font-size="10" fill="#5e5e5e">ELB+ASG+EC2を</text>
+<text x="510" y="202" text-anchor="middle" font-size="10" fill="#5e5e5e">自動で建てる</text>
+<text x="510" y="240" text-anchor="middle" font-size="10" fill="#b01212">「素早くデプロイ」</text>
+<text x="510" y="280" text-anchor="middle" font-size="10" fill="#5e5e5e">PaaS的・</text>
+<text x="510" y="294" text-anchor="middle" font-size="10" fill="#5e5e5e">アプリ開発に集中</text></g>
+<!-- AWS Backup -->
+<g><rect x="620" y="40" width="180" height="280" rx="8" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/>
+<text x="710" y="80" text-anchor="middle" font-size="40">💾</text>
+<text x="710" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#b01212">AWS Backup</text>
+<text x="710" y="136" text-anchor="middle" font-size="11" fill="#b01212">統合バックアップ</text>
+<text x="710" y="170" text-anchor="middle" font-size="10" fill="#5e5e5e">EC2/EBS/RDS/</text>
+<text x="710" y="186" text-anchor="middle" font-size="10" fill="#5e5e5e">DynamoDB等を</text>
+<text x="710" y="202" text-anchor="middle" font-size="10" fill="#5e5e5e">一元管理</text>
+<text x="710" y="240" text-anchor="middle" font-size="10" fill="#b01212">「ポリシーベース」</text>
+<text x="710" y="280" text-anchor="middle" font-size="10" fill="#5e5e5e">スケジュール・</text>
+<text x="710" y="294" text-anchor="middle" font-size="10" fill="#5e5e5e">保管期間を設定</text></g>
+<!-- X-Ray -->
+<g><rect x="820" y="40" width="160" height="280" rx="8" fill="#f0e6f4" stroke="#7a3da1" stroke-width="1.5"/>
+<text x="900" y="80" text-anchor="middle" font-size="40">🔍</text>
+<text x="900" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#5a2d7a">X-Ray</text>
+<text x="900" y="136" text-anchor="middle" font-size="11" fill="#5a2d7a">配達ルートの記録</text>
+<text x="900" y="170" text-anchor="middle" font-size="10" fill="#5e5e5e">リクエストが</text>
+<text x="900" y="186" text-anchor="middle" font-size="10" fill="#5e5e5e">どのサービスで</text>
+<text x="900" y="202" text-anchor="middle" font-size="10" fill="#5e5e5e">どれだけ時間かかった</text>
+<text x="900" y="240" text-anchor="middle" font-size="10" fill="#b01212">「ボトルネック特定」</text>
+<text x="900" y="280" text-anchor="middle" font-size="10" fill="#5e5e5e">マイクロサービス</text>
+<text x="900" y="294" text-anchor="middle" font-size="10" fill="#5e5e5e">トレース</text></g>
+</svg>
+</div>
+<p style="font-size:14px;margin-top:8px;color:#121212">問題文の語と道具：<b>「セルフサービス・製品として共有」=Service Catalog／「テンプレート・IaC」=CloudFormation／「アプリ環境を一発で」=Beanstalk／「複数サービスを一元バックアップ」=AWS Backup／「リクエスト処理時間・ボトルネック」=X-Ray</b>。</p>
+
+<h2 id="quickref" style="font-size:20px;color:#183251;margin-top:32px;margin-bottom:8px">📋 サービス早見表（一言＋いつ出番）</h2>
+<p style="font-size:15px;color:#5e5e5e;margin-bottom:12px">お店の地図に部屋として描けなかったサービスの一覧。<b>「正体（たとえ）」と「いつ出番（問題文の語）」</b>を1行で。本番の問題文に書いてある単語を見つけてサービスを引く形。</p>
+<table>
+<caption>図解の補足：本番頻出の20サービス</caption>
+<tr><th>サービス</th><th>正体（たとえ）</th><th>いつ出番（問題文の語）</th></tr>
+<tr><td class="svc">DataZone</td><td>社内のフリマアプリ（部門間データ共有カタログ）</td><td>「部門/アカウント間でデータセット共有」「カタログ＋Athenaで分析」</td></tr>
+<tr><td class="svc">EKS Auto Mode</td><td>フルマネージドK8s（運用全部AWSまかせ）</td><td>「Kubernetes」＋「運用負荷最小／開発に集中」</td></tr>
+<tr><td class="svc">VPC Lattice</td><td>マイクロサービス専用の社内連絡網</td><td>「マイクロサービス間通信」＋「複数アカウント」＋「サービスディスカバリ」</td></tr>
+<tr><td class="svc">Managed Service for Apache Flink</td><td>流れる川を見ながら異常検知する監視員（リアルタイム分析）</td><td>「リアルタイム分析」「異常検出」「ストリーム処理」</td></tr>
+<tr><td class="svc">Comprehend</td><td>気持ちを読む（感情分析）</td><td>「感情分析」「キーフレーズ抽出」「自然言語処理」</td></tr>
+<tr><td class="svc">Textract</td><td>手書きを読む（OCR）</td><td>「画像/PDFから文字を抽出」「OCR」「スキャン文書」</td></tr>
+<tr><td class="svc">Translate</td><td>他の言語に直す（翻訳）</td><td>「翻訳」「多言語化」</td></tr>
+<tr><td class="svc">Transcribe</td><td>話を書き起こす（音声→文字）</td><td>「音声を文字に」「録音をテキスト化」「文字起こし」</td></tr>
+<tr><td class="svc">Polly</td><td>読み上げる（文字→音声）</td><td>「文字を音声に」「読み上げ」「音声合成」</td></tr>
+<tr><td class="svc">Rekognition</td><td>写真を見る（画像/動画認識）</td><td>「顔認識」「物体検出」「画像から人物特定」</td></tr>
+<tr><td class="svc">X-Ray</td><td>配達ルートの記録（リクエスト追跡）</td><td>「リクエスト処理時間」「サービス間トレース」「ボトルネック特定」</td></tr>
+<tr><td class="svc">Service Catalog</td><td>社内のレシピ集（CFnテンプレートを承認済みメニュー化）</td><td>「セルフサービス」「製品として共有」「バージョン管理」「使用履歴」</td></tr>
+<tr><td class="svc">CloudFormation</td><td>レシピ（IaC・テンプレートからリソース自動作成）</td><td>「テンプレート」「スタック」「IaC」「再現可能なインフラ」</td></tr>
+<tr><td class="svc">Elastic Beanstalk</td><td>お店ひと式パッケージ（アプリのzip→環境一式自動構築）</td><td>「アプリのデプロイ」「ELB+ASG+EC2を自動構築」「素早く環境を立ち上げる」</td></tr>
+<tr><td class="svc">AWS Backup</td><td>統合バックアップ（EC2/EBS/RDS等を一元管理）</td><td>「複数サービスを一元的にバックアップ」「ポリシーベース」</td></tr>
+<tr><td class="svc">Storage Gateway キャッシュ型</td><td>主はクラウド・ローカルにキャッシュだけ</td><td>「オンプレでクラウド容量を使う」「ローカル容量を圧迫したくない」</td></tr>
+<tr><td class="svc">Storage Gateway ストアド型</td><td>主はオンプレ・S3にバックアップ</td><td>「オンプレで運用継続＋AWSにDRバックアップ」</td></tr>
+<tr><td class="svc">Glacier Instant Retrieval</td><td>地下倉庫だけど即取り出し</td><td>「アーカイブ価格＋ミリ秒取り出し」「四半期に1回程度」</td></tr>
+<tr><td class="svc">Glacier Flexible Retrieval</td><td>地下倉庫・数分〜数時間で運ばれる</td><td>「バックアップ」「取り出しに数分〜数時間OK」</td></tr>
+<tr><td class="svc">Glacier Deep Archive</td><td>地下深く・12時間で取り出し</td><td>「最安」「法令で長期保存」「取り出しに12時間OK」</td></tr>
+</table>
+<p style="font-size:14px;color:#5e5e5e;margin-top:10px;margin-bottom:24px">右の「いつ出番」の語が問題文に出てきたら、左のサービスを答える。<b>逆引きの辞書</b>として使う。</p>
+
+<h2 style="font-size:20px;color:#183251;margin-top:24px;margin-bottom:8px">困りごと → 道具（本番の問題文はだいたいこの形）</h2>
+<p style="font-size:16px;color:#5e5e5e;margin-bottom:8px">「分類で覚える」より「困りごとから引く」方が本番の文章が読みやすい。問題文の主語＝お店、述語＝困りごと、と読み替えると道具が見える。</p>
+<table>
+<caption>お店の困りごと早見表</caption>
+<tr><th>お店の困りごと</th><th>道具（AWS）</th></tr>
+<tr><td>お店に人がたくさん来た。店員が足りない</td><td class="svc">Auto Scaling（人を自動で増員）</td></tr>
+<tr><td>お店が燃えても続けたい</td><td class="svc">マルチAZ・バックアップ・DR</td></tr>
+<tr><td>遠くの国の客に表示が遅い</td><td class="svc">CloudFront（近所の支店にコピー）</td></tr>
+<tr><td>常連の注文が決まりきっていて毎回レジ帳を引くのは無駄</td><td class="svc">ElastiCache（よく使う答えを付箋にメモ）</td></tr>
+<tr><td>同じ書類を複数の店員が同時に開きたい</td><td class="svc">EFS / FSx（共有書庫）</td></tr>
+<tr><td>1台の店員のメモ帳として使いたい（OS用ディスク）</td><td class="svc">EBS（1台専用ディスク）</td></tr>
+<tr><td>大量の写真・動画・ログをただ置いておきたい</td><td class="svc">S3（無限の棚）</td></tr>
+<tr><td>めったに見ないが法令で10年保管</td><td class="svc">S3 Glacier Deep Archive（地下深く）</td></tr>
+<tr><td>店員(EC2)が重いタスクを持ってる。返事を待たず次の仕事へ</td><td class="svc">SQS（順番に処理する箱）</td></tr>
+<tr><td>1つの出来事を関係者全員に知らせたい</td><td class="svc">SNS（全員に放送）</td></tr>
+<tr><td>客がフォームに何を書いたか追跡したい</td><td class="svc">CloudTrail / CloudWatch（監視カメラとメーター）</td></tr>
+<tr><td>別会社の倉庫を、許可した分だけ覗かせたい</td><td class="svc">IAMロール + AssumeRole（一時的な合鍵）</td></tr>
+<tr><td>重要な金庫の鍵だけは別部署が管理したい</td><td class="svc">KMS（鍵管理を分離）</td></tr>
+<tr><td>本社のオフィスからお店の裏に直接行きたい</td><td class="svc">Direct Connect（専用線）/ VPN</td></tr>
+<tr><td>お店にどう道具を並べたか毎回手で組むのが大変</td><td class="svc">CloudFormation（設計図から自動建設）</td></tr>
+</table>
+
+<script>
+(function(){
+  document.querySelectorAll('#shopSvg .snode').forEach(el=>{
+    el.style.cursor='pointer';
+    el.addEventListener('mouseenter',()=>{
+      const r=el.querySelector('rect');
+      if(r){ if(!r.dataset.osw) r.dataset.osw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width', String(parseFloat(r.dataset.osw)+1.5)); }
+    });
+    el.addEventListener('mouseleave',()=>{
+      const r=el.querySelector('rect');
+      if(r&&r.dataset.osw) r.setAttribute('stroke-width', r.dataset.osw);
+    });
+    el.addEventListener('click',()=>{
+      const href=el.dataset.href;
+      if(!href) return;
+      const t=document.querySelector(href);
+      if(t) t.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+})();
+</script>
+
 <h1 id="compute" style="margin-top:56px">コンピュートの選び方（EC2 / Fargate / Lambda）</h1>
 <p class="lead">軸は1本＝<b>「どこまで自分で管理するか（自由）↔ どこまでAWSに任せるか（手軽）」</b>。左ほど自由で手間大、右ほど手軽で制約あり。下のボタンで「こう問われたら」を押すと該当が強調される。</p>
 <div class="btns" id="cmpBtns">
@@ -633,6 +1427,166 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 </table>
 <p style="font-size:16px;margin-top:14px;color:#121212">最速の切り方：問題文に <b style="color:#b01212">「キャッシュできない」「TCP/UDP」「固定IP」</b> があれば CloudFront は消えて <b>Global Accelerator</b>。<b style="color:#b01212">「静的コンテンツ」「CDN」「キャッシュ」</b> があれば <b>CloudFront</b>。</p>
 
+<h1 id="hybrid" style="margin-top:56px">オンプレ接続・エッジの選び方（専用線／VPN／拠点集約／近接）</h1>
+<p class="lead">「<b>オンプレとどう繋ぐか</b>」「<b>ユーザーに物理的に近い所で動かすか</b>」の地図。CloudFront/GA（前の図）は別レイヤー。ここは専用線・VPN・拠点集約・エッジ・ハイブリッドDNS。下のボタンで状況を押すと該当が強調される。</p>
+<div class="btns" id="hyBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="dx">オンプレと安定・低遅延の専用線</button>
+<button data-k="vpn">即日・安価な暗号トンネルでオンプレ接続</button>
+<button data-k="clientvpn">在宅の個人端末からVPCへ</button>
+<button data-k="tgw">多数のVPC/拠点をハブで集約</button>
+<button data-k="localzone">特定大都市圏で一桁ミリ秒</button>
+<button data-k="wavelength">5Gモバイル網の中で超低遅延</button>
+<button data-k="resolver">オンプレDNSとVPCを双方向に名前解決</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 540" id="hySvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<text x="20" y="30" font-size="15" font-weight="700" fill="#21537f">🔌 オンプレ ↔ AWS を繋ぐ</text>
+<g class="hyn" data-k="dx"><rect x="20" y="42" width="300" height="92" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="170" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">Direct Connect</text><text x="170" y="92" text-anchor="middle" font-size="11.5" fill="#5e5e5e">専用線・安定して低遅延・帯域確保</text><text x="170" y="112" text-anchor="middle" font-size="11.5" fill="#b01212">高い・敷設に時間がかかる</text></g>
+<g class="hyn" data-k="vpn"><rect x="340" y="42" width="320" height="92" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="500" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">Site-to-Site VPN</text><text x="500" y="92" text-anchor="middle" font-size="11.5" fill="#7a471a">即日・安い・暗号トンネル（ネット経由）</text><text x="500" y="112" text-anchor="middle" font-size="11.5" fill="#b01212">2要素：VGW(AWS側)＋CGW(オンプレ側)</text></g>
+<g class="hyn" data-k="clientvpn"><rect x="680" y="42" width="300" height="92" fill="#eaf3ea" stroke="#1f9d55" stroke-width="1.5"/><text x="830" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">Client VPN</text><text x="830" y="92" text-anchor="middle" font-size="11.5" fill="#1f6b3d">在宅社員の個人端末から</text><text x="830" y="112" text-anchor="middle" font-size="11.5" fill="#1f6b3d">VPCへ安全に接続</text></g>
+<text x="20" y="170" font-size="15" font-weight="700" fill="#21537f">🕸 多数の拠点・VPCを束ねる</text>
+<g class="hyn" data-k="tgw"><rect x="20" y="182" width="960" height="64" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="500" y="208" text-anchor="middle" font-size="14" font-weight="700" fill="#183251">Transit Gateway</text><text x="500" y="230" text-anchor="middle" font-size="11.5" fill="#5e5e5e">VPCや拠点が増えて1対1ピアリングが爆発 → ハブに集約してルーティングを一元管理</text></g>
+<text x="20" y="282" font-size="15" font-weight="700" fill="#21537f">📍 ユーザーに物理的に近い所で動かす（エッジ）</text>
+<g class="hyn" data-k="localzone"><rect x="20" y="294" width="470" height="86" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="255" y="322" text-anchor="middle" font-size="14" font-weight="700" fill="#b01212">Local Zones</text><text x="255" y="344" text-anchor="middle" font-size="11.5" fill="#b01212">特定の大都市圏に小さなAWS</text><text x="255" y="364" text-anchor="middle" font-size="11.5" fill="#b01212">一桁ミリ秒の超低遅延（都市近接）</text></g>
+<g class="hyn" data-k="wavelength"><rect x="510" y="294" width="470" height="86" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="745" y="322" text-anchor="middle" font-size="14" font-weight="700" fill="#b01212">Wavelength</text><text x="745" y="344" text-anchor="middle" font-size="11.5" fill="#b01212">通信事業者の5G網の中にAWS</text><text x="745" y="364" text-anchor="middle" font-size="11.5" fill="#b01212">モバイル端末に超低遅延</text></g>
+<text x="20" y="416" font-size="15" font-weight="700" fill="#21537f">🔤 ハイブリッドDNS（名前解決）</text>
+<g class="hyn" data-k="resolver"><rect x="20" y="428" width="960" height="72" fill="#f4f4ef" stroke="#ba8425" stroke-width="1.5"/><text x="500" y="454" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">Route 53 Resolver</text><text x="500" y="476" text-anchor="middle" font-size="11.5" fill="#7a471a">アウトバウンド＝VPCからオンプレDNSを解決／インバウンド＝オンプレからVPC内の名前を解決</text><text x="500" y="494" text-anchor="middle" font-size="11.5" fill="#7a471a">→ 双方向の「ハイブリッドDNS」。転送ルールで使い分け</text></g>
+<rect x="20" y="512" width="960" height="22" fill="none"/><text x="20" y="528" font-size="12" fill="#5e5e5e">※ 固定IP・非HTTPのグローバル経路最適化＝Global Accelerator／静的コンテンツ配信＝CloudFront（前の図）</text>
+</svg>
+</div>
+<div class="panel" id="hyPanel" style="margin-top:14px">ボタンを押すと、その状況で選ぶべきものだけ強調されます。</div>
+<table>
+<caption>こう問われたら（決め手）</caption>
+<tr><th>要件</th><th>サービス</th></tr>
+<tr><td>オンプレと安定・低遅延の専用線（帯域確保）</td><td class="svc">Direct Connect</td></tr>
+<tr><td>安く即日・暗号トンネルでオンプレ接続（多少の遅延は許容）</td><td class="svc">Site-to-Site VPN</td></tr>
+<tr><td>Site-to-Site VPNの構成要素（2つ）</td><td class="svc">VGW（AWS側）＋ CGW（オンプレ側）</td></tr>
+<tr><td>在宅社員の個人端末からVPCへ接続</td><td class="svc">Client VPN</td></tr>
+<tr><td>多数のVPC/拠点でピアリングが爆発・ハブに集約</td><td class="svc">Transit Gateway</td></tr>
+<tr><td>特定の大都市圏で一桁ミリ秒の低遅延</td><td class="svc">Local Zones</td></tr>
+<tr><td>5Gモバイル事業者網の中で超低遅延</td><td class="svc">Wavelength</td></tr>
+<tr><td>オンプレDNSとVPCを双方向に名前解決（ハイブリッドDNS）</td><td class="svc">Route 53 Resolver</td></tr>
+</table>
+<script>
+(function(){
+  const notes={
+    dx:'オンプレとAWSを<b>物理専用線</b>で結ぶ。安定して低遅延・帯域を確保できるが、敷設に時間がかかり高い → <b>Direct Connect</b>。「安定低遅延の専用線」が合図。',
+    vpn:'インターネット越しに<b>暗号トンネル</b>でオンプレと接続。安く即日に張れる（遅延はネット次第） → <b>Site-to-Site VPN</b>。構成要素は<b>VGW（AWS側の終端）＋CGW（オンプレ側を表す情報）</b>の2つ。',
+    clientvpn:'拠点間ではなく、<b>在宅社員などの個人端末（クライアント）</b>からVPCへ安全に接続 → <b>Client VPN</b>。',
+    tgw:'VPCや拠点が増えると1対1のピアリングが組合せ爆発する。<b>中央ハブ</b>に集約してルーティングを一元管理 → <b>Transit Gateway</b>。「多数のVPC/拠点」「ハブに集約」が合図。',
+    localzone:'AWSの一部を<b>特定の大都市圏</b>に置き、その地域のユーザーに<b>一桁ミリ秒</b>の超低遅延 → <b>Local Zones</b>。',
+    wavelength:'AWSを<b>通信事業者の5Gネットワークの中</b>に置き、モバイル端末に超低遅延 → <b>Wavelength</b>。「5G」「キャリア網内」が合図。Local Zonesと混同注意。',
+    resolver:'オンプレのDNSとVPCの名前解決を<b>双方向</b>に。アウトバウンド＝VPCからオンプレ名を引く／インバウンド＝オンプレからVPC内名を引く → <b>Route 53 Resolver</b>（ハイブリッドDNS）。',
+    all:'オンプレ接続＝専用線(Direct Connect)/暗号VPN(Site-to-Site、VGW+CGW)/個人端末(Client VPN)、拠点集約＝Transit Gateway、近接エッジ＝Local Zones(都市)/Wavelength(5G網)、名前解決＝Route 53 Resolver。'
+  };
+  const svg=document.getElementById('hySvg');
+  const panel=document.getElementById('hyPanel');
+  const nodes=svg.querySelectorAll('.hyn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.28';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('hyBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#hyBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
+<h1 id="hybrid-map" style="margin-top:48px">同じ内容を「実際の構成」で見る（どこを繋ぐ＝どのサービス）</h1>
+<p class="lead">上のリストを<b>実際のつなぎ目の絵</b>に置き直したもの。左が「現実の世界（拠点・社員・端末・利用者）」、右がAWS。問題文の「<b>誰が・どこから</b>繋ぐか」で、使う線（サービス）が決まる。下のボタンでその経路だけ光る。</p>
+<div class="btns" id="hmBtns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="dx">本社DCから専用線で</button>
+<button data-k="vpn">本社DCから安価な暗号トンネルで</button>
+<button data-k="tgw">複数の拠点/VPCをまとめて</button>
+<button data-k="clientvpn">在宅社員の端末から</button>
+<button data-k="wavelength">5Gモバイル端末に近く</button>
+<button data-k="localzone">大都市の利用者に近く</button>
+<button data-k="resolver">オンプレとVPCの名前解決</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 520" id="hmSvg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="hm" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker>
+<marker id="hm2" markerWidth="9" markerHeight="9" refX="2" refY="4" orient="auto"><path d="M8,0 L0,4 L8,8 z" fill="#ba8425"/></marker>
+<marker id="hm3" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#ba8425"/></marker></defs>
+<text x="20" y="28" font-size="14" font-weight="700" fill="#5e5e5e">現実の世界（拠点・社員・端末・利用者）</text>
+<text x="770" y="28" font-size="14" font-weight="700" fill="#21537f">AWS</text>
+<!-- 現実側の箱（常時表示） -->
+<rect x="20" y="42" width="190" height="62" fill="#fafafa" stroke="#5e5e5e" stroke-width="1.5"/><text x="115" y="68" text-anchor="middle" font-size="13" font-weight="700" fill="#121212">🏢 本社データセンター</text><text x="115" y="88" text-anchor="middle" font-size="11" fill="#5e5e5e">オンプレのサーバー群</text>
+<rect x="20" y="150" width="190" height="50" fill="#fafafa" stroke="#5e5e5e" stroke-width="1.5"/><text x="115" y="180" text-anchor="middle" font-size="13" font-weight="700" fill="#121212">🏢 別の拠点 / VPC</text>
+<rect x="20" y="226" width="190" height="50" fill="#fafafa" stroke="#5e5e5e" stroke-width="1.5"/><text x="115" y="256" text-anchor="middle" font-size="13" font-weight="700" fill="#121212">🏠 在宅社員の端末</text>
+<rect x="20" y="302" width="190" height="50" fill="#fafafa" stroke="#5e5e5e" stroke-width="1.5"/><text x="115" y="332" text-anchor="middle" font-size="13" font-weight="700" fill="#121212">📱 5Gモバイル端末</text>
+<rect x="20" y="378" width="190" height="50" fill="#fafafa" stroke="#5e5e5e" stroke-width="1.5"/><text x="115" y="408" text-anchor="middle" font-size="13" font-weight="700" fill="#121212">🧑 大都市圏の利用者</text>
+<!-- AWS側（常時表示） -->
+<rect x="760" y="42" width="220" height="386" fill="#edf2f4" stroke="#21537f" stroke-width="2"/><text x="870" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">☁️ AWS リージョン</text>
+<rect x="790" y="150" width="160" height="120" fill="#fafafa" stroke="#21537f" stroke-width="1.5"/><text x="870" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">VPC</text><text x="870" y="222" text-anchor="middle" font-size="11.5" fill="#5e5e5e">EC2 / RDS</text>
+<!-- 中継ノード -->
+<g class="hmn" data-k="tgw dx vpn"><rect x="430" y="96" width="150" height="64" fill="#edf2f4" stroke="#21537f" stroke-width="1.5"/><text x="505" y="124" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">Transit Gateway</text><text x="505" y="144" text-anchor="middle" font-size="10.5" fill="#5e5e5e">拠点/VPCのハブ</text></g>
+<g class="hmn" data-k="wavelength"><rect x="430" y="300" width="150" height="52" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="505" y="324" text-anchor="middle" font-size="13" font-weight="700" fill="#b01212">Wavelength</text><text x="505" y="342" text-anchor="middle" font-size="10.5" fill="#b01212">5G網内のAWS</text></g>
+<g class="hmn" data-k="localzone"><rect x="430" y="378" width="150" height="52" fill="#fdeaea" stroke="#b01212" stroke-width="1.5"/><text x="505" y="402" text-anchor="middle" font-size="13" font-weight="700" fill="#b01212">Local Zones</text><text x="505" y="420" text-anchor="middle" font-size="10.5" fill="#b01212">都市近接のAWS</text></g>
+<!-- 接続線（光らせる対象） -->
+<g class="hmn" data-k="dx tgw"><line x1="210" y1="66" x2="318" y2="96" stroke="#21537f" stroke-width="3.5" marker-end="url(#hm)"/><rect x="210" y="44" width="116" height="20" fill="#21537f"/><text x="268" y="59" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">Direct Connect</text><rect x="318" y="78" width="88" height="32" fill="#eef3f8" stroke="#21537f" stroke-width="1.5"/><text x="362" y="93" text-anchor="middle" font-size="9.5" font-weight="700" fill="#183251">Direct Connect</text><text x="362" y="105" text-anchor="middle" font-size="9.5" font-weight="700" fill="#183251">Gateway</text><line x1="406" y1="98" x2="430" y2="114" stroke="#21537f" stroke-width="3.5" marker-end="url(#hm)"/></g>
+<g class="hmn" data-k="vpn"><line x1="210" y1="92" x2="430" y2="146" stroke="#ba8425" stroke-width="2.5" stroke-dasharray="8 5" marker-end="url(#hm)"/><rect x="226" y="126" width="206" height="20" fill="#ba8425"/><text x="329" y="141" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">Site-to-Site VPN (VGW+CGW)</text></g>
+<text x="598" y="184" font-size="11.5" fill="#5e5e5e">※ VPCが1個だけなら VGW に直結（TGW不要）</text>
+<g class="hmn" data-k="tgw"><line x1="210" y1="176" x2="430" y2="150" stroke="#21537f" stroke-width="2.5" marker-end="url(#hm)"/></g>
+<g class="hmn" data-k="tgw dx vpn"><line x1="580" y1="128" x2="760" y2="160" stroke="#21537f" stroke-width="3.5" marker-end="url(#hm)"/></g>
+<g class="hmn" data-k="tgw"><rect x="610" y="116" width="120" height="22" fill="#21537f"/><text x="670" y="132" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">ハブで集約</text></g>
+<g class="hmn" data-k="clientvpn"><line x1="210" y1="251" x2="760" y2="226" stroke="#1f9d55" stroke-width="2.5" marker-end="url(#hm)"/><rect x="430" y="232" width="110" height="22" fill="#1f9d55"/><text x="485" y="248" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Client VPN</text></g>
+<g class="hmn" data-k="wavelength"><line x1="210" y1="327" x2="430" y2="326" stroke="#b01212" stroke-width="2.5" marker-end="url(#hm)"/><line x1="580" y1="326" x2="760" y2="250" stroke="#b01212" stroke-width="2.5" marker-end="url(#hm)"/></g>
+<g class="hmn" data-k="localzone"><line x1="210" y1="403" x2="430" y2="404" stroke="#b01212" stroke-width="2.5" marker-end="url(#hm)"/><line x1="580" y1="404" x2="760" y2="270" stroke="#b01212" stroke-width="2.5" marker-end="url(#hm)"/></g>
+<g class="hmn" data-k="resolver"><line x1="215" y1="120" x2="755" y2="300" stroke="#ba8425" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#hm3)" marker-start="url(#hm2)"/><rect x="430" y="206" width="200" height="22" fill="#f4f4ef" stroke="#ba8425"/><text x="530" y="222" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a471a">Route 53 Resolver（DNS双方向）</text></g>
+</svg>
+</div>
+<div class="panel" id="hmPanel" style="margin-top:14px">ボタンを押すと、その「つなぎ目」だけ光ります。</div>
+<p style="font-size:16px;margin-top:10px;color:#121212">読み方：問題文の主語＝<b>本社/データセンター</b>なら専用線(Direct Connect)か暗号VPN、<b>在宅・個人端末</b>なら Client VPN、<b>拠点やVPCが多数</b>なら Transit Gateway、<b>モバイル/5G</b>なら Wavelength、<b>特定都市の利用者に近く</b>なら Local Zones、<b>名前解決</b>の話なら Route 53 Resolver。</p>
+
+<script>
+(function(){
+  const notes={
+    dx:'本社データセンターから<b>専用線</b>でAWSへ。多数VPCをまとめるときは<b>Direct Connect Gateway</b>経由でTransit Gatewayに接続しVPCへ。安定・低遅延・帯域確保だが高く敷設に時間 → <b>Direct Connect</b>（太い実線）。※VPCが1個だけならVGWに直結（TGW不要）。',
+    vpn:'本社データセンターから<b>インターネット越しの暗号トンネル</b>でAWSへ（同じくTGW経由でVPCへ）。安く即日。構成は<b>VGW(AWS側)＋CGW(オンプレ側)</b> → <b>Site-to-Site VPN</b>（破線＝ネット経由）。',
+    tgw:'拠点やVPCが多数あり1対1接続が爆発するとき、<b>中央ハブ</b>に集約してルーティング一元管理 → <b>Transit Gateway</b>。本社DCも別拠点VPCもここに集め、まとめてVPCへ。',
+    clientvpn:'拠点でなく<b>在宅社員の個人端末</b>から直接VPCへ安全に接続 → <b>Client VPN</b>。',
+    wavelength:'<b>5Gモバイル端末</b>に超低遅延で届けたいとき、通信事業者の5G網の中に置いたAWS → <b>Wavelength</b>。',
+    localzone:'<b>特定の大都市の利用者</b>に一桁ミリ秒で届けたいとき、その都市に置いた小さなAWS → <b>Local Zones</b>。',
+    resolver:'オンプレのDNSとVPCの名前解決を<b>双方向</b>に橋渡し → <b>Route 53 Resolver</b>（アウトバウンド＝VPC→オンプレ名、インバウンド＝オンプレ→VPC内名）。',
+    all:'左の「誰が・どこから」を、右のVPCへどの線で繋ぐかの地図。本社DC＝Direct Connect/VPN、在宅＝Client VPN、多拠点＝Transit Gateway、5G＝Wavelength、都市近接＝Local Zones、名前解決＝Route 53 Resolver。'
+  };
+  const svg=document.getElementById('hmSvg');
+  const panel=document.getElementById('hmPanel');
+  const nodes=svg.querySelectorAll('.hmn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const keys=(g.dataset.k||'').split(/\s+/);
+      const on=!set||keys.some(x=>set.has(x));
+      g.style.opacity = on ? '1' : '0.18';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width')||'1.5'; r.setAttribute('stroke-width',(on&&set)?'3.5':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('hmBtns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#hmBtns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
+</script>
+
 <h1 id="data-analytics" style="margin-top:56px">データ分析サービスの地図（最重要・ここが一番穴）</h1>
 <p class="lead">データが流れる順番に並べると役割が見える。<b>取り込み → 保存 → 変換(ETL) → クエリ/分析 → 可視化</b>。下のボタンで「こう問われたら」を押すと、該当サービスだけ強調される。</p>
 
@@ -1195,7 +2149,7 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 })();
 </script>
 
-<h1 style="margin-top:56px">認証・アクセス制御・暗号化（誰に権限を／鍵をどう持つ／公開をどう防ぐ）</h1>
+<h1 id="auth" style="margin-top:56px">認証・アクセス制御・暗号化（誰に権限を／鍵をどう持つ／公開をどう防ぐ）</h1>
 <p class="lead">セキュリティの中でも「検知・防御」とは別の、<b>認証・アクセス制御・暗号化</b>の地図。模試の最弱ドメインがここ。「誰に権限を渡すか」「鍵を誰が持つか」「公開をどう防ぐか」の3グループで整理する。下のボタンで状況を押すと該当が強調される。</p>
 <div class="btns" id="authBtns">
 <button data-k="all" class="on">全部表示</button>
@@ -1325,7 +2279,7 @@ body[data-mode="ifep"] .flow:not(.f-ifep){opacity:.08}
 })();
 </script>
 
-<h1 style="margin-top:56px">高可用アーキの組み立て方（複数AZ・Auto Scaling・可用性の使い分け）</h1>
+<h1 id="ha" style="margin-top:56px">高可用アーキの組み立て方（複数AZ・Auto Scaling・可用性の使い分け）</h1>
 <p class="lead">本番は「複数サービスを組み合わせた高可用構成」がよく出る（最多の間違いもここ）。<b>Web3層を複数AZに分散＋DBは自動フェイルオーバー＋需要に自動追従＋平常時コスト</b>の4条件を1つずつ潰す。まず典型構成の地図。</p>
 <div class="stage">
 <svg viewBox="0 0 1000 430" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
@@ -1449,6 +2403,174 @@ document.getElementById('btns').addEventListener('click',e=>{
   render(b.dataset.m);
 });
 render('all');
+</script>
+
+
+<h1 id="storage" style="margin-top:56px">ストレージの選び方（S3クラス・ブロック/ファイル/オブジェクト）</h1>
+<p class="lead">ストレージクラスは<b>地層</b>と同じ。よく使う物は<b>地表</b>に置けばすぐ手に取れる。めったに使わない物ほど<b>深く埋める</b> ── 掘り出すのに時間はかかるが、保管はうんと安い。下に行くほど「取り出し遅い・最安」。下のボタンを押すと該当の層が光る。</p>
+<div class="btns" id="s3Btns">
+<button data-k="all" class="on">全部表示</button>
+<button data-k="std">頻繁にアクセス・取り出しは即時</button>
+<button data-k="intel">アクセス頻度が読めない・自動で最適化</button>
+<button data-k="ia">アクセスは少ないが必要時は即時</button>
+<button data-k="onezone">再作成できる・1AZでいいから安く</button>
+<button data-k="gir">アーカイブだがミリ秒で取り出したい</button>
+<button data-k="gfr">アーカイブ・取り出しは数分〜数時間でOK</button>
+<button data-k="gda">めったに出さない・最安で長期保管</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 1000 580" id="s3Svg" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="sdn" markerWidth="10" markerHeight="10" refX="5" refY="8" orient="auto"><path d="M0,0 L10,0 L5,9 z" fill="#8a6a3a"/></marker></defs>
+<!-- 左の深さ軸 -->
+<line x1="58" y1="40" x2="58" y2="548" stroke="#8a6a3a" stroke-width="2" marker-end="url(#sdn)"/>
+<text x="40" y="34" font-size="13" font-weight="700" fill="#1f6b3d">地表（すぐ手に取れる）</text>
+<text x="40" y="566" font-size="13" font-weight="700" fill="#7a2018">地中深く（掘り出すのに時間）</text>
+<!-- 右の2軸ラベル -->
+<text x="992" y="60" text-anchor="end" font-size="12" font-weight="700" fill="#5e5e5e">↓ 保管コスト 安い</text>
+<text x="992" y="548" text-anchor="end" font-size="12" font-weight="700" fill="#5e5e5e">↓ 取り出し 遅い</text>
+<!-- 地層6枚（上＝地表、下＝最深） -->
+<g class="sn" data-k="std"><rect x="80" y="44" width="700" height="80" fill="#e7f0f7" stroke="#21537f" stroke-width="2"/><text x="100" y="80" font-size="24">🌱</text><text x="98" y="108" font-size="11" font-weight="700" fill="#21537f">地表</text><text x="200" y="80" font-size="17" font-weight="700" fill="#183251">S3 標準</text><text x="200" y="106" font-size="12.5" fill="#5e5e5e">頻繁にアクセス・保管コスト高・取り出し無料</text><text x="764" y="80" text-anchor="end" font-size="14" font-weight="700" fill="#183251">取り出し：ミリ秒（即時）</text><text x="764" y="106" text-anchor="end" font-size="11.5" fill="#5e5e5e">最低保管期間なし</text></g>
+<g class="sn" data-k="ia"><rect x="80" y="128" width="700" height="80" fill="#e4eedd" stroke="#3f9d63" stroke-width="2"/><text x="100" y="164" font-size="24">🪏</text><text x="98" y="192" font-size="11" font-weight="700" fill="#1f6b3d">浅い層</text><text x="200" y="164" font-size="17" font-weight="700" fill="#1f6b3d">標準-IA（低頻度アクセス）</text><text x="200" y="190" font-size="12.5" fill="#5e5e5e">アクセスは少ないが必要時は即時・保管安い</text><text x="764" y="164" text-anchor="end" font-size="14" font-weight="700" fill="#1f6b3d">取り出し：ミリ秒（料金あり）</text><text x="764" y="190" text-anchor="end" font-size="11.5" fill="#5e5e5e">最低保管30日</text></g>
+<g class="sn" data-k="onezone"><rect x="80" y="212" width="700" height="80" fill="#efe9d8" stroke="#c79a3e" stroke-width="2"/><text x="100" y="248" font-size="24">🪏</text><text x="92" y="276" font-size="11" font-weight="700" fill="#7a471a">浅い層(1AZ)</text><text x="200" y="248" font-size="17" font-weight="700" fill="#7a471a">One Zone-IA</text><text x="200" y="274" font-size="12.5" fill="#5e5e5e">1つのAZのみ・標準-IAより安いが冗長性低い</text><text x="764" y="248" text-anchor="end" font-size="14" font-weight="700" fill="#7a471a">取り出し：ミリ秒</text><text x="764" y="274" text-anchor="end" font-size="11.5" fill="#5e5e5e">消えても再作成できる物向け・最低30日</text></g>
+<g class="sn" data-k="gir"><rect x="80" y="296" width="700" height="80" fill="#e9dcc0" stroke="#b9842a" stroke-width="2"/><text x="100" y="332" font-size="24">⛏️</text><text x="98" y="360" font-size="11" font-weight="700" fill="#7a471a">地層</text><text x="200" y="332" font-size="17" font-weight="700" fill="#7a471a">Glacier Instant Retrieval</text><text x="200" y="358" font-size="12.5" fill="#5e5e5e">アーカイブ価格・四半期に1回程度のアクセス向け</text><text x="764" y="332" text-anchor="end" font-size="14" font-weight="700" fill="#7a471a">取り出し：ミリ秒（即時）</text><text x="764" y="358" text-anchor="end" font-size="11.5" fill="#5e5e5e">最低保管90日</text></g>
+<g class="sn" data-k="gfr"><rect x="80" y="380" width="700" height="80" fill="#dcc8a2" stroke="#8a5a2a" stroke-width="2"/><text x="100" y="416" font-size="24">⛏️</text><text x="98" y="444" font-size="11" font-weight="700" fill="#5e3a12">深い地層</text><text x="200" y="416" font-size="17" font-weight="700" fill="#5e3a12">Glacier Flexible Retrieval</text><text x="200" y="442" font-size="12.5" fill="#5e3a12">バックアップ・たまに使う保管</text><text x="764" y="416" text-anchor="end" font-size="14" font-weight="700" fill="#5e3a12">取り出し：数分〜数時間</text><text x="764" y="442" text-anchor="end" font-size="11.5" fill="#5e3a12">最低保管90日</text></g>
+<g class="sn" data-k="gda"><rect x="80" y="464" width="700" height="80" fill="#d8b9ad" stroke="#b01212" stroke-width="2"/><text x="100" y="500" font-size="24">🪨</text><text x="98" y="528" font-size="11" font-weight="700" fill="#7a2018">最深部</text><text x="200" y="500" font-size="17" font-weight="700" fill="#7a2018">Glacier Deep Archive</text><text x="200" y="526" font-size="12.5" fill="#7a2018">最安・法令で長期保存・ほぼ出さない</text><text x="764" y="500" text-anchor="end" font-size="14" font-weight="700" fill="#7a2018">取り出し：12時間程度</text><text x="764" y="526" text-anchor="end" font-size="11.5" fill="#7a2018">最低保管180日</text></g>
+<!-- 右：Intelligent-Tiering＝自動エレベーター -->
+<text x="812" y="120" font-size="11.5" fill="#5e5e5e">頻度が読めない時はこれ</text>
+<g class="sn" data-k="intel"><rect x="812" y="128" width="178" height="332" fill="#eef6f1" stroke="#1f9d55" stroke-width="2" stroke-dasharray="6 3"/><text x="901" y="160" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">Intelligent-</text><text x="901" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#1f6b3d">Tiering</text><text x="901" y="214" text-anchor="middle" font-size="30">🛗</text><text x="901" y="240" text-anchor="middle" font-size="12" font-weight="700" fill="#1f6b3d">自動エレベーター</text><path d="M901,256 L901,418" stroke="#1f9d55" stroke-width="2"/><path d="M901,256 l-7,12 h14 z" fill="#1f9d55"/><path d="M901,418 l-7,-12 h14 z" fill="#1f9d55"/><text x="901" y="446" text-anchor="middle" font-size="11" fill="#1f6b3d">使われ方を見て</text><text x="901" y="462" text-anchor="middle" font-size="11" fill="#1f6b3d">AWSが層を自動で上下</text></g>
+</svg>
+</div>
+<div class="panel" id="s3Panel" style="margin-top:14px">ボタンを押すと、その要件に合うクラスだけ強調されます。</div>
+
+<h2 style="font-size:20px;color:#183251;margin-top:28px;margin-bottom:6px">ライフサイクル & バージョニング（コスト削減の頻出パターン）</h2>
+<table>
+<caption>こう問われたら（決め手）</caption>
+<tr><th>問題文のヒント</th><th>答え</th></tr>
+<tr><td>古くなったオブジェクトを自動で安いクラスへ移す／一定期間後に削除したい</td><td class="svc">S3 ライフサイクルルール（移行・失効）</td></tr>
+<tr><td>バージョニング有効で<b>最新と直前だけ残し</b>古い非現行バージョンを自動削除（コスト急増対策）</td><td class="svc">ライフサイクルで「非現行バージョンを失効」</td></tr>
+<tr><td>誤削除・上書きから守りたい／削除しても復元できるように</td><td class="svc">バージョニング（＋MFA Delete）</td></tr>
+<tr><td>アクセス頻度が予測できず、手間なくコスト最適化したい</td><td class="svc">S3 Intelligent-Tiering</td></tr>
+<tr><td>取り出しは即時のままアクセスの少ないデータを安く</td><td class="svc">標準-IA（再作成可なら One Zone-IA）</td></tr>
+</table>
+<p style="font-size:16px;margin-top:10px;color:#121212">ポイント：<b>「自動で・運用の手間を最小に」＝ライフサイクル or Intelligent-Tiering</b>。Lambdaで自前に消す案は手間が増えるのでたいてい不正解。<b>「最新N世代だけ残す」</b>はライフサイクルの<b>非現行バージョンの失効</b>で実現する。</p>
+
+<h1 id="storage-types" style="margin-top:56px">ストレージ3種（ブロック / ファイル / オブジェクト）＋一時ディスク</h1>
+<p class="lead">3つは<b>使われ方の絵</b>で覚えると混ざらない。<b>1台に直結する内蔵ディスク</b>＝ブロック、<b>共有書庫を複数台でマウント</b>＝ファイル、<b>世界中の倉庫にHTTPで投げ込む</b>＝オブジェクト。</p>
+<div class="stage">
+<svg viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" font-family="'Yu Gothic','Meiryo',sans-serif">
+<defs><marker id="sa" markerWidth="9" markerHeight="9" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5e5e5e"/></marker><marker id="sb" markerWidth="9" markerHeight="9" refX="2" refY="4" orient="auto"><path d="M8,0 L0,4 L8,8 z" fill="#5e5e5e"/></marker></defs>
+
+<!-- 列① ブロック：1台にディスクを直結 -->
+<rect x="14" y="14" width="320" height="392" fill="#fafbfd" stroke="#cdd5dd" stroke-width="1"/>
+<text x="174" y="38" text-anchor="middle" font-size="15" font-weight="700" fill="#183251">ブロック ── 1台専用の内蔵ディスク</text>
+<text x="174" y="58" text-anchor="middle" font-size="12" fill="#5e5e5e">「PCにHDDを1個だけ差してる」感じ</text>
+<!-- EC2本体 -->
+<rect x="80" y="86" width="188" height="112" rx="6" fill="#edf2f4" stroke="#21537f" stroke-width="2"/>
+<text x="174" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#183251">EC2（1台）</text>
+<!-- EBSディスクアイコン（円筒） -->
+<g transform="translate(108,128)"><ellipse cx="65" cy="10" rx="56" ry="9" fill="#fff" stroke="#21537f"/><rect x="9" y="10" width="112" height="38" fill="#fff" stroke="#21537f"/><ellipse cx="65" cy="48" rx="56" ry="9" fill="#fff" stroke="#21537f"/><text x="65" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#21537f">EBS</text></g>
+<text x="174" y="216" text-anchor="middle" font-size="11.5" fill="#5e5e5e">DB/OSのディスク・永続・gp3/io2/st1/sc1</text>
+<text x="174" y="234" text-anchor="middle" font-size="11.5" fill="#b01212">他のEC2にはアタッチできない（1台専用）</text>
+<!-- インスタンスストア（同じEC2内・点線・消える） -->
+<rect x="80" y="262" width="188" height="86" rx="6" fill="#fff7ec" stroke="#ba8425" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="174" y="284" text-anchor="middle" font-size="13" font-weight="700" fill="#7a471a">インスタンスストア</text>
+<text x="174" y="304" text-anchor="middle" font-size="11.5" fill="#7a471a">物理ホスト直結の一時ディスク・超高速</text>
+<text x="174" y="322" text-anchor="middle" font-size="11.5" fill="#b01212">⚡ 停止/終了でデータは消える</text>
+<text x="174" y="340" text-anchor="middle" font-size="11" fill="#7a471a">永続が要るならEBS</text>
+<text x="174" y="382" text-anchor="middle" font-size="12" fill="#5e5e5e">→ 答えのキーワード：<tspan font-weight="700" fill="#183251">「EC2のディスク」「IOPS」「DB」</tspan></text>
+
+<!-- 列② ファイル：共有書庫を複数台でマウント -->
+<rect x="346" y="14" width="320" height="392" fill="#fafbfd" stroke="#cdd5dd" stroke-width="1"/>
+<text x="506" y="38" text-anchor="middle" font-size="15" font-weight="700" fill="#1f6b3d">ファイル ── みんなで使う共有書庫</text>
+<text x="506" y="58" text-anchor="middle" font-size="12" fill="#5e5e5e">「会社の共有フォルダ」を複数台で同時に</text>
+<!-- 共有書庫(中央) -->
+<g transform="translate(440,180)"><rect x="0" y="-30" width="132" height="20" fill="#e3efe3" stroke="#1f9d55"/><rect x="0" y="-10" width="132" height="60" fill="#eaf3ea" stroke="#1f9d55"/><text x="66" y="14" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6b3d">EFS / FSx</text><text x="66" y="34" text-anchor="middle" font-size="11" fill="#1f6b3d">共有書庫（NFS/SMB）</text></g>
+<!-- 周囲のEC2 3台 -->
+<rect x="362" y="98" width="80" height="42" rx="4" fill="#edf2f4" stroke="#21537f"/><text x="402" y="123" text-anchor="middle" font-size="12" fill="#183251">EC2(A)</text>
+<rect x="572" y="98" width="80" height="42" rx="4" fill="#edf2f4" stroke="#21537f"/><text x="612" y="123" text-anchor="middle" font-size="12" fill="#183251">EC2(B)</text>
+<rect x="466" y="280" width="80" height="42" rx="4" fill="#edf2f4" stroke="#21537f"/><text x="506" y="305" text-anchor="middle" font-size="12" fill="#183251">EC2(C)</text>
+<!-- 矢印（双方向）-->
+<line x1="430" y1="140" x2="478" y2="172" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#sa)" marker-start="url(#sb)"/>
+<line x1="582" y1="140" x2="535" y2="172" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#sa)" marker-start="url(#sb)"/>
+<line x1="506" y1="278" x2="506" y2="240" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#sa)" marker-start="url(#sb)"/>
+<text x="506" y="356" text-anchor="middle" font-size="11.5" fill="#1f6b3d">EFS=Linux(NFS)・FSx=Windows(SMB)/HPC(Lustre)</text>
+<text x="506" y="382" text-anchor="middle" font-size="12" fill="#5e5e5e">→ キーワード：<tspan font-weight="700" fill="#1f6b3d">「複数台で同時」「共有」「Windows/HPC」</tspan></text>
+
+<!-- 列③ オブジェクト：世界中からHTTPで -->
+<rect x="678" y="14" width="308" height="392" fill="#fafbfd" stroke="#cdd5dd" stroke-width="1"/>
+<text x="832" y="38" text-anchor="middle" font-size="15" font-weight="700" fill="#7a471a">オブジェクト ── 世界中の無限の倉庫</text>
+<text x="832" y="58" text-anchor="middle" font-size="12" fill="#5e5e5e">「街中のコインロッカー」をHTTPで開ける</text>
+<!-- 上：人・スマホ・サーバー（クライアント） -->
+<text x="730" y="100" text-anchor="middle" font-size="22">👤</text>
+<text x="780" y="100" text-anchor="middle" font-size="22">📱</text>
+<text x="830" y="100" text-anchor="middle" font-size="22">💻</text>
+<text x="880" y="100" text-anchor="middle" font-size="22">🖥️</text>
+<text x="930" y="100" text-anchor="middle" font-size="22">🌍</text>
+<!-- HTTPの矢印 -->
+<line x1="832" y1="116" x2="832" y2="158" stroke="#5e5e5e" stroke-width="1.5" marker-end="url(#sa)"/>
+<text x="846" y="142" font-size="11" fill="#5e5e5e">HTTP（GET/PUT）でキー名指定</text>
+<!-- 倉庫 -->
+<g transform="translate(710,166)">
+  <polygon points="0,32 122,0 244,32 244,160 0,160" fill="#f4f4ef" stroke="#ba8425" stroke-width="2"/>
+  <line x1="0" y1="32" x2="244" y2="32" stroke="#ba8425"/>
+  <text x="122" y="58" text-anchor="middle" font-size="14" font-weight="700" fill="#7a471a">S3 バケット</text>
+  <!-- 中身（キー＝値の小箱） -->
+  <rect x="20" y="76" width="60" height="30" fill="#fff" stroke="#ba8425"/><text x="50" y="96" text-anchor="middle" font-size="10" fill="#7a471a">img/a.jpg</text>
+  <rect x="92" y="76" width="60" height="30" fill="#fff" stroke="#ba8425"/><text x="122" y="96" text-anchor="middle" font-size="10" fill="#7a471a">log/2026.txt</text>
+  <rect x="164" y="76" width="60" height="30" fill="#fff" stroke="#ba8425"/><text x="194" y="96" text-anchor="middle" font-size="10" fill="#7a471a">video/x.mp4</text>
+  <rect x="20" y="116" width="60" height="30" fill="#fff" stroke="#ba8425"/><text x="50" y="136" text-anchor="middle" font-size="10" fill="#7a471a">backup/db</text>
+  <rect x="92" y="116" width="60" height="30" fill="#fff" stroke="#ba8425"/><text x="122" y="136" text-anchor="middle" font-size="10" fill="#7a471a">data/parquet</text>
+  <rect x="164" y="116" width="60" height="30" fill="#fff" stroke="#ba8425"/><text x="194" y="136" text-anchor="middle" font-size="10" fill="#7a471a">…無限に</text>
+</g>
+<text x="832" y="346" text-anchor="middle" font-size="11.5" fill="#7a471a">容量無限・複数AZに自動冗長・11ナイン耐久</text>
+<text x="832" y="362" text-anchor="middle" font-size="11.5" fill="#b01212">OSのディスクには使えない（≠ブロック）</text>
+<text x="832" y="382" text-anchor="middle" font-size="12" fill="#5e5e5e">→ キーワード：<tspan font-weight="700" fill="#7a471a">「画像・動画・ログ・バックアップ」「公開」</tspan></text>
+</svg>
+</div>
+<p style="font-size:16px;margin-top:14px;color:#121212">3つの違いは<b>誰がどう触るか</b>。<b>EBS＝1台のEC2に内蔵ディスクとして直結</b>（他の人は触れない）／<b>EFS・FSx＝複数台が同時にマウントする共有書庫</b>（社内の共有フォルダ）／<b>S3＝HTTPで世界中から出し入れする倉庫</b>（コインロッカー・無限）。<b>インスタンスストア＝EC2の作業机</b>（電源切ると消える・キャッシュ向け）。</p>
+
+<table>
+<caption>EBSボリュームタイプ（こう問われたら）</caption>
+<tr><th>タイプ</th><th>性質・使いどころ</th></tr>
+<tr><td class="svc">gp3（汎用SSD）</td><td>標準の選択肢。多くのワークロードはこれ。IOPS/スループットを容量と独立に設定できコスパ良い</td></tr>
+<tr><td class="svc">io2 / io2 Block Express（プロビジョンドIOPS SSD）</td><td><b>最高のIOPS・低レイテンシが必要</b>な大規模DB（高負荷のRDBMS等）。「プロビジョンドIOPS」「ミッションクリティカルなDB」で選ぶ</td></tr>
+<tr><td class="svc">st1（スループット最適化HDD）</td><td>大きなファイルを順番に読む<b>シーケンシャル・大容量スループット</b>（ビッグデータ、ログ処理）。安い</td></tr>
+<tr><td class="svc">sc1（コールドHDD）</td><td>アクセス頻度が低い大容量データ。<b>最安</b>。めったに読まないアーカイブ的用途</td></tr>
+</table>
+<p style="font-size:16px;margin-top:10px;color:#121212">決め手：<b>「高IOPS・低遅延の本番DB」＝io2（プロビジョンドIOPS）</b>／<b>迷ったら gp3</b>／<b>大きいファイルを連続で・安く＝st1</b>／<b>めったに読まない最安＝sc1</b>。SSD（gp3/io2）＝IOPS重視、HDD（st1/sc1）＝スループット/コスト重視。</p>
+
+<script>
+(function(){
+  const notes={
+    std:'頻繁にアクセスし、取り出しは即時。保管コストは高いが取り出し料金なし → <b>S3 標準</b>。アクセスが多いデータの既定。',
+    intel:'アクセス頻度が<b>予測できない</b>・変動する。手間なくコスト最適化したい → <b>S3 Intelligent-Tiering</b>。使用実績に応じてAWSが自動で階層を移動（取り出し料金なし・少額の監視料のみ）。「頻度が読めない」と来たらこれ。',
+    ia:'アクセスは少ないが、<b>必要な時は即時</b>に取り出したい → <b>標準-IA</b>。保管は安いが取り出しに料金。最低保管30日。',
+    onezone:'<b>再作成できる</b>データ（再生成可能なログ・サムネ等）を、1つのAZだけに置いて<b>標準-IAより安く</b> → <b>One Zone-IA</b>。AZ障害で失われてもよい物に限る。',
+    gir:'アーカイブ価格で保管しつつ、<b>必要時はミリ秒で即取り出し</b>たい → <b>Glacier Instant Retrieval</b>。四半期に1回程度しか使わない医療画像・メディア等。最低保管90日。',
+    gfr:'アーカイブで、取り出しは<b>数分〜数時間待ってよい</b> → <b>Glacier Flexible Retrieval</b>。バックアップやたまに参照する保管。最低保管90日。',
+    gda:'<b>めったに出さない</b>長期保管を<b>最安</b>で。取り出しは12時間程度かかってよい → <b>Glacier Deep Archive</b>。法令での長期保存・コンプライアンス保管。最低保管180日。'
+  };
+  const svg=document.getElementById('s3Svg');
+  const panel=document.getElementById('s3Panel');
+  const nodes=svg.querySelectorAll('.sn');
+  function apply(k){
+    const set=k==='all'?null:new Set(k.split(','));
+    nodes.forEach(g=>{
+      g.style.transition='opacity .25s';
+      const on=!set||set.has(g.dataset.k);
+      g.style.opacity = on ? '1' : '0.28';
+      const r=g.querySelector('rect');
+      if(r){ if(!r.dataset.sw) r.dataset.sw=r.getAttribute('stroke-width'); r.setAttribute('stroke-width',(on&&set)?'4':r.dataset.sw); }
+    });
+    panel.innerHTML=notes[k]||'';
+  }
+  document.getElementById('s3Btns').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#s3Btns button').forEach(x=>x.classList.toggle('on',x===b));
+    apply(b.dataset.k);
+  });
+  apply('all');
+})();
 </script>
 </div>
 </body>
