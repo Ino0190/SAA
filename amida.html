@@ -98,25 +98,25 @@ const decks = {
       {s:'スナップショットを公開させたくない',a:'Block Public Access',b:'AWS Config',ans:'a',why:'<b>予防</b>（そもそも禁止）。Configは検出のみ。'},
       {s:'組織全体で特定APIを禁止',a:'SCP（Service Control Policy）',b:'IAMポリシー配布',ans:'a',why:'SCPはルートユーザーすら超えられない上限。IAM配布は漏れる。'},
       {s:'S3バケットが公開されたら自動で戻す',a:'Config＋SSM修復',b:'Block Public Access',ans:'b',why:'<b>予防が勝つ</b>。一度公開された瞬間に流出する。'},
-      {s:'各アカウントのSG設定を継続評価',a:'AWS Config',b:'CloudTrail',ans:'a',why:'Configは<b>構成の状態</b>。CloudTrailは<b>APIの行為</b>。'},
+      {s:'各アカウントのセキュリティグループの設定が基準通りか、ずっと監視したい',a:'AWS Config',b:'CloudTrail',ans:'a',why:'Configは<b>構成の状態</b>を継続評価。CloudTrailは<b>APIの行為</b>の記録。'},
       {s:'「誰がいつ設定を変えたか」を追う',a:'AWS Config',b:'CloudTrail',ans:'b',why:'CloudTrailは<b>行為の記録</b>（誰が/いつ/何を）。'},
       {s:'DDoSの物量攻撃を受け止める',a:'Shield',b:'WAF（Web Application Firewall）',ans:'a',why:'Shield=<b>DDoS</b>。WAF=L7の中身(SQLi/XSS)フィルタ。'},
       {s:'SQLインジェクションを防ぐ',a:'Shield',b:'WAF（Web Application Firewall）',ans:'b',why:'WAF=<b>HTTPの中身を見る</b>L7フィルタ。'},
-      {s:'VPC内のドメインフィルタ＋IPS',a:'WAF（Web Application Firewall）',b:'Network Firewall',ans:'b',why:'Network Firewall=<b>VPC城壁</b>。WAFはALB/CloudFront前のL7。'},
+      {s:'VPC内のネットワーク層でドメイン名フィルタや侵入検知をしたい',a:'WAF（Web Application Firewall）',b:'Network Firewall',ans:'b',why:'Network Firewall=<b>VPC城壁</b>。WAFはALB/CloudFront前のL7。'},
       {s:'Shield AdvancedのDDoSコスト保護とは？',a:'攻撃中のスケーリング課金を返金',b:'DDoS検知のための追加課金',ans:'a',why:'Shield Advanced=DDoS中の膨らんだ<b>ELB/EC2等の課金をクレジット返金</b>。'},
       {s:'AWS Backupでスナップショットの公開設定を制御できる？',a:'できる',b:'できない（バックアップ管理が役目）',ans:'b',why:'Backup=作成/保管/世代管理。<b>公開設定の制御は範囲外</b>。'},
       {s:'AWSアカウントを持たない人にCloudWatchメトリクスを見せる',a:'IAMユーザーを発行',b:'ダッシュボード共有（URL）',ans:'b',why:'ダッシュボード共有=<b>URLだけで閲覧可</b>。IAM発行は過剰。'},
     ]
   },
   'sg-nacl': {
-    name: 'SG vs NACL',
+    name: 'SG（セキュリティグループ） vs NACL（ネットワークACL）',
     cards: [
-      {s:'戻り通信は自動で許可される？',a:'SG（はい）',b:'NACL（いいえ）',ans:'a',why:'SGは<b>ステートフル</b>。NACLは<b>ステートレス</b>（戻りも書く）。'},
-      {s:'「拒否ルール」を書ける？',a:'SG（書けない）',b:'NACL（書ける）',ans:'b',why:'SGは許可のみ。NACLは許可＋拒否。'},
-      {s:'ソースに別のSGを指定できる？',a:'SG（できる）',b:'NACL（できない）',ans:'a',why:'SGは<b>SG参照</b>可（Auto Scaling自動追従）。NACLはIPのみ。'},
-      {s:'サブネット全体に適用される？',a:'SG',b:'NACL（Network ACL）',ans:'b',why:'SG=インスタンス単位。NACL=<b>サブネット単位</b>。'},
+      {s:'戻り通信は自動で許可される？',a:'SG／セキュリティグループ（はい）',b:'NACL（いいえ）',ans:'a',why:'SGは<b>ステートフル</b>。NACLは<b>ステートレス</b>（戻りも書く）。'},
+      {s:'「拒否ルール」を書ける？',a:'SG／セキュリティグループ（書けない）',b:'NACL（書ける）',ans:'b',why:'SGは許可のみ。NACLは許可＋拒否。'},
+      {s:'セキュリティグループの許可ルールに、別のセキュリティグループを「送信元」として指定できる？',a:'SG／セキュリティグループ（できる）',b:'NACL（できない）',ans:'a',why:'SGは<b>SG参照</b>可（Auto Scaling自動追従）。NACLはIPのみ。'},
+      {s:'サブネット全体に適用される？',a:'SG（セキュリティグループ）',b:'NACL（ネットワークACL）',ans:'b',why:'SG=インスタンス単位。NACL=<b>サブネット単位</b>。'},
       {s:'ALBのヘルスチェック(80)はどの方向？',a:'ALBのインバウンド',b:'ALBのアウトバウンド',ans:'b',why:'ALBが<b>EC2に出す</b>のでアウトバウンド。'},
-      {s:'「VPC CIDRからALBへHTTPS」は正しい？',a:'正しい',b:'間違い（0.0.0.0/0）',ans:'b',why:'公開ALBのソースは<b>0.0.0.0/0</b>。'},
+      {s:'公開ALBのセキュリティグループ、受付元は「VPCのCIDR」でOK？',a:'正しい',b:'間違い（0.0.0.0/0にすべき）',ans:'b',why:'公開ALBのソースは<b>0.0.0.0/0</b>。VPC CIDRでは外からのアクセスが届かない。'},
     ]
   },
   'iam-basics': {
@@ -139,8 +139,8 @@ const decks = {
       {s:'7-10年保管・年1回取り出し',a:'Glacier Deep Archive',b:'S3 Standard-IA',ans:'a',why:'Deep Archive=<b>最安・12時間復元</b>。規制対応の長期保管。'},
       {s:'EC2のブートディスク',a:'EBS（Elastic Block Store）',b:'EFS（Elastic File System）',ans:'a',why:'EBS=<b>EC2直付け</b>（1対1）。EFSは共有ファイルシステム。'},
       {s:'複数EC2から同時に読み書き',a:'EBS（Elastic Block Store）',b:'EFS（Elastic File System）',ans:'b',why:'EFS=<b>共有</b>（NFS）。EBSは基本1台のみ。'},
-      {s:'オンプレのファイルサーバーをS3に裏打ち',a:'Storage Gateway',b:'DataSync',ans:'a',why:'Storage Gateway=<b>オンプレにキャッシュ</b>を残しつつS3に。DataSyncは転送/同期。'},
-      {s:'オンプレ→S3への一括データ移行',a:'Storage Gateway',b:'DataSync',ans:'b',why:'DataSync=<b>転送・同期</b>が仕事。Gatewayは常設キャッシュ。'},
+      {s:'オンプレのファイルサーバーを残しつつ、裏でS3にデータを同期したい',a:'Storage Gateway',b:'DataSync',ans:'a',why:'Storage Gateway=<b>オンプレにキャッシュ</b>を残しつつS3に。DataSyncは転送/同期。'},
+      {s:'オンプレのデータをS3にまとめて引っ越したい（移行目的）',a:'Storage Gateway',b:'DataSync',ans:'b',why:'DataSync=<b>転送・同期</b>が仕事。Gatewayは常設キャッシュ。'},
       {s:'既存バケットにS3 Object Lockを後から有効化できる？',a:'できる',b:'できない（作成時のみ）',ans:'b',why:'Object Lock=<b>バケット作成時のみ</b>有効化可能。後付け不可。'},
     ]
   },
@@ -224,6 +224,8 @@ const decks = {
       {s:'EC2が落ちても自動で代替を起動',a:'Auto Scaling',b:'手動で新EC2起動',ans:'a',why:'Auto Scaling=<b>異常検知→自動置換</b>。手動は遅い＋人的負担。'},
       {s:'EC2のStop/Start後もIPが変わらないようにしたい',a:'パブリックIP',b:'Elastic IP',ans:'b',why:'パブリックIPは再起動で変わる。<b>Elastic IP=固定</b>。'},
       {s:'S3を別リージョンに複製（リージョン災害対策）',a:'バージョニング',b:'クロスリージョンレプリケーション(CRR)',ans:'b',why:'CRR=<b>別リージョン複製</b>。バージョニング=同一バケット内の世代管理。'},
+      {s:'リージョンまたぎで自動切替（ドメインのDNSレベル）',a:'Route 53フェイルオーバールーティング',b:'ALBのヘルスチェック',ans:'a',why:'Route 53=<b>DNSでリージョン切替</b>。ALBは単一リージョン内。'},
+      {s:'需要の波が大きい（アイドル時ほぼゼロ）のRDB・PostgreSQL互換',a:'RDS PostgreSQL',b:'Aurora Serverless v2',ans:'b',why:'Aurora Serverless=<b>自動スケール・アイドル時低課金</b>。RDSは常時インスタンス起動。'},
     ]
   },
   'cost': {
@@ -247,6 +249,59 @@ const decks = {
       {s:'複数ステップを順番に・状態管理・リトライ',a:'Step Functions',b:'SQS（Simple Queue Service）',ans:'a',why:'Step Functions=<b>ワークフロー司令官</b>。SQSはキューで状態管理しない。'},
       {s:'S3イベントを複数の宛先に送りたい',a:'S3イベント通知を複数設定',b:'EventBridge経由',ans:'b',why:'S3イベント通知は<b>1宛先のみ</b>。複数ターゲットはEventBridge必須。'},
       {s:'SQSで同じメッセージが2回届く（重複配信）原因は？',a:'可視性タイムアウトが短すぎる',b:'ロングポーリングが短すぎる',ans:'a',why:'可視性タイムアウト<処理時間→<b>処理中に再配信</b>。ロングポーリングは取得待ちで無関係。'},
+      {s:'順序保証＋重複排除を標準機能で持つキューは？',a:'SQS Standard',b:'SQS FIFO',ans:'b',why:'FIFO=<b>First-In-First-Out・正確に1回配信</b>。Standardは順序保証なし。'},
+      {s:'1つのイベントを複数のSQSキューに同時配信',a:'SQSキューを複数設定',b:'SNS→SQSファンアウト',ans:'b',why:'SNS→複数SQSサブスクリプション=<b>ファンアウトパターン</b>。SQS単体は1対1。'},
+    ]
+  },
+  'data-analytics': {
+    name: 'データ分析（最弱分野）',
+    cards: [
+      {s:'大量ログの全文検索＋ダッシュボード可視化',a:'OpenSearch Service',b:'Athena',ans:'a',why:'OpenSearch=<b>全文検索＋Kibana可視化</b>。AthenaはSQL分析。'},
+      {s:'S3上のデータにサーバーレスでSQL',a:'Athena',b:'Redshift',ans:'a',why:'Athena=<b>サーバーレス・スキャン従量課金</b>。Redshiftは常時稼働DWH。'},
+      {s:'ペタバイト級の複雑な集計・結合を高頻度に',a:'Athena',b:'Redshift',ans:'b',why:'Redshift=<b>本格DWH・列指向・分散並列</b>。Athenaはアドホック向き。'},
+      {s:'Redshiftから、S3のデータをロードせず直接結合クエリ',a:'Redshift Spectrum',b:'Athena',ans:'a',why:'Spectrum=<b>Redshiftの外部テーブルでS3直接クエリ</b>。'},
+      {s:'ストリームをサーバーレスでS3に配信（変換・圧縮込み）',a:'Kinesis Data Streams',b:'Kinesis Data Firehose',ans:'b',why:'Firehose=<b>配信特化・フルマネージド</b>。Streamsは自分で読む。'},
+      {s:'複数コンシューマーが同じストリームを独立に再読み込み',a:'Kinesis Data Streams',b:'Kinesis Data Firehose',ans:'a',why:'Streams=<b>保持期間内で再読み＋複数独立読み</b>。'},
+      {s:'ストリームに対してリアルタイムにウィンドウ集計',a:'Managed Service for Apache Flink',b:'Kinesis Data Firehose',ans:'a',why:'Flink=<b>継続クエリ・ストリーム分析</b>。Firehoseは配信するだけ。'},
+      {s:'サーバーレスETL（Sparkベース＋スキーマ自動カタログ化）',a:'AWS Glue',b:'EMR',ans:'a',why:'Glue=<b>サーバーレスETL＋Data Catalog</b>。EMRはクラスタ管理あり。'},
+      {s:'Hadoop/Sparkクラスタを細かく制御・チューニング',a:'AWS Glue',b:'EMR（Elastic MapReduce）',ans:'b',why:'EMR=<b>クラスタを自分で制御</b>。Glueはサーバーレス。'},
+      {s:'コードを書かずに視覚的にデータクレンジング',a:'Glue DataBrew',b:'Glue ETLジョブ',ans:'a',why:'DataBrew=<b>ノーコード・ビジュアルデータ準備</b>。'},
+      {s:'データレイクの権限をテーブル/列/行レベルで一元管理',a:'Lake Formation',b:'IAMポリシー',ans:'a',why:'Lake Formation=<b>データレイクの統合ガバナンス</b>。'},
+      {s:'時系列データ（IoTセンサー）を高速クエリ＋自動階層化',a:'Timestream',b:'DynamoDB',ans:'a',why:'Timestream=<b>時系列専用DB</b>。DynamoDBはキーバリュー汎用。'},
+      {s:'既存Kafka資産（API互換必須）をマネージドに',a:'Amazon MSK（Managed Streaming for Kafka）',b:'Kinesis Data Streams',ans:'a',why:'MSK=<b>Kafka互換</b>。KinesisはAWS独自API。'},
+    ]
+  },
+  'core-services': {
+    name: '基本サービスの区別（Lambda/Athena/RDS/DynamoDB/NAT/ALB/NLB）',
+    cards: [
+      {s:'Lambdaは何をするもの？',a:'コードを一瞬だけ動かす（最大15分）',b:'データベースに問い合わせる',ans:'a',why:'Lambda=<b>イベント駆動で短いコードを実行</b>。DB機能はない。'},
+      {s:'Athenaは何をするもの？',a:'S3のデータにSQLを投げて分析する',b:'コードを動かしてデータを加工する',ans:'a',why:'Athena=<b>S3に直接SQL</b>。コード実行はLambda。'},
+      {s:'LambdaとAthenaの違いは？',a:'Lambda=任意コード実行、Athena=SQLエンジン',b:'同じもの',ans:'a',why:'Lambda=<b>何でもできるが自分でコードを書く</b>。Athena=<b>SQLだけで分析</b>。'},
+      {s:'RDSは何をするもの？',a:'テーブルにデータを保存してSQLで問い合わせる(MySQL/PostgreSQL等)',b:'ファイルを保存する',ans:'a',why:'RDS=<b>リレーショナルDB(SQL・JOIN・トランザクション)</b>。'},
+      {s:'DynamoDBは何をするもの？',a:'キーを渡すと値が一瞬で返ってくるDB',b:'SQLでJOINして複雑な検索をするDB',ans:'a',why:'DynamoDB=<b>キーバリュー・ミリ秒未満</b>。JOINはできない。'},
+      {s:'RDSとDynamoDBの選び方は？',a:'JOINが要る→RDS、キーで引くだけ→DynamoDB',b:'どちらでも同じ',ans:'a',why:'<b>データの形で選ぶ</b>。テーブル結合が要るならRDS。'},
+      {s:'DynamoDBとS3の違いは？',a:'DynamoDB=DB(キーで検索)、S3=ファイル置き場',b:'同じストレージ',ans:'a',why:'DynamoDB=<b>ミリ秒で構造化データを検索</b>。S3=<b>ファイル/オブジェクトの保管庫</b>。'},
+      {s:'NAT Gatewayは何をするもの？',a:'プライベートサブネットから外に出る出口',b:'外からの通信を受け付ける入口',ans:'a',why:'NAT GW=<b>外向き(アウトバウンド)専用</b>。外からは入れない。'},
+      {s:'ALB（Application Load Balancer）は何をするもの？',a:'HTTPの中身(URLパス等)を見て振り分ける',b:'TCP/UDPをそのまま流す',ans:'a',why:'ALB=<b>L7・HTTP/HTTPS</b>。中身を見てルーティング。'},
+      {s:'NLB（Network Load Balancer）は何をするもの？',a:'TCP/UDPをそのまま超低遅延で流す',b:'HTTPのURLパスを見て振り分ける',ans:'a',why:'NLB=<b>L4・TCP/UDP・固定IP・超低遅延</b>。中身は見ない。'},
+      {s:'ALBとNLBの選び方は？',a:'HTTP/URLパスで振り分け→ALB、TCP/UDP/固定IP→NLB',b:'どちらでも同じ',ans:'a',why:'<b>L7で中身を見るか、L4でそのまま流すか</b>が判断基準。'},
+      {s:'NAT GatewayとALBの違いは？',a:'NAT=外に出る出口、ALB=外から来た通信を振り分ける',b:'同じもの',ans:'a',why:'方向が逆。NAT=<b>出る</b>。ALB=<b>入ってくるのを分配</b>。'},
+      {s:'LambdaからRDSを呼ぶ時の問題は？',a:'接続数が枯渇する（コネクションプールがない）',b:'SQLが使えない',ans:'a',why:'Lambda=毎回新規接続。<b>RDS Proxyで接続プール</b>が定石。'},
+      {s:'LambdaからDynamoDBを呼ぶ時の問題は？',a:'接続数が枯渇する',b:'問題なし（HTTP APIで接続プール不要）',ans:'b',why:'DynamoDB=<b>HTTPベースAPI</b>。接続数の概念がない。Lambdaと相性抜群。'},
+      {s:'「サーバーレスAPI」の鉄板構成は？',a:'API Gateway → Lambda → DynamoDB',b:'ALB → EC2 → RDS',ans:'a',why:'左が<b>サーバーレス鉄板</b>。右は全部サーバー管理が要る。'},
+      {s:'Lambdaの最大実行時間は？',a:'15分',b:'無制限',ans:'a',why:'Lambda=<b>最大15分</b>。超える処理はBatch/ECS/Step Functions。'},
+      {s:'S3＋Athena vs RDSの選び方は？',a:'たまにSQLで分析→S3+Athena、常時アプリから読み書き→RDS',b:'どちらでも同じ',ans:'a',why:'S3+Athena=<b>保管＋たまに分析(安い)</b>。RDS=<b>アプリが常時使うDB</b>。'},
+    ]
+  },
+  'ebs-types': {
+    name: 'EBSボリュームタイプ',
+    cards: [
+      {s:'普通のDB・Webサーバーに安定した性能を安く',a:'gp3（汎用SSD）',b:'io2（プロビジョンドIOPS）',ans:'a',why:'gp3=<b>大半のワークロードに十分・コスパ最良</b>。io2は高い。'},
+      {s:'決済DBで一瞬の遅延も許されない・最高IOPS',a:'gp3（汎用SSD）',b:'io2 Block Express',ans:'b',why:'io2=<b>サブミリ秒・最高IOPS</b>。ミッションクリティカル用。'},
+      {s:'大容量ログのシーケンシャル読み書き（安く）',a:'st1（スループットHDD）',b:'gp3（汎用SSD）',ans:'a',why:'st1=<b>シーケンシャル・高スループット・安いHDD</b>。'},
+      {s:'めったにアクセスしないコールドデータ（最安HDD）',a:'st1（スループットHDD）',b:'sc1（Cold HDD）',ans:'b',why:'sc1=<b>最安HDD・めったに触らない</b>。st1は頻繁に読む。'},
+      {s:'EC2停止してもデータは残る？',a:'EBS=残る',b:'インスタンスストア=消える',ans:'a',why:'EBS=<b>永続</b>。インスタンスストア=停止で消える。'},
+      {s:'一時データ・スクラッチ用で超低レイテンシ（消えてOK）',a:'EBS（Elastic Block Store）',b:'インスタンスストア',ans:'b',why:'インスタンスストア=<b>ホスト直結・超高速・揮発</b>。'},
     ]
   },
   'confusing-pairs': {
@@ -268,6 +323,11 @@ const decks = {
       {s:'DynamoDB Streams vs TTL、どっちが「変更検知」？',a:'Streams',b:'TTL',ans:'a',why:'Streams=<b>イベントベース(変更検知)</b>。TTL=<b>時間ベース(期限切れ削除)</b>。'},
       {s:'VPC Lattice vs Transit Gateway',a:'VPC Lattice=L7・マイクロサービス間通信',b:'Transit Gateway=L3・VPC/オンプレ接続のハブ',ans:'a',why:'Lattice=<b>L7ビル受付</b>。TGW=<b>L3駅ターミナル</b>。層が違う。'},
       {s:'「セッション共有・ホットデータのキャッシュ」',a:'ElastiCache（Redis）',b:'DynamoDB',ans:'a',why:'ElastiCache=<b>インメモリ・マイクロ秒</b>。セッション/ランキング/キャッシュはRedisの出番。'},
+      {s:'GuardDutyが検知した後「なぜ/誰が関与」を調査',a:'Inspector',b:'Detective',ans:'b',why:'Detective=<b>検知の先の調査・関係者の可視化</b>。Inspectorは脆弱性スキャン。'},
+      {s:'S3を非公開のまま、一時的にURLでアクセスさせたい',a:'バケットポリシーを公開に変更',b:'署名付きURL（Presigned URL）',ans:'b',why:'署名付きURL=<b>期限付き一時アクセス</b>。バケット公開は永続で危険。'},
+      {s:'Lambda→RDSの接続数が枯渇する',a:'RDS Proxy',b:'マルチAZ',ans:'a',why:'RDS Proxy=<b>コネクションプール</b>。マルチAZは可用性で接続数問題は解決しない。'},
+      {s:'APIへのリクエスト数を「クライアントごとに」制限',a:'API Gatewayの使用量プラン',b:'WAFレートベースルール',ans:'a',why:'API GW使用量プラン=<b>APIキー別に上限</b>。WAFはIP単位。'},
+      {s:'HPC（密結合ノード間通信）の遅延を最小化',a:'クラスタープレイスメントグループ',b:'スプレッドプレイスメントグループ',ans:'a',why:'クラスター=<b>同一ラック・最低遅延</b>。スプレッドは分散（可用性優先）。'},
     ]
   }
 };
