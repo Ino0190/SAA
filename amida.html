@@ -293,6 +293,31 @@ const decks = {
       {s:'S3＋Athena vs RDSの選び方は？',a:'たまにSQLで分析→S3+Athena、常時アプリから読み書き→RDS',b:'どちらでも同じ',ans:'a',why:'S3+Athena=<b>保管＋たまに分析(安い)</b>。RDS=<b>アプリが常時使うDB</b>。'},
     ]
   },
+  'saa-level': {
+    name: 'SAA本番レベル（条件で判断）',
+    cards: [
+      {s:'「専用線を維持＋コスト削減＋300Mbps」',a:'Dedicated Connection(1G固定)を維持',b:'Hosted Connection(300Mbps)に切替',ans:'b',why:'Dedicated=1G/10G/100G固定。<b>中間帯域はHostedのみ</b>。'},
+      {s:'「リージョン障害でも読み書き両方継続」のDB',a:'Aurora Global Database',b:'DynamoDB Global Tables',ans:'b',why:'Aurora Global=<b>書き込みは1リージョン</b>。Global Tables=<b>マルチリージョン読み書き</b>。'},
+      {s:'「月末だけ負荷100倍・普段はゼロ」のRDB',a:'RDS(常時起動)',b:'Aurora Serverless v2',ans:'b',why:'Aurora Serverless=<b>ゼロ〜最大まで自動スケール</b>。RDSは常時インスタンス課金。'},
+      {s:'「S3の特定バケットを特定VPCからだけ」にする方法',a:'バケットポリシー＋VPCエンドポイント条件',b:'Block Public Access',ans:'a',why:'BPA=公開を防ぐだけ。<b>特定VPCに限定</b>はエンドポイント条件付きポリシー。'},
+      {s:'「DynamoDBのテーブルを別リージョンにDR」',a:'DynamoDB Streams＋Lambda',b:'Global Tables',ans:'b',why:'Global Tables=<b>マネージドでマルチリージョン複製</b>。Streams+Lambdaは自前で複雑。'},
+      {s:'「マルチアカウントで新規アカウントにも自動でルール適用」',a:'各アカウントに手動でConfig Rules設定',b:'Firewall Manager / Organizations委任',ans:'b',why:'FW Manager=<b>新規リソースにも自動適用・一元管理</b>。手動は漏れる。'},
+      {s:'「CloudTrailの"データイベント"はデフォルトで記録される？」',a:'はい',b:'いいえ（明示的に有効化が必要）',ans:'b',why:'管理イベント=デフォルトON。<b>データイベント(GetObject等)は明示有効化</b>。'},
+      {s:'「オンプレAD連携＋複数アカウントSSO」の正解セット',a:'Cognito＋IAMユーザー',b:'IAM Identity Center＋AWS Managed Microsoft AD',ans:'b',why:'Identity Center=<b>社員SSO</b>。Managed AD=<b>AD互換</b>。Cognitoはアプリ利用者(toC)。'},
+      {s:'「画像＋メタデータ」を保存する構成',a:'RDSに画像バイナリも入れる',b:'S3に画像＋DynamoDBにメタデータ',ans:'b',why:'<b>2段構え</b>=大容量バイナリはS3・構造化検索はDynamoDB。RDSに画像は非効率。'},
+      {s:'「既存バケットのオブジェクトを改ざん・削除不可に」',a:'既存バケットでObject Lockを有効化',b:'新バケット作成(Object Lock有効)→DataSyncで移行',ans:'b',why:'Object Lock=<b>バケット作成時のみ有効化可</b>。既存バケットには後付け不可。'},
+      {s:'「Lambda処理が失敗した時にメッセージを失わない」',a:'S3イベント→Lambda直結',b:'S3イベント→SQS→Lambda',ans:'b',why:'SQS挟む=<b>失敗時にキューに残る(再試行可)</b>。直結は失敗で消える。'},
+      {s:'「世界中の静的サイト＋独自ドメインHTTPS＋サーバーレス」',a:'EC2＋ALB＋ACM',b:'S3＋CloudFront＋ACM',ans:'b',why:'S3+CloudFront=<b>サーバーレス・グローバルCDN・低コスト</b>。EC2は管理が要る。'},
+      {s:'「予測可能な時刻のスパイクに事前に備える」',a:'ターゲット追跡スケーリング',b:'スケジュールドスケーリング（予測スケーリング）',ans:'b',why:'予測/スケジュール=<b>事前に台数を増やしておく</b>。ターゲット追跡は反応型。'},
+      {s:'「KMSの鍵使用ログを監査したい」',a:'CloudTrail',b:'AWS Config',ans:'a',why:'CloudTrail=<b>API呼び出しの監査ログ</b>（誰がいつ鍵を使ったか）。Configは構成評価。'},
+      {s:'「NATを通さずS3/DynamoDBへ（コスト削減）」',a:'インターフェイス型エンドポイント（課金あり）',b:'ゲートウェイ型エンドポイント（無料）',ans:'b',why:'S3/DynamoDB=<b>ゲートウェイ型(無料)</b>。インターフェイス型は時間課金。'},
+      {s:'「サーバーレスでSQL分析」で選ぶべきは？',a:'Lambda＋RDS',b:'S3＋Athena',ans:'b',why:'Athena=<b>サーバーレスSQLエンジン</b>。Lambda+RDS=RDSが常時課金で非サーバーレス。'},
+      {s:'「DDoS攻撃でスケーリング課金が膨張→補償したい」',a:'WAFレートベースルール',b:'Shield Advanced（コスト保護）',ans:'b',why:'Shield Advanced=<b>DDoS中のスケーリング課金をクレジット返金</b>。WAFはL7フィルタ。'},
+      {s:'「権限委譲：開発者にロール作成を許すが権限の上限を制限」',a:'SCP（Service Control Policy）',b:'許可境界（Permissions Boundary）',ans:'b',why:'許可境界=<b>個々のユーザー/ロールの権限上限</b>。SCPはアカウント全体の上限。'},
+      {s:'「S3のライフサイクルで30日後にIA→90日後にGlacier」は可能？',a:'可能（自動移行）',b:'不可能（手動で変更）',ans:'a',why:'ライフサイクルルール=<b>日数ベースで自動的にクラス移行</b>。'},
+      {s:'「VPCフローログ」で分かることは？',a:'通信の中身（ペイロード）',b:'送信元/宛先IP・ポート・許可/拒否',ans:'b',why:'フローログ=<b>メタデータのみ</b>（中身は見えない）。パケットキャプチャではない。'},
+    ]
+  },
   'ebs-types': {
     name: 'EBSボリュームタイプ',
     cards: [
