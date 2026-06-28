@@ -95,15 +95,16 @@ const decks = {
     name: 'セキュリティ：予防 vs 検出',
     cards: [
       {s:'スナップショットを公開させたくない',a:'Block Public Access',b:'AWS Config',ans:'a',why:'<b>予防</b>（そもそも禁止）。Configは検出のみ。'},
-      {s:'組織全体で特定APIを禁止',a:'SCP',b:'IAMポリシー配布',ans:'a',why:'SCPはルートユーザーすら超えられない上限。IAM配布は漏れる。'},
+      {s:'組織全体で特定APIを禁止',a:'SCP（Service Control Policy）',b:'IAMポリシー配布',ans:'a',why:'SCPはルートユーザーすら超えられない上限。IAM配布は漏れる。'},
       {s:'S3バケットが公開されたら自動で戻す',a:'Config＋SSM修復',b:'Block Public Access',ans:'b',why:'<b>予防が勝つ</b>。一度公開された瞬間に流出する。'},
       {s:'各アカウントのSG設定を継続評価',a:'AWS Config',b:'CloudTrail',ans:'a',why:'Configは<b>構成の状態</b>。CloudTrailは<b>APIの行為</b>。'},
       {s:'「誰がいつ設定を変えたか」を追う',a:'AWS Config',b:'CloudTrail',ans:'b',why:'CloudTrailは<b>行為の記録</b>（誰が/いつ/何を）。'},
-      {s:'DDoSの物量攻撃を受け止める',a:'Shield',b:'WAF',ans:'a',why:'Shield=<b>DDoS</b>。WAF=L7の中身(SQLi/XSS)フィルタ。'},
-      {s:'SQLインジェクションを防ぐ',a:'Shield',b:'WAF',ans:'b',why:'WAF=<b>HTTPの中身を見る</b>L7フィルタ。'},
-      {s:'VPC内のドメインフィルタ＋IPS',a:'WAF',b:'Network Firewall',ans:'b',why:'Network Firewall=<b>VPC城壁</b>。WAFはALB/CloudFront前のL7。'},
+      {s:'DDoSの物量攻撃を受け止める',a:'Shield',b:'WAF（Web Application Firewall）',ans:'a',why:'Shield=<b>DDoS</b>。WAF=L7の中身(SQLi/XSS)フィルタ。'},
+      {s:'SQLインジェクションを防ぐ',a:'Shield',b:'WAF（Web Application Firewall）',ans:'b',why:'WAF=<b>HTTPの中身を見る</b>L7フィルタ。'},
+      {s:'VPC内のドメインフィルタ＋IPS',a:'WAF（Web Application Firewall）',b:'Network Firewall',ans:'b',why:'Network Firewall=<b>VPC城壁</b>。WAFはALB/CloudFront前のL7。'},
       {s:'Shield AdvancedのDDoSコスト保護とは？',a:'攻撃中のスケーリング課金を返金',b:'DDoS検知のための追加課金',ans:'a',why:'Shield Advanced=DDoS中の膨らんだ<b>ELB/EC2等の課金をクレジット返金</b>。'},
       {s:'AWS Backupでスナップショットの公開設定を制御できる？',a:'できる',b:'できない（バックアップ管理が役目）',ans:'b',why:'Backup=作成/保管/世代管理。<b>公開設定の制御は範囲外</b>。'},
+      {s:'AWSアカウントを持たない人にCloudWatchメトリクスを見せる',a:'IAMユーザーを発行',b:'ダッシュボード共有（URL）',ans:'b',why:'ダッシュボード共有=<b>URLだけで閲覧可</b>。IAM発行は過剰。'},
     ]
   },
   'sg-nacl': {
@@ -112,7 +113,7 @@ const decks = {
       {s:'戻り通信は自動で許可される？',a:'SG（はい）',b:'NACL（いいえ）',ans:'a',why:'SGは<b>ステートフル</b>。NACLは<b>ステートレス</b>（戻りも書く）。'},
       {s:'「拒否ルール」を書ける？',a:'SG（書けない）',b:'NACL（書ける）',ans:'b',why:'SGは許可のみ。NACLは許可＋拒否。'},
       {s:'ソースに別のSGを指定できる？',a:'SG（できる）',b:'NACL（できない）',ans:'a',why:'SGは<b>SG参照</b>可（Auto Scaling自動追従）。NACLはIPのみ。'},
-      {s:'サブネット全体に適用される？',a:'SG',b:'NACL',ans:'b',why:'SG=インスタンス単位。NACL=<b>サブネット単位</b>。'},
+      {s:'サブネット全体に適用される？',a:'SG',b:'NACL（Network ACL）',ans:'b',why:'SG=インスタンス単位。NACL=<b>サブネット単位</b>。'},
       {s:'ALBのヘルスチェック(80)はどの方向？',a:'ALBのインバウンド',b:'ALBのアウトバウンド',ans:'b',why:'ALBが<b>EC2に出す</b>のでアウトバウンド。'},
       {s:'「VPC CIDRからALBへHTTPS」は正しい？',a:'正しい',b:'間違い（0.0.0.0/0）',ans:'b',why:'公開ALBのソースは<b>0.0.0.0/0</b>。'},
     ]
@@ -135,8 +136,8 @@ const decks = {
       {s:'月1回しかアクセスしない安いS3',a:'S3 Standard',b:'S3 Standard-IA',ans:'b',why:'IA=<b>低頻度</b>。保管安い＋取り出し有料。'},
       {s:'アクセス頻度が読めない',a:'S3 Intelligent-Tiering',b:'手動でクラス切替',ans:'a',why:'Intelligent-Tiering=<b>自動移動</b>。監視料だけ。'},
       {s:'7-10年保管・年1回取り出し',a:'Glacier Deep Archive',b:'S3 Standard-IA',ans:'a',why:'Deep Archive=<b>最安・12時間復元</b>。規制対応の長期保管。'},
-      {s:'EC2のブートディスク',a:'EBS',b:'EFS',ans:'a',why:'EBS=<b>EC2直付け</b>（1対1）。EFSは共有ファイルシステム。'},
-      {s:'複数EC2から同時に読み書き',a:'EBS',b:'EFS',ans:'b',why:'EFS=<b>共有</b>（NFS）。EBSは基本1台のみ。'},
+      {s:'EC2のブートディスク',a:'EBS（Elastic Block Store）',b:'EFS（Elastic File System）',ans:'a',why:'EBS=<b>EC2直付け</b>（1対1）。EFSは共有ファイルシステム。'},
+      {s:'複数EC2から同時に読み書き',a:'EBS（Elastic Block Store）',b:'EFS（Elastic File System）',ans:'b',why:'EFS=<b>共有</b>（NFS）。EBSは基本1台のみ。'},
       {s:'オンプレのファイルサーバーをS3に裏打ち',a:'Storage Gateway',b:'DataSync',ans:'a',why:'Storage Gateway=<b>オンプレにキャッシュ</b>を残しつつS3に。DataSyncは転送/同期。'},
       {s:'オンプレ→S3への一括データ移行',a:'Storage Gateway',b:'DataSync',ans:'b',why:'DataSync=<b>転送・同期</b>が仕事。Gatewayは常設キャッシュ。'},
       {s:'既存バケットにS3 Object Lockを後から有効化できる？',a:'できる',b:'できない（作成時のみ）',ans:'b',why:'Object Lock=<b>バケット作成時のみ</b>有効化可能。後付け不可。'},
@@ -147,10 +148,10 @@ const decks = {
     cards: [
       {s:'JOINが必要なリレーショナルデータ',a:'RDS/Aurora',b:'DynamoDB',ans:'a',why:'RDS=<b>SQL・JOIN・トランザクション</b>。'},
       {s:'キーで一発取り出し・ミリ秒未満',a:'RDS',b:'DynamoDB',ans:'b',why:'DynamoDB=<b>キーバリュー・超高速</b>。'},
-      {s:'DynamoDBの読み込みをもっと速く',a:'DAX',b:'ElastiCache',ans:'a',why:'DAX=<b>DynamoDB専用</b>キャッシュ。'},
+      {s:'DynamoDBの読み込みをもっと速く',a:'DAX（DynamoDB Accelerator）',b:'ElastiCache',ans:'a',why:'DAX=<b>DynamoDB専用</b>キャッシュ。'},
       {s:'RDSの読み込みを分散したい',a:'リードレプリカ',b:'マルチAZ',ans:'a',why:'リードレプリカ=<b>読み取り分散</b>。マルチAZ=可用性（フェイルオーバー）。'},
       {s:'RDSが落ちても自動復旧（可用性）',a:'リードレプリカ',b:'マルチAZ',ans:'b',why:'マルチAZ=<b>自動フェイルオーバー</b>。読み取り分散ではない。'},
-      {s:'世界中で読み書き両方高速',a:'DynamoDB Global Tables',b:'DAX',ans:'a',why:'Global Tables=<b>マルチリージョン読み書き</b>。DAX=読みだけ・単一リージョン。'},
+      {s:'世界中で読み書き両方高速',a:'DynamoDB Global Tables',b:'DAX（DynamoDB Accelerator）',ans:'a',why:'Global Tables=<b>マルチリージョン読み書き</b>。DAX=読みだけ・単一リージョン。'},
       {s:'グラフDB（人間関係・ネットワーク）',a:'Neptune',b:'DynamoDB',ans:'a',why:'Neptune=<b>グラフ</b>（ノードとエッジ）。'},
       {s:'全文検索・ログ分析',a:'OpenSearch',b:'RDS',ans:'a',why:'OpenSearch=<b>全文検索・分析</b>。RDSはLIKE程度。'},
       {s:'DynamoDB TTLの削除にWCU(書き込み容量)は消費される？',a:'される',b:'されない（無料）',ans:'b',why:'TTL削除は<b>無料</b>。WCU消費なし。48時間のズレあり。'},
@@ -159,14 +160,16 @@ const decks = {
   'migration': {
     name: 'データ移行の使い分け',
     cards: [
-      {s:'オンプレDBをRDSへ（異種エンジン可）',a:'DMS',b:'DataSync',ans:'a',why:'DMS=<b>DB論理移行</b>＋異種変換(SCT)。DataSyncはファイル転送。'},
-      {s:'NASのファイルをS3に継続同期',a:'DMS',b:'DataSync',ans:'b',why:'DataSync=<b>ファイル転送・同期</b>。DMSはDB専用。'},
+      {s:'オンプレDBをRDSへ（異種エンジン可）',a:'DMS（Database Migration Service）',b:'DataSync',ans:'a',why:'DMS=<b>DB論理移行</b>＋異種変換(SCT)。DataSyncはファイル転送。'},
+      {s:'NASのファイルをS3に継続同期',a:'DMS（Database Migration Service）',b:'DataSync',ans:'b',why:'DataSync=<b>ファイル転送・同期</b>。DMSはDB専用。'},
       {s:'数十TBをネットで送ると何週間もかかる',a:'Snowball',b:'DataSync',ans:'a',why:'Snowball=<b>物理デバイス</b>で大量データを物理搬送。'},
-      {s:'サーバーを丸ごとEC2へ移行',a:'MGN',b:'DMS',ans:'a',why:'MGN=<b>サーバー丸ごと</b>（OS/アプリ/データ）。DMSはDB論理データだけ。'},
-      {s:'DR用にオンプレサーバーをAWSに複製',a:'MGN',b:'DRS（Elastic Disaster Recovery）',ans:'b',why:'DRS=<b>DR専用</b>（常時レプリケーション＋即起動）。MGNは移行。'},
+      {s:'サーバーを丸ごとEC2へ移行',a:'MGN（Application Migration Service）',b:'DMS（Database Migration Service）',ans:'a',why:'MGN=<b>サーバー丸ごと</b>（OS/アプリ/データ）。DMSはDB論理データだけ。'},
+      {s:'DR用にオンプレサーバーをAWSに複製',a:'MGN（Application Migration Service）',b:'DRS（Elastic Disaster Recovery）',ans:'b',why:'DRS=<b>DR専用</b>（常時レプリケーション＋即起動）。MGNは移行。'},
       {s:'SaaS（Salesforce等）からS3/Redshiftへ',a:'AppFlow',b:'Firehose',ans:'a',why:'AppFlow=<b>SaaSコネクタ内蔵</b>。FirehoseはIoT/ログのストリーミング。'},
       {s:'IoTセンサーのリアルタイムストリーム→S3',a:'AppFlow',b:'Firehose',ans:'b',why:'Firehose=<b>ストリーミング→S3/Redshift/OpenSearch</b>。'},
       {s:'Direct Connectで物理回線を引く相手は？',a:'オンプレ↔AWS',b:'SaaS（他社クラウド）↔AWS',ans:'a',why:'DX=<b>自社オンプレ↔AWS</b>の物理専用線。SaaSに直接線は引けない。'},
+      {s:'S3イベント通知の宛先を2つ以上にしたい',a:'S3イベント通知を2つ設定',b:'EventBridge経由で複数ルール',ans:'b',why:'S3イベント通知は同じイベントに<b>1宛先</b>。EventBridge経由なら複数ルール可。'},
+      {s:'DynamoDBのデータからPII(個人情報)を検出したい',a:'MacieでDynamoDBを直接スキャン',b:'DynamoDB→S3エクスポート→Macie',ans:'b',why:'Macie=<b>S3専門</b>。DynamoDBは一度S3にエクスポートしてからMacie。'},
     ]
   },
   'compute': {
@@ -180,6 +183,7 @@ const decks = {
       {s:'常時必要なベース＋上乗せを安く',a:'全部スポット',b:'オンデマンド＋スポット混在',ans:'b',why:'混在=<b>安定＋コスト最適化</b>。全スポットは追い出しリスク。'},
       {s:'Step Functions:IoT 10万/秒・5分以内',a:'Standard',b:'Express',ans:'b',why:'Express=<b>高頻度・短時間・安い</b>。Standardは長時間/監査向き。'},
       {s:'Step Functions:長時間ワークフロー・監査証跡',a:'Standard',b:'Express',ans:'a',why:'Standard=<b>最大1年・Exactly-once・状態遷移記録</b>。'},
+      {s:'Kinesisのチェックポイントをカスタム制御したい',a:'Lambda',b:'ECS + KCL（Kinesis Client Library）',ans:'b',why:'Lambda=チェックポイント自動管理。<b>KCL（Kinesis Client Library）=アプリ側で任意位置制御可</b>。'},
     ]
   },
   'network': {
@@ -206,6 +210,42 @@ const decks = {
       {s:'Lambda + RDS の構成は全体としてサーバーレス？',a:'はい',b:'いいえ',ans:'b',why:'裏のRDSが常時課金。<b>全部サーバーレスか</b>で判定。'},
       {s:'「サーバーレスでSQL分析」と来たら？',a:'Lambda',b:'Athena',ans:'b',why:'Athena=<b>サーバーレスSQLエンジン</b>。LambdaはSQLエンジンを持たない。'},
       {s:'API Gateway + Lambda + DynamoDB は？',a:'サーバーレス鉄板',b:'非サーバーレス',ans:'a',why:'3つとも管理不要・使った分だけ=<b>鉄板構成</b>。'},
+    ]
+  },
+  'ha-dr': {
+    name: '高可用/DR/スケーリング',
+    cards: [
+      {s:'RDSが落ちても自動フェイルオーバー（可用性）',a:'マルチAZ',b:'リードレプリカ',ans:'a',why:'マルチAZ=<b>自動フェイルオーバー</b>（可用性）。リードレプリカ=読み取り分散。'},
+      {s:'RDSの読み取り負荷を分散',a:'マルチAZ',b:'リードレプリカ',ans:'b',why:'リードレプリカ=<b>読み取り分散</b>。マルチAZは読み分散ではない。'},
+      {s:'RTO数分・コスト抑えめ・縮小版を温めておく',a:'パイロットライト',b:'ウォームスタンバイ',ans:'b',why:'ウォームスタンバイ=<b>縮小版が常に稼働</b>。パイロットライト=最小限のDB等のみ。'},
+      {s:'RTO数十分・最小コスト・コアだけ複製',a:'パイロットライト',b:'バックアップ＆リストア',ans:'a',why:'パイロットライト=<b>コアだけ常時複製</b>（障害時に残りを起動）。B&R=最安だがRTO数時間。'},
+      {s:'ダウンタイムゼロ・両リージョン常時フル稼働',a:'ウォームスタンバイ',b:'マルチサイト(アクティブ/アクティブ)',ans:'b',why:'マルチサイト=<b>両方フル稼働・RTO≒0</b>。最もコスト高。'},
+      {s:'EC2が落ちても自動で代替を起動',a:'Auto Scaling',b:'手動で新EC2起動',ans:'a',why:'Auto Scaling=<b>異常検知→自動置換</b>。手動は遅い＋人的負担。'},
+      {s:'EC2のStop/Start後もIPが変わらないようにしたい',a:'パブリックIP',b:'Elastic IP',ans:'b',why:'パブリックIPは再起動で変わる。<b>Elastic IP=固定</b>。'},
+      {s:'S3を別リージョンに複製（リージョン災害対策）',a:'バージョニング',b:'クロスリージョンレプリケーション(CRR)',ans:'b',why:'CRR=<b>別リージョン複製</b>。バージョニング=同一バケット内の世代管理。'},
+    ]
+  },
+  'cost': {
+    name: 'コスト最適化',
+    cards: [
+      {s:'常時起動の安定ワークロード（1-3年確約OK）',a:'オンデマンド',b:'Reserved Instance / Savings Plan',ans:'b',why:'確約=<b>最大72%割引</b>。オンデマンドは定価。'},
+      {s:'中断されても問題ない処理を安く',a:'スポットインスタンス',b:'オンデマンド',ans:'a',why:'スポット=<b>最大90%割引</b>。ただし2分前通知で追い出される。'},
+      {s:'Compute Savings PlanとEC2 Instance SPの違い',a:'Compute SP=EC2/Fargate/Lambda柔軟',b:'EC2 Instance SP=特定ファミリー固定',ans:'a',why:'Compute SP=<b>柔軟</b>（ファミリー/リージョン変更可）。EC2 Instance SP=固定で割引最大。'},
+      {s:'S3のアクセス頻度が読めない（自動で最安に）',a:'S3 Intelligent-Tiering',b:'S3 Standard-IA',ans:'a',why:'Intelligent-Tiering=<b>自動移動</b>。手動判断不要。'},
+      {s:'プライベートEC2→S3で「NAT Gatewayのデータ処理料金」を減らす',a:'NAT GW経由のまま',b:'S3 VPCエンドポイント(GW型・無料)',ans:'b',why:'ゲートウェイ型=<b>追加料金なし</b>。NAT GW=データ処理課金。'},
+      {s:'EBSスナップショットの自動世代管理（削除も自動）',a:'Data Lifecycle Manager(DLM)',b:'手動スクリプト',ans:'a',why:'DLM=<b>タグ+スケジュールで自動</b>。手動は漏れる・運用負荷大。'},
+      {s:'Lambda関数のコールドスタートを防ぐ（追加課金あり）',a:'予約済み同時実行(Reserved)',b:'プロビジョンド同時実行(Provisioned)',ans:'b',why:'Provisioned=<b>常に温めておく（追加課金）</b>。Reservedは上限設定でコスト削減でない。'},
+    ]
+  },
+  'messaging': {
+    name: 'メッセージング/イベント',
+    cards: [
+      {s:'1対1・順番に処理（順番箱）',a:'SQS（Simple Queue Service）',b:'SNS（Simple Notification Service）',ans:'a',why:'SQS=<b>キュー・1対1・順番処理</b>。SNSは1対多。'},
+      {s:'1対多・全員に同時放送',a:'SQS（Simple Queue Service）',b:'SNS（Simple Notification Service）',ans:'b',why:'SNS=<b>Pub/Sub・ファンアウト</b>。SQSは1対1。'},
+      {s:'「条件に応じて宛先を振り分け」たい',a:'SNS（Simple Notification Service）',b:'EventBridge',ans:'b',why:'EventBridge=<b>ルールで条件ルーティング</b>。SNSは全員に同じものを送る。'},
+      {s:'複数ステップを順番に・状態管理・リトライ',a:'Step Functions',b:'SQS（Simple Queue Service）',ans:'a',why:'Step Functions=<b>ワークフロー司令官</b>。SQSはキューで状態管理しない。'},
+      {s:'S3イベントを複数の宛先に送りたい',a:'S3イベント通知を複数設定',b:'EventBridge経由',ans:'b',why:'S3イベント通知は<b>1宛先のみ</b>。複数ターゲットはEventBridge必須。'},
+      {s:'SQSで同じメッセージが2回届く（重複配信）原因は？',a:'可視性タイムアウトが短すぎる',b:'ロングポーリングが短すぎる',ans:'a',why:'可視性タイムアウト<処理時間→<b>処理中に再配信</b>。ロングポーリングは取得待ちで無関係。'},
     ]
   }
 };
