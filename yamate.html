@@ -110,6 +110,19 @@ table.cmp td.relrow{background:#fff;padding:11px 14px}
 .note-body .decide{background:#162a42;color:#fff;font-size:14.5px;padding:9px 13px;margin-top:8px;line-height:1.7}
 .note-body .decide b{color:#ffd9a0}
 
+/* 阿弥陀籤（決定木）— 問題文の決め手キーワードでYes/Noを辿って正解にたどり着く */
+.amida{margin:14px 0;background:#faf9f5;border-left:4px solid #21537f;padding:14px 16px}
+.amida .start{font-size:15px;color:#5e5e5e;margin-bottom:10px}
+.amida .start b{color:#121212}
+.amida .q{background:#162a42;color:#fff;display:inline-block;padding:6px 12px;font-weight:700;font-size:15px;margin:10px 0 6px;border-radius:0}
+.amida .br{margin:0 0 4px 18px;padding:6px 0 6px 14px;border-left:2px solid #c8c2b0;font-size:15px;line-height:1.7}
+.amida .br .k{color:#21537f;font-weight:700}
+.amida .br .ng{color:#d81616;font-weight:700}
+.amida .br .ans{background:#5c3512;color:#fff;padding:2px 10px;font-weight:700;margin-left:6px}
+.amida .br .ans.ok{background:#162a42}
+.amida .br.ind{margin-left:36px}
+.amida .br.ind2{margin-left:54px}
+
 /* スマホ：多列テーブルが潰れて改行が崩れるのを防ぐ（横スクロールにする） */
 @media(max-width:700px){
   .note-body{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -251,7 +264,8 @@ const DATA=[
    <li><span class="nm">Lambda関数（Lambda function）</span>Lambdaに登録した<b>処理ひとかたまりのコード</b>。"関数"はプログラム用語で「入力を受け取り、処理して、結果を返すひとまとまり」のこと。例＝「画像がS3にアップされたらサムネイルを作る」コードを1つの関数として置いておく。イベント（ファイル到着・APIアクセス等）で自動起動し、最大15分で終わる。</li>
    <li><span class="nm">実行ロール（execution role）</span>Lambda関数が他のAWSサービス（DynamoDB・S3など）を<b>触るための権限</b>。Lambda自身にIAMロールをアタッチして「このロールの許可の範囲で動いていい」と渡す。鍵を手渡すのでなく、バッジを付けるイメージ。</li>
   </ul>
-  <div class="decide">決め手 ／ <b>LambdaにDynamoDBやS3を操作させたい</b> → <b>実行ロール（IAMロール）</b>に必要な許可（例: dynamodb:PutItem）を付けてLambdaにアタッチする。<b>アクセスキーをコードに書く・環境変数に埋め込むのは誤り</b>（漏洩リスク）。EC2に権限を渡す時も同じくIAMロールをアタッチする。</div>`},
+  <div class="decide">決め手 ／ <b>LambdaにDynamoDBやS3を操作させたい</b> → <b>実行ロール（IAMロール）</b>に必要な許可（例: dynamodb:PutItem）を付けてLambdaにアタッチする。<b>アクセスキーをコードに書く・環境変数に埋め込むのは誤り</b>（漏洩リスク）。EC2に権限を渡す時も同じくIAMロールをアタッチする。</div>
+  <div class="decide">🚨もう一つの引っかけ ／ <b>「サーバーレスでSQL」と来たら Lambda ではなく Athena</b>。Lambdaは任意コードを動かす場所であり、それ自体はSQLエンジンを持たない。サーバーレス御三家＝<b>S3</b>（置き場）／<b>Lambda</b>（処理）／<b>DynamoDB</b>（キーバリューDB）に加え、<b>Athena・API Gateway・SNS/SQS/EventBridge・Step Functions・Fargate・CloudFront</b> もサーバーレス。逆に <b>EC2・RDS・Redshift・ElastiCache は非サーバーレス</b>（インスタンスやノードが常時起動して課金）。判別の癖＝<b>「構成セットで全部サーバーレスか」</b>を見る。Lambda＋RDSは裏のRDSが常時課金で全体は非サーバーレスになる。</div>`},
   {h:"⑧ 静的サイトと動的サイト（S3ホスティング＋CloudFrontの王道）",body:`<ul>
    <li><span class="nm">静的サイト（static）</span>HTML/CSS/JS/画像などで、<b>誰がいつ見ても同じ中身</b>。サーバー側で毎回作らず、完成品を返すだけ。会社案内・ランディングページ・ドキュメントなど。</li>
    <li><span class="nm">動的サイト（dynamic）</span>ユーザーやタイミングで<b>中身が変わる</b>。サーバーが毎回データを取って組み立てる。ログイン後の画面・検索結果・ECのカートなど。</li>
@@ -299,7 +313,7 @@ const DATA=[
    <tr><td>NLB</td><td>L4（TCP/UDP）</td><td>IP・ポートでそのまま流す（中身は見ない）</td><td>超低遅延・固定IP・毎秒数百万接続・送信元IP保持。非HTTP・ゲーム・IoT・極端な性能</td></tr>
    <tr><td>GWLB</td><td>L3</td><td>経路上に透過的に挿入</td><td>サードパーティのファイアウォール/IDSをインラインで検査させたい</td></tr>
    </table>
-   <div class="decide">設問の決め手 ／ <b>HTTP・URLパスやホスト名で振り分け・WAF</b>→ALB ／ <b>TCP/UDP・固定IP・超低遅延・数百万接続・送信元IP保持</b>→NLB ／ <b>セキュリティ製品を経路に挟む</b>→GWLB。「L7で中身を見るか、L4でそのまま流すか」がALB対NLBの一語。</div>`},
+   <div class="decide">設問の決め手 ／ <b>HTTP・URLパスやホスト名で振り分け・WAF</b>→ALB ／ <b>TCP/UDP・固定IP・超低遅延・数百万接続・送信元IP保持</b>→NLB ／ <b>セキュリティ製品を経路に挟む</b>→GWLB。「L7で中身を見るか、L4でそのまま流すか」がALB対NLBの一語。<br>🚨頻出罠／ <b>「スティッキーセッション＋WAF」と来たら必ずALB</b>。スティッキーは<b>LB（ALB/NLB）の機能で、EC2やWAFに付けるものではない</b>。WAFが付けられる相手は<b>ALB／CloudFront／API Gateway／AppSync／Cognito User Pool／App Runner</b>に限定＝<b>NLB・NAT Gateway・EC2・Elastic IPには付かない</b>。「NLBにWAF」「NAT GWにWAF」「EC2にEIP＋WAFをエンドポイントに」は全部即消去。</div>`},
   {h:"💰 EC2購入オプション4種（それぞれ別物）",body:`<table class="gtbl">
    <tr><th>種類</th><th>割引</th><th>約束（コミット）</th><th>中断</th><th>向いてる仕事</th></tr>
    <tr><td>オンデマンド</td><td>なし（定価）</td><td>なし</td><td>されない</td><td>短期・予測不能・とりあえず動かす</td></tr>
@@ -495,6 +509,12 @@ const DATA=[
   {a:"DynamoDB オンデマンドキャパシティ",b:"プロビジョンドキャパシティ（＋Auto Scaling）",key:"予測不能・急増か予測可能・定常か",
    scene:`午前はほぼ動かず、午後から増え、夕方は読み書きが読めず短時間で急増する——プロビジョンド＋Auto Scalingは段階的にしか追従できず、急なスパイクで容量不足になったり、余裕を持たせると無駄が出たりした。オンデマンドに変えたら、設定なしで瞬時にスパイクを吸収し、動かない午前は課金もほぼゼロになった。`,
    tale:`<span class="a">オンデマンドキャパシティ</span>は事前設定なしでリクエストに応じて瞬時に伸縮・使った分だけ課金（予測不能・スパイク・断続的な負荷に最適）。<span class="b">プロビジョンドキャパシティ（＋Auto Scaling）</span>は読み書き容量を事前に決めて安くする方式で、Auto Scalingは段階的にしか追従せず急なスパイクに弱い（負荷が予測可能で定常なら割安）。読めない急増＋コスト最適化なら<span class="a">オンデマンド</span>。`},
+  {a:"DynamoDB TTL（Time To Live）",b:"DynamoDB Streams",key:"期限切れで消すか変更を伝えるか",
+   scene:`セッションデータを30日後に自動削除したくてDynamoDB Streamsを使おうとしたが、Streamsはアイテムが追加/更新/削除された時に他へ伝える仕組みで「30日経過したら自動で消す」機能ではなかった。TTL属性に有効期限のUnix秒を入れたら、AWSが裏で自動的に消してくれて、削除料も追加コードも要らなかった。`,
+   tale:`<span class="a">TTL</span>は<b>時間ベース</b>でアイテムを自動削除（属性にUnix秒の有効期限を入れるだけ・WCU消費なし・削除無料・最大48時間のズレ許容）。<span class="b">Streams</span>は<b>イベントベース</b>でアイテムの作成/更新/削除を他システム（Lambda等）へ伝える仕組み（変更検知の通知役）。「期限切れで消す」なら<span class="a">TTL</span>、「変更を他に伝える」なら<span class="b">Streams</span>。役割が違う。`},
+  {a:"DynamoDB TTL",b:"BatchやLambdaで定期スキャン削除",key:"AWS任せか自前で全件走査するか",
+   scene:`古いセッションを毎晩スキャンして消すLambdaを毎日動かしていたら、テーブル全件のScanでRCUを大量に消費して請求が膨らんだ。TTL属性に切り替えたら、AWSが裏で勝手に消してくれて、スキャンも追加コードも消えた。`,
+   tale:`<span class="a">TTL</span>はDynamoDBネイティブ機能でAWS側が自動削除（WCU消費なし・削除無料・コード不要）。<span class="b">BatchやEventBridge+Lambdaで定期スキャン削除</span>は全件Scanで<b>RCUを大量消費</b>＋自前コードの保守＋運用負荷。「DynamoDBの古いデータ自動削除＋効率」と来たら<span class="a">TTL</span>一択。`},
   {a:"Aurora",b:"RDS（標準エンジン）",key:"高性能・高可用を強く求めるか",
    tale:`<span class="a">Aurora</span>はクラウド最適化で高性能・ストレージ自動拡張・高可用（商用DB級をマネージドで）。<span class="b">RDS標準</span>は通常のMySQL/PostgreSQLをマネージド化（十分だが性能・スケールは控えめ）。`},
   {a:"リードレプリカ",b:"マルチAZ配置",key:"性能か可用性か",
@@ -518,6 +538,16 @@ const DATA=[
    tale:`<span class="a">Timestream</span>は時系列専用（高頻度取り込み・時間範囲集計・自動階層化）。<span class="b">DynamoDB/RDB</span>は汎用で時系列関数や階層化を自前で作る必要がある。IoT計測の時系列なら<span class="a">Timestream</span>。`},
   {a:"互換サービスへ移行",b:"別種DBへ移行",key:"変更最小か再設計か",
    tale:`MongoDB→<span class="a">DocumentDB</span>、Cassandra→<span class="a">Keyspaces</span>は互換でコード変更最小。<span class="b">DynamoDBやRDSへ移す</span>と書き換え・再設計が要る。「変更最小で移行」なら互換サービス。`}
+ ],
+ notes:[
+  {h:"⚖️ 保存系サービスの「古いデータ自動削除」3兄弟",body:`<p style="margin-bottom:10px">「古いデータを自動で消したい・コスト削減」要件は、<b>保存先サービスが各自でネイティブ機能</b>を持っている。スキャンして自前で消す発想は罠（コストも運用も増える）。</p>
+  <table class="gtbl">
+   <tr><th>保存先</th><th>機能名</th><th>仕組み</th><th>こんな時</th></tr>
+   <tr><td><b>DynamoDB</b></td><td>Time To Live（TTL）</td><td>アイテムにUnix秒の有効期限属性。AWSが裏で自動削除・WCU消費なし・削除無料・最大48hズレ</td><td>セッションデータを30日後に自動削除</td></tr>
+   <tr><td><b>ElastiCache（Redis）</b></td><td>EXPIRE / TTL コマンド</td><td>キーごとに秒数で有効期限を設定。Redisネイティブ機能</td><td>ログインセッションを24時間後に失効</td></tr>
+   <tr><td><b>S3</b></td><td>ライフサイクルポリシー</td><td>プレフィックス/タグごとにルール。N日後にGlacier移行/削除を自動実行</td><td>ログを30日後にGlacier・1年後に削除</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>「古いデータを自動で消す・コスト削減・効率」</b>と来たら<b>保存先のネイティブ機能</b>を選ぶ。<b>BatchやEventBridge+Lambdaで全件スキャンして自前削除する選択肢は罠</b>（スキャンコスト・運用負荷・コード保守が増える）。<b>DynamoDB Streamsは「変更検知」用</b>で「期限切れ削除」には使わない（時間ベースでなくイベントベース）。「保存系サービスは古いデータ自動削除をネイティブで持っている」と覚える。</div>`}
  ]},
 {ico:"⚙️",t:"計算工房（コンピュート）",
  story:`仕事を処理する工房がいくつもある。呼ばれた時だけ来て15分で帰る出張職人 <span class="who">Lambda</span>、常駐するコンテナ職人 <span class="who">Fargate</span>、自分で道具（EC2）を揃える親方 <span class="who">EC2起動タイプ</span>。雇い方も色々で、激安だが追い出される日雇い <span class="who">スポット</span>、年間契約で割安の <span class="who">リザーブド</span>。「どれだけ手を抜きたいか・中断されて平気か」で選ぶ。`,
@@ -525,6 +555,9 @@ const DATA=[
   {a:"Lambda",b:"Fargate",key:"15分・イベント駆動か常駐か",
    scene:`サムネ生成APIをLambdaにしたら、誰も使わない深夜は請求ゼロ、昼の急増も勝手に並列起動でさばけた。やがて常駐させたい長時間処理が出てきた時だけ、コンテナのFargateへ引っ越した。`,
    tale:`<span class="a">Lambda</span>は最大15分・イベント駆動・実行時間課金・アイドルほぼ無料（不定期/バースト）。<span class="b">Fargate</span>はコンテナを常時/長時間動かす（15分超や常駐ワーカー）。数秒の不定期処理なら<span class="a">Lambda</span>。`},
+  {a:"Lambda 予約済み同時実行（Reserved Concurrency）",b:"Lambda プロビジョンド同時実行（Provisioned Concurrency）",key:"上限を予約するか実行環境を温めるか",
+   scene:`重要な決済関数が、他の関数の急増でアカウント全体の同時実行枠を食われて呼び出せなくなった——予約済み同時実行を設定して関数ごとに上限を確保したら、他の関数に左右されなくなった。一方、毎朝9時のログイン処理で最初の数十リクエストだけコールドスタートで遅れた——プロビジョンド同時実行で実行環境を事前に温めたら立ち上がりが消えた（追加課金あり）。どちらも「コスト削減」目的ではない。`,
+   tale:`<span class="a">予約済み同時実行</span>は関数ごとに<b>同時実行数の上限を予約</b>する設定（他関数からの干渉防止・最大値の制限・<b>追加課金なし</b>）。<span class="b">プロビジョンド同時実行</span>は実行環境を<b>事前に温めておく</b>機能（コールドスタート対策・<b>追加課金あり=高い</b>）。<b>どちらもコスト削減手段ではない</b>＝SAAの罠選択肢で頻出（「コスト最適化に予約済み/プロビジョンド同時実行」と来たら原則ハズレ）。`},
   {a:"ECS on Fargate",b:"EKS",key:"AWSネイティブかKubernetesか",
    scene:`社内の小さなAPI群をECS on Fargateで動かし始めたら、Kubernetesを学ばずに半日で本番に乗った。別チームは既にk8s資産を持っていたので、そちらはEKSで揃えた。`,
    tale:`<span class="a">ECS</span>はAWSネイティブでシンプル・k8s知識不要。<span class="b">EKS</span>はKubernetes互換でエコシステム/移植性が要るとき（運用知識が必要）。「k8sに縛られずシンプルに」なら<span class="a">ECS</span>。`},
@@ -648,6 +681,23 @@ const DATA=[
    <tr><td>Client VPN</td><td>個人デバイスからVPCへ</td><td>在宅社員のリモートアクセス</td></tr>
   </table>
   <div class="decide">決め手 ／ <b>キャッシュ配信</b>→CloudFront ／ <b>非HTTP・固定IP・経路最適化</b>→Global Accelerator ／ <b>特定都市で近接処理</b>→Local Zones ／ <b>5G網内</b>→Wavelength ／ <b>専用線</b>→DX ／ <b>拠点間トンネル</b>→S2S VPN ／ <b>個人端末</b>→Client VPN。</div>`},
+  {h:"🛂 SGの方向と最小権限（ALB／EC2／RDS 3層の決まり文句）",body:`<div style="margin-bottom:12px">SGは<b>ステートフル</b>（戻り通信は自動許可）かつ<b>許可ルールのみ</b>。書くのは「能動的に出す／受ける」方向だけ。最小権限ならソースは可能な限り別SGを指定し、不要な0.0.0.0/0は書かない。</div>
+   <table class="gtbl">
+   <tr><th>対象SG</th><th>インバウンド（受ける）</th><th>アウトバウンド（出す）</th></tr>
+   <tr><td>ALBのSG</td><td>0.0.0.0/0からHTTPS 443（公開受付）</td><td>EC2のSGへHTTPS 443（中継）＋EC2のSGへHTTP 80（ヘルスチェック）</td></tr>
+   <tr><td>EC2(Web)のSG</td><td>ALBのSGからHTTPS 443＋ALBのSGからHTTP 80（ヘルスチェック）</td><td>RDSのSGへ3306/5432</td></tr>
+   <tr><td>RDSのSG</td><td>EC2のSGから3306/5432</td><td>（基本的に不要・デフォルトのままでも可）</td></tr>
+   </table>
+   <div class="decide">罠の見抜き方 ／ <b>「EC2のSGからALBへのHTTPS 443を許可」=戻り通信</b>→SGはステートフルだから不要(NG) ／ <b>「VPCのCIDRからALBへのHTTPS」</b>→ALBは公開なのでソースは0.0.0.0/0(NG) ／ <b>「ALBのインバウンドにHTTP 80」</b>→ALBが受けるのは443だけ、80はALBが「出す」側(ヘルスチェック)なのでアウトバウンド(NG)。ALBから見て<b>受ける=in／出す=out</b>と「ステートフルで戻りは書かない」の2点を必ず確認。</div>`},
+  {h:"🚫 SG vs NACL の決まり文句（拒否ルールとステートレス戻りの罠）",body:`<div style="margin-bottom:12px">「Webサーバーのみ・DBは公開しない・3層構成」の最小権限問題では、ほぼ毎回この2点が罠として混ざる。</div>
+   <table class="gtbl">
+   <tr><th>項目</th><th>SG（セキュリティグループ）</th><th>NACL（ネットワークACL）</th></tr>
+   <tr><td>適用先</td><td>インスタンス/ENI単位</td><td>サブネット単位</td></tr>
+   <tr><td>ルール種別</td><td><b>許可のみ</b>（デフォルト拒否）</td><td>許可＋<b>拒否も書ける</b></td></tr>
+   <tr><td>状態</td><td><b>ステートフル</b>（戻り通信は自動許可）</td><td><b>ステートレス</b>（行きと戻りの両方を書く必要）</td></tr>
+   <tr><td>ソース/宛先指定</td><td>IPまたは<b>SGそのもの</b>を指定可（動的群に強い）</td><td>IPレンジのみ</td></tr>
+   </table>
+   <div class="decide">罠1（SGに拒否ルール）／ <b>「DBのSGに『WebのSG以外からのすべてを拒否』を追加」=NG</b>。SGには拒否ルール構文が存在しない（許可されたもの以外は最初から全部拒否）。「以外を拒否」を書くのはNACL。<br>罠2（NACLでステートレス戻り忘れ）／ <b>「サブネットのNACLにinで443だけ許可・その他は全部拒否」=NG</b>。NACLはステートレスなので、応答のためにアウトバウンドのエフェメラルポート（1024-65535）も明示許可しないと通信が成立しない。<br>正解の鉄板=<b>WebのSGに0.0.0.0/0から443をin</b>＋<b>DBのSGの送信元にWebのSGを指定して3306をin</b>。SGを送信元に書けばAuto ScalingでWebが増えても自動追従。</div>`},
 /*NET*/ ]},
 {ico:"📡",t:"配達便（配信・DNS・低遅延）",
  story:`遠くのユーザーに速く届けるための配達網。各地の支店にコピーを置いて配る <span class="who">CloudFront</span>、AWSの高速バックボーンで最短ルートを選ぶ <span class="who">Global Accelerator</span>、ユーザーの近くまで工房ごと出張する <span class="who">Local Zones</span>。入口の案内係 <span class="who">Route 53</span> は、訪問者をどの支店へ送るかを「国で・速さで・主従で」振り分ける。`,
@@ -665,10 +715,31 @@ const DATA=[
    tale:`<span class="a">CloudFront Functions</span>は超軽量・超低レイテンシ・高頻度・低コスト（ヘッダー操作/リダイレクト・外部アクセス不可）。<span class="b">Lambda@Edge</span>はより重い処理・外部アクセス可（その分レイテンシ/コスト高）。`},
   {a:"位置情報（Geolocation）ルーティング",b:"レイテンシールーティング",key:"国で確実か低遅延か",
    tale:`<span class="a">位置情報</span>はユーザーの所在国/地域で確実に振り分け（ライセンス/コンプライアンス・言語出し分け）。<span class="b">レイテンシ</span>は最も低遅延のリージョンへ（性能最適化で、国の確実な制限はできない）。`},
+  {a:"CloudFront 地理的制限（Geo Restriction）",b:"WAF Geo Match Rule",key:"CDN組み込みの一括ブロックか細かい制御か",
+   scene:`ライセンス都合で特定国だけ配信を止めたかった——CloudFrontのGeo Restrictionで国コードの許可/拒否リストを設定したらアプリ改修なしで即ブロックできた。一方、ALB配下のEC2に国別の制限を入れたい時はWAFのGeo Match Ruleを使い、レート制限やSQLi対策など他のWAFルールと組み合わせた。Route 53の位置情報ルーティングはDNSで「振り分ける」だけでブロックではない（DNSは回避されうる）。`,
+   tale:`<span class="a">CloudFront Geo Restriction</span>はCDNの組み込み機能で国単位の許可/拒否リスト（追加料金なし・CloudFront経由配信限定・シンプル）。<span class="b">WAF Geo Match Rule</span>はWeb ACLに国条件のルールを追加（ALB/CloudFront/API Gateway/AppSyncに付与可・他WAFルールと組み合わせ細かい制御・WAF料金あり）。<b>「ALB配下のEC2に国制限・2つ選択」と来たらWAF+CloudFrontの両方が答え</b>（SAA頻出）。Route 53位置情報は<b>振り分け（出し分け）であってブロックではない</b>のが要注意の混同。`},
   {a:"レイテンシールーティング",b:"フェイルオーバールーティング",key:"アクティブ/アクティブかアクティブ/スタンバイか",
    tale:`<span class="a">レイテンシ</span>は平常時に最寄り（低遅延）へ振り分け（アクティブ/アクティブ）。<span class="b">フェイルオーバー</span>は主系→障害時に副系へ（普段は使わないスタンバイがある構成）。両方ヘルスチェックと組む。`},
   {a:"Route 53 フェイルオーバー",b:"ALB",key:"リージョンまたぎかリージョン内か",
    tale:`<span class="a">Route 53</span>はDNSレベルでリージョンをまたいで切り替え（クライアント設定不要）。<span class="b">ALB</span>は単一リージョン内でAZ/ターゲット間に負荷分散（リージョンまたぎ不可）。`}
+ ],
+ notes:[
+  {h:"🌍 国別アクセス制御 3兄弟（Route 53／CloudFront／WAF）",body:`<p style="margin-bottom:10px"><b>「国でアクセスを制限したい」</b>は3つの手段がある。役割が違うので混同しないこと。<b>「ブロック」目的なら下の2つ</b>（Route 53は振り分け）。</p>
+  <table class="gtbl">
+   <tr><th>サービス</th><th>機能名</th><th>レイヤー</th><th>何をする</th><th>こんな時</th></tr>
+   <tr><td><b>Route 53</b></td><td>位置情報ルーティング（Geolocation）</td><td>DNS</td><td>国別に<b>返すIPを変える</b>＝振り分け</td><td>日本→日本サイト・米国→米国サイト（出し分け・<b>ブロックでない</b>）</td></tr>
+   <tr><td><b>CloudFront</b></td><td>地理的制限（Geo Restriction）</td><td>エッジ(CDN)</td><td>国コードで配信を<b>許可/拒否</b></td><td>ライセンス都合の地域ブロック・CloudFront経由配信のみ・追加料金なし</td></tr>
+   <tr><td><b>WAF</b></td><td>Geo Match Rule</td><td>L7(WAF)</td><td>Web ACLに国条件で<b>許可/拒否</b>＋他ルール組合せ</td><td>ALB/API Gateway配下のEC2・細かい制御・WAF料金あり</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>振り分け（出し分け）</b>→Route 53位置情報 ／ <b>CloudFront配信を国でブロック</b>→Geo Restriction ／ <b>ALB配下のEC2を国でブロック・他WAFルールと併用</b>→WAF Geo Match。<br>🚨頻出罠／ <b>「ALB配下のEC2を自国だけに制限・2つ選択」</b>と来たら<b>WAF+CloudFront</b>の両方が答え（SAA定番）。<b>SGは国指定不可</b>（IP/ポートのみ）・<b>ShieldにWeb ACLはない</b>（Web ACLはWAFの機能）・<b>API Gatewayに地理制限機能はない</b>（WAF経由）。Route 53位置情報は<b>DNSなので回避可能=確実なブロックでない</b>。</div>`},
+  {h:"👀 AWSアカウントを持たない人への読み取り共有 3兄弟（CloudWatch／QuickSight／S3）",body:`<p style="margin-bottom:10px"><b>「役員・顧客・取引先などAWSアカウントを持たない人に、AWS上のコンテンツを見せたい」</b>。3つの専用機能があり、<b>IAMユーザーやAWSアカウントを新規発行する必要はない</b>。「のぞき窓」のURLを渡すだけ。</p>
+  <table class="gtbl">
+   <tr><th>見せたいもの</th><th>使う機能</th><th>仕組み</th><th>こんな時</th></tr>
+   <tr><td><b>CloudWatchダッシュボード</b>（監視メトリクス）</td><td>CloudWatchダッシュボード共有機能</td><td>メール指定/SSO/パブリックの3方式・裏でCognitoが認証・<b>表示専用</b></td><td>役員にリソース利用状況を必要時に確認させる</td></tr>
+   <tr><td><b>QuickSightダッシュボード</b>（BIグラフ）</td><td>QuickSight 埋め込み/匿名アクセス</td><td>埋め込みURLを発行・リーダー権限ユーザーまたは匿名アクセス・JavaScript SDKでアプリに埋め込み可</td><td>顧客に売上ダッシュボードを公開・自社アプリ内にグラフ埋め込み</td></tr>
+   <tr><td><b>HTMLレポート/静的サイト</b></td><td>S3静的ホスティング＋CloudFront</td><td>S3にHTMLを置きCloudFrontで配信・必要ならOAC/Cognitoでアクセス制御</td><td>取引先に月次レポートを公開・静的なドキュメント配布</td></tr>
+  </table>
+  <div class="decide">決め手 ／ <b>監視メトリクス（CPU使用率/ALBレスポンスタイム等）</b>→CloudWatchダッシュボード共有 ／ <b>BIグラフ・売上/KPIダッシュボード</b>→QuickSight埋め込み ／ <b>HTMLレポート・静的ファイル</b>→S3+CloudFront。<br>🚨頻出罠／ <b>「役員に見せたい・AWSアカウントなし」と来たら「IAMユーザー作成して資格情報共有」「新規AWSアカウント払い出し」「スクリーンショット定期送付」は全部罠</b>。①IAMユーザー資格情報共有はAWSベストプラクティス違反＋役員にコンソール使わせる前提＝運用負荷大／②AWSアカウント払い出しは過剰／③スクショは手動でリアルタイムでない。<b>「のぞき窓」のURLを渡すだけ</b>でアカウントもスキルも不要なのがダッシュボード共有機能の本質。</div>`}
  ]},
 {ico:"🛡",t:"警備会社（セキュリティ）",weak:true,
  story:`AWSの街を守る警備会社には個性的な面々がいる。不審な動きを嗅ぎつける見回り役 <span class="who">GuardDuty</span>、建物の弱点（鍵の不良）を点検する設備屋 <span class="who">Inspector</span>、金庫の中身が機密かを調べる鑑定士 <span class="who">Macie</span>、事件後に「誰がなぜ」を追う刑事 <span class="who">Detective</span>。門前ではL7の門番 <span class="who">WAF</span> と、殴り込み（DDoS）を受け止める用心棒 <span class="who">Shield</span> が立つ。鍵の管理は手軽な <span class="who">KMS</span> と専用金庫室 <span class="who">CloudHSM</span>。`,
@@ -768,6 +839,55 @@ const DATA=[
    <tr><td>ネットワークACL</td><td>サブネット単位・ステートレス</td><td>拒否も書ける・特定IPブロック</td></tr>
   </table>
   <div class="decide">決め手 ／ <b>HTTPの攻撃</b>→WAF ／ <b>DDoS物量</b>→Shield ／ <b>ドメイン/IPSまで</b>→Network Firewall ／ <b>サーバー単位の許可</b>→SG ／ <b>サブネットで拒否も</b>→NACL。</div>`},
+  {h:"🚫 予防 vs 検出 vs 修復（公開防止・違反防止の選び方）",body:`<div style="margin-bottom:12px">「組織全体で誤公開を防ぐ」「運用負荷最小」と来たら、まず<b>予防的(Preventive)</b>を選ぶ。検出してから直すのは事後対応で運用負荷が乗る。</div>
+   <table class="gtbl">
+   <tr><th>分類</th><th>代表サービス</th><th>性質</th></tr>
+   <tr><td>予防的(Preventive)</td><td>SCP／<b>Block Public Access</b>（S3/EBS Snapshot/AMI）／許可境界</td><td><b>そもそも禁止</b>・違反が起きない・運用ゼロ</td></tr>
+   <tr><td>検出的(Detective)</td><td>AWS Config／GuardDuty／Security Hub／CloudTrail</td><td>起きた後で検知・修復は別途必要</td></tr>
+   <tr><td>修復(Remediation)</td><td>SSM Automation／Lambda（EventBridge起動）</td><td>検出をトリガーに自動で戻す・コード必要</td></tr>
+   </table>
+   <div style="margin-top:12px;margin-bottom:8px"><b>Block Public Access 3兄弟（公開を一括で防ぐ機能）</b></div>
+   <table class="gtbl">
+   <tr><th>対象</th><th>名称・適用範囲</th></tr>
+   <tr><td>S3</td><td>S3 Block Public Access（バケット/アカウント単位）</td></tr>
+   <tr><td>EBSスナップショット</td><td>EBS Snapshot Block Public Access（リージョン×アカウント単位）</td></tr>
+   <tr><td>AMI</td><td>AMI Block Public Access（リージョン単位）</td></tr>
+   </table>
+   <div style="margin-top:8px;margin-bottom:8px">いずれも<b>Organizationsで組織全体に一元適用可能</b>（SCPやDeclarative Policy）。</div>
+   <div class="decide">頻出パターン ／ <b>「Organizations配下・誤公開を防ぐ・運用負荷最小・中央から一貫」</b>→<b>Block Public Access＋Organizationsで一括適用</b>（予防的）。<br>罠の見抜き方 ／ <b>EventBridge+Lambda自動修復</b>＝事後対応・コード必要・運用負荷大(NG) ／ <b>AWS Configルール展開</b>＝検出のみ・修復は別途・各アカウント運用必要(NG) ／ <b>AWS Backup</b>＝バックアップの作成/保管が役目で<b>公開設定の制御は範囲外</b>(罠) ／ <b>予防系(SCP/Block Public Access)があるなら検出系より優先</b>(一度公開された瞬間に流出する=検出してから直すでは間に合わない)。</div>
+   <div class="amida">
+   <div class="start">🎋 <b>阿弥陀籤：「誤公開を防ぐ」答えの出し方</b>（問題文の決め手を上から指差しでたどる）</div>
+   <div class="q">Q1. 「予防的に防ぐ」要件か（vs 検出して直す）</div>
+   <div class="br"><span class="k">予防＝そもそも禁止</span>（運用負荷最小・組織全体・中央一元・誤公開を起こさない）→ Q2へ</div>
+   <div class="br"><span class="ng">検出＋自動修復</span>（事後対応・カスタムコード・各アカウント運用）→ 候補は<span class="k">AWS Config（検出）＋SSM Automation（修復）</span> or <span class="k">EventBridge＋Lambda</span>。<b>でも問題文に「予防的に」「運用負荷最小」「組織全体」「中央から一貫」のどれかがあれば、ここはほぼ罠の選択肢</b></div>
+   <div class="q">Q2. 何の公開を防ぐ？</div>
+   <div class="br ind">S3バケット/オブジェクト → <span class="ans ok">S3 Block Public Access＋Organizations</span></div>
+   <div class="br ind">EBSスナップショット → <span class="ans ok">EBS Snapshot Block Public Access＋Organizations</span></div>
+   <div class="br ind">AMI → <span class="ans ok">AMI Block Public Access＋Organizations</span></div>
+   <div class="br ind">特定アクション全般を禁止（公開以外も含む）→ <span class="ans ok">SCP（Organizations）</span></div>
+   <div class="q">罠選択肢の見分け（即落とせる4種）</div>
+   <div class="br"><span class="ng">AWS Backup</span> → バックアップの作成/保管が役目・<b>公開設定の制御は範囲外</b>。「組織」「Backup」のキーワードに釣られない</div>
+   <div class="br"><span class="ng">EventBridge＋Lambda</span> → 一度公開された後の自動修復・カスタムコード必要・運用負荷大</div>
+   <div class="br"><span class="ng">AWS Configルールを各アカウントに展開</span> → 検出だけで修復は別途・各アカウント展開負荷あり</div>
+   <div class="br"><span class="ng">IAMポリシー個別配布</span> → 漏れる・中央一貫にならない</div>
+   </div>`},
+  {h:"👤 IAMの登場人物と関係（用語が分からない時の地図）",body:`<div style="margin-bottom:12px">IAMで迷うのは「<b>誰に</b>権限を持たせるか」と「<b>何を</b>くっつけるか」が混ざるから。会社の出入管理でたとえる。</div>
+   <table class="gtbl">
+   <tr><th>IAM用語</th><th>たとえ</th><th>役割</th></tr>
+   <tr><td>IAMユーザー</td><td>個人の社員証</td><td>「井内」のように個人/プログラムに固有。パスワードやアクセスキーが付く</td></tr>
+   <tr><td>IAMグループ</td><td>部署（開発部・経理部）</td><td>ユーザーをまとめる箱。新メンバーは入れるだけで権限が付く</td></tr>
+   <tr><td>IAMポリシー</td><td>権限ルールブック（JSON）</td><td>「何ができる/できないか」を書いた紙。<b>単体では効かない</b>=誰かにアタッチして初めて効く</td></tr>
+   <tr><td>IAMロール</td><td>変身マスク</td><td>個人専用でなく<b>「引き受ける（AssumeRole）」もの</b>。EC2/Lambda/他アカウント/SSO経由ログインが一時的に被って権限を借りる。<b>人間ユーザー/グループには直接アタッチしない</b></td></tr>
+   <tr><td>インスタンスプロファイル</td><td>EC2用の社員証ホルダー</td><td><b>EC2にIAMロールを履かせる専用の仕組み</b>。EC2だけのもの。人間ユーザー/グループには無関係</td></tr>
+   </table>
+   <div style="margin-top:12px;margin-bottom:8px"><b>ポリシーは誰にアタッチできるか（最重要）</b></div>
+   <table class="gtbl">
+   <tr><th>アタッチ先</th><th>使う場面</th></tr>
+   <tr><td>IAMグループにポリシー</td><td><b>人間向けの定石</b>。「開発部」に必要な権限を付けてユーザーを入れるだけ</td></tr>
+   <tr><td>IAMロールにポリシー</td><td><b>サービス/クロスアカウント向けの定石</b>。EC2/Lambda/他アカウント/SSO</td></tr>
+   <tr><td>IAMユーザーに直接ポリシー</td><td>非推奨（管理が辛くなる）</td></tr>
+   </table>
+   <div class="decide">頻出パターン ／ <b>「開発チームが拡大・新メンバー追加・必要最小限」</b>→IAMグループにポリシーをアタッチ（人間の定石）。<br>罠の見抜き方 ／ <b>「IAMロールをIAMグループにアタッチ」=NG</b>（構造的に不可能・ロールは引き受けるもので、グループに直接付けない）。<b>「インスタンスプロファイルを人間グループに割り当て」=NG</b>（インスタンスプロファイルはEC2専用）。<b>「フルアクセスを付与」=NG</b>（最小権限の原則違反）。<b>呪文=「人間にはグループ＋ポリシー／サービスにはロール／EC2はロール＋インスタンスプロファイル」</b>。</div>`},
   {h:"⚖️ 認可・IAM（誰に何を許すか）",body:`<table class="gtbl">
    <tr><th>仕組み</th><th>こんな時</th></tr>
    <tr><td>IAMロール(AssumeRole)</td><td>EC2/Lambdaや他アカウントに一時権限。長期キー禁止</td></tr>
@@ -780,9 +900,18 @@ const DATA=[
    <tr><td>Cognito</td><td>アプリの一般ユーザー(toC)のサインイン</td></tr>
   </table>
   <div class="decide">決め手 ／ <b>一時権限/クロスアカウント</b>→ロール(+External ID) ／ <b>別アカウントを直接許可</b>→リソースベース ／ <b>組織で禁止</b>→SCP ／ <b>条件付き(MFA/IP)</b>→条件キー ／ <b>社員SSO</b>→Identity Center ／ <b>アプリ利用者</b>→Cognito。長期アクセスキーの配布は避ける。</div>`},
+  {h:"🏢 組織のセキュリティ管理4兄弟（Organizations / Firewall Manager / Security Hub / Config）",body:`<p style="margin-bottom:10px">「複数アカウントのセキュリティを管理」系のサービスが4つある。<b>名前が似ていてごっちゃになる</b>が、役割が全く違う。</p>
+  <table class="gtbl">
+   <tr><th>サービス</th><th>一文で言うと</th><th>問題文キーワード</th></tr>
+   <tr><td><b>AWS Organizations</b></td><td>アカウントを<b>束ねる枠組み＋禁止事項(SCP)</b></td><td>OU構成・SCP・リージョン制限・一括請求・「禁止」「できないようにする」</td></tr>
+   <tr><td><b>AWS Firewall Manager</b></td><td>WAF/SG/Shield/Network FWの<b>ルールを全アカウントに配る</b></td><td>「WAF一元管理」「SG一元」「新規リソースにも自動適用」「一貫性」</td></tr>
+   <tr><td><b>AWS Security Hub</b></td><td>セキュリティ検出結果を<b>集約して見る</b>ダッシュボード</td><td>「GuardDuty/Inspector/Macieの結果を1画面で」「CIS/PCI準拠チェック」「俯瞰」</td></tr>
+   <tr><td><b>AWS Config</b></td><td>リソースの設定変更を<b>記録・評価・通知</b></td><td>「設定変更の監視」「コンプラ逸脱」「リソースの履歴」「手動調整」</td></tr>
+  </table>
+  <div class="decide">覚え方 ／ <b>Organizations=束ねて禁止</b>（枠組み）／ <b>Firewall Manager=ルールを配る</b>（実行）／ <b>Security Hub=結果を見る</b>（集約）／ <b>Config=変更を記録</b>（監査）。<br>🚨頻出罠 ／ 「複数アカウントにWAF/SG/Shieldを一元適用＋一貫性」→<b>Firewall Manager</b>（Organizations自体はルールを配る力がない=枠だけ・Security Hubは見るだけで直す力がない・Configは監視だけで配る力がない）。Firewall ManagerはOrganizationsと<b>連携して動く</b>（前提条件）が、主役はFirewall Manager。</div>`}
 /*SEC*/ ]},
 {ico:"🔬",t:"分析ラボ（データ分析）",weak:true,
- story:`流れ込むデータを扱うラボ。蛇口から流れるデータを受ける2人——保管して何度も読ませる <span class="who">Kinesis Data Streams</span> と、ただ下流へ流し込む <span class="who">Firehose</span>。溜まったデータを調べる側には、その場でSQLを投げる気軽な <span class="who">Athena</span> と、常駐の本格分析室 <span class="who">Redshift</span>。下ごしらえ役が <span class="who">Glue</span>、見せる係が <span class="who">QuickSight</span>、ログを全文検索する <span class="who">OpenSearch</span>。`,
+ story:`流れ込むデータを扱うラボ。蛇口から流れるデータを受ける2人——保管して何度も読ませる <span class="who">Kinesis Data Streams</span> と、ただ下流へ流し込む <span class="who">Firehose</span>。SaaSアプリ（Salesforce／SAP／ServiceNow等）からレコードをノーコード＋KMS暗号化付きで運んでくる <span class="who">AppFlow</span>。溜まったデータを調べる側には、その場でSQLを投げる気軽な <span class="who">Athena</span> と、常駐の本格分析室 <span class="who">Redshift</span>。下ごしらえ役が <span class="who">Glue</span>、見せる係が <span class="who">QuickSight</span>、ログを全文検索する <span class="who">OpenSearch</span>。`,
  pairs:[
   {a:"Kinesis Data Streams",b:"Kinesis Data Firehose",key:"保持・複数読み・リプレイか配信だけか",
    scene:`IoTのテレメトリを、リアルタイム異常検知とS3への蓄積で同時に読みたかった。Data Streamsなら複数のコンシューマーが同じ流れを別々のペースで読め、数日後にロジックを変えて先頭から読み直せた。単にS3へ流すだけならFirehoseで全自動にできた。`,
@@ -791,9 +920,18 @@ const DATA=[
    tale:`<span class="a">Data Streams</span>は同じデータを複数が読め、保持期間内で再読み込み可。<span class="b">SQS</span>は1メッセージを基本1コンシューマーが処理して削除・リプレイ不可。`},
   {a:"Amazon MSK",b:"Kinesis Data Streams",key:"Kafka資産を活かすか",
    tale:`<span class="a">MSK</span>はApache Kafka互換で既存Kafka資産を活かす（ブローカー運用はAWS）。<span class="b">Kinesis</span>はAWSネイティブでKafka非互換だがよりサーバーレスで運用が軽い。既存Kafkaがあるなら<span class="a">MSK</span>。`},
+  {a:"AppFlow",b:"Kinesis Data Firehose",key:"SaaSアプリのレコードか・絶え間ないストリームか",
+   scene:`SaaS型の顧客管理（Salesforce／SAP／ServiceNow等）に溜まった顧客レコードを、KMS暗号化付きでRedshiftへ安全に転送・分析したい。AppFlowはSaaSコネクタとRedshift宛先を組み込みで持ち、ノーコードで定期／イベント／オンデマンド転送＋転送中（TLS）・保存時（KMS）暗号化が標準。Firehoseはストリーミング（IoT・ログ・クリック）用でSaaSコネクタを持たず、自前でPutRecordしないと取り込めない。`,
+   tale:`<span class="a">AppFlow</span>は<b>SaaSアプリ↔AWS</b>のデータ転送マネージド（Salesforce／SAP／ServiceNow／Slack／Zendesk等のコネクタ組み込み・宛先S3／Redshift／Snowflake・KMS暗号化標準・ノーコード）。<span class="b">Firehose</span>は<b>絶え間ないストリーミング</b>をS3／Redshift／OpenSearchへ流す配達便。問題文に「SaaSの顧客管理システム」「Salesforce／SAP」と書かれた瞬間にFirehoseは消える。`},
+  {a:"AppFlow",b:"Direct Connect",key:"SaaSはクラウド・DXはオンプレ専用",
+   scene:`「SaaSの顧客管理システムとRedshift間に、安全な専用接続を確立してデータ転送」と書かれていてもDirect Connectは選ばない。SaaSは他社クラウドサービスなので物理回線が引けない。Direct Connectはオンプレデータセンター↔AWS専用。SaaS→AWS転送の本命はAppFlow。EC2で自前バッチを書く案も「最小運用負荷／マネージド」観点で必ず負ける。`,
+   tale:`<span class="b">Direct Connect</span>は<b>オンプレデータセンター↔AWS</b>の物理専用線。SaaS（=他社クラウド）には引けない。「SaaS」「Salesforce」の文字を見たらDXは即消す。SaaS連携の正解は<span class="a">AppFlow</span>。`},
   {a:"Athena",b:"Redshift",key:"サーバーレスのアドホックか本格DWHか",
    scene:`月に数回しか見ないログ分析のためにDWHを常時立てるのは無駄だった。AthenaでS3に直接SQLを投げたら、使った分だけの課金で済んだ。毎日大量の集計を回す経営ダッシュボードは、常駐のRedshiftにロードして安定させた。`,
    tale:`<span class="a">Athena</span>はS3に直接SQL・サーバーレス・スキャン量課金（低頻度のアドホック）。<span class="b">Redshift</span>はクラスタを常時稼働しデータをロードして使う本格DWH（大規模/高頻度）。`},
+  {a:"Athena",b:"Lambda（自前でSQL接続）",key:"SQLエンジンが要るのか任意のコードを動かすのか",
+   scene:`オンプレDBにあるデータへ月に一度だけ標準SQLでアクセスしたい——「サーバーレスで処理」と聞いてLambdaを思い出したが、Lambdaは任意のコードを動かす場所であってSQLエンジンではない。データをS3に置きAthenaに投げれば、コードも常時稼働サーバーも要らず、標準SQLがそのまま動いた。Lambda＋RDSにすると、Lambdaはサーバーレスでも裏のRDSが常時課金で全体は非サーバーレスになる。`,
+   tale:`<span class="a">Athena</span>はS3に対する<b>サーバーレスのSQLエンジン</b>。クエリ投げて結果を返す係。<span class="b">Lambda</span>は<b>任意のコードを動かす場所</b>でSQLエンジンではない（自前でDB接続コードを書く必要・15分制限）。<b>「サーバーレスで標準SQL・低頻度・コスパ」と来たらAthena</b>。Lambdaで実装するなら裏に置くDBが要り、それがRDS等の常時課金サービスだと全体としてサーバーレスにならない引っかけ。`},
   {a:"Redshift",b:"RDS",key:"OLAP（分析）かOLTP（取引）か",
    tale:`<span class="a">Redshift</span>は列指向・分散並列で大規模集計分析（OLAP）。<span class="b">RDS</span>は行指向でトランザクション処理（OLTP）。大量データの集計分析なら<span class="a">Redshift</span>。`},
   {a:"Redshift Spectrum",b:"Redshiftへの全ロード",key:"ロードせず直接クエリか",
@@ -862,6 +1000,8 @@ const DATA=[
    <tr><th>問題文の状況（こう書かれる）</th><th>答え</th></tr>
    <tr><td>毎秒数十万件。複数チームが同じデータを別ペースで読む。後で過去分を読み直す</td><td>Kinesis Data Streams</td></tr>
    <tr><td>ログを手間なくS3へ。変換・圧縮込み。シャード管理やコンシューマーは書きたくない</td><td>Kinesis Data Firehose</td></tr>
+   <tr><td>SaaS（Salesforce／SAP／ServiceNow／Slack／Zendesk等）の顧客／案件レコードを定期的にS3／Redshiftへ・KMS暗号化標準・ノーコード</td><td>Amazon AppFlow</td></tr>
+   <tr><td>「SaaSとAWSを専用接続で安全に転送」と書かれていても、SaaSは他社クラウドなのでDirect Connect／VPNは選べない</td><td>Amazon AppFlow（DX／VPNは罠）</td></tr>
    <tr><td>S3のログを月数回アドホックにSQL。常時サーバーは立てない。使った分だけ</td><td>Athena</td></tr>
    <tr><td>数十TBを毎日大量集計しBIで。複雑JOIN・常時稼働の本格基盤</td><td>Redshift</td></tr>
    <tr><td>Redshiftで、滅多に使わない古いデータをロードせずS3のままクエリ・結合</td><td>Redshift Spectrum</td></tr>
@@ -901,7 +1041,7 @@ const DATA=[
   {a:"Backup Vault Lock",b:"S3 Object Lock",key:"対象がバックアップかS3か",
    tale:`<span class="a">Backup Vault Lock</span>はAWS Backupのバックアップを保持期間中削除/改ざん不可にするWORM。<span class="b">S3 Object Lock</span>はS3オブジェクトへの同様のWORM。対象が違う。`},
   {a:"Object Lock コンプライアンスモード",b:"ガバナンスモード",key:"ルートでも消せないか",
-   tale:`<span class="a">コンプライアンスモード</span>は保持期間中ルートでも削除/変更不可（規制・ランサム最強）。<span class="b">ガバナンスモード</span>は特別な権限を持つ者は解除可能。改ざん絶対不可なら<span class="a">コンプライアンスモード</span>。`},
+   tale:`<span class="a">コンプライアンスモード</span>は保持期間中ルートでも削除/変更不可（規制・ランサム最強）。<span class="b">ガバナンスモード</span>は特別な権限を持つ者は解除可能。改ざん絶対不可なら<span class="a">コンプライアンスモード</span>。<br>🚨<b>Object Lockはバケット作成時にのみ有効化できる（既存バケットに後付け不可）</b>。既存データを守るには新バケット(Object Lock有効)を作り→DataSync等で既存データをコピー。「既存バケットをObject Lock有効に変更する」選択肢は技術的に不可能＝罠。既存オブジェクトにロック設定を適用するのはS3バッチオペレーションで可能だが、前提としてバケット自体がObject Lock有効でなければ動かない。`},
   {a:"別アカウント保管（隔離）",b:"同一アカウント保管",key:"侵害されても残るか",
    tale:`<span class="a">別アカウント・別リージョンのVaultへコピー</span>すれば本番が侵害されても隔離されて残る（ランサム/内部不正対策）。<span class="b">同一アカウント</span>は侵害されるとバックアップも消されうる。`},
   {a:"PITR（ポイントインタイムリカバリ）",b:"マルチAZ/リードレプリカ",key:"巻き戻せるか",
@@ -967,6 +1107,9 @@ const DATA=[
    tale:`<span class="a">EventBridge</span>はイベントを発生源から切り離して各所へルーティング（疎結合・1対多）。<span class="b">Step Functions</span>は多段処理を順序・分岐・リトライ付きで確実に実行（オーケストレーション）。組み合わせて使う。`},
   {a:"Step Functions",b:"Lambdaチェーン",key:"状態管理が組み込みか自前か",
    tale:`<span class="a">Step Functions</span>はワークフローを宣言的に定義しリトライ/分岐/並列/状態管理/可視化を組み込みで提供。<span class="b">Lambdaチェーン</span>は各関数が次を直接呼び、エラー制御・状態管理を自前で散らばらせ複雑化。多段の制御なら<span class="a">Step Functions</span>。`},
+  {a:"Step Functions Express",b:"Step Functions Standard",key:"高頻度・5分以内・低コストか長時間・監査・Exactly-onceか",
+   scene:`数十万台のIoTデバイスから毎秒10万件超の受信ワークフローを動かしたかった。標準は1秒2000開始の上限と状態遷移課金で、レートにもコストにも届かなかった。Expressは10万/秒以上で5分以内の処理に合い、課金も1/10〜1/100に落ちた。ただし監査のため全実行履歴をExactly-onceで残したい場合は、Standardの方が向いていた。`,
+   tale:`<span class="a">Express</span>は<b>最大5分・10万/秒以上・実行回数+時間+メモリで大幅安・At-least-once(同期)/At-most-once(非同期)・履歴はCloudWatch Logs</b>。IoT/ストリーミング/高頻度の大規模並列向き。<span class="b">Standard</span>は<b>最大1年・2000/秒・状態遷移ごとに課金・Exactly-once・履歴はコンソール90日</b>。長時間処理・人手承認・監査必須向き。両方の特性が要るならStandardの中でExpressをネスト呼び出しできる。`},
   {a:"EventBridge Scheduler",b:"EventBridge ルール（イベントバス）",key:"時刻起動かイベント起動か",
    tale:`<span class="a">EventBridge Scheduler</span>は時刻ベースの大規模スケジュール実行（cron/一回限り・多数ターゲット直接呼び出し）。<span class="b">EventBridgeルール</span>はイベント（状態変化）に応じたルーティング。「いつ起動するか」の契機で割る。`},
   {a:"EventBridge Pipes",b:"EventBridge イベントバス（ルール）",key:"1対1＋変換か1対多か",
@@ -1062,6 +1205,8 @@ const DATA=[
   ["アプリのエンドユーザー認証（toC）","Amazon Cognito"],
   ["保持して複数が独立に読む・リプレイ","Kinesis Data Streams"],
   ["S3等へバッファ配信するだけ・全自動","Kinesis Data Firehose"],
+  ["SaaSアプリ（Salesforce／SAP／ServiceNow／Slack／Zendesk）→ S3／Redshift・KMS暗号化標準・ノーコード","Amazon AppFlow"],
+  ["「SaaSとAWSを安全な専用接続で転送」と書かれていてもSaaSは他社クラウドなのでDX／VPNは選ばない","Amazon AppFlow（DX／VPNは罠）"],
   ["既存Kafka資産を活かす","Amazon MSK"],
   ["S3に直接SQL・サーバーレス・アドホック","Athena"],
   ["本格DWH・大規模/高頻度の分析","Redshift"],

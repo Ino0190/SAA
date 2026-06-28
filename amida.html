@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SAA こんな時どっち？</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;background:#fafafa;color:#121212;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.app{max-width:600px;width:100%;text-align:center}
+
+/* トップ */
+.top h1{font-size:20px;color:#183251;margin-bottom:6px}
+.top .sub{font-size:14px;color:#5e5e5e;margin-bottom:24px}
+.decks{display:flex;flex-direction:column;gap:10px;text-align:left}
+.deck{background:#fff;border:1px solid #c8c2b0;padding:16px 18px;cursor:pointer;font-family:inherit;font-size:17px;color:#183251;font-weight:700;text-align:left;width:100%}
+.deck:hover{border-color:#21537f;background:#edf2f4}
+.deck .cnt{font-size:13px;color:#5e5e5e;font-weight:400;margin-left:8px}
+.deck.todo{opacity:.4;cursor:default;font-weight:400}
+.deck.todo:hover{border-color:#c8c2b0;background:#fff}
+
+/* クイズ */
+.quiz{display:none;flex-direction:column;align-items:center}
+.progress{font-size:13px;color:#5e5e5e;margin-bottom:18px}
+.situation{font-size:22px;font-weight:700;color:#121212;margin-bottom:28px;line-height:1.5;text-align:center}
+.choices{display:flex;flex-direction:column;gap:12px;width:100%}
+.ch{background:#fff;border:2px solid #c8c2b0;padding:16px 20px;cursor:pointer;font-family:inherit;font-size:18px;color:#183251;font-weight:700;text-align:center;transition:all .15s}
+.ch:hover{border-color:#21537f;background:#edf2f4;transform:scale(1.02)}
+.ch:active{transform:scale(.98)}
+
+/* 結果 */
+.result{display:none;flex-direction:column;align-items:center}
+.res-icon{font-size:48px;margin-bottom:12px}
+.res-text{font-size:20px;font-weight:700;margin-bottom:6px}
+.res-text.ok{color:#183251}
+.res-text.ng{color:#b01212}
+.res-ans{font-size:16px;color:#5e5e5e;margin-bottom:8px}
+.res-why{font-size:15px;color:#121212;margin-bottom:24px;line-height:1.6;text-align:left;background:#faf9f5;padding:14px 16px;border-left:4px solid #21537f;width:100%}
+.res-why b{color:#183251}
+.nextbtn{background:#21537f;color:#fff;border:none;padding:14px 32px;font-size:16px;cursor:pointer;font-family:inherit;font-weight:700}
+.nextbtn:hover{background:#162a42}
+
+/* スコア */
+.score{display:none;flex-direction:column;align-items:center}
+.score-num{font-size:42px;font-weight:700;color:#183251;margin-bottom:8px}
+.score-sub{font-size:16px;color:#5e5e5e;margin-bottom:24px}
+.score-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.score-btns button{padding:12px 22px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700;border:none}
+.score-btns .retry{background:#21537f;color:#fff}
+.score-btns .retry:hover{background:#162a42}
+.score-btns .back{background:#fafafa;color:#21537f;border:1px solid #c8c2b0}
+.score-btns .back:hover{background:#edf2f4}
+
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav style="display:flex;gap:6px;margin:0 0 16px;padding:8px 0;flex-wrap:wrap">
+    <a href="index.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5e5e5e;background:#fff;border:1px solid #c8c2b0;padding:8px 4px;text-decoration:none;min-width:60px">🎯 ドリル</a>
+    <a href="cards.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5e5e5e;background:#fff;border:1px solid #c8c2b0;padding:8px 4px;text-decoration:none;min-width:60px">📇 暗記帳</a>
+    <a href="amida.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#121212;background:#edf2f4;border:1px solid #21537f;padding:8px 4px;text-decoration:none;min-width:60px">⚡ どっち</a>
+    <a href="network-zukai.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5e5e5e;background:#fff;border:1px solid #c8c2b0;padding:8px 4px;text-decoration:none;min-width:60px">🧭 図解</a>
+    <a href="mock-exam.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5e5e5e;background:#fff;border:1px solid #c8c2b0;padding:8px 4px;text-decoration:none;min-width:60px">📝 模試</a>
+  </nav>
+  <div class="top" id="top">
+    <h1>こんな時どっち？</h1>
+    <div class="sub">2択で答える。電車で10秒ずつ。</div>
+    <div class="decks" id="decks"></div>
+  </div>
+  <div class="quiz" id="quiz">
+    <div class="progress" id="progress"></div>
+    <div class="situation" id="situation"></div>
+    <div class="choices" id="choices"></div>
+  </div>
+  <div class="result" id="result">
+    <div class="res-icon" id="res-icon"></div>
+    <div class="res-text" id="res-text"></div>
+    <div class="res-ans" id="res-ans"></div>
+    <div class="res-why" id="res-why"></div>
+    <button class="nextbtn" id="nextbtn">次へ</button>
+  </div>
+  <div class="score" id="score">
+    <div class="score-num" id="score-num"></div>
+    <div class="score-sub" id="score-sub"></div>
+    <div class="score-btns">
+      <button class="retry" id="score-retry">もう一度</button>
+      <button class="back" id="score-back">別のデッキ</button>
+    </div>
+  </div>
+</div>
+<script>
+const decks = {
+  'security-prevent': {
+    name: 'セキュリティ：予防 vs 検出',
+    cards: [
+      {s:'スナップショットを公開させたくない',a:'Block Public Access',b:'AWS Config',ans:'a',why:'<b>予防</b>（そもそも禁止）。Configは検出のみ。'},
+      {s:'組織全体で特定APIを禁止',a:'SCP',b:'IAMポリシー配布',ans:'a',why:'SCPはルートユーザーすら超えられない上限。IAM配布は漏れる。'},
+      {s:'S3バケットが公開されたら自動で戻す',a:'Config＋SSM修復',b:'Block Public Access',ans:'b',why:'<b>予防が勝つ</b>。一度公開された瞬間に流出する。'},
+      {s:'各アカウントのSG設定を継続評価',a:'AWS Config',b:'CloudTrail',ans:'a',why:'Configは<b>構成の状態</b>。CloudTrailは<b>APIの行為</b>。'},
+      {s:'「誰がいつ設定を変えたか」を追う',a:'AWS Config',b:'CloudTrail',ans:'b',why:'CloudTrailは<b>行為の記録</b>（誰が/いつ/何を）。'},
+      {s:'DDoSの物量攻撃を受け止める',a:'Shield',b:'WAF',ans:'a',why:'Shield=<b>DDoS</b>。WAF=L7の中身(SQLi/XSS)フィルタ。'},
+      {s:'SQLインジェクションを防ぐ',a:'Shield',b:'WAF',ans:'b',why:'WAF=<b>HTTPの中身を見る</b>L7フィルタ。'},
+      {s:'VPC内のドメインフィルタ＋IPS',a:'WAF',b:'Network Firewall',ans:'b',why:'Network Firewall=<b>VPC城壁</b>。WAFはALB/CloudFront前のL7。'},
+      {s:'Shield AdvancedのDDoSコスト保護とは？',a:'攻撃中のスケーリング課金を返金',b:'DDoS検知のための追加課金',ans:'a',why:'Shield Advanced=DDoS中の膨らんだ<b>ELB/EC2等の課金をクレジット返金</b>。'},
+      {s:'AWS Backupでスナップショットの公開設定を制御できる？',a:'できる',b:'できない（バックアップ管理が役目）',ans:'b',why:'Backup=作成/保管/世代管理。<b>公開設定の制御は範囲外</b>。'},
+    ]
+  },
+  'sg-nacl': {
+    name: 'SG vs NACL',
+    cards: [
+      {s:'戻り通信は自動で許可される？',a:'SG（はい）',b:'NACL（いいえ）',ans:'a',why:'SGは<b>ステートフル</b>。NACLは<b>ステートレス</b>（戻りも書く）。'},
+      {s:'「拒否ルール」を書ける？',a:'SG（書けない）',b:'NACL（書ける）',ans:'b',why:'SGは許可のみ。NACLは許可＋拒否。'},
+      {s:'ソースに別のSGを指定できる？',a:'SG（できる）',b:'NACL（できない）',ans:'a',why:'SGは<b>SG参照</b>可（Auto Scaling自動追従）。NACLはIPのみ。'},
+      {s:'サブネット全体に適用される？',a:'SG',b:'NACL',ans:'b',why:'SG=インスタンス単位。NACL=<b>サブネット単位</b>。'},
+      {s:'ALBのヘルスチェック(80)はどの方向？',a:'ALBのインバウンド',b:'ALBのアウトバウンド',ans:'b',why:'ALBが<b>EC2に出す</b>のでアウトバウンド。'},
+      {s:'「VPC CIDRからALBへHTTPS」は正しい？',a:'正しい',b:'間違い（0.0.0.0/0）',ans:'b',why:'公開ALBのソースは<b>0.0.0.0/0</b>。'},
+    ]
+  },
+  'iam-basics': {
+    name: 'IAMの選び方',
+    cards: [
+      {s:'人間の開発チームに権限を付ける',a:'IAMグループ＋ポリシー',b:'IAMロール',ans:'a',why:'<b>人間=グループ+ポリシー</b>。ロールは引き受けるもの。'},
+      {s:'EC2からS3を読みたい',a:'アクセスキーを環境変数に',b:'IAMロールをアタッチ',ans:'b',why:'ロール=一時認証で安全。長期キー=漏洩リスク。'},
+      {s:'インスタンスプロファイルは何用？',a:'EC2にロールを履かせる',b:'人間ユーザーに権限を付ける',ans:'a',why:'インスタンスプロファイル=<b>EC2専用</b>。'},
+      {s:'IAMロールをIAMグループにアタッチできる？',a:'できる',b:'できない',ans:'b',why:'ロールは<b>引き受ける</b>もの。グループに直接付けられない。'},
+      {s:'別アカウントに一時的に権限を渡す',a:'アクセスキー共有',b:'AssumeRole',ans:'b',why:'AssumeRole=一時認証・期限切れ・安全。'},
+      {s:'IAMロールの信頼ポリシーは何を書く？',a:'「何ができるか」',b:'「誰が引き受けられるか」',ans:'b',why:'信頼ポリシー=<b>Principal</b>（誰）。権限ポリシー=Action（何）。'},
+      {s:'「フルアクセス権限をグループに付与」は最小権限を満たす？',a:'満たす',b:'満たさない',ans:'b',why:'フルアクセス=<b>最小権限違反</b>。業務に必要な最小限のみ。'},
+    ]
+  },
+  'storage-choice': {
+    name: 'ストレージの選び方',
+    cards: [
+      {s:'月1回しかアクセスしない安いS3',a:'S3 Standard',b:'S3 Standard-IA',ans:'b',why:'IA=<b>低頻度</b>。保管安い＋取り出し有料。'},
+      {s:'アクセス頻度が読めない',a:'S3 Intelligent-Tiering',b:'手動でクラス切替',ans:'a',why:'Intelligent-Tiering=<b>自動移動</b>。監視料だけ。'},
+      {s:'7-10年保管・年1回取り出し',a:'Glacier Deep Archive',b:'S3 Standard-IA',ans:'a',why:'Deep Archive=<b>最安・12時間復元</b>。規制対応の長期保管。'},
+      {s:'EC2のブートディスク',a:'EBS',b:'EFS',ans:'a',why:'EBS=<b>EC2直付け</b>（1対1）。EFSは共有ファイルシステム。'},
+      {s:'複数EC2から同時に読み書き',a:'EBS',b:'EFS',ans:'b',why:'EFS=<b>共有</b>（NFS）。EBSは基本1台のみ。'},
+      {s:'オンプレのファイルサーバーをS3に裏打ち',a:'Storage Gateway',b:'DataSync',ans:'a',why:'Storage Gateway=<b>オンプレにキャッシュ</b>を残しつつS3に。DataSyncは転送/同期。'},
+      {s:'オンプレ→S3への一括データ移行',a:'Storage Gateway',b:'DataSync',ans:'b',why:'DataSync=<b>転送・同期</b>が仕事。Gatewayは常設キャッシュ。'},
+      {s:'既存バケットにS3 Object Lockを後から有効化できる？',a:'できる',b:'できない（作成時のみ）',ans:'b',why:'Object Lock=<b>バケット作成時のみ</b>有効化可能。後付け不可。'},
+    ]
+  },
+  'db-choice': {
+    name: 'DBの選び方',
+    cards: [
+      {s:'JOINが必要なリレーショナルデータ',a:'RDS/Aurora',b:'DynamoDB',ans:'a',why:'RDS=<b>SQL・JOIN・トランザクション</b>。'},
+      {s:'キーで一発取り出し・ミリ秒未満',a:'RDS',b:'DynamoDB',ans:'b',why:'DynamoDB=<b>キーバリュー・超高速</b>。'},
+      {s:'DynamoDBの読み込みをもっと速く',a:'DAX',b:'ElastiCache',ans:'a',why:'DAX=<b>DynamoDB専用</b>キャッシュ。'},
+      {s:'RDSの読み込みを分散したい',a:'リードレプリカ',b:'マルチAZ',ans:'a',why:'リードレプリカ=<b>読み取り分散</b>。マルチAZ=可用性（フェイルオーバー）。'},
+      {s:'RDSが落ちても自動復旧（可用性）',a:'リードレプリカ',b:'マルチAZ',ans:'b',why:'マルチAZ=<b>自動フェイルオーバー</b>。読み取り分散ではない。'},
+      {s:'世界中で読み書き両方高速',a:'DynamoDB Global Tables',b:'DAX',ans:'a',why:'Global Tables=<b>マルチリージョン読み書き</b>。DAX=読みだけ・単一リージョン。'},
+      {s:'グラフDB（人間関係・ネットワーク）',a:'Neptune',b:'DynamoDB',ans:'a',why:'Neptune=<b>グラフ</b>（ノードとエッジ）。'},
+      {s:'全文検索・ログ分析',a:'OpenSearch',b:'RDS',ans:'a',why:'OpenSearch=<b>全文検索・分析</b>。RDSはLIKE程度。'},
+      {s:'DynamoDB TTLの削除にWCU(書き込み容量)は消費される？',a:'される',b:'されない（無料）',ans:'b',why:'TTL削除は<b>無料</b>。WCU消費なし。48時間のズレあり。'},
+    ]
+  },
+  'migration': {
+    name: 'データ移行の使い分け',
+    cards: [
+      {s:'オンプレDBをRDSへ（異種エンジン可）',a:'DMS',b:'DataSync',ans:'a',why:'DMS=<b>DB論理移行</b>＋異種変換(SCT)。DataSyncはファイル転送。'},
+      {s:'NASのファイルをS3に継続同期',a:'DMS',b:'DataSync',ans:'b',why:'DataSync=<b>ファイル転送・同期</b>。DMSはDB専用。'},
+      {s:'数十TBをネットで送ると何週間もかかる',a:'Snowball',b:'DataSync',ans:'a',why:'Snowball=<b>物理デバイス</b>で大量データを物理搬送。'},
+      {s:'サーバーを丸ごとEC2へ移行',a:'MGN',b:'DMS',ans:'a',why:'MGN=<b>サーバー丸ごと</b>（OS/アプリ/データ）。DMSはDB論理データだけ。'},
+      {s:'DR用にオンプレサーバーをAWSに複製',a:'MGN',b:'DRS（Elastic Disaster Recovery）',ans:'b',why:'DRS=<b>DR専用</b>（常時レプリケーション＋即起動）。MGNは移行。'},
+      {s:'SaaS（Salesforce等）からS3/Redshiftへ',a:'AppFlow',b:'Firehose',ans:'a',why:'AppFlow=<b>SaaSコネクタ内蔵</b>。FirehoseはIoT/ログのストリーミング。'},
+      {s:'IoTセンサーのリアルタイムストリーム→S3',a:'AppFlow',b:'Firehose',ans:'b',why:'Firehose=<b>ストリーミング→S3/Redshift/OpenSearch</b>。'},
+      {s:'Direct Connectで物理回線を引く相手は？',a:'オンプレ↔AWS',b:'SaaS（他社クラウド）↔AWS',ans:'a',why:'DX=<b>自社オンプレ↔AWS</b>の物理専用線。SaaSに直接線は引けない。'},
+    ]
+  },
+  'compute': {
+    name: 'コンピュートの選び方',
+    cards: [
+      {s:'コンテナを使いたいがEC2を管理したくない',a:'ECS on Fargate',b:'ECS on EC2',ans:'a',why:'Fargate=<b>サーバー管理ゼロ</b>。EC2起動タイプは自分で管理。'},
+      {s:'15分以内で終わるイベント駆動の処理',a:'Lambda',b:'EC2',ans:'a',why:'Lambda=<b>イベント駆動・サーバーレス</b>。15分制限あり。'},
+      {s:'数時間かかる動画エンコード',a:'Lambda',b:'AWS Batch',ans:'b',why:'Lambda=15分制限。Batch=<b>長時間バッチ処理</b>。'},
+      {s:'コードだけ渡して環境一式を自動構築',a:'Elastic Beanstalk',b:'手動でEC2/ELB/ASG構築',ans:'a',why:'Beanstalk=<b>お店ひと式パッケージ</b>。裏はEC2/ELB/ASG。'},
+      {s:'波のあるトラフィックに自動で増減',a:'Auto Scaling',b:'大きいインスタンスに変更',ans:'a',why:'Auto Scaling=<b>水平スケール</b>。スケールアップは上限あり。'},
+      {s:'常時必要なベース＋上乗せを安く',a:'全部スポット',b:'オンデマンド＋スポット混在',ans:'b',why:'混在=<b>安定＋コスト最適化</b>。全スポットは追い出しリスク。'},
+      {s:'Step Functions:IoT 10万/秒・5分以内',a:'Standard',b:'Express',ans:'b',why:'Express=<b>高頻度・短時間・安い</b>。Standardは長時間/監査向き。'},
+      {s:'Step Functions:長時間ワークフロー・監査証跡',a:'Standard',b:'Express',ans:'a',why:'Standard=<b>最大1年・Exactly-once・状態遷移記録</b>。'},
+    ]
+  },
+  'network': {
+    name: 'ネットワークの選び方',
+    cards: [
+      {s:'プライベートEC2からS3へ（NAT料金を減らす）',a:'VPCエンドポイント(GW型)',b:'NAT Gateway経由のまま',ans:'a',why:'ゲートウェイ型=<b>S3/DynamoDB無料</b>。NAT GWはデータ処理課金。'},
+      {s:'プライベートからSQS/KMSへプライベート接続',a:'ゲートウェイ型エンドポイント',b:'インターフェイス型(PrivateLink)',ans:'b',why:'S3/DynamoDB以外=<b>インターフェイス型</b>（ENI＋SG）。'},
+      {s:'VPCが20個以上でピアリング爆発',a:'Transit Gateway',b:'VPCピアリング追加',ans:'a',why:'TGW=<b>ハブ集約</b>。ピアリングはメッシュ爆発する。'},
+      {s:'HTTPの静的コンテンツを世界に速く配信',a:'CloudFront',b:'Global Accelerator',ans:'a',why:'CloudFront=<b>CDNキャッシュ配信</b>。GAはキャッシュしない。'},
+      {s:'非HTTP(UDP)ゲーム＋固定IP＋低遅延',a:'CloudFront',b:'Global Accelerator',ans:'b',why:'GA=<b>TCP/UDP・固定IP・AWSバックボーン</b>。'},
+      {s:'特定の国からのアクセスだけ許可',a:'SG(セキュリティグループ)',b:'WAF Geo Match',ans:'b',why:'SGは国指定不可。<b>WAF/CloudFront</b>で国フィルタ。'},
+      {s:'オンプレとの安定・低遅延な専用線',a:'Direct Connect',b:'Site-to-Site VPN',ans:'a',why:'DX=<b>物理専用線</b>（安定・大容量）。VPN=ネット経由トンネル。'},
+      {s:'即日・安く・暗号化された拠点間接続',a:'Direct Connect',b:'Site-to-Site VPN',ans:'b',why:'VPN=<b>即日・安い・暗号</b>。DXは敷設に時間かかる。'},
+      {s:'Dedicated Connectionの帯域を途中で変更できる？',a:'できる',b:'できない（契約時固定）',ans:'b',why:'Dedicated=1G/10G/100G<b>固定</b>。中間帯域はHosted Connection。'},
+    ]
+  },
+  'serverless': {
+    name: 'サーバーレス判定',
+    cards: [
+      {s:'S3はサーバーレス？',a:'はい',b:'いいえ',ans:'a',why:'管理不要・使った分だけ課金・自動スケール=<b>サーバーレス</b>。'},
+      {s:'RDSはサーバーレス？',a:'はい',b:'いいえ',ans:'b',why:'RDS=インスタンス常時起動=<b>非サーバーレス</b>。（Aurora Serverless v2は例外）'},
+      {s:'ElastiCacheはサーバーレス？',a:'はい',b:'いいえ',ans:'b',why:'ノード常時起動=<b>非サーバーレス</b>。'},
+      {s:'Fargateはサーバーレス？',a:'はい',b:'いいえ',ans:'a',why:'Fargate=EC2管理なし・タスク単位課金=<b>サーバーレス</b>。'},
+      {s:'Lambda + RDS の構成は全体としてサーバーレス？',a:'はい',b:'いいえ',ans:'b',why:'裏のRDSが常時課金。<b>全部サーバーレスか</b>で判定。'},
+      {s:'「サーバーレスでSQL分析」と来たら？',a:'Lambda',b:'Athena',ans:'b',why:'Athena=<b>サーバーレスSQLエンジン</b>。LambdaはSQLエンジンを持たない。'},
+      {s:'API Gateway + Lambda + DynamoDB は？',a:'サーバーレス鉄板',b:'非サーバーレス',ans:'a',why:'3つとも管理不要・使った分だけ=<b>鉄板構成</b>。'},
+    ]
+  }
+};
+
+
+// ===== ロジック =====
+let current = null;
+let idx = 0;
+let correct = 0;
+let order = [];
+
+const $ = id => document.getElementById(id);
+function showOnly(id){
+  ['top','quiz','result','score'].forEach(s => {
+    $(s).style.display = s === id ? 'flex' : 'none';
+  });
+  if(id==='top') $('top').style.display='block';
+}
+
+function renderDecks(){
+  const wrap = $('decks');
+  wrap.innerHTML = '';
+  Object.entries(decks).forEach(([id,d]) => {
+    const b = document.createElement('button');
+    b.className = 'deck';
+    b.innerHTML = `${d.name}<span class="cnt">${d.cards.length}問</span>`;
+    b.onclick = () => startDeck(id);
+    wrap.appendChild(b);
+  });
+}
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.random()*i+1|0;[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function startDeck(id){
+  current = decks[id];
+  order = shuffle(current.cards.map((_,i)=>i));
+  idx = 0;
+  correct = 0;
+  showQ();
+}
+
+function showQ(){
+  if(idx >= order.length){ showScore(); return; }
+  const c = current.cards[order[idx]];
+  $('progress').textContent = `${idx+1} / ${order.length}`;
+  $('situation').textContent = c.s;
+  const wrap = $('choices');
+  wrap.innerHTML = '';
+  // ランダムに選択肢の並びを入れ替え
+  const opts = Math.random() > 0.5 ? ['a','b'] : ['b','a'];
+  opts.forEach(key => {
+    const b = document.createElement('button');
+    b.className = 'ch';
+    b.textContent = c[key];
+    b.onclick = () => answer(key);
+    wrap.appendChild(b);
+  });
+  showOnly('quiz');
+}
+
+function answer(picked){
+  const c = current.cards[order[idx]];
+  const ok = picked === c.ans;
+  if(ok) correct++;
+  $('res-icon').textContent = ok ? '⭕' : '❌';
+  $('res-text').textContent = ok ? '正解' : '不正解';
+  $('res-text').className = 'res-text ' + (ok ? 'ok' : 'ng');
+  $('res-ans').textContent = '→ ' + c[c.ans];
+  $('res-why').innerHTML = c.why;
+  showOnly('result');
+}
+
+$('nextbtn').onclick = () => { idx++; showQ(); };
+
+function showScore(){
+  $('score-num').textContent = `${correct} / ${order.length}`;
+  const pct = Math.round(correct/order.length*100);
+  $('score-sub').textContent = pct >= 80 ? '👏 この分野はOK' : pct >= 60 ? 'あと少し' : 'もう一周しよう';
+  showOnly('score');
+}
+
+$('score-retry').onclick = () => startDeck(Object.keys(decks).find(k=>decks[k]===current));
+$('score-back').onclick = () => showOnly('top');
+
+renderDecks();
+showOnly('top');
+</script>
+</body>
+</html>
