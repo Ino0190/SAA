@@ -247,6 +247,27 @@ const decks = {
       {s:'S3イベントを複数の宛先に送りたい',a:'S3イベント通知を複数設定',b:'EventBridge経由',ans:'b',why:'S3イベント通知は<b>1宛先のみ</b>。複数ターゲットはEventBridge必須。'},
       {s:'SQSで同じメッセージが2回届く（重複配信）原因は？',a:'可視性タイムアウトが短すぎる',b:'ロングポーリングが短すぎる',ans:'a',why:'可視性タイムアウト<処理時間→<b>処理中に再配信</b>。ロングポーリングは取得待ちで無関係。'},
     ]
+  },
+  'confusing-pairs': {
+    name: '紛らわしいペア（本番で迷うやつ）',
+    cards: [
+      {s:'S3への「上り(アップロード)」を速くしたい',a:'CloudFront',b:'S3 Transfer Acceleration',ans:'b',why:'CloudFront=<b>下り(配信)</b>専門。上り高速化は<b>Transfer Acceleration</b>。'},
+      {s:'オンプレのAD(Active Directory)をAWSに移したい',a:'AWS Managed Microsoft AD',b:'Cognito',ans:'a',why:'Managed AD=<b>社内AD互換</b>。Cognito=アプリのエンドユーザー(toC)認証。'},
+      {s:'社員の複数AWSアカウントへのSSO',a:'IAM Identity Center',b:'Cognito',ans:'a',why:'Identity Center=<b>社員のAWSログインSSO</b>。Cognito=アプリ利用者。'},
+      {s:'Windowsファイルサーバー(SMB)をAWSへ',a:'EFS（Elastic File System）',b:'FSx for Windows',ans:'b',why:'EFS=Linux NFS。<b>FSx for Windows=SMB/NTFS/AD統合</b>。'},
+      {s:'HPC(高性能計算)用の超高スループットファイルシステム',a:'EFS（Elastic File System）',b:'FSx for Lustre',ans:'b',why:'Lustre=<b>数百GB/秒級・HPC/ML向け</b>。EFSは汎用NFS。'},
+      {s:'インスタンスストアのデータはEC2停止で？',a:'残る',b:'消える',ans:'b',why:'インスタンスストア=<b>停止で消える</b>使い捨て。永続はEBS。'},
+      {s:'Aurora Global Database は読み書き両方を別リージョンで？',a:'はい',b:'いいえ（読み取りだけ）',ans:'b',why:'Global DB=<b>書き込みは1リージョン</b>。読み書き両方別リージョンはDynamoDB Global Tables。'},
+      {s:'「予約済み同時実行(Reserved)」でコスト削減できる？',a:'できる',b:'できない（枠確保するだけ）',ans:'b',why:'Reserved Concurrency=<b>上限設定</b>。コスト削減はしない。Provisioned Concurrencyと混同する罠。'},
+      {s:'Config vs Security Hub',a:'Config=個々の設定を評価',b:'Security Hub=検出結果を集約',ans:'a',why:'両方正解の説明だが<b>問われ方が違う</b>。Configは継続評価、Security Hubは複数サービスの結果を1画面に。'},
+      {s:'GuardDuty vs Inspector',a:'GuardDuty=脅威検知(攻撃の動き)',b:'Inspector=脆弱性スキャン(弱点)',ans:'a',why:'GuardDuty=<b>不審な動きを検知</b>。Inspector=<b>EC2/コンテナのCVE脆弱性を検査</b>。'},
+      {s:'Macie vs GuardDuty',a:'Macie=S3の機密データ(PII)検出',b:'GuardDuty=S3の不審アクセス検知',ans:'a',why:'Macie=<b>個人情報を探す鑑定士</b>。GuardDuty=不正アクセスの見回り。'},
+      {s:'Control Tower vs Organizations',a:'Control Tower=ガードレール＋環境自動構築',b:'Organizations=アカウントを束ねる土台',ans:'b',why:'<b>両方正解だが主語が違う</b>。Organizations=束ねるだけ。Control Tower=その上にログ/ガードレール/SSO込みの標準環境を自動構築。'},
+      {s:'CloudTrailの「管理イベント」はデフォルトON？',a:'はい',b:'いいえ（手動で有効化が要る）',ans:'a',why:'管理イベント=<b>デフォルトON</b>。データイベント(S3 GetObject等)は明示的に有効化が要る。'},
+      {s:'DynamoDB Streams vs TTL、どっちが「変更検知」？',a:'Streams',b:'TTL',ans:'a',why:'Streams=<b>イベントベース(変更検知)</b>。TTL=<b>時間ベース(期限切れ削除)</b>。'},
+      {s:'VPC Lattice vs Transit Gateway',a:'VPC Lattice=L7・マイクロサービス間通信',b:'Transit Gateway=L3・VPC/オンプレ接続のハブ',ans:'a',why:'Lattice=<b>L7ビル受付</b>。TGW=<b>L3駅ターミナル</b>。層が違う。'},
+      {s:'「セッション共有・ホットデータのキャッシュ」',a:'ElastiCache（Redis）',b:'DynamoDB',ans:'a',why:'ElastiCache=<b>インメモリ・マイクロ秒</b>。セッション/ランキング/キャッシュはRedisの出番。'},
+    ]
   }
 };
 
