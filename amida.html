@@ -84,6 +84,7 @@ body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;backgro
     <div class="score-num" id="score-num"></div>
     <div class="score-sub" id="score-sub"></div>
     <div class="score-btns">
+      <button class="retry" id="score-wrong" style="background:#b01212;display:none">❌ 間違えたやつだけ</button>
       <button class="retry" id="score-retry">もう一度</button>
       <button class="back" id="score-back">別のデッキ</button>
     </div>
@@ -274,9 +275,11 @@ const decks = {
 
 // ===== ロジック =====
 let current = null;
+let currentId = null;
 let idx = 0;
 let correct = 0;
 let order = [];
+let wrongIdx = [];
 
 const $ = id => document.getElementById(id);
 function showOnly(id){
@@ -306,9 +309,11 @@ function shuffle(arr){
 
 function startDeck(id){
   current = decks[id];
+  currentId = id;
   order = shuffle(current.cards.map((_,i)=>i));
   idx = 0;
   correct = 0;
+  wrongIdx = [];
   showQ();
 }
 
@@ -335,6 +340,7 @@ function answer(picked){
   const c = current.cards[order[idx]];
   const ok = picked === c.ans;
   if(ok) correct++;
+  else wrongIdx.push(order[idx]);
   $('res-icon').textContent = ok ? '⭕' : '❌';
   $('res-text').textContent = ok ? '正解' : '不正解';
   $('res-text').className = 'res-text ' + (ok ? 'ok' : 'ng');
@@ -349,11 +355,27 @@ function showScore(){
   $('score-num').textContent = `${correct} / ${order.length}`;
   const pct = Math.round(correct/order.length*100);
   $('score-sub').textContent = pct >= 80 ? '👏 この分野はOK' : pct >= 60 ? 'あと少し' : 'もう一周しよう';
+  // 間違えたやつだけボタンの表示
+  const wrongBtn = $('score-wrong');
+  if(wrongIdx.length > 0){
+    wrongBtn.style.display = '';
+    wrongBtn.textContent = `❌ 間違えた${wrongIdx.length}問だけ`;
+  } else {
+    wrongBtn.style.display = 'none';
+  }
   showOnly('score');
 }
 
-$('score-retry').onclick = () => startDeck(Object.keys(decks).find(k=>decks[k]===current));
+$('score-retry').onclick = () => startDeck(currentId);
 $('score-back').onclick = () => showOnly('top');
+$('score-wrong').onclick = () => {
+  // 間違えた問題だけで再スタート
+  order = shuffle(wrongIdx);
+  idx = 0;
+  correct = 0;
+  wrongIdx = [];
+  showQ();
+};
 
 renderDecks();
 showOnly('top');
