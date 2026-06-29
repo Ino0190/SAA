@@ -373,6 +373,27 @@ const decks = {
       {s:'「中断されると困る」本番Webサーバー',a:'オンデマンド / Reserved',b:'スポットインスタンス',ans:'a',why:'決め手は<b>中断NG</b>。スポットは最大90%安いが2分前通知で<b>追い出される</b>＝本番Web不可。「安い」に釣られない。'},
       {s:'「OS・ミドルウェアまで自社で細かく管理」したいDB',a:'EC2上に自前でDB構築',b:'RDS（マネージド）',ans:'a',why:'決め手は<b>OSまで自社管理</b>。マネージドはOSに触れない→要件を満たすのはEC2自前構築だけ。「マネージドが正解」の思い込みを外す。'},
     ]
+  },
+  'frequent-traps': {
+    name: '🔥頻出ひっかけ（3つで迷うやつ）',
+    cards: [
+      {s:'ユーザーを「最も遅延の少ない」リージョンへ振り分ける',a:'レイテンシールーティング',b:'位置情報（Geolocation）ルーティング',c:'加重（Weighted）ルーティング',ans:'a',why:'決め手は<b>遅延が最小</b>＝レイテンシー。Geolocation＝<b>アクセス元の国/地域</b>で固定。Weighted＝<b>割合</b>（カナリア配信）。'},
+      {s:'「日本からは日本語サイト、米国は英語サイト」へ出し分け',a:'レイテンシールーティング',b:'位置情報（Geolocation）ルーティング',c:'フェイルオーバールーティング',ans:'b',why:'決め手は<b>国/地域で出し分け</b>＝Geolocation。レイテンシーは速さ基準。フェイルオーバーは障害時にDRへ。'},
+      {s:'ストリームデータを「コードなし」でS3/Redshiftへロード',a:'Kinesis Data Streams',b:'Kinesis Data Firehose',c:'Managed Service for Apache Flink',ans:'b',why:'Firehose＝<b>フルマネージドで宛先へ配送（ニアリアルタイム・コード不要）</b>。Data Streams＝<b>自前でコンシューマ実装・保持</b>。Flink＝<b>ストリームにSQL/集計</b>。'},
+      {s:'DynamoDBの読み取りを「マイクロ秒」に高速化',a:'ElastiCache for Redis',b:'DAX（DynamoDB Accelerator）',c:'CloudFront',ans:'b',why:'DAX＝<b>DynamoDB専用インメモリ・マイクロ秒</b>。ElastiCacheは<b>汎用（RDB結果/セッション）</b>。CloudFrontは静的配信。'},
+      {s:'RDBのクエリ結果やセッションをキャッシュして負荷軽減',a:'ElastiCache for Redis',b:'DAX（DynamoDB Accelerator）',c:'S3',ans:'a',why:'ElastiCache＝<b>汎用インメモリ（RDB結果/セッション/ランキング）</b>。DAXは<b>DynamoDB専用</b>。'},
+      {s:'1つのイベントを「複数の購読先へ同時配信」（ファンアウト）',a:'SQS',b:'SNS',c:'EventBridge',ans:'b',why:'SNS＝<b>pub/sub・1対多ファンアウト</b>。SQS＝<b>1対1キュー・順番処理</b>。EventBridge＝<b>多数のイベント源をルールでルーティング</b>。'},
+      {s:'「SaaSや多数のAWSサービスのイベント」をルールで振り分け',a:'SQS',b:'SNS',c:'EventBridge',ans:'c',why:'EventBridge＝<b>イベントバス・ルールでフィルタ/ルーティング・スケジュール</b>。SNSは単純通知、SQSはキュー。'},
+      {s:'DBの認証情報を「自動ローテーション」しながら安全に保管',a:'Secrets Manager',b:'Systems Manager Parameter Store',c:'KMS',ans:'a',why:'Secrets Manager＝<b>自動ローテーション内蔵（有料）</b>。Parameter Store＝<b>設定値/平文を無料で（ローテーションは自前）</b>。KMSは<b>鍵管理</b>。'},
+      {s:'アプリの設定値・環境変数を「無料で」一元管理',a:'Secrets Manager',b:'Systems Manager Parameter Store',c:'KMS',ans:'b',why:'Parameter Store＝<b>無料・設定値/平文/SecureString</b>。Secrets Managerは<b>自動ローテーション込みで有料</b>。'},
+      {s:'数百ノードを「ラック障害から分離しつつ」大規模分散（HDFS/Cassandra）',a:'クラスタープレイスメントグループ',b:'スプレッドプレイスメントグループ',c:'パーティションプレイスメントグループ',ans:'c',why:'パーティション＝<b>大規模分散・ラック単位で障害分離</b>。クラスター＝<b>同一ラックで最低遅延</b>。スプレッド＝<b>少数を個別ハードに分散</b>。'},
+      {s:'S3暗号化で「誰がいつ鍵を使ったか監査＋鍵ローテーション」',a:'SSE-S3',b:'SSE-KMS',c:'SSE-C',ans:'b',why:'SSE-KMS＝<b>CloudTrailで鍵使用を監査・ローテーション可</b>。SSE-S3＝<b>AWS任せで一番簡単（監査は弱い）</b>。SSE-C＝<b>鍵を自分で持ち込み毎回渡す</b>。'},
+      {s:'オンプレからS3を「NFS/SMBのファイル共有」として使う',a:'File Gateway',b:'Volume Gateway',c:'Tape Gateway',ans:'a',why:'File GW＝<b>NFS/SMB→S3</b>。Volume GW＝<b>iSCSIブロック</b>。Tape GW＝<b>仮想テープ（バックアップ）→Glacier</b>。'},
+      {s:'「数十TBを、回線が細い/期限内に」一度だけAWSへ移す',a:'DataSync（ネット経由）',b:'Snowball（物理輸送）',c:'Storage Gateway',ans:'b',why:'回線が細い/大容量/期限＝<b>物理輸送のSnowball</b>。DataSync＝<b>回線が太く継続同期</b>向け。Storage GWはハイブリッド常用。'},
+      {s:'「専有ハードウェア・自社単独で鍵を完全管理（FIPS 140-2 Lv3）」',a:'KMS（Key Management Service）',b:'CloudHSM',ans:'b',why:'CloudHSM＝<b>専有HSM・顧客が単独管理</b>。KMS＝<b>マネージド・マルチテナント</b>で大半はこれで十分。「専有/単独管理」が決め手。'},
+      {s:'「非HTTP（TCP/UDP）」を固定IPで・低遅延に世界中から',a:'CloudFront',b:'Global Accelerator',ans:'b',why:'GA＝<b>L4・固定エニーキャストIP・任意のTCP/UDP</b>。CloudFront＝<b>HTTP(S)の静的/動的キャッシュ配信</b>。プロトコルが決め手。'},
+      {s:'アプリのサインイン後に「AWSリソースへの一時クレデンシャル」を発行',a:'Cognito ユーザープール',b:'Cognito IDプール（フェデレーテッドアイデンティティ）',ans:'b',why:'IDプール＝<b>認証後にAWSへの一時認証情報を払い出す</b>。ユーザープール＝<b>サインイン/ユーザーディレクトリ</b>。'},
+    ]
   }
 };
 
@@ -472,8 +493,8 @@ function showQ(){
   $('situation').textContent = c.s;
   const wrap = $('choices');
   wrap.innerHTML = '';
-  // ランダムに選択肢の並びを入れ替え
-  const opts = Math.random() > 0.5 ? ['a','b'] : ['b','a'];
+  // 選択肢を動的に集める（2択でも3択でも対応）＋並びをシャッフル
+  const opts = shuffle(['a','b','c'].filter(key => c[key] != null));
   opts.forEach(key => {
     const b = document.createElement('button');
     b.className = 'ch';
