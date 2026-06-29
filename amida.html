@@ -365,12 +365,16 @@ const decks = {
 
 
 // ===== ロジック =====
+// 定着ルール: 間違えた問題は3回連続で正解するまでキューに残す。
+// 進捗はlocalStorageに保存し、次回開いたときも「まだ覚えてない問題」を覚えておく。
+const MASTER_NEED = 3;          // 間違えた問題が定着するのに必要な連続正解数
+const STORE_KEY = 'amida_need_v1';
+
 let current = null;
 let currentId = null;
-let idx = 0;
-let correct = 0;
-let order = [];
-let wrongIdx = [];
+let queue = [];                 // まだ定着していないカードidxの待ち行列
+let needMap = {};               // カードidx → 定着までに必要な残り正解数（<=0で定着）
+let missed = new Set();         // 一度でも間違えたカードidx（保存対象）
 
 const $ = id => document.getElementById(id);
 function showOnly(id){
@@ -380,13 +384,39 @@ function showOnly(id){
   if(id==='top') $('top').style.display='block';
 }
 
+// ----- localStorage（まだ覚えてない問題を記憶） -----
+function loadStore(){
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveStore(store){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e){}
+}
+// 現在のデッキの「未定着の間違え問題」を質問文(s)をキーに保存
+function persistNeed(){
+  const store = loadStore();
+  const obj = {};
+  current.cards.forEach((c,i) => {
+    if(missed.has(i) && needMap[i] > 0) obj[c.s] = needMap[i];
+  });
+  if(Object.keys(obj).length) store[currentId] = obj;
+  else delete store[currentId];
+  saveStore(store);
+}
+function pendingCount(id){
+  const o = loadStore()[id];
+  return o ? Object.keys(o).length : 0;
+}
+
 function renderDecks(){
   const wrap = $('decks');
   wrap.innerHTML = '';
   Object.entries(decks).forEach(([id,d]) => {
     const b = document.createElement('button');
     b.className = 'deck';
-    b.innerHTML = `${d.name}<span class="cnt">${d.cards.length}問</span>`;
+    const pend = pendingCount(id);
+    const badge = pend > 0 ? `<span class="cnt" style="color:#b01212">🔁まだ${pend}問</span>` : '';
+    b.innerHTML = `${d.name}<span class="cnt">${d.cards.length}問</span>${badge}`;
     b.onclick = () => startDeck(id);
     wrap.appendChild(b);
   });
@@ -398,20 +428,34 @@ function shuffle(arr){
   return a;
 }
 
-function startDeck(id){
+// fresh=true なら保存済みの間違え記録を消してまっさらに始める
+function startDeck(id, fresh){
   current = decks[id];
   currentId = id;
-  order = shuffle(current.cards.map((_,i)=>i));
-  idx = 0;
-  correct = 0;
-  wrongIdx = [];
+  if(fresh){
+    const store = loadStore();
+    delete store[id];
+    saveStore(store);
+  }
+  const saved = loadStore()[id] || {};
+  needMap = {};
+  missed = new Set();
+  current.cards.forEach((c,i) => {
+    if(saved[c.s] > 0){ needMap[i] = saved[c.s]; missed.add(i); } // 前回の間違えを引き継ぐ
+    else { needMap[i] = 1; }                                      // 初見は1回正解で定着
+  });
+  queue = shuffle(current.cards.map((_,i)=>i));
   showQ();
 }
 
+function masteredCount(){
+  return current.cards.reduce((n,_,i) => n + (needMap[i] <= 0 ? 1 : 0), 0);
+}
+
 function showQ(){
-  if(idx >= order.length){ showScore(); return; }
-  const c = current.cards[order[idx]];
-  $('progress').textContent = `${idx+1} / ${order.length}`;
+  if(queue.length === 0){ showScore(); return; }
+  const c = current.cards[queue[0]];
+  $('progress').textContent = `覚えた ${masteredCount()} / ${current.cards.length}　・　残り ${queue.length}`;
   $('situation').textContent = c.s;
   const wrap = $('choices');
   wrap.innerHTML = '';
@@ -428,45 +472,43 @@ function showQ(){
 }
 
 function answer(picked){
-  const c = current.cards[order[idx]];
+  const i = queue.shift();
+  const c = current.cards[i];
   const ok = picked === c.ans;
-  if(ok) correct++;
-  else wrongIdx.push(order[idx]);
+  if(ok){
+    needMap[i]--;
+  } else {
+    needMap[i] = MASTER_NEED;   // 間違えたら3回連続正解が必要に
+    missed.add(i);
+  }
+  // まだ定着していなければ待ち行列の後ろに戻す
+  if(needMap[i] > 0) queue.splice(Math.min(3, queue.length), 0, i);
+  persistNeed();
+
   $('res-icon').textContent = ok ? '⭕' : '❌';
-  $('res-text').textContent = ok ? '正解' : '不正解';
+  let head = ok ? '正解' : '不正解';
+  if(ok && needMap[i] <= 0) head = '正解 ✅ 定着！';
+  else if(ok) head = `正解 ⭕ あと${needMap[i]}回で定着`;
+  else head = `不正解 ❌ ${MASTER_NEED}回連続で正解すると定着`;
+  $('res-text').textContent = head;
   $('res-text').className = 'res-text ' + (ok ? 'ok' : 'ng');
   $('res-ans').textContent = '→ ' + c[c.ans];
   $('res-why').innerHTML = c.why;
   showOnly('result');
 }
 
-$('nextbtn').onclick = () => { idx++; showQ(); };
+$('nextbtn').onclick = () => showQ();
 
 function showScore(){
-  $('score-num').textContent = `${correct} / ${order.length}`;
-  const pct = Math.round(correct/order.length*100);
-  $('score-sub').textContent = pct >= 80 ? '👏 この分野はOK' : pct >= 60 ? 'あと少し' : 'もう一周しよう';
-  // 間違えたやつだけボタンの表示
-  const wrongBtn = $('score-wrong');
-  if(wrongIdx.length > 0){
-    wrongBtn.style.display = '';
-    wrongBtn.textContent = `❌ 間違えた${wrongIdx.length}問だけ`;
-  } else {
-    wrongBtn.style.display = 'none';
-  }
+  const total = current.cards.length;
+  $('score-num').textContent = `${total} / ${total}`;
+  $('score-sub').textContent = '🎉 全部定着した！';
+  $('score-wrong').style.display = 'none';
   showOnly('score');
 }
 
-$('score-retry').onclick = () => startDeck(currentId);
-$('score-back').onclick = () => showOnly('top');
-$('score-wrong').onclick = () => {
-  // 間違えた問題だけで再スタート
-  order = shuffle(wrongIdx);
-  idx = 0;
-  correct = 0;
-  wrongIdx = [];
-  showQ();
-};
+$('score-retry').onclick = () => startDeck(currentId, true);   // まっさらにもう一度
+$('score-back').onclick = () => { renderDecks(); showOnly('top'); };
 
 renderDecks();
 showOnly('top');
