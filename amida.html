@@ -394,6 +394,49 @@ const decks = {
       {s:'「非HTTP（TCP/UDP）」を固定IPで・低遅延に世界中から',a:'CloudFront',b:'Global Accelerator',ans:'b',why:'GA＝<b>L4・固定エニーキャストIP・任意のTCP/UDP</b>。CloudFront＝<b>HTTP(S)の静的/動的キャッシュ配信</b>。プロトコルが決め手。'},
       {s:'アプリのサインイン後に「AWSリソースへの一時クレデンシャル」を発行',a:'Cognito ユーザープール',b:'Cognito IDプール（フェデレーテッドアイデンティティ）',ans:'b',why:'IDプール＝<b>認証後にAWSへの一時認証情報を払い出す</b>。ユーザープール＝<b>サインイン/ユーザーディレクトリ</b>。'},
     ]
+  },
+  'ai-ml-select': {
+    name: '🤖 AI/MLサービスの選び方',
+    cards: [
+      {s:'画像の中の物体・顔・不適切コンテンツを検出したい',a:'Rekognition',b:'Textract',ans:'a',why:'Rekognition＝<b>画像/映像の物体・顔・シーン認識</b>。Textractは文字の抽出が専門。'},
+      {s:'スキャンした請求書PDFから文字と表を抽出したい',a:'Rekognition',b:'Textract',ans:'b',why:'Textract＝<b>OCR＋表/フォーム構造の抽出</b>。Rekognitionは画像認識で文字構造は読まない。'},
+      {s:'テキストを別の言語に翻訳したい',a:'Translate',b:'Comprehend',ans:'a',why:'Translate＝<b>翻訳家</b>。Comprehendは言語検出・感情分析はできるが訳さない。'},
+      {s:'レビュー文の感情（ポジ/ネガ）やキーフレーズを分析したい',a:'Translate',b:'Comprehend',ans:'b',why:'Comprehend＝<b>テキストの意味・感情・キーフレーズ分析</b>。Translateは翻訳専門。'},
+      {s:'テキストを自然な音声に変換して読み上げたい',a:'Polly',b:'Transcribe',ans:'a',why:'Polly＝<b>テキスト→音声</b>（口）。Transcribeは音声→テキスト（耳）で向きが逆。'},
+      {s:'録音された音声ファイルを文字に書き起こしたい',a:'Polly',b:'Transcribe',ans:'b',why:'Transcribe＝<b>音声→テキスト</b>。Pollyは逆方向のテキスト読み上げ。'},
+      {s:'社内文書を根拠にチャットボットで自然文の回答を生成したい（作り話を避けたい）',a:'SageMakerでゼロから訓練',b:'Bedrock＋RAG（Knowledge Bases）',ans:'b',why:'Bedrock＋RAG＝<b>基盤モデルに社内文書を検索させて根拠付き生成</b>・訓練不要。SageMaker自前訓練は専門知識と時間が要る。'},
+    ]
+  },
+  'compute-network-edge': {
+    name: '🌐 コンピュート抽象度＆エッジ/ハイブリッド',
+    cards: [
+      {s:'コンテナイメージを渡すだけでLB/スケール/HTTPSまで全自動にしたい',a:'App Runner',b:'ECS on Fargate',ans:'a',why:'App Runner＝<b>イメージ指定だけで構成不要・最小の手間</b>。Fargateはクラスタ/サービス/ALBを自分で構成する。'},
+      {s:'既存のKubernetesマニフェスト・ツールをそのまま使いたい',a:'ECS',b:'EKS',ans:'b',why:'EKS＝<b>Kubernetes互換</b>で既存マニフェストが使える。ECSはAWS独自のオーケストレーター。'},
+      {s:'大都市圏のユーザーに一桁ミリ秒の低遅延を提供したい（自社施設ではない）',a:'AWS Local Zones',b:'AWS Outposts',ans:'a',why:'Local Zones＝<b>AWSが大都市圏に置く拠点</b>。Outpostsは自社データセンター内に設置するAWS。',},
+      {s:'規制でデータを自社データセンター内に残しつつAWSと同じAPIで動かしたい',a:'AWS Local Zones',b:'AWS Outposts',ans:'b',why:'Outposts＝<b>自社施設内にAWSハードを設置</b>（データ所在地要件対応）。Local Zonesは自社施設ではない。'},
+      {s:'5Gモバイル網内で処理して移動体からの遅延を最小化したい',a:'AWS Wavelength',b:'AWS Local Zones',ans:'a',why:'Wavelength＝<b>通信事業者の5G網内にAWSを配置</b>。Local Zonesは大都市圏拠点で5G網内ではない。'},
+      {s:'IPv6のプライベートサブネットから外向き通信だけ許可したい（インバウンド拒否）',a:'NAT Gateway',b:'Egress-Only Internet Gateway',ans:'b',why:'Egress-Only IGW＝<b>IPv6専用の外向きのみ</b>。NAT GatewayはIPv4専用で対象が違う。'},
+      {s:'サードパーティの仮想ファイアウォール群に全トラフィックを透過的に通したい',a:'Application Load Balancer',b:'Gateway Load Balancer',ans:'b',why:'GWLB＝<b>サードパーティアプライアンスをインラインで透過挿入</b>。ALBはL7 HTTP分散が専門。'},
+      {s:'ECS FargateでコストNGなワークロードを最大割引で動かしたい（中断OK）',a:'Fargate Spot',b:'通常のFargate',ans:'a',why:'Fargate Spot＝<b>大幅割引だが中断され得る</b>。中断耐性のあるバッチ/ワーカー向け。中断NGのAPIは通常Fargateで。'},
+      {s:'従業員にクラウド上の永続的なフル仮想デスクトップを払い出したい',a:'Amazon WorkSpaces',b:'Amazon AppStream 2.0',ans:'a',why:'WorkSpaces＝<b>フルデスクトップ環境（VDI/DaaS）</b>。AppStreamは特定アプリだけのストリーミング配信。'},
+      {s:'特定の1本のアプリだけをブラウザにストリーミング配信したい',a:'Amazon WorkSpaces',b:'Amazon AppStream 2.0',ans:'b',why:'AppStream 2.0＝<b>アプリ単位のストリーミング</b>。WorkSpacesはデスクトップごとの提供。'},
+    ]
+  },
+  'governance-storage-gaps': {
+    name: '🗂 運用ガバナンス＆ストレージの穴埋め',
+    cards: [
+      {s:'GuardDuty/Inspector/Macieの検出結果を1画面に集約し標準準拠も自動チェックしたい',a:'AWS Config',b:'AWS Security Hub',ans:'b',why:'Security Hub＝<b>複数セキュリティサービスの結果を集約・正規化・準拠チェック</b>。Configは自リソースの構成準拠のみ。'},
+      {s:'マイクロサービス間でどこがボトルネックか、区間ごとのレイテンシを可視化したい',a:'CloudWatch',b:'X-Ray',ans:'b',why:'X-Ray＝<b>分散トレーシングでサービス間の経路とレイテンシを可視化</b>。CloudWatchはメトリクス監視が主。'},
+      {s:'普段と違う異常なコスト急増を機械学習で自動検知したい',a:'AWS Budgets',b:'Cost Anomaly Detection',ans:'b',why:'Cost Anomaly Detection＝<b>MLで異常なコスト増を自動検知</b>。Budgetsは予算しきい値の事前アラート。'},
+      {s:'予算に近づいたら/超えそうになったら事前に通知を受けたい',a:'AWS Budgets',b:'Cost Anomaly Detection',ans:'a',why:'Budgets＝<b>予算としきい値アラート（予測ベース含む）で先回り通知</b>。異常検知はCost Anomaly Detectionの役目。'},
+      {s:'ネットワーク基盤（サブネット/TGW）を所有は集約したまま他アカウントに共有したい',a:'CloudFormation StackSets',b:'Resource Access Manager (RAM)',ans:'b',why:'RAM＝<b>1つのリソースを複数アカウントで共有</b>（所有は1つ）。StackSetsは同じ構成を複製する（実体が複数できる）。'},
+      {s:'別アカウントのリソースに、長期アクセスキーを渡さず一時的にアクセスさせたい',a:'IAMユーザーのアクセスキーを共有',b:'IAMロール＋STS AssumeRole',ans:'b',why:'AssumeRole＝<b>一時認証情報を都度取得</b>・鍵の共有不要。アクセスキー共有は漏洩・棚卸しリスクが残る。'},
+      {s:'オンプレのNetApp/ONTAP機能（クローン・重複排除）をそのままAWSで使いたい',a:'Amazon EFS',b:'FSx for NetApp ONTAP',ans:'b',why:'FSx for NetApp ONTAP＝<b>NFS/SMB両対応＋ONTAP機能をそのまま移行</b>。EFSはNFS専用でONTAP機能を持たない。'},
+      {s:'取引先の既存SFTPクライアントはそのまま、自前SFTPサーバー運用はやめたい',a:'EC2に自前でSFTPサーバー構築',b:'AWS Transfer Family',ans:'b',why:'Transfer Family＝<b>マネージドSFTPエンドポイント・直接S3保存</b>。取引先のSFTP運用を変えずに済む。'},
+      {s:'数千台規模の大規模移行で、依存関係の自動発見と複数移行ツールの進捗を一元管理したい',a:'個別ツールのコンソールを都度確認',b:'Application Discovery Service＋Migration Hub',ans:'b',why:'Discovery Service＝<b>自動棚卸し</b>、Migration Hub＝<b>複数ツールの進捗を横断一元管理</b>。個別確認は大規模で全体像が見えない。'},
+      {s:'大量のトランザクションメールを到達率管理・送信認証込みで送りたい',a:'Amazon SNS（Eメール）',b:'Amazon SES',ans:'b',why:'SES＝<b>到達率・バウンス/苦情管理・SPF/DKIM/DMARC対応の本格メール送信</b>。SNSのEメールは簡易な通知向け。'},
+      {s:'S3を非公開のまま、CloudFront経由でのみ配信させたい（直リンク防止）',a:'S3バケットポリシーで公開設定',b:'Origin Access Control（OAC）',ans:'b',why:'OAC＝<b>CloudFront経由のみアクセス許可・S3は非公開のまま</b>。バケット公開は誰でも直接アクセス可能になり危険。'},
+    ]
   }
 };
 
