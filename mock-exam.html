@@ -142,6 +142,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 <script>
 // ===== 本番ドメインへのマッピング =====
 const DOMAIN_MAP = {
+  // 基本カテゴリ
   'セキュリティ': 'secure',
   'セキュリティ深掘り': 'secure',
   '運用・ガバナンス': 'secure',
@@ -164,17 +165,48 @@ const DOMAIN_MAP = {
   '配信/CDN': 'performance',
   'データ分析': 'performance',
   'AI/ML': 'performance',
-  'コスト最適化': 'cost'
+  'コスト最適化': 'cost',
+  // 複合カテゴリ（バンクE等）
+  '高可用・コスト': 'resilient',
+  'セキュリティ・暗号化': 'secure',
+  'ストレージ・移行': 'resilient',
+  'コンピュート・購入戦略': 'cost',
+  '配信・セキュリティ': 'secure',
+  'IAM・ガバナンス': 'secure',
+  'DB・読み取り最適化': 'performance',
+  'セキュリティ・秘密管理': 'secure',
+  '移行・大容量転送': 'resilient',
+  'サーバーレス・API': 'performance',
+  '可用性・DB': 'resilient',
+  'ネットワーク・プライベート接続': 'secure',
+  'WAF・DDoS防御': 'secure',
+  'サーバーレス・イベント駆動': 'performance',
+  'DR・フェイルオーバー': 'resilient',
+  'データ分析・ETL': 'performance',
+  '高可用・移行': 'resilient',
+  'コスト最適化・EBS': 'cost',
+  'IAM・クロスアカウント': 'secure',
+  'ネットワーク・オンプレミス統合': 'secure',
+  'コンテナ・移行': 'performance',
+  'バックアップ・ランサム対策': 'resilient',
+  'サーバーレス・大規模処理': 'performance',
+  '移行・データベース': 'resilient',
+  '監視・オブザーバビリティ': 'secure',
+  'ストレージ・パフォーマンス': 'performance',
+  'コスト管理・タグ戦略': 'cost',
+  'データ保護・暗号化キー管理': 'secure',
+  'API設計・スロットリング': 'performance',
+  '高可用・グローバル配信': 'resilient'
 };
 
 const DOMAINS = {
-  secure:      {label:'セキュアなアーキテクチャ設計', target:20},
-  resilient:   {label:'回復性の高いアーキテクチャ設計', target:17},
+  secure:      {label:'セキュアなアーキテクチャ設計', target:19},
+  resilient:   {label:'回復性の高いアーキテクチャ設計', target:16},
   performance: {label:'高性能アーキテクチャ設計', target:15},
-  cost:        {label:'コスト最適化アーキテクチャ設計', target:13}
+  cost:        {label:'コスト最適化アーキテクチャ設計', target:15}
 };
 
-const FILES = ['questions.js','questions_v2.js','questions_v3.js','questions_v4.js'];
+const FILES = ['questions.js','questions_v2.js','questions_v3.js','questions_v4.js','questions_v5.js'];
 let ALL_Q = [];
 let exam = {list:[], idx:0, answers:{}, flagged:{}, startTime:null, timerInterval:null};
 
@@ -314,7 +346,7 @@ function toggleQli(gi){
 }
 
 // 復習プールへ書き込み（バンク別）＝模試の正解・間違い両方を進捗に反映
-const SRC_TO_BANK = {'questions.js':'main','questions_v2.js':'v2','questions_v3.js':'v3','questions_v4.js':'v4'};
+const SRC_TO_BANK = {'questions.js':'main','questions_v2.js':'v2','questions_v3.js':'v3','questions_v4.js':'v4','questions_v5.js':'v5'};
 function saveWrongToReview(){
   const byBank = {};
   exam.list.forEach((q,i) => {
