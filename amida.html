@@ -212,7 +212,23 @@ const decks = {
       {s:'1本のDirect Connectから複数リージョンの複数VPCへ接続したい',a:'Direct Connect Gateway',b:'VPCごとに専用線を契約',ans:'a',why:'DX Gateway＝<b>1つのDXから複数リージョン/VPCのVGW/TGWへ接続</b>。回線を都度契約する必要がない。'},
       {s:'自社のサービスを、顧客VPCへプライベートに公開したい(CIDR重複OK・一方向)',a:'PrivateLink(エンドポイントサービス)',b:'VPCピアリング/TGW',ans:'a',why:'PrivateLink＝<b>NLB前段でサービスを一方向にプライベート公開・CIDR重複可</b>。ピアリング/TGWは相互到達でCIDR重複不可。'},
       {s:'IPv6のプライベートサブネットから外向き通信のみ許可（インバウンド拒否）',a:'NAT Gateway',b:'Egress-Only Internet Gateway',ans:'b',why:'Egress-Only IGW＝<b>IPv6専用の外向き専用</b>。NAT GatewayはIPv4用で対象が違う。'},
-      {s:'個々の従業員のPCから（拠点間ではなく）AWS VPCへリモートVPN接続したい',a:'AWS Client VPN',b:'Site-to-Site VPN',ans:'a',why:'Client VPN＝<b>個人デバイスからのリモートアクセス(OpenVPN)</b>。Site-to-Site＝<b>拠点(データセンター)とVPCを結ぶ</b>。単位が「個人」か「拠点」かで決まる。',tip:'Client VPN＝個人デバイスのリモートアクセス(OpenVPN)。拠点ごとはSite-to-Site。'}
+      {s:'個々の従業員のPCから（拠点間ではなく）AWS VPCへリモートVPN接続したい',a:'AWS Client VPN',b:'Site-to-Site VPN',ans:'a',why:'Client VPN＝<b>個人デバイスからのリモートアクセス(OpenVPN)</b>。Site-to-Site＝<b>拠点(データセンター)とVPCを結ぶ</b>。単位が「個人」か「拠点」かで決まる。',tip:'Client VPN＝個人デバイスのリモートアクセス(OpenVPN)。拠点ごとはSite-to-Site。'},
+      {s:'固定のパブリックIP(Elastic IP)を付けたい・クライアントの送信元IPをそのまま保持したい',a:'NLB',b:'ALB',ans:'a',why:'NLB＝<b>L4でクライアントIPを保持・AZごとに固定IP/Elastic IP付与可</b>。ALBはIPが変動し送信元は X-Forwarded-For で伝える。',tip:'固定IP・送信元IP保持・超低遅延＝NLB(L4)。HTTPの中身で振り分けるならALB(L7)。'},
+      {s:'パスやホスト名で振り分け・WebSocket・リダイレクト・Cognito認証を使いたい',a:'ALB',b:'NLB',ans:'a',why:'ALB＝<b>L7でHTTP/HTTPSの高度なルーティング(パス/ホスト/ヘッダ)・WebSocket・認証連携</b>。NLBはL4で中身を見ない。',tip:'HTTPの機能(パス/ホスト振り分け・WebSocket・認証・リダイレクト)が要る＝ALB。中身を見ないNLBでは無理。'},
+      {s:'WAFを直接関連付けられるロードバランサーは？',a:'ALB',b:'NLB',ans:'a',why:'WAFはL7の中身を見るので<b>ALB(とCloudFront/API Gateway)に付く</b>。NLB(L4)には直接付けられない。',tip:'WAFはL7＝ALB/CloudFront/API GWに付く。NLB(L4)には付かない。'},
+      {s:'急なスパイク(事前ウォームアップなし)で毎秒数百万接続をさばきたい',a:'NLB',b:'ALB',ans:'a',why:'NLB＝<b>L4で超低遅延・突発スパイクにも即応(事前プリウォーム不要)・数百万接続</b>。ALBはL7処理のぶんオーバーヘッドがある。',tip:'いきなり大量接続・超低遅延・TCP/UDP＝NLB。'}
+    ]
+  },
+  'gateways': {
+    name: '🚪 ○○ゲートウェイの使い分け',
+    cards: [
+      {s:'Site-to-Site VPNの「AWS側」の終端はどっち？',a:'仮想プライベートゲートウェイ(VGW)',b:'カスタマーゲートウェイ(CGW)',ans:'a',why:'VGW＝<b>AWS側の終端</b>。CGW＝<b>オンプレ側ルーターを表すAWS上の情報</b>。この2つでVPNトンネルを張る。',tip:'V(irtual)＝AWS側、C(ustomer)＝顧客(オンプレ)側。頭文字で覚える。'},
+      {s:'VPCをインターネットにつなぐ「双方向の玄関」はどっち？',a:'インターネットゲートウェイ(IGW)',b:'NAT Gateway',ans:'a',why:'IGW＝<b>VPCとインターネットの境界(双方向)</b>。NAT GW＝<b>プライベートの外向き専用</b>(外からの接続開始は不可)。',tip:'IGW(Internet Gateway)＝VPCの玄関(双方向)。NAT Gateway＝プライベートの勝手口(出るだけ)。'},
+      {s:'プライベートサブネットの外向き専用。IPv6ならどっち？',a:'NAT Gateway',b:'Egress-Only Internet Gateway',ans:'b',why:'外向き専用は、<b>IPv4＝NAT Gateway / IPv6＝Egress-Only IGW</b>。役割は同じで対象アドレスが違う。',tip:'外向き専用の兄弟。IPv4はNAT Gateway、IPv6はEgress-Only Internet Gateway。'},
+      {s:'外向きNATをマネージドで高可用・自動スケールにしたい',a:'NAT Gateway',b:'NATインスタンス(自前EC2)',ans:'a',why:'NAT Gateway＝<b>マネージド・高可用・自動スケール</b>。NATインスタンスは自前EC2で運用が残り単一障害点になりがち。',tip:'楽して高可用＝NAT Gateway。自前EC2＝NATインスタンス(運用/冗長化が手間)。'},
+      {s:'多数のVPC/オンプレを1つのハブで相互接続する「ゲートウェイ」は？',a:'Transit Gateway(TGW)',b:'Direct Connect Gateway(DXGW)',ans:'a',why:'TGW＝<b>VPC/VPN/オンプレを束ねる中央ハブ</b>。DXGW＝<b>1本の専用線(DX)を複数リージョン/VPCへ配る中継</b>。',tip:'束ねるハブ＝TGW(Transit Gateway)。専用線(DX＝Direct Connect)を複数VPC/リージョンへ配る＝Direct Connect Gateway(DXGW)。'},
+      {s:'名前が似た2つ。APIの受付(認証・スロットリング)をするのは？',a:'Amazon API Gateway',b:'Gateway Load Balancer',ans:'a',why:'API Gateway＝<b>APIの入口(認証/スロットリング/変換)</b>。GWLB＝<b>サードパーティFW/IDS機器を経路に透過挿入するLB</b>。名前は似て全くの別物。',tip:'API GW(Amazon API Gateway)＝APIの受付。GWLB(Gateway Load Balancer)＝FW等の機器を経路に透過挿入するLB。別物。'},
+      {s:'オンプレからS3を「NFS/SMBのファイル共有」として使うStorage Gatewayは？',a:'File Gateway',b:'Volume Gateway',ans:'a',why:'Storage Gatewayは3種：<b>File(NFS/SMBファイル共有→S3)・Volume(iSCSIブロック→S3)・Tape(仮想テープVTL→S3/Glacier)</b>。',tip:'Storage Gatewayは3種＝File(ファイル共有)/Volume(iSCSIブロック)/Tape(仮想テープ)。用途で選ぶ。'}
     ]
   },
   'edge-hybrid': {
@@ -463,8 +479,8 @@ const decks = {
       {s:'テーブルをJOINして複雑な検索をするのは？',a:'RDS',b:'DynamoDB',ans:'a',why:'RDS=<b>SQL・JOIN・トランザクション</b>。DynamoDB=<b>キーで引くだけ・JOIN不可</b>。'},
       {s:'キーを渡すとミリ秒未満で値が返るのは？',a:'RDS',b:'DynamoDB',ans:'b',why:'DynamoDB=<b>キーバリュー・超高速</b>。RDS=<b>SQL・JOIN</b>でキー一発取り出しの速さは出ない。'},
       {s:'画像や動画などのファイルを保管するのは？',a:'DynamoDB',b:'S3',ans:'b',why:'S3=<b>ファイル/オブジェクトの保管庫</b>。DynamoDB=<b>キーで引く構造化データのDB</b>。'},
-      {s:'URLパス(L7)を見てHTTPを振り分けるのは？',a:'ALB',b:'NLB',ans:'a',why:'ALB=<b>L7・URLパスで振り分け</b>。NLB=<b>L4・TCP/UDPを超低遅延でそのまま流す</b>。'},
-      {s:'TCP/UDPを超低遅延でそのまま流す・固定IPなのは？',a:'ALB',b:'NLB',ans:'b',why:'NLB=<b>L4・TCP/UDP・固定IP・超低遅延</b>（中身は見ない）。ALB=<b>L7・URLパスで振り分け</b>。'},
+      {s:'URLパス(L7)を見てHTTPを振り分けるのは？',a:'ALB',b:'NLB',ans:'a',why:'ALB=<b>L7・URLパスで振り分け</b>。NLB=<b>L4・TCP/UDPを超低遅延でそのまま流す</b>。',tip:'ALB＝Application(L7・HTTPの中身/パス/ホスト振り分け・WebSocket・認証)。NLB＝Network(L4・TCP/UDP・中身見ない・超低遅延・固定IP)。「HTTPの機能が要る→ALB」。'},
+      {s:'TCP/UDPを超低遅延でそのまま流す・固定IPなのは？',a:'ALB',b:'NLB',ans:'b',why:'NLB=<b>L4・TCP/UDP・固定IP・超低遅延</b>（中身は見ない）。ALB=<b>L7・URLパスで振り分け</b>。',tip:'固定IP・送信元IP保持・超低遅延・非HTTP(TCP/UDP)＝NLB(L4)。HTTPの中身で振り分けるならALB(L7)。'},
       {s:'外から来た通信を受けて振り分けるのは？入口はどっち？',a:'NAT Gateway',b:'ALB',ans:'b',why:'ALB=<b>外からの通信を分配(入口)</b>。NAT GW=<b>プライベートから外に出る出口</b>。方向が逆。'},
       {s:'LambdaからRDSを大量に呼ぶ時の問題と対策は？',a:'接続数が枯渇→RDS Proxyで接続プール',b:'SQLが使えない',ans:'a',why:'Lambda=毎回新規接続。<b>RDS Proxyで接続プール</b>が定石。DynamoDBはHTTP APIで接続枯渇しない。'},
       {s:'「サーバーレスAPI」の鉄板構成は？',a:'API Gateway → Lambda → DynamoDB',b:'ALB → EC2 → RDS',ans:'a',why:'左が<b>サーバーレス鉄板</b>。右は全部サーバー管理が要る。'},
