@@ -1251,8 +1251,15 @@ function genJumon(){
       ?{seen:progress.seen||{},wrong:progress.wrong||{},wrongCount:progress.wrongCount||{},correctCount:progress.correctCount||{}}
       :readBankProg(b);
   });
-  document.getElementById('jOut').value=encodeJumon({v:2,banks:banks});
-  showToast('📜 全セット分のじゅもんを出しました。コピーしてもう片方の端末へ');
+  const payload={v:2,banks:banks};
+  // ⚡どっち（amida）の「間違えたものモード」記録も同梱する。
+  // 持ち運ぶ価値のある永久記録だけ。その場限りの定着カウント(amida_need_v1)は入れない＝呪文を短く保つ。
+  try{
+    const ev=JSON.parse(localStorage.getItem('amida_everwrong_v1'))||{};
+    if(ev&&Object.keys(ev).length) payload.amida={ever:ev};
+  }catch(e){}
+  document.getElementById('jOut').value=encodeJumon(payload);
+  showToast('📜 全セット＋⚡どっちのじゅもんを出しました。コピーしてもう片方の端末へ');
 }
 
 function copyJumon(){
@@ -1287,8 +1294,19 @@ function applyJumon(){
       if(b===currentBank())progress=merged;
       touched++;
     });
+    // ⚡どっち（amida）の間違えたものモード記録も合算（重複はスキップ・履歴は消えない）
+    let amidaMerged=0;
+    if(data.amida&&data.amida.ever&&typeof data.amida.ever==='object'){
+      let cur={};try{cur=JSON.parse(localStorage.getItem('amida_everwrong_v1'))||{};}catch(e){cur={};}
+      Object.entries(data.amida.ever).forEach(([deck,list])=>{
+        if(!Array.isArray(list))return;
+        if(!cur[deck])cur[deck]=[];
+        list.forEach(t=>{if(!cur[deck].includes(t)){cur[deck].push(t);amidaMerged++;}});
+      });
+      try{localStorage.setItem('amida_everwrong_v1',JSON.stringify(cur));}catch(e){}
+    }
     saveProgress();renderHome();closeJumon();
-    showToast('✨ '+touched+'セット分のじゅもんを合算しました（履歴は消えません）');
+    showToast('✨ '+touched+'セット'+(amidaMerged?'＋⚡どっち'+amidaMerged+'枚':'')+'を合算しました（履歴は消えません）');
     return;
   }
   // 旧・単一バンク版：今選んでいるセットに合算
