@@ -2,7 +2,7 @@
 // 各問: id, cat(テーマ), scenario(状況文), ask(本当の質問), options[4], answer(0-3), keypoint(本当に聞かれたこと), explain(なぜ正解), elim(消去法)
 // キーワードは <span class="kw">...</span> で強調
 
-const QUESTIONS = [
+var QUESTIONS = [
 {
   id:1, cards:["ELB (ALB/NLB)","Auto Scaling","RDS マルチAZ","複数AZ配置","RDS"], cat:"可用性", pattern:"q-web",
   scenario:"ある企業が、AWS Cloud上で3層構成のWebアプリケーションを単一リージョンで運用しています。フロントエンドはAmazon EC2インスタンス1台で稼働し、データベースにはAmazon RDS for MySQLを使用しています。同社は年に数回、テレビCMと連動した期間限定セールを実施しており、セール期間中はトラフィックが通常の10〜20倍に増加します。前回のセール時にはWebサーバーが応答不能となり、顧客が決済を完了できない事象が発生しました。セール期間以外のCPU使用率は平均5%程度です。ソリューションアーキテクトは、トラフィックの急増時にも可用性を維持しつつ、平常時のコストを最小限に抑える構成を設計する必要があります。",

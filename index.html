@@ -1080,19 +1080,31 @@ function reviewClear(){
 /* ===== 弱点をAIに相談するプロンプト生成 ===== */
 // 全バンクの問題を一度だけfetch+評価してキャッシュ
 let ALLBANKS=null,ALLREADY=false,ALLLOADING=false;const ALLCBS=[];
+// 全バンクの問題を <script> タグで逐次読み込みしてキャッシュ。
+// fetch を使わないので file:// でも GitHub Pages でも動く（fetchはfile://だとCORSでブロックされる）。
 function loadAllBanks(cb){
   if(ALLREADY){cb&&cb();return;}
   if(cb)ALLCBS.push(cb);
   if(ALLLOADING)return;
   ALLLOADING=true;ALLBANKS={};
-  const keys=Object.keys(BANKS);let pend=keys.length;
-  keys.forEach(b=>{
-    fetch(BANKS[b].file).then(r=>r.text()).then(t=>{
-      try{ALLBANKS[b]=(new Function(t+'\n;return QUESTIONS;'))();}catch(e){ALLBANKS[b]=[];}
-    }).catch(()=>{ALLBANKS[b]=[];}).then(()=>{
-      if(--pend===0){ALLREADY=true;ALLLOADING=false;ALLCBS.splice(0).forEach(f=>f());}
-    });
-  });
+  const cur=currentBank();
+  const curQ=(typeof QUESTIONS!=='undefined')?QUESTIONS:[];
+  ALLBANKS[cur]=curQ;                                   // 現在バンクはロード済み。先に退避
+  const keys=Object.keys(BANKS).filter(b=>b!==cur);     // 残りを順番に読む
+  let i=0;
+  (function next(){
+    if(i>=keys.length){
+      try{QUESTIONS=curQ;}catch(e){}                    // script読込で上書きされた現在バンクを復元
+      ALLREADY=true;ALLLOADING=false;ALLCBS.splice(0).forEach(f=>f());
+      return;
+    }
+    const b=keys[i++];
+    const s=document.createElement('script');
+    s.src=BANKS[b].file;
+    s.onload=function(){try{ALLBANKS[b]=QUESTIONS;}catch(e){ALLBANKS[b]=[];}next();};
+    s.onerror=function(){ALLBANKS[b]=[];next();};
+    document.head.appendChild(s);
+  })();
 }
 function bankProgFor(b){return b===currentBank()?progress:readBankProg(b);}
 function buildWeaknessPrompt(){
