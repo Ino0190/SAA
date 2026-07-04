@@ -221,6 +221,8 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 
   <div id="bankToggle" class="bankToggle"></div>
 
+  <div id="allBankProg"></div>
+
   <div class="tip">
     <b>読み方の型：</b>長い状況説明はほぼ飾り。<b>最後の1行</b>と、その中の<b>キーワード</b>（コスト最小／手間最小／可用性最大／最も安全 など）だけが正解を決める。選択肢4つのうち2つは「やりすぎ」か「明らかに違う」。
   </div>
@@ -470,6 +472,23 @@ function renderHome(){
   if(!themeTab)themeTab=currentBank();
   loadAllBanks(()=>{renderThemeGraph();updateCrossCount();});
   renderThemeGraph();
+  renderAllBankProg();
+}
+// 全セットの進捗を各バンクのlocalStorageから直接読んで一覧表示（呪文の復元確認用・問題ファイル取得は不要）
+function renderAllBankProg(){
+  const el=document.getElementById('allBankProg'); if(!el) return;
+  const rows=Object.keys(BANKS).map(b=>{
+    const p=readBankProg(b);
+    const seen=Object.keys(p.seen||{}).length;
+    const wrong=Object.keys(p.wrong||{}).filter(id=>p.wrong[id]).length;
+    const label=(BANKS[b]&&BANKS[b].label)||b;
+    const cur=(b===currentBank());
+    return '<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 10px;font-size:14px;'+(cur?'background:#edf2f4;font-weight:700;':'')+'cursor:pointer" onclick="setBank(\''+b+'\')">'+
+      '<span style="color:#183251">'+(cur?'▶ ':'')+label+'</span>'+
+      '<span style="color:#5e5e5e">学習 '+seen+'・間違い '+wrong+'</span></div>';
+  }).join('');
+  el.innerHTML='<div style="border:1px solid #c8c2b0;background:#fff;margin:0 0 14px">'+
+    '<div style="font-size:13px;font-weight:700;color:#5e5e5e;padding:8px 10px;border-bottom:1px solid #eee">📚 全セットの進捗（タップでそのセットに切替）</div>'+rows+'</div>';
 }
 function updateCrossCount(){
   const el=document.getElementById('cntCross');if(!el)return;
