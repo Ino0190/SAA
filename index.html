@@ -1285,7 +1285,7 @@ function applyJumon(){
   if(!data||typeof data!=='object'){alert('じゅもんの中身が読み取れませんでした。');return;}
   // 全バンク版（v2）：各セットの進捗をそれぞれのlocalStorageへ合算
   if(data.banks&&typeof data.banks==='object'){
-    let touched=0;
+    let touched=0; const lines=[];
     Object.keys(data.banks).forEach(b=>{
       const inc=data.banks[b];if(!inc)return;
       const cur=(b===currentBank())?progress:readBankProg(b);
@@ -1293,6 +1293,9 @@ function applyJumon(){
       localStorage.setItem(bankLSKey(b),JSON.stringify(merged));
       if(b===currentBank())progress=merged;
       touched++;
+      const seenN=Object.keys(merged.seen||{}).length;
+      const wrongN=Object.keys(merged.wrong||{}).filter(id=>merged.wrong[id]).length;
+      lines.push('・'+((BANKS[b]&&BANKS[b].label)||b)+'：学習'+seenN+'問／間違い'+wrongN+'問');
     });
     // ⚡どっち（amida）の間違えたものモード記録も合算（重複はスキップ・履歴は消えない）
     let amidaMerged=0;
@@ -1306,7 +1309,7 @@ function applyJumon(){
       try{localStorage.setItem('amida_everwrong_v1',JSON.stringify(cur));}catch(e){}
     }
     saveProgress();renderHome();closeJumon();
-    showToast('✨ '+touched+'セット'+(amidaMerged?'＋⚡どっち'+amidaMerged+'枚':'')+'を合算しました（履歴は消えません）');
+    alert('✨ 全'+touched+'セットを復元しました（履歴は消えません）\n\n'+lines.join('\n')+(amidaMerged?'\n・⚡どっち：+'+amidaMerged+'枚':'')+'\n\n※ホームは「いま選んでいる問題セット」だけを表示します。上の A〜E を切り替えると各セットの復元内容が見られます。');
     return;
   }
   // 旧・単一バンク版：今選んでいるセットに合算
