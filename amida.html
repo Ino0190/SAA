@@ -39,6 +39,12 @@ body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;backgro
 .res-why b{color:#183251}
 .nextbtn{background:#21537f;color:#fff;border:none;padding:14px 32px;font-size:16px;cursor:pointer;font-family:inherit;font-weight:700}
 .nextbtn:hover{background:#162a42}
+.res-btns{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.backbtn{background:#fafafa;color:#21537f;border:1px solid #c8c2b0;padding:14px 22px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700}
+.backbtn:hover{background:#edf2f4;border-color:#21537f}
+.backbtn:disabled{opacity:.3;cursor:default}
+.quiz-back{margin-top:22px;background:transparent;color:#5e5e5e;border:1px solid #c8c2b0;padding:9px 18px;font-size:14px;cursor:pointer;font-family:inherit;font-weight:700}
+.quiz-back:hover{background:#edf2f4;color:#21537f;border-color:#21537f}
 
 /* スコア */
 .score{display:none;flex-direction:column;align-items:center}
@@ -72,13 +78,17 @@ body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;backgro
     <div class="progress" id="progress"></div>
     <div class="situation" id="situation"></div>
     <div class="choices" id="choices"></div>
+    <button class="quiz-back" id="quiz-back" style="display:none">← 前の問題の解説を見る</button>
   </div>
   <div class="result" id="result">
     <div class="res-icon" id="res-icon"></div>
     <div class="res-text" id="res-text"></div>
     <div class="res-ans" id="res-ans"></div>
     <div class="res-why" id="res-why"></div>
-    <button class="nextbtn" id="nextbtn">次へ</button>
+    <div class="res-btns">
+      <button class="backbtn" id="backbtn">← 前へ</button>
+      <button class="nextbtn" id="nextbtn">次へ →</button>
+    </div>
   </div>
   <div class="score" id="score">
     <div class="score-num" id="score-num"></div>
@@ -133,7 +143,7 @@ const decks = {
       {s:'決済DBで一瞬の遅延も許されない・最高IOPS',a:'gp3（汎用SSD）',b:'io2 Block Express',ans:'b',why:'io2=<b>サブミリ秒・最高IOPS</b>。ミッションクリティカル用。'},
       {s:'大容量ログのシーケンシャル読み書き（安く）',a:'st1（スループットHDD）',b:'gp3（汎用SSD）',ans:'a',why:'st1=<b>シーケンシャル・高スループット・安いHDD</b>。'},
       {s:'めったにアクセスしないコールドデータ（最安HDD）',a:'st1（スループットHDD）',b:'sc1（Cold HDD）',ans:'b',why:'sc1=<b>最安HDD・めったに触らない</b>。st1は頻繁に読む。'},
-      {s:'EC2停止してもデータは残る？',a:'EBS=残る',b:'インスタンスストア=消える',ans:'a',why:'EBS=<b>永続</b>。インスタンスストア=停止で消える。'},
+      {s:'EC2を停止してもデータが残るのはどっち？',a:'EBS',b:'インスタンスストア',ans:'a',why:'EBS=<b>永続（停止しても残る）</b>。インスタンスストア=<b>停止で消える使い捨て</b>。'},
       {s:'一時データ・スクラッチ用で超低レイテンシ（消えてOK）',a:'EBS（Elastic Block Store）',b:'インスタンスストア',ans:'b',why:'インスタンスストア=<b>ホスト直結・超高速・揮発</b>。'},
       {s:'複数AZにまたがって自動で冗長化されるファイルシステムは？',a:'EBS',b:'EFS',ans:'b',why:'EFS=<b>複数AZに自動冗長・複数EC2から共有</b>。EBSは<b>単一AZ</b>に閉じる。'},
       {s:'EBSボリュームはAZをまたげる？',a:'またげる',b:'またげない（単一AZ・別AZはスナップショット経由）',ans:'b',why:'EBS=<b>単一AZ</b>。別AZで使うにはスナップショットから作り直す。'},
@@ -330,7 +340,7 @@ const decks = {
     cards: [
       {s:'常時起動の安定ワークロード（1-3年確約OK）',a:'オンデマンド',b:'Reserved Instance / Savings Plan',ans:'b',why:'確約=<b>最大72%割引</b>。オンデマンドは定価。'},
       {s:'中断されても問題ない処理を安く',a:'スポットインスタンス',b:'オンデマンド',ans:'a',why:'スポット=<b>最大90%割引</b>。ただし2分前通知で追い出される。'},
-      {s:'Compute Savings PlanとEC2 Instance SPの違い',a:'Compute SP=EC2/Fargate/Lambda柔軟',b:'EC2 Instance SP=特定ファミリー固定',ans:'a',why:'Compute SP=<b>柔軟</b>（ファミリー/リージョン変更可）。EC2 Instance SP=固定で割引最大。'},
+      {s:'割引はほしいがEC2以外(Fargate/Lambda)や別ファミリーにも効かせたい。選ぶのは？',a:'Compute Savings Plan',b:'EC2 Instance Savings Plan',ans:'a',why:'Compute SP=<b>EC2/Fargate/Lambda横断・ファミリー/リージョン変更可で柔軟</b>。EC2 Instance SP=<b>特定ファミリー固定で割引率は最大だが柔軟性なし</b>。'},
       {s:'S3のアクセス頻度が読めない（自動で最安に）',a:'S3 Intelligent-Tiering',b:'S3 Standard-IA',ans:'a',why:'Intelligent-Tiering=<b>自動移動</b>。手動判断不要。'},
       {s:'プライベートEC2→S3で「NAT Gatewayのデータ処理料金」を減らす',a:'NAT GW経由のまま',b:'S3 VPCエンドポイント(GW型・無料)',ans:'b',why:'ゲートウェイ型=<b>追加料金なし</b>。NAT GW=データ処理課金。'},
       {s:'EBSスナップショットの自動世代管理（削除も自動）',a:'Data Lifecycle Manager(DLM)',b:'スナップショットを取るだけ（削除は未設定）',ans:'a',why:'DLM=<b>タグ+スケジュールで作成も削除も自動</b>。スナップショットを取るだけでは古い世代が溜まりコスト増。'},
@@ -418,13 +428,13 @@ const decks = {
       {s:'インスタンスストアのデータはEC2停止で？',a:'残る',b:'消える',ans:'b',why:'インスタンスストア=<b>停止で消える</b>使い捨て。永続はEBS。'},
       {s:'Aurora Global Database は読み書き両方を別リージョンで？',a:'はい',b:'いいえ（読み取りだけ）',ans:'b',why:'Global DB=<b>書き込みは1リージョン</b>。読み書き両方別リージョンはDynamoDB Global Tables。'},
       {s:'「予約済み同時実行(Reserved)」でコスト削減できる？',a:'できる',b:'できない（枠確保するだけ）',ans:'b',why:'Reserved Concurrency=<b>上限設定</b>。コスト削減はしない。Provisioned Concurrencyと混同する罠。'},
-      {s:'Config vs Security Hub',a:'Config=個々の設定を評価',b:'Security Hub=検出結果を集約',ans:'a',why:'両方正解の説明だが<b>問われ方が違う</b>。Configは継続評価、Security Hubは複数サービスの結果を1画面に。'},
-      {s:'GuardDuty vs Inspector',a:'GuardDuty=脅威検知(攻撃の動き)',b:'Inspector=脆弱性スキャン(弱点)',ans:'a',why:'GuardDuty=<b>不審な動きを検知</b>。Inspector=<b>EC2/コンテナのCVE脆弱性を検査</b>。'},
-      {s:'Macie vs GuardDuty',a:'Macie=S3の機密データ(PII)検出',b:'GuardDuty=S3の不審アクセス検知',ans:'a',why:'Macie=<b>個人情報を探す鑑定士</b>。GuardDuty=不正アクセスの見回り。'},
-      {s:'Control Tower vs Organizations',a:'Control Tower=ガードレール＋環境自動構築',b:'Organizations=アカウントを束ねる土台',ans:'b',why:'<b>両方正解だが主語が違う</b>。Organizations=束ねるだけ。Control Tower=その上にログ/ガードレール/SSO込みの標準環境を自動構築。'},
+      {s:'個々のリソースの設定が基準どおりか継続的に評価するのは？',a:'AWS Config',b:'Security Hub',ans:'a',why:'Config=<b>個々のリソース設定を継続的に評価</b>。Security Hub=<b>複数サービスの検出結果を1画面に集約</b>。'},
+      {s:'不審な挙動・攻撃の動き（脅威）を検知するのは？',a:'GuardDuty',b:'Inspector',ans:'a',why:'GuardDuty=<b>不審な動き(脅威)を検知</b>。Inspector=<b>EC2/コンテナのCVE脆弱性をスキャン</b>。'},
+      {s:'S3内の個人情報(PII)など機密データを検出するのは？',a:'Macie',b:'GuardDuty',ans:'a',why:'Macie=<b>S3の機密データ(PII)を検出</b>。GuardDuty=<b>不審アクセスの脅威検知</b>で用途が違う。'},
+      {s:'複数アカウントを束ねる「土台」そのものはどっち？',a:'Control Tower',b:'Organizations',ans:'b',why:'Organizations=<b>アカウントを束ねる土台</b>。Control Tower=<b>その上にガードレール/ログ/SSO込みの標準環境を自動構築</b>。'},
       {s:'CloudTrailの「管理イベント」はデフォルトON？',a:'はい',b:'いいえ（手動で有効化が要る）',ans:'a',why:'管理イベント=<b>デフォルトON</b>。データイベント(S3 GetObject等)は明示的に有効化が要る。'},
       {s:'DynamoDB Streams vs TTL、どっちが「変更検知」？',a:'Streams',b:'TTL',ans:'a',why:'Streams=<b>イベントベース(変更検知)</b>。TTL=<b>時間ベース(期限切れ削除)</b>。'},
-      {s:'VPC Lattice vs Transit Gateway',a:'VPC Lattice=L7・マイクロサービス間通信',b:'Transit Gateway=L3・VPC/オンプレ接続のハブ',ans:'a',why:'Lattice=<b>L7ビル受付</b>。TGW=<b>L3駅ターミナル</b>。層が違う。'},
+      {s:'L7でマイクロサービス間の通信を管理するのは？',a:'VPC Lattice',b:'Transit Gateway',ans:'a',why:'VPC Lattice=<b>L7・サービス間通信の管理</b>。Transit Gateway=<b>L3・VPC/オンプレ接続のハブ</b>で層が違う。'},
       {s:'「セッション共有・ホットデータのキャッシュ」',a:'ElastiCache（Redis）',b:'DynamoDB',ans:'a',why:'ElastiCache=<b>インメモリ・マイクロ秒</b>。セッション/ランキング/キャッシュはRedisの出番。'},
       {s:'GuardDutyが検知した後「なぜ/誰が関与」を調査',a:'Inspector',b:'Detective',ans:'b',why:'Detective=<b>検知の先の調査・関係者の可視化</b>。Inspectorは脆弱性スキャン。'},
       {s:'S3を非公開のまま、一時的にURLでアクセスさせたい',a:'バケットポリシーを公開に変更',b:'署名付きURL（Presigned URL）',ans:'b',why:'署名付きURL=<b>期限付き一時アクセス</b>。バケット公開は永続で危険。'},
@@ -531,6 +541,8 @@ let currentId = null;
 let queue = [];                 // まだ定着していないカードidxの待ち行列
 let needMap = {};               // カードidx → 定着までに必要な残り正解数（<=0で定着）
 let missed = new Set();         // 一度でも間違えたカードidx（保存対象）
+let history = [];               // 回答済み結果の履歴（解説の読み返し用・採点はしない）
+let reviewIdx = null;           // 履歴レビュー中の位置（null=ライブの問題中）
 
 const $ = id => document.getElementById(id);
 function showOnly(id){
@@ -611,7 +623,7 @@ function startEverWrongMode(){
   cards.forEach(c => { c._deck = deckOf[c.s] || currentId; });
   current = { name:'❗️間違えたものモード', cards, _ever:true };
   currentId = '__everwrong__';
-  needMap = {}; missed = new Set();
+  needMap = {}; missed = new Set(); history = []; reviewIdx = null;
   cards.forEach((c,i)=> needMap[i]=1);   // 復習は1回正解で一旦クリア（記録自体は永久に残る）
   queue = shuffle(cards.map((_,i)=>i));
   showQ();
@@ -630,6 +642,7 @@ function startDeck(id, fresh){
   const saved = loadStore()[id] || {};
   needMap = {};
   missed = new Set();
+  history = []; reviewIdx = null;
   current.cards.forEach((c,i) => {
     if(saved[c.s] > 0){ needMap[i] = saved[c.s]; missed.add(i); } // 前回の間違えを引き継ぐ
     else { needMap[i] = 1; }                                      // 初見は1回正解で定着
@@ -643,8 +656,10 @@ function masteredCount(){
 }
 
 function showQ(){
+  reviewIdx = null;                 // ライブ（今の問題）に戻る
   if(queue.length === 0){ showScore(); return; }
   const c = current.cards[queue[0]];
+  $('quiz-back').style.display = history.length > 0 ? 'inline-block' : 'none';
   $('progress').textContent = `覚えた ${masteredCount()} / ${current.cards.length}　・　残り ${queue.length}`;
   $('situation').textContent = c.s;
   const wrap = $('choices');
@@ -677,19 +692,43 @@ function answer(picked){
   if(needMap[i] > 0) queue.splice(Math.min(3, queue.length), 0, i);
   persistNeed();
 
-  $('res-icon').textContent = ok ? '⭕' : '❌';
   let head = ok ? '正解' : '不正解';
   if(ok && needMap[i] <= 0) head = '正解 ✅ 定着！';
   else if(ok) head = `正解 ⭕ あと${needMap[i]}回で定着`;
   else head = `不正解 ❌ ${MASTER_NEED}回連続で正解すると定着`;
-  $('res-text').textContent = head;
-  $('res-text').className = 'res-text ' + (ok ? 'ok' : 'ng');
-  $('res-ans').textContent = '→ ' + c[c.ans];
-  $('res-why').innerHTML = c.why;
+
+  // 結果を履歴に積む（あとで「前へ」で解説を読み返せる）
+  history.push({ icon: ok ? '⭕' : '❌', head, cls: ok ? 'ok' : 'ng', ans: '→ ' + c[c.ans], why: c.why });
+  renderResult(history.length - 1);
+}
+
+// 履歴上の結果を表示する（k=historyのインデックス）。読み返し専用で採点はしない。
+function renderResult(k){
+  reviewIdx = k;
+  const h = history[k];
+  $('res-icon').textContent = h.icon;
+  $('res-text').textContent = h.head;
+  $('res-text').className = 'res-text ' + h.cls;
+  $('res-ans').textContent = h.ans;
+  $('res-why').innerHTML = h.why;
+  $('backbtn').disabled = (k <= 0);                                   // これ以上前がなければ無効
+  $('nextbtn').textContent = (k >= history.length - 1) ? '次へ →' : '次の解説 →';
   showOnly('result');
 }
 
-$('nextbtn').onclick = () => showQ();
+// 「次へ」= 履歴を見ている途中なら新しい方向へ、最新まで来たら次の問題へ
+$('nextbtn').onclick = () => {
+  if(reviewIdx !== null && reviewIdx < history.length - 1) renderResult(reviewIdx + 1);
+  else { reviewIdx = null; showQ(); }
+};
+// 「前へ」= ひとつ古い解説へ戻る
+$('backbtn').onclick = () => {
+  if(reviewIdx !== null && reviewIdx > 0) renderResult(reviewIdx - 1);
+};
+// 問題画面から「前の問題の解説を見る」= 最新の結果を開く
+$('quiz-back').onclick = () => {
+  if(history.length > 0) renderResult(history.length - 1);
+};
 
 function showScore(){
   const total = current.cards.length;
