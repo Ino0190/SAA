@@ -1166,8 +1166,8 @@ function renderThemeGraph(){
   const host=document.getElementById('themeWrap');if(!host)return;
   const sel=themeTab||currentBank();
   let tabs='<div class="themetabs">'+Object.keys(BANKS).map(b=>
-    `<button class="ttab${sel===b?' on':''}" data-tab="${b}">${(BANKS[b].label||b).split('・')[0]}</button>`).join('')
-    +`<button class="ttab${sel==='__all'?' on':''}" data-tab="__all">全体</button></div>`;
+    `<button class="ttab${sel===b?' on':''}" data-tab="${b}" onclick="selectThemeTab('${b}')">${(BANKS[b].label||b).split('・')[0]}</button>`).join('')
+    +`<button class="ttab${sel==='__all'?' on':''}" data-tab="__all" onclick="selectThemeTab('__all')">全体</button></div>`;
   if(sel!=='__all'&&sel!==currentBank()&&!ALLREADY){
     host.innerHTML=tabs+'<div style="color:var(--sub);font-size:14px;padding:10px 2px">読み込み中…</div>';
     loadAllBanks(()=>renderThemeGraph());return;
@@ -1190,14 +1190,18 @@ function renderThemeGraph(){
       +`<div class="tbar-l">${r.c} <span class="tbar-n">${r.seen}/${r.n}</span></div>`
       +`<div class="tbar-track">${seg}<span class="tbar-v">${val}</span></div></div>`;
   }).join('');
+  const barsHtml = rows.length ? bars
+    : '<div style="color:var(--sub);font-size:14px;padding:10px 2px">このセットの表示データがありません。ファイルを直接開いている場合は <b>サーバー経由</b>（python3 -m http.server）で開くと他セットも読み込めます。</div>';
   const legend='<div class="tlegend"><span><i style="background:#2ecc71"></i>正解</span>'
     +'<span><i style="background:#e0a52e"></i>自信なし/AI相談</span>'
     +'<span><i style="background:#e74c3c"></i>間違えた</span></div>';
   const hint=sel==='__all'
     ?'全セット合算。バーをタップでそのセットへ切替を促します。'
     :'バーをタップでその分野を解く（別セット選択中はまず切替）。';
-  host.innerHTML=tabs+legend+'<div class="tbars">'+bars+'</div><div class="themehint">'+hint+'</div>';
+  host.innerHTML=tabs+legend+'<div class="tbars">'+barsHtml+'</div><div class="themehint">'+hint+'</div>';
 }
+// タブ直接クリック用（イベント委譲が効かない環境の保険）
+function selectThemeTab(t){themeTab=t;renderThemeGraph();}
 function themeWrapClick(e){
   const tb=e.target.closest('.ttab');
   if(tb){themeTab=tb.dataset.tab;renderThemeGraph();return;}
