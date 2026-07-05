@@ -46,6 +46,15 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 .xchip b{font-size:15px;color:var(--accent);font-weight:700}
 .xchip.xall{border-color:var(--accent);font-weight:700}
 
+/* 弱点特訓チップ */
+.weakchips{display:flex;flex-wrap:wrap;gap:8px}
+.wchip{background:var(--card);border:2px solid var(--ng);border-radius:20px;padding:8px 14px;font-size:15px;cursor:pointer;display:flex;gap:8px;align-items:center;transition:.15s}
+.wchip:active{transform:scale(.97)}
+.wchip.on{background:rgba(231,76,60,.15)}
+.wchip:not(.on){border-color:var(--line);opacity:.5}
+.wchip-rate{color:var(--ng);font-weight:700;font-size:14px}
+.wchip-cnt{color:var(--sub);font-size:13px}
+
 /* テーマ別グラフ */
 .themetabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
 .ttab{font-size:14px;padding:7px 14px;border-radius:18px;border:1px solid var(--line);background:var(--card);color:var(--sub);cursor:pointer;font-family:inherit;font-weight:700}
@@ -254,6 +263,12 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
     <p>前回ミスした問題を、間違えた回数の多い順に復習。</p>
     <div class="cnt" id="cntWrong"></div>
   </div>
+  <div class="modecard" onclick="openWeakness()" style="border-color:var(--ng)">
+    <h3 style="color:var(--ng)">🔥 弱点特訓</h3>
+    <p>ミス率の高い分野を自動検出し、全バンクから横断で20問。弱点を集中攻撃。</p>
+    <div class="cnt" id="cntWeak"></div>
+  </div>
+
   <div class="modecard" onclick="openCrossWrong()" style="border-color:var(--accent)">
     <h3 style="color:var(--accent)">🌐 全セット横断で間違いを解き直す</h3>
     <p>A〜D全バンクの間違いを分野で絞って解き直す。正解すれば各セットの「間違えた問題」から外れ、数字が動く。データ分析だけ・ネットワークだけ、と弱点を集中攻撃できる。</p>
@@ -324,6 +339,17 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
   <div id="xpickWrap" class="xpick"></div>
   <div style="text-align:center;margin-top:18px">
     <button class="btn ghost small" style="width:auto;display:inline-block;padding:8px 18px" onclick="goHome()">ホームへ</button>
+  </div>
+</section>
+
+<!-- 弱点特訓 確認画面 -->
+<section class="screen" id="scWeakConfirm">
+  <h2 style="font-size:20px;margin-bottom:14px">🔥 弱点特訓</h2>
+  <p style="font-size:16px;color:var(--sub);margin-bottom:16px">ミス率40%以上の分野を検出しました。タップで除外できます。</p>
+  <div id="weakChips" class="weakchips"></div>
+  <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+    <button class="btn primary" id="weakStartBtn" onclick="startWeakness()">この 20 問で開始</button>
+    <button class="btn ghost" onclick="goHome()">やめる</button>
   </div>
 </section>
 
@@ -530,7 +556,12 @@ function startMode(mode,cat){
 function renderQ(){
   const q=state.list[state.idx];
   state.answered=false;state.sel=isMulti(q)?[]:null;
-  document.getElementById('qCat').textContent=q.cat;
+  if((state.mode==='weakness'||state.mode==='xwrong')&&q._bank){
+    var bankLabel=(BANKS[q._bank].label||q._bank).split('・')[0];
+    document.getElementById('qCat').textContent='['+bankLabel+'] '+q.cat;
+  }else{
+    document.getElementById('qCat').textContent=q.cat;
+  }
   document.getElementById('qIdx').textContent=`${state.idx+1} / ${state.list.length}`;
   let multiHint='';
   if(isMulti(q)){const n=ansArr(q).length;multiHint=`<div class="multiHint">✓ ${n}つ選んでください（複数選択）</div>`;}
@@ -593,7 +624,7 @@ function revealAnswer(){
   state.session.total++;
   if(correct)state.session.correct++;else state.session.wrongIds.push(q.id);
   // 記録（横断モード=xwrong では問題が属するバンクのLSへ書き戻す）
-  const tgtBank=(state.mode==='xwrong'&&q._bank)?q._bank:currentBank();
+  const tgtBank=((state.mode==='xwrong'||state.mode==='weakness')&&q._bank)?q._bank:currentBank();
   const pr=(tgtBank===currentBank())?progress:readBankProg(tgtBank);
   pr.seen[q.id]=true;
   pr.wrong[q.id]=!correct; // 正解したら false に上書き（復習リストから外れる）
@@ -679,13 +710,33 @@ function finish(){
     state.session.wrongIds.forEach(id=>{
       const q=state.list.find(x=>x.id===id)||QUESTIONS.find(x=>x.id===id);
       if(!q)return;
-      const tgt=(state.mode==='xwrong'&&q._bank)?bankProgFor(q._bank):progress;
+      const tgt=((state.mode==='xwrong'||state.mode==='weakness')&&q._bank)?bankProgFor(q._bank):progress;
       const wc=(tgt.wrongCount&&tgt.wrongCount[id])||0;
       const badge=wc>=2?` <span style="color:var(--ng)">✕${wc}回目</span>`:'';
       const d=document.createElement('div');d.className='ritem';
       d.innerHTML=`<div class="rc">${q.cat}${badge}</div>${q.ask}`;
       rv.appendChild(d);
     });
+  }
+  // 弱点特訓モード追加表示
+  if(state.mode==='weakness'){
+    var overcomeCount=0;
+    if(window._weakWrongBefore){
+      state.list.forEach(function(q){
+        var key=q._bank+'|'+q.id;
+        if(window._weakWrongBefore[key]){
+          var pr=bankProgFor(q._bank);
+          if(!pr.wrong[q.id])overcomeCount++;
+        }
+      });
+    }
+    var extra='<div style="margin-top:18px;padding:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;text-align:center">'+
+      '<div style="font-size:17px;font-weight:700;color:var(--ok);margin-bottom:6px">✅ 克服した問題: '+overcomeCount+' 問</div>'+
+      '<div style="font-size:14px;color:var(--sub)">正解して「間違えた問題」から外れた数</div></div>'+
+      '<div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">'+
+      '<button class="btn primary" onclick="openWeakness()">次の弱点特訓</button>'+
+      '<button class="btn ghost" onclick="goHome()">ホームに戻る</button></div>';
+    rv.insertAdjacentHTML('beforeend',extra);
   }
   renderHome();
 }
@@ -734,7 +785,7 @@ opts,
 function markUnsure(id,silent){
   // 「自信がなかった」＝正解でも復習プールに入れる（横断モードは問題のバンクへ）
   const xq=state.list.find(x=>x.id===id);
-  const tgtBank=(state.mode==='xwrong'&&xq&&xq._bank)?xq._bank:currentBank();
+  const tgtBank=((state.mode==='xwrong'||state.mode==='weakness')&&xq&&xq._bank)?xq._bank:currentBank();
   const pr=(tgtBank===currentBank())?progress:readBankProg(tgtBank);
   pr.wrong[id]=true;
   pr.unsure=pr.unsure||{};
@@ -1162,6 +1213,128 @@ function weakFallback(text,done){
   document.body.appendChild(ta);ta.focus();ta.select();
   try{document.execCommand('copy');done&&done();}catch(e){showToast('コピーできませんでした。長押しで選択してください');}
   document.body.removeChild(ta);
+}
+
+/* ===== 弱点特訓モード ===== */
+function detectWeak(){
+  try{
+    const rows=computeThemeRows('__all');
+    if(!rows||!rows.length)return [];
+    // poolCount: 各カテゴリに属する問題の総数（全バンク横断）
+    const poolMap={};
+    Object.keys(BANKS).forEach(b=>{
+      (ALLBANKS[b]||[]).forEach(q=>{poolMap[q.cat]=(poolMap[q.cat]||0)+1;});
+    });
+    return rows
+      .filter(r=>r.seen>=5&&(r.red+r.yellow)/r.seen>=0.4)
+      .map(r=>({cat:r.c,seen:r.seen,red:r.red,yellow:r.yellow,green:r.green,
+        missRate:Math.round((r.red+r.yellow)/r.seen*100)/100,
+        poolCount:poolMap[r.c]||0,enabled:true}))
+      .sort((a,b)=>b.missRate-a.missRate);
+  }catch(e){return [];}
+}
+
+function buildWeaknessPool(weakCats){
+  const enabledSet=new Set(weakCats.filter(c=>c.enabled).map(c=>c.cat));
+  const disabledSet=new Set(weakCats.filter(c=>!c.enabled).map(c=>c.cat));
+  const missRateMap={};
+  weakCats.forEach(c=>{missRateMap[c.cat]=c.missRate;});
+  const seen=new Set();
+  const out=[];
+  Object.keys(BANKS).forEach(b=>{
+    const arr=ALLBANKS[b]||[];
+    const pr=bankProgFor(b);
+    arr.forEach(q=>{
+      if(disabledSet.has(q.cat))return;
+      const key=b+'|'+q.id;
+      if(seen.has(key))return;
+      const wc=(pr.wrongCount&&pr.wrongCount[q.id])||0;
+      const isUnsure=!!(pr.unsure&&pr.unsure[q.id]);
+      const isWrong=!!(pr.wrong&&pr.wrong[q.id]);
+      const isSeen=!!(pr.seen&&pr.seen[q.id]);
+      const inEnabledWeak=enabledSet.has(q.cat)&&isSeen;
+      if(inEnabledWeak||wc>=2||isUnsure){
+        seen.add(key);
+        const catMissRate=missRateMap[q.cat]||0;
+        out.push(Object.assign({},q,{_bank:b,_wc:wc,_unsure:isUnsure,_wrong:isWrong,_missRate:catMissRate}));
+      }
+    });
+  });
+  return out;
+}
+
+function sortAndCap(pool){
+  pool.sort(function(a,b){
+    if(b._wc!==a._wc)return b._wc-a._wc;
+    if(b._unsure!==a._unsure)return b._unsure?1:-1;
+    if(b._wrong!==a._wrong)return b._wrong?1:-1;
+    if(b._missRate!==a._missRate)return b._missRate-a._missRate;
+    return Math.random()-0.5;
+  });
+  return pool.slice(0,20);
+}
+
+function openWeakness(){
+  showToast('⏳ 弱点を分析中…');
+  loadAllBanks(function(){
+    var weakCats=detectWeak();
+    if(!weakCats.length){
+      var pool=buildWeaknessPool([]);
+      if(!pool.length){
+        showToast('弱点はありません🎉');
+        return;
+      }
+    }
+    window._weakCats=weakCats;
+    renderWeakConfirm();
+  });
+}
+
+function renderWeakConfirm(){
+  var cats=window._weakCats;
+  var wrap=document.getElementById('weakChips');
+  wrap.innerHTML=cats.map(function(c,i){
+    return '<div class="wchip on" data-i="'+i+'" onclick="toggleWeakChip('+i+')">'+
+      '<span class="wchip-name">'+c.cat+'</span>'+
+      '<span class="wchip-rate">'+Math.round(c.missRate*100)+'%</span>'+
+      '<span class="wchip-cnt">'+c.poolCount+'問</span></div>';
+  }).join('');
+  updateWeakCount();
+  show('scWeakConfirm');
+  document.getElementById('btnRow').style.display='none';
+  document.getElementById('hTitle').textContent='🔥 弱点特訓';
+}
+
+function toggleWeakChip(i){
+  window._weakCats[i].enabled=!window._weakCats[i].enabled;
+  var chips=document.querySelectorAll('#weakChips .wchip');
+  chips[i].classList.toggle('on',window._weakCats[i].enabled);
+  updateWeakCount();
+}
+
+function updateWeakCount(){
+  var pool=buildWeaknessPool(window._weakCats);
+  var n=Math.min(pool.length,20);
+  var btn=document.getElementById('weakStartBtn');
+  btn.textContent='この '+n+' 問で開始';
+  btn.disabled=(n===0);
+}
+
+function startWeakness(){
+  var pool=buildWeaknessPool(window._weakCats);
+  var list=sortAndCap(pool);
+  if(!list.length){showToast('対象の問題がありません');return;}
+  // Record which questions were wrong before session (for "克服" count at result)
+  window._weakWrongBefore={};
+  list.forEach(function(q){if(q._wrong)window._weakWrongBefore[q._bank+'|'+q.id]=true;});
+  state.mode='weakness';
+  state.list=list;
+  state.idx=0;
+  state.session={correct:0,total:0,wrongIds:[]};
+  show('scQuiz');
+  document.getElementById('btnRow').style.display='flex';
+  document.getElementById('hTitle').textContent='弱点特訓';
+  renderQ();
 }
 
 /* ===== テーマ別 正答率グラフ（V1〜V4タブ＋全体） ===== */
