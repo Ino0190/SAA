@@ -176,6 +176,8 @@ const decks = {
       {s:'EC2を停止(Stop)するとデータが消えるのは？',a:'EBS',b:'インスタンスストア',ans:'b',why:'インスタンスストア=<b>停止で揮発</b>（ホスト直結の使い捨て）。EBSは永続。'},
       {s:'S3の「99.999999999%(11 9s)」は何を表す？',a:'耐久性（データが失われない）',b:'可用性（アクセスできる）',ans:'a',why:'11 9s=<b>耐久性(durability)</b>。可用性(availability)はクラスにより99.9〜99.99%で別物。'},
       {s:'EFSを最も安くするには（低頻度アクセス）？',a:'EFS標準のまま',b:'EFS-IA + ライフサイクル自動移行',ans:'b',why:'EFS-IA=<b>低頻度クラスへ自動移行して節約</b>。S3のIAと同じ発想。'},
+      {s:'S3バージョニング有効時、オブジェクトを「削除」すると実体はどうなる？',a:'完全に消える',b:'削除マーカーが付くだけ（実体は残る）',ans:'b',why:'バージョニング有効時の削除＝<b>削除マーカー</b>。実体は旧バージョンとして残り復元可能。',tip:'バージョニング＝上書き/削除しても旧版が残る保険。完全削除にはバージョンIDを指定する必要がある。'},
+      {s:'S3バージョニングで「バージョンIDを指定した完全削除」すら防ぎたい',a:'バケットポリシーでDenyを書く',b:'MFA Deleteを有効化する',ans:'b',why:'MFA Delete＝<b>バージョンの完全削除にMFA認証を要求</b>。万一キーが漏れても物理削除を防げる。',tip:'MFA Delete＝最後の砦。バージョニング無効化＋完全削除にMFAを要求。rootアカウントでのみ設定可。'},
     ]
   },
   'database': {
@@ -353,7 +355,9 @@ const decks = {
       {s:'Organizations配下の全アカウント・新規リソースにWAF/SGルールを一元適用したい',a:'AWS Firewall Manager',b:'各アカウントで個別にWAF設定',ans:'a',why:'Firewall Manager＝<b>組織全体・新規リソースにも自動適用</b>。個別設定は抜け漏れる。',tip:'Firewall Manager＝組織全体に一括適用＋新規リソースにも自動。個別設定は漏れる。'},
       {s:'構成が基準から逸脱したら検出し、自動で修復まで行いたい',a:'AWS Config(検出のみ)',b:'AWS Config＋Systems Manager Automation(修復)',ans:'b',why:'Config＋SSM Automation修復＝<b>逸脱検出→自動修復</b>。Config単体は検出・記録まで。'},
       {s:'マイクロサービス間のどの区間が遅いか、レイテンシを分散トレースで可視化したい',a:'CloudWatch',b:'X-Ray',ans:'b',why:'X-Ray＝<b>分散トレースでサービス間の経路と区間レイテンシを可視化</b>。CloudWatchはメトリクス監視が主。',tip:'X-Ray＝分散トレースで区間ごとの遅延を可視化。CloudWatchはメトリクス監視。'},
-      {s:'固定しきい値でなく、普段のパターンからの異常なコスト急増をMLで自動検知したい',a:'AWS Budgets',b:'Cost Anomaly Detection',ans:'b',why:'Cost Anomaly Detection＝<b>MLで異常なコスト逸脱を自動検知</b>。Budgetsは固定しきい値ベース。'}
+      {s:'固定しきい値でなく、普段のパターンからの異常なコスト急増をMLで自動検知したい',a:'AWS Budgets',b:'Cost Anomaly Detection',ans:'b',why:'Cost Anomaly Detection＝<b>MLで異常なコスト逸脱を自動検知</b>。Budgetsは固定しきい値ベース。'},
+      {s:'EC2のOS・ミドルウェアのパッチ適用は誰の責任？',a:'AWS（インフラ側）',b:'利用者（顧客側）',ans:'b',why:'責任共有モデル＝<b>OSから上は顧客の責任</b>。AWSはハード/ネットワーク/ハイパーバイザーまで。',tip:'「AWSは建物の管理人、部屋の中（OS/データ/アプリ）は住人の責任」。マネージド(RDS等)ならOS管理はAWSに移る。'},
+      {s:'RDSの「OSパッチ」は誰の責任？',a:'AWS',b:'利用者',ans:'a',why:'RDS＝<b>マネージドなのでOSパッチはAWS側</b>。EC2なら顧客。責任境界はサービスの管理レベルで変わる。',tip:'EC2＝OS以上は顧客。RDS＝DBエンジン設定・データは顧客、OS/パッチはAWS。Lambda＝コードだけ顧客。'},
     ]
   },
   'iam-auth': {
@@ -964,74 +968,6 @@ function conceptMatch(question, deckId) {
 }
 
 /**
- * extractSituation: keypointからシナリオ文を抽出（HTMLタグ除去、60文字以内）
- * @param {string} text - keypoint or explain text (may contain HTML)
- * @returns {string} 60文字以内のシチュエーション文
- */
-function extractSituation(text) {
-  var clean = text.replace(/<[^>]+>/g, '');
-  var firstSentence = clean.split(/[。、]/)[0];
-  return firstSentence.length <= 60 ? firstSentence : clean.substring(0, 57) + '…';
-}
-
-/**
- * shortenOption: 長い選択肢を短縮（Amidaは画面小さいため50文字以内）
- * @param {string} opt - 選択肢テキスト (may contain HTML)
- * @returns {string} 50文字以内の短縮テキスト
- */
-function shortenOption(opt) {
-  if (!opt) return '';
-  var clean = opt.replace(/<[^>]+>/g, '');
-  if (clean.length > 50) {
-    var match = clean.match(/^([^（(。、]+)/);
-    if (match) clean = match[1];
-  }
-  return clean.length > 50 ? clean.substring(0, 47) + '…' : clean;
-}
-
-/**
- * buildWhy: explain/keypointからwhy文を生成（キーワードを<b>タグで囲む）
- * @param {object} question - ドリルの問題オブジェクト
- * @returns {string} why文
- */
-function buildWhy(question) {
-  var source = question.explain || question.keypoint || '';
-  if (source.includes('<b>')) return source;
-  return source;
-}
-
-/**
- * generateCard: ドリル問題からAmidaカード（2択）を生成する
- * @param {object} question - ドリルの問題オブジェクト
- * @returns {object|null} 生成されたAmidaカード、または生成不能時にnull
- */
-function generateCard(question) {
-  if (!question.keypoint && !question.explain) return null;
-
-  var s = extractSituation(question.keypoint || question.explain);
-  if (s.length > 60) s = s.substring(0, 57) + '…';
-
-  var correctIdx = question.answer;
-  var correctOpt = question.options[correctIdx];
-  var distractors = question.options.filter(function(_, i) { return i !== correctIdx; });
-  var distractor = distractors[0];
-
-  var correctPos = Math.random() < 0.5 ? 'a' : 'b';
-  var card = { s: s };
-  if (correctPos === 'a') {
-    card.a = shortenOption(correctOpt);
-    card.b = shortenOption(distractor);
-    card.ans = 'a';
-  } else {
-    card.a = shortenOption(distractor);
-    card.b = shortenOption(correctOpt);
-    card.ans = 'b';
-  }
-  card.why = buildWhy(question);
-  return card;
-}
-
-/**
  * decodeJumon: Jumon文字列をデコードする
  * @param {string} jumonStr - "SAAv1:base64..." 形式の文字列
  * @returns {{ banks: object }|null} デコード結果、または失敗時null
@@ -1059,8 +995,9 @@ function decodeJumon(jumonStr) {
 }
 
 /**
- * loadAllDrillQuestions: 各questions_*.jsファイルをfetchしてローカルスコープで評価し、
- * bankIdをキーとした問題データの辞書を返す
+ * loadAllDrillQuestions: 各questions_*.jsファイルを読み込み、
+ * bankIdをキーとした問題データの辞書を返す。
+ * file://でも動くように<script>タグ方式を使用。
  * @returns {Promise<Record<string, Array>>} bankId → DrillQuestion[] のマップ
  */
 async function loadAllDrillQuestions() {
@@ -1072,15 +1009,30 @@ async function loadAllDrillQuestions() {
     v5: 'questions_v5.js'
   };
   var banks = {};
+  // scriptタグで順番に読み込み、グローバルQUESTIONSをコピーしていく
+  var origQ = (typeof QUESTIONS !== 'undefined') ? QUESTIONS : undefined;
   for (var bankId of Object.keys(files)) {
     try {
-      var resp = await fetch(files[bankId]);
-      if (!resp.ok) continue;
-      var code = await resp.text();
-      var fn = new Function(code + '; return QUESTIONS;');
-      banks[bankId] = fn();
-    } catch (e) { /* skip unavailable bank */ }
+      await new Promise(function(resolve, reject) {
+        var s = document.createElement('script');
+        s.src = files[bankId];
+        s.onload = function() {
+          if (typeof QUESTIONS !== 'undefined' && Array.isArray(QUESTIONS)) {
+            banks[bankId] = QUESTIONS;
+          }
+          document.head.removeChild(s);
+          resolve();
+        };
+        s.onerror = function() {
+          document.head.removeChild(s);
+          resolve(); // skip unavailable
+        };
+        document.head.appendChild(s);
+      });
+    } catch (e) { /* skip */ }
   }
+  // グローバルQUESTIONSを復元（もし他で使われている場合の安全策）
+  if (origQ !== undefined) { QUESTIONS = origQ; }
   return banks;
 }
 
@@ -1133,26 +1085,8 @@ async function runImportPipeline(source) {
             result.matchedCount++;
           }
         });
-      } else {
-        // No match → generate new card
-        var newCard = generateCard(question);
-        if (newCard) {
-          var deck = decks[deckId];
-          if (deck) {
-            var exists = deck.cards.some(function(c) { return c.s === newCard.s; });
-            if (exists) {
-              result.skippedDuplicates++;
-            } else {
-              deck.cards.push(newCard);
-              if (!ever[deckId]) ever[deckId] = [];
-              if (!ever[deckId].includes(newCard.s)) {
-                ever[deckId].push(newCard.s);
-              }
-              result.generatedCount++;
-            }
-          }
-        }
       }
+      // マッチなしの場合はスキップ（手書きカードで別途対応）
     });
   });
 
@@ -1219,9 +1153,7 @@ async function runImportPipeline(source) {
         var deckNames = [...result.affectedDecks].map(function(id) { return decks[id] ? decks[id].name : id; }).join('、');
         var msg = '✅ 取り込み完了\n';
         msg += '・間違い問題数: ' + result.totalWrongIds + '\n';
-        msg += '・既存カードにマーク: ' + result.matchedCount + '\n';
-        msg += '・新規カード生成: ' + result.generatedCount + '\n';
-        if (result.skippedDuplicates > 0) msg += '・重複スキップ: ' + result.skippedDuplicates + '\n';
+        msg += '・間違えたものモードに追加: ' + result.matchedCount + '\n';
         msg += '・対象デッキ: ' + deckNames;
         if (result.errors.length > 0) msg += '\n⚠️ エラー: ' + result.errors.join(', ');
         statusEl.style.background = '#eafaf0';
