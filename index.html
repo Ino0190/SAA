@@ -399,7 +399,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 </div>
 
 <script>
-// ===== 問題バンク切替（questions.js=86問 / questions_v2.js=新80問）=====
+// ===== 問題バンク切替（A=main / B=v2 / C=v3 / D=v4 / E=v5。各セットの件数はホームの「全セットの進捗」に動的表示）=====
 const BANKS={
   main:{file:'questions.js', label:'A・既存'},
   v2:{file:'questions_v2.js', label:'B・新規'},
@@ -470,25 +470,33 @@ function renderHome(){
   document.getElementById('hStat').textContent=`学習済 ${seen}/${QUESTIONS.length}`;
   document.getElementById('hBar').style.width=(seen/QUESTIONS.length*100)+'%';
   if(!themeTab)themeTab=currentBank();
-  loadAllBanks(()=>{renderThemeGraph();updateCrossCount();});
+  loadAllBanks(()=>{renderThemeGraph();updateCrossCount();renderAllBankProg();});  // 総問題数は全バンク読込後に反映
   renderThemeGraph();
   renderAllBankProg();
 }
-// 全セットの進捗を各バンクのlocalStorageから直接読んで一覧表示（呪文の復元確認用・問題ファイル取得は不要）
+// 全セットの進捗を各バンクのlocalStorageから直接読んで一覧表示（学習/間違い＋総問題数。タップで切替）
 function renderAllBankProg(){
   const el=document.getElementById('allBankProg'); if(!el) return;
+  let grandTotal=0, allKnown=true;
   const rows=Object.keys(BANKS).map(b=>{
     const p=readBankProg(b);
     const seen=Object.keys(p.seen||{}).length;
     const wrong=Object.keys(p.wrong||{}).filter(id=>p.wrong[id]).length;
+    // 総問題数：現在バンクはQUESTIONS、他は全バンク読込後のALLBANKSから
+    const total=(b===currentBank())?QUESTIONS.length
+      :(typeof ALLBANKS!=='undefined'&&ALLBANKS&&ALLBANKS[b]?ALLBANKS[b].length:null);
+    if(total==null) allKnown=false; else grandTotal+=total;
     const label=(BANKS[b]&&BANKS[b].label)||b;
     const cur=(b===currentBank());
+    const right = total!=null ? ('学習 '+seen+' / 全'+total+'問・間違い '+wrong)
+                              : ('学習 '+seen+'・間違い '+wrong);
     return '<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 10px;font-size:14px;'+(cur?'background:#edf2f4;font-weight:700;':'')+'cursor:pointer" onclick="setBank(\''+b+'\')">'+
       '<span style="color:#183251">'+(cur?'▶ ':'')+label+'</span>'+
-      '<span style="color:#5e5e5e">学習 '+seen+'・間違い '+wrong+'</span></div>';
+      '<span style="color:#5e5e5e">'+right+'</span></div>';
   }).join('');
+  const head='📚 全セットの進捗'+(allKnown?'（全'+grandTotal+'問・タップで切替）':'（タップで切替）');
   el.innerHTML='<div style="border:1px solid #c8c2b0;background:#fff;margin:0 0 14px">'+
-    '<div style="font-size:13px;font-weight:700;color:#5e5e5e;padding:8px 10px;border-bottom:1px solid #eee">📚 全セットの進捗（タップでそのセットに切替）</div>'+rows+'</div>';
+    '<div style="font-size:13px;font-weight:700;color:#5e5e5e;padding:8px 10px;border-bottom:1px solid #eee">'+head+'</div>'+rows+'</div>';
 }
 function updateCrossCount(){
   const el=document.getElementById('cntCross');if(!el)return;

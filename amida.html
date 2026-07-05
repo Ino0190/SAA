@@ -216,7 +216,10 @@ const decks = {
       {s:'固定のパブリックIP(Elastic IP)を付けたい・クライアントの送信元IPをそのまま保持したい',a:'NLB',b:'ALB',ans:'a',why:'NLB＝<b>L4でクライアントIPを保持・AZごとに固定IP/Elastic IP付与可</b>。ALBはIPが変動し送信元は X-Forwarded-For で伝える。',tip:'固定IP・送信元IP保持・超低遅延＝NLB(L4)。HTTPの中身で振り分けるならALB(L7)。'},
       {s:'パスやホスト名で振り分け・WebSocket・リダイレクト・Cognito認証を使いたい',a:'ALB',b:'NLB',ans:'a',why:'ALB＝<b>L7でHTTP/HTTPSの高度なルーティング(パス/ホスト/ヘッダ)・WebSocket・認証連携</b>。NLBはL4で中身を見ない。',tip:'HTTPの機能(パス/ホスト振り分け・WebSocket・認証・リダイレクト)が要る＝ALB。中身を見ないNLBでは無理。'},
       {s:'WAFを直接関連付けられるロードバランサーは？',a:'ALB',b:'NLB',ans:'a',why:'WAFはL7の中身を見るので<b>ALB(とCloudFront/API Gateway)に付く</b>。NLB(L4)には直接付けられない。',tip:'WAFはL7＝ALB/CloudFront/API GWに付く。NLB(L4)には付かない。'},
-      {s:'急なスパイク(事前ウォームアップなし)で毎秒数百万接続をさばきたい',a:'NLB',b:'ALB',ans:'a',why:'NLB＝<b>L4で超低遅延・突発スパイクにも即応(事前プリウォーム不要)・数百万接続</b>。ALBはL7処理のぶんオーバーヘッドがある。',tip:'いきなり大量接続・超低遅延・TCP/UDP＝NLB。'}
+      {s:'急なスパイク(事前ウォームアップなし)で毎秒数百万接続をさばきたい',a:'NLB',b:'ALB',ans:'a',why:'NLB＝<b>L4で超低遅延・突発スパイクにも即応(事前プリウォーム不要)・数百万接続</b>。ALBはL7処理のぶんオーバーヘッドがある。',tip:'いきなり大量接続・超低遅延・TCP/UDP＝NLB。'},
+      {s:'Direct Connectの障害に備えたい。追加コストを最小にしつつ自動で切り替わるバックアップは？',a:'Site-to-Site VPNをバックアップに用意しBGPで自動フェイルオーバー',b:'2本目のDirect Connectを別ロケーションに敷設',ans:'a',why:'コスト最小のバックアップ＝<b>Site-to-Site VPN(安価・BGPで自動切替)</b>。2本目のDXは最も堅牢だが回線費が倍で「コスト最小」に反する。障害時に帯域が少し落ちてよいならVPNバックアップが定石。',tip:'DXのバックアップ＝安いVPN(BGPで自動フェイルオーバー)。帯域も品質も完全維持したい時だけ2本目のDX。'},
+      {s:'各AZのプライベートEC2の外向き通信。NAT Gatewayはどう置く？',a:'AZごとに1つずつ置き、各AZは自分のAZのNATを使う',b:'1つのNAT Gatewayに全AZから集約する',ans:'a',why:'NAT GatewayはAZ単位のリソース。AZごとに置くと<b>AZ間データ転送料金が消え、あるAZのNAT障害が他AZに波及しない</b>。1つに集約するとAZ間転送課金＋そのAZ障害で全体が巻き添えになる。',tip:'NATはAZごとに置く＝AZ間転送ゼロ＋AZ障害が波及しない。1つに集約はコスト増＋単一障害点。'},
+      {s:'Route 53で「距離＋バイアス値で境界を寄せて」振り分けるルーティングは？',a:'地理的近接性ルーティング（geoproximity）',b:'位置情報ルーティング（geolocation）',ans:'a',why:'geoproximity＝<b>リソースとの距離を基準にバイアスで境界を寄せられる(調整可)</b>。geolocation＝<b>アクセス元の国/大陸で確定的に固定</b>(規制対応向け)。',tip:'国で確実に固定＝geolocation(規制)。距離＋バイアスで寄せ具合を調整＝geoproximity。速さで振る＝latency。'}
     ]
   },
   'gateways': {
@@ -288,6 +291,7 @@ const decks = {
       {s:'データレイクの権限をテーブル/列/行レベルで一元管理',a:'Lake Formation',b:'IAMポリシー',ans:'a',why:'Lake Formation=<b>データレイクの統合ガバナンス</b>。'},
       {s:'時系列データ（IoTセンサー）を高速クエリ＋自動階層化',a:'Timestream',b:'DynamoDB',ans:'a',why:'Timestream=<b>時系列専用DB</b>。DynamoDBはキーバリュー汎用。',tip:'Timestream＝時系列専用(時間集計・自動階層化)。汎用KVのDynamoDBは時系列集計が苦手。'},
       {s:'既存Kafka資産（API互換必須）をマネージドに',a:'Amazon MSK（Managed Streaming for Kafka）',b:'Kinesis Data Streams',ans:'a',why:'MSK=<b>Kafka互換</b>。KinesisはAWS独自API。',tip:'MSK＝Kafka互換(既存資産そのまま)。KinesisはAWS独自API。'},
+      {s:'GlueのETLで、前回以降に届いた新規ファイルだけを差分処理したい',a:'ジョブブックマークを有効化する',b:'処理済みファイル一覧を自前でDynamoDBに記録する',ans:'a',why:'Glueの<b>ジョブブックマーク</b>は処理済みデータを自動追跡し、新規到着分だけを処理する標準機能。自前で処理済みリストを管理するのは車輪の再発明。',tip:'Glueの差分処理＝ジョブブックマーク(処理済みを自動追跡)。自前の処理済み管理は不要。'},
     ]
   },
   'ai-ml': {
