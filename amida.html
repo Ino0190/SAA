@@ -78,6 +78,9 @@ body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;backgro
   <div class="top" id="top">
     <h1>こんな時どっち？</h1>
     <div class="sub">2択で答える。電車で10秒ずつ。</div>
+    <div id="import-tool" style="margin-bottom:16px;text-align:center">
+      <button id="import-btn" class="deck" style="border-color:#ba8425;background:#fffdf2;text-align:center">📥 ドリル弱点を取り込む</button>
+    </div>
     <div class="decks" id="decks"></div>
   </div>
   <div class="quiz" id="quiz">
@@ -104,6 +107,22 @@ body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;backgro
       <button class="retry" id="score-wrong" style="background:#b01212;display:none">❌ 間違えたやつだけ</button>
       <button class="retry" id="score-retry">もう一度</button>
       <button class="back" id="score-back">別のデッキ</button>
+    </div>
+  </div>
+  <!-- Import Modal -->
+  <div id="import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;padding:20px;overflow-y:auto">
+    <div style="background:#fff;max-width:500px;margin:40px auto;padding:20px;border-radius:12px">
+      <h3 style="margin-bottom:12px">📥 ドリル弱点を取り込む</h3>
+      <p style="font-size:14px;color:#5e5e5e;margin-bottom:14px">ドリルで間違えた問題をAmidaの「間違えたものモード」に取り込みます。AmidaのlocalStorageデータが変更されます。</p>
+      <details style="margin-bottom:14px">
+        <summary style="cursor:pointer;font-size:14px;color:#21537f;font-weight:700">💾 ふっかつのじゅもんから取り込む（別端末のデータ）</summary>
+        <textarea id="import-jumon" style="width:100%;height:80px;margin-top:8px;font-size:13px;border:1px solid #c8c2b0;padding:8px;border-radius:6px" placeholder="SAAv1:... のじゅもんを貼り付け"></textarea>
+      </details>
+      <div id="import-status" style="display:none;font-size:14px;padding:10px;margin-bottom:10px;border-radius:8px"></div>
+      <div style="display:flex;gap:10px">
+        <button id="import-cancel" style="flex:1;padding:12px;font-size:15px;border:1px solid #c8c2b0;background:#fff;cursor:pointer;font-family:inherit;font-weight:700;border-radius:6px">キャンセル</button>
+        <button id="import-confirm" style="flex:1;padding:12px;font-size:15px;border:none;background:#21537f;color:#fff;cursor:pointer;font-family:inherit;font-weight:700;border-radius:6px">取り込む</button>
+      </div>
     </div>
   </div>
 </div>
@@ -849,6 +868,379 @@ $('score-back').onclick = () => { renderDecks(); showOnly('top'); };
 
 renderDecks();
 showOnly('top');
+
+// ─── Drill-Amida Weakness Integration: Core Utilities ───
+
+/**
+ * CATEGORY_DECK_MAP: ドリルのcat値 → AmidaデッキID のマッピング（12件）
+ */
+const CATEGORY_DECK_MAP = {
+  '可用性':       'ha-dr',
+  'ストレージ':   'storage',
+  'データベース': 'database',
+  'ネットワーク': 'network',
+  'セキュリティ': 'security',
+  'コンピュート': 'compute',
+  'サーバーレス': 'compute',
+  '疎結合':       'app-integration',
+  '配信/CDN':     'edge-hybrid',
+  'コスト最適化': 'cost',
+  '高性能':       'compute',
+  '移行':         'migration'
+};
+const FALLBACK_DECK = 'exam-traps';
+
+/**
+ * resolveDeck: catからデッキIDを決定する
+ * @param {string|null|undefined} cat - ドリル問題のカテゴリ
+ * @returns {string} 対応するAmidaデッキID、未マッピング時は'exam-traps'
+ */
+function resolveDeck(cat) {
+  if (!cat) return FALLBACK_DECK;
+  return CATEGORY_DECK_MAP[cat] || FALLBACK_DECK;
+}
+
+/**
+ * extractWrongIds: ドリル進捗から間違いIDを収集する
+ * @param {string|object} source - 'local'ならlocalStorageから、
+ *                                  オブジェクトならJumonPayload（{ banks: { bankId: { wrong: {...} } } }）から収集
+ * @returns {Record<string, string[]>} { bankId: [questionId, ...], ... }
+ */
+function extractWrongIds(source) {
+  const BANKS = ['main', 'v2', 'v3', 'v4', 'v5'];
+  const result = {};
+
+  if (source === 'local') {
+    BANKS.forEach(function(bankId) {
+      var key = 'saa_drill_progress_v1_' + bankId;
+      try {
+        var raw = localStorage.getItem(key);
+        if (!raw) return;
+        var data = JSON.parse(raw);
+        if (data && data.wrong && typeof data.wrong === 'object') {
+          var ids = Object.keys(data.wrong).filter(function(k) {
+            return data.wrong[k] === true;
+          });
+          if (ids.length > 0) result[bankId] = ids;
+        }
+      } catch (e) { /* skip invalid JSON or missing bank */ }
+    });
+  } else if (source && typeof source === 'object' && source.banks) {
+    Object.keys(source.banks).forEach(function(bankId) {
+      var bankData = source.banks[bankId];
+      if (bankData && bankData.wrong && typeof bankData.wrong === 'object') {
+        var ids = Object.keys(bankData.wrong).filter(function(k) {
+          return bankData.wrong[k] === true;
+        });
+        if (ids.length > 0) result[bankId] = ids;
+      }
+    });
+  }
+  return result;
+}
+
+/**
+ * conceptMatch: ドリル問題のcardsとAmidaデッキのカードを照合する
+ * @param {object} question - ドリルの問題オブジェクト（cardsフィールドを持つ）
+ * @param {string} deckId - マッピング先のAmidaデッキID
+ * @returns {Array} マッチしたAmidaカードの配列（空なら未マッチ）
+ */
+function conceptMatch(question, deckId) {
+  const deck = decks[deckId];
+  if (!deck || !question.cards || question.cards.length === 0) return [];
+  const matches = [];
+  const terms = question.cards.filter(function(t) { return t && t.length >= 2; });
+  if (terms.length === 0) return [];
+  deck.cards.forEach(function(card) {
+    var sLower = card.s.toLowerCase();
+    for (var i = 0; i < terms.length; i++) {
+      if (sLower.includes(terms[i].toLowerCase())) {
+        matches.push(card);
+        break;
+      }
+    }
+  });
+  return matches;
+}
+
+/**
+ * extractSituation: keypointからシナリオ文を抽出（HTMLタグ除去、60文字以内）
+ * @param {string} text - keypoint or explain text (may contain HTML)
+ * @returns {string} 60文字以内のシチュエーション文
+ */
+function extractSituation(text) {
+  var clean = text.replace(/<[^>]+>/g, '');
+  var firstSentence = clean.split(/[。、]/)[0];
+  return firstSentence.length <= 60 ? firstSentence : clean.substring(0, 57) + '…';
+}
+
+/**
+ * shortenOption: 長い選択肢を短縮（Amidaは画面小さいため50文字以内）
+ * @param {string} opt - 選択肢テキスト (may contain HTML)
+ * @returns {string} 50文字以内の短縮テキスト
+ */
+function shortenOption(opt) {
+  if (!opt) return '';
+  var clean = opt.replace(/<[^>]+>/g, '');
+  if (clean.length > 50) {
+    var match = clean.match(/^([^（(。、]+)/);
+    if (match) clean = match[1];
+  }
+  return clean.length > 50 ? clean.substring(0, 47) + '…' : clean;
+}
+
+/**
+ * buildWhy: explain/keypointからwhy文を生成（キーワードを<b>タグで囲む）
+ * @param {object} question - ドリルの問題オブジェクト
+ * @returns {string} why文
+ */
+function buildWhy(question) {
+  var source = question.explain || question.keypoint || '';
+  if (source.includes('<b>')) return source;
+  return source;
+}
+
+/**
+ * generateCard: ドリル問題からAmidaカード（2択）を生成する
+ * @param {object} question - ドリルの問題オブジェクト
+ * @returns {object|null} 生成されたAmidaカード、または生成不能時にnull
+ */
+function generateCard(question) {
+  if (!question.keypoint && !question.explain) return null;
+
+  var s = extractSituation(question.keypoint || question.explain);
+  if (s.length > 60) s = s.substring(0, 57) + '…';
+
+  var correctIdx = question.answer;
+  var correctOpt = question.options[correctIdx];
+  var distractors = question.options.filter(function(_, i) { return i !== correctIdx; });
+  var distractor = distractors[0];
+
+  var correctPos = Math.random() < 0.5 ? 'a' : 'b';
+  var card = { s: s };
+  if (correctPos === 'a') {
+    card.a = shortenOption(correctOpt);
+    card.b = shortenOption(distractor);
+    card.ans = 'a';
+  } else {
+    card.a = shortenOption(distractor);
+    card.b = shortenOption(correctOpt);
+    card.ans = 'b';
+  }
+  card.why = buildWhy(question);
+  return card;
+}
+
+/**
+ * decodeJumon: Jumon文字列をデコードする
+ * @param {string} jumonStr - "SAAv1:base64..." 形式の文字列
+ * @returns {{ banks: object }|null} デコード結果、または失敗時null
+ */
+function decodeJumon(jumonStr) {
+  var trimmed = (jumonStr || '').trim();
+  if (!trimmed.startsWith('SAAv1:')) return null;
+  try {
+    var b64 = trimmed.substring(6);
+    var json = atob(b64);
+    var data = JSON.parse(json);
+    // v2 format: { v:2, banks: {...}, amida: {...} }
+    if (data.banks && typeof data.banks === 'object') {
+      if (Object.keys(data.banks).length === 0) return null;
+      return { banks: data.banks };
+    }
+    // legacy v1 format: { seen: {...}, wrong: {...} }
+    if (data.wrong && typeof data.wrong === 'object') {
+      return { banks: { main: data } };
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * loadAllDrillQuestions: 各questions_*.jsファイルをfetchしてローカルスコープで評価し、
+ * bankIdをキーとした問題データの辞書を返す
+ * @returns {Promise<Record<string, Array>>} bankId → DrillQuestion[] のマップ
+ */
+async function loadAllDrillQuestions() {
+  var files = {
+    main: 'questions.js',
+    v2: 'questions_v2.js',
+    v3: 'questions_v3.js',
+    v4: 'questions_v4.js',
+    v5: 'questions_v5.js'
+  };
+  var banks = {};
+  for (var bankId of Object.keys(files)) {
+    try {
+      var resp = await fetch(files[bankId]);
+      if (!resp.ok) continue;
+      var code = await resp.text();
+      var fn = new Function(code + '; return QUESTIONS;');
+      banks[bankId] = fn();
+    } catch (e) { /* skip unavailable bank */ }
+  }
+  return banks;
+}
+
+/**
+ * runImportPipeline: ドリル弱点インポートの全体パイプラインを実行する
+ * @param {string|object} source - 'local' または JumonPayload
+ * @returns {Promise<{totalWrongIds:number, matchedCount:number, generatedCount:number, skippedDuplicates:number, affectedDecks:Set, errors:string[]}>}
+ */
+async function runImportPipeline(source) {
+  var result = {
+    totalWrongIds: 0,
+    matchedCount: 0,
+    generatedCount: 0,
+    skippedDuplicates: 0,
+    affectedDecks: new Set(),
+    errors: []
+  };
+
+  // Step 1: 問題データのロード
+  var allQuestions = await loadAllDrillQuestions();
+
+  // Step 2: Wrong IDの収集
+  var wrongIds = extractWrongIds(source);
+  Object.values(wrongIds).forEach(function(ids) { result.totalWrongIds += ids.length; });
+  if (result.totalWrongIds === 0) return result;
+
+  // Step 3: EverWrongレコードのロード
+  var ever = loadEver();
+
+  // Step 4: 各Wrong_IDを処理
+  Object.keys(wrongIds).forEach(function(bankId) {
+    var questions = allQuestions[bankId];
+    if (!questions) return;
+    wrongIds[bankId].forEach(function(qId) {
+      var question = questions.find(function(q) { return String(q.id) === String(qId); });
+      if (!question) return;
+
+      var deckId = resolveDeck(question.cat);
+      result.affectedDecks.add(deckId);
+
+      // Concept Match
+      var matches = conceptMatch(question, deckId);
+
+      if (matches.length > 0) {
+        // Match found → mark as everWrong
+        matches.forEach(function(card) {
+          if (!ever[deckId]) ever[deckId] = [];
+          if (!ever[deckId].includes(card.s)) {
+            ever[deckId].push(card.s);
+            result.matchedCount++;
+          }
+        });
+      } else {
+        // No match → generate new card
+        var newCard = generateCard(question);
+        if (newCard) {
+          var deck = decks[deckId];
+          if (deck) {
+            var exists = deck.cards.some(function(c) { return c.s === newCard.s; });
+            if (exists) {
+              result.skippedDuplicates++;
+            } else {
+              deck.cards.push(newCard);
+              if (!ever[deckId]) ever[deckId] = [];
+              if (!ever[deckId].includes(newCard.s)) {
+                ever[deckId].push(newCard.s);
+              }
+              result.generatedCount++;
+            }
+          }
+        }
+      }
+    });
+  });
+
+  // Step 5: Persist
+  try {
+    saveEver(ever);
+  } catch (e) {
+    result.errors.push('amida_everwrong_v1 の書き込みに失敗');
+  }
+
+  return result;
+}
+
+// ─── Import Tool UI Wiring ───
+(function() {
+  var btn = document.getElementById('import-btn');
+  var modal = document.getElementById('import-modal');
+  var confirmBtn = document.getElementById('import-confirm');
+  var cancelBtn = document.getElementById('import-cancel');
+  var statusEl = document.getElementById('import-status');
+  var jumonInput = document.getElementById('import-jumon');
+
+  if (btn) btn.onclick = function() {
+    modal.style.display = 'block';
+    statusEl.style.display = 'none';
+    if (jumonInput) jumonInput.value = '';
+  };
+
+  if (cancelBtn) cancelBtn.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  if (confirmBtn) confirmBtn.onclick = async function() {
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = '⏳ 処理中…';
+    statusEl.style.display = 'none';
+
+    var source;
+    var jumonText = (jumonInput && jumonInput.value || '').trim();
+    if (jumonText) {
+      var decoded = decodeJumon(jumonText);
+      if (!decoded) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = '#fdecec';
+        statusEl.style.color = '#b01212';
+        statusEl.textContent = '❌ じゅもんの形式が無効です。SAAv1:... で始まるデータを貼り付けてください。';
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = '取り込む';
+        return;
+      }
+      source = decoded;
+    } else {
+      source = 'local';
+    }
+
+    try {
+      var result = await runImportPipeline(source);
+      statusEl.style.display = 'block';
+      if (result.totalWrongIds === 0) {
+        statusEl.style.background = '#fffdf2';
+        statusEl.style.color = '#7a471a';
+        statusEl.textContent = 'ドリルに間違えた問題が見つかりませんでした。まずドリルで問題を解いてみましょう。';
+      } else {
+        var deckNames = [...result.affectedDecks].map(function(id) { return decks[id] ? decks[id].name : id; }).join('、');
+        var msg = '✅ 取り込み完了\n';
+        msg += '・間違い問題数: ' + result.totalWrongIds + '\n';
+        msg += '・既存カードにマーク: ' + result.matchedCount + '\n';
+        msg += '・新規カード生成: ' + result.generatedCount + '\n';
+        if (result.skippedDuplicates > 0) msg += '・重複スキップ: ' + result.skippedDuplicates + '\n';
+        msg += '・対象デッキ: ' + deckNames;
+        if (result.errors.length > 0) msg += '\n⚠️ エラー: ' + result.errors.join(', ');
+        statusEl.style.background = '#eafaf0';
+        statusEl.style.color = '#183251';
+        statusEl.style.whiteSpace = 'pre-wrap';
+        statusEl.textContent = msg;
+        renderDecks();
+      }
+    } catch (e) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = '#fdecec';
+      statusEl.style.color = '#b01212';
+      statusEl.textContent = '❌ エラーが発生しました: ' + e.message;
+    }
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = '取り込む';
+  };
+})();
+
 </script>
 </body>
 </html>
