@@ -1339,6 +1339,31 @@ function startWeakness(){
 
 /* ===== テーマ別 正答率グラフ（V1〜V4タブ＋全体） ===== */
 let themeTab=null;
+// 73カテゴリ→12グループへの表示集約マッピング
+const THEME_GROUP={
+  'コンピュート・コンテナ':'🖥️ コンピュート','コンピュート・購入戦略':'🖥️ コンピュート','コンピュート・高性能':'🖥️ コンピュート','高性能':'🖥️ コンピュート','コンテナ・移行':'🖥️ コンピュート',
+  'サーバーレス':'⚡ サーバーレス','サーバーレス・API':'⚡ サーバーレス','サーバーレス・イベント駆動':'⚡ サーバーレス','サーバーレス・大規模処理':'⚡ サーバーレス',
+  'ストレージ':'🗄️ ストレージ','ストレージ・アーカイブ':'🗄️ ストレージ','ストレージ・パフォーマンス':'🗄️ ストレージ','ストレージ・共有ファイル':'🗄️ ストレージ','ストレージ・移行':'🗄️ ストレージ','ストレージ深掘り':'🗄️ ストレージ','ストレージ移行':'🗄️ ストレージ',
+  'データベース':'🗃️ データベース','目的別データベース':'🗃️ データベース','DB・読み取り最適化':'🗃️ データベース','可用性・DB':'🗃️ データベース',
+  'データ分析':'📊 データ分析','データ分析・DWH拡張':'📊 データ分析','データ分析・ETL':'📊 データ分析','データ分析・アクセス制御':'📊 データ分析','データ分析・アドホック分析':'📊 データ分析','データ分析・ストリーミング取込':'📊 データ分析','データ分析・リアルタイム基盤':'📊 データ分析','データ分析・ログ検索':'📊 データ分析','AI/ML':'📊 データ分析',
+  'ネットワーク深掘り':'🌐 ネットワーク','ネットワーク・AZ設計':'🌐 ネットワーク','ネットワーク・DNSルーティング':'🌐 ネットワーク','ネットワーク・VPCエンドポイント':'🌐 ネットワーク','ネットワーク・オンプレミス統合':'🌐 ネットワーク','ネットワーク・トラフィック検査':'🌐 ネットワーク','ネットワーク・ハイブリッドDNS':'🌐 ネットワーク','ネットワーク・プライベート接続':'🌐 ネットワーク','ネットワーク・マルチVPC接続':'🌐 ネットワーク',
+  'セキュリティ':'🔒 セキュリティ','セキュリティ深掘り':'🔒 セキュリティ','セキュリティ・S3保護':'🔒 セキュリティ','セキュリティ・データ検出':'🔒 セキュリティ','セキュリティ・ネットワーク制御':'🔒 セキュリティ','セキュリティ・暗号化':'🔒 セキュリティ','セキュリティ・秘密管理':'🔒 セキュリティ','セキュリティ・限定共有':'🔒 セキュリティ','IAM・ガバナンス':'🔒 セキュリティ','IAM・クロスアカウント':'🔒 セキュリティ','IAM・認証情報管理':'🔒 セキュリティ','WAF・DDoS防御':'🔒 セキュリティ','データ保護・暗号化キー管理':'🔒 セキュリティ',
+  '可用性':'🔄 高可用性・DR','高可用DR':'🔄 高可用性・DR','高可用・グローバル配信':'🔄 高可用性・DR','高可用・コスト':'🔄 高可用性・DR','高可用・移行':'🔄 高可用性・DR','DR・フェイルオーバー':'🔄 高可用性・DR','DR戦略':'🔄 高可用性・DR','バックアップ・PITR':'🔄 高可用性・DR','バックアップ・ランサム対策':'🔄 高可用性・DR',
+  'コスト最適化':'💰 コスト最適化','コスト最適化・EBS':'💰 コスト最適化','コスト管理・タグ戦略':'💰 コスト最適化',
+  'アプリ統合・疎結合':'🔗 アプリ統合','疎結合':'🔗 アプリ統合','API設計・スロットリング':'🔗 アプリ統合',
+  '移行・データベース':'🚚 移行','移行・大容量転送':'🚚 移行',
+  '運用・IaC':'🛠️ 運用・配信','運用・ガバナンス':'🛠️ 運用・配信','監視・オブザーバビリティ':'🛠️ 運用・配信','配信/CDN':'🛠️ 運用・配信','配信・セキュリティ':'🛠️ 運用・配信'
+};
+function groupThemeRows(rows){
+  const g={};
+  rows.forEach(r=>{
+    const gn=THEME_GROUP[r.c]||'🔹 その他';
+    const o=g[gn]=g[gn]||{c:gn,n:0,seen:0,green:0,red:0,yellow:0};
+    o.n+=r.n;o.seen+=r.seen;o.green+=r.green;o.red+=r.red;o.yellow+=r.yellow;
+  });
+  return Object.values(g).map(o=>({...o,rate:o.seen?Math.round(o.green/o.seen*100):null}))
+    .sort((a,b)=>{if(a.rate===null)return 1;if(b.rate===null)return -1;return a.rate-b.rate;});
+}
 function computeThemeRows(sel){
   const cats={};
   const add=(arr,pr)=>{(arr||[]).forEach(q=>{
@@ -1358,9 +1383,11 @@ function computeThemeRows(sel){
 function renderThemeGraph(){
   const host=document.getElementById('themeWrap');if(!host)return;
   const sel=themeTab||currentBank();
+  const grouped=themeGrouped;
   let tabs='<div class="themetabs">'+Object.keys(BANKS).map(b=>
     `<button class="ttab${sel===b?' on':''}" data-tab="${b}" onclick="selectThemeTab('${b}')">${(BANKS[b].label||b).split('・')[0]}</button>`).join('')
-    +`<button class="ttab${sel==='__all'?' on':''}" data-tab="__all" onclick="selectThemeTab('__all')">全体</button></div>`;
+    +`<button class="ttab${sel==='__all'?' on':''}" data-tab="__all" onclick="selectThemeTab('__all')">全体</button>`
+    +`<button class="ttab" style="margin-left:auto;font-size:13px" onclick="toggleThemeGroup()">${grouped?'📋 詳細':'📊 集約'}</button></div>`;
   if(sel!=='__all'&&sel!==currentBank()&&!ALLREADY){
     host.innerHTML=tabs+'<div style="color:var(--sub);font-size:14px;padding:10px 2px">読み込み中…</div>';
     loadAllBanks(()=>renderThemeGraph());return;
@@ -1369,7 +1396,8 @@ function renderThemeGraph(){
     host.innerHTML=tabs+'<div style="color:var(--sub);font-size:14px;padding:10px 2px">読み込み中…</div>';
     loadAllBanks(()=>renderThemeGraph());return;
   }
-  const rows=computeThemeRows(sel);
+  const rawRows=computeThemeRows(sel);
+  const rows=grouped?groupThemeRows(rawRows):rawRows;
   const bars=rows.map(r=>{
     const seen=r.seen||0;
     const g=seen?Math.round(r.green/seen*100):0;
@@ -1394,6 +1422,8 @@ function renderThemeGraph(){
   host.innerHTML=tabs+legend+'<div class="tbars">'+barsHtml+'</div><div class="themehint">'+hint+'</div>';
 }
 // タブ直接クリック用（イベント委譲が効かない環境の保険）
+let themeGrouped=true;
+function toggleThemeGroup(){themeGrouped=!themeGrouped;renderThemeGraph();}
 function selectThemeTab(t){themeTab=t;renderThemeGraph();}
 function themeWrapClick(e){
   const tb=e.target.closest('.ttab');
@@ -1401,9 +1431,61 @@ function themeWrapClick(e){
   const bar=e.target.closest('.tbar');
   if(bar){
     const c=bar.dataset.cat,bank=bar.dataset.bank;
-    if(bank==='__all'){showToast('セット(A〜D)のタブを選んでからタップしてください');return;}
-    if(bank===currentBank()){startMode('cat',c);}
-    else if(confirm((BANKS[bank].label||bank)+' に切り替えますか？（切替後にテーマをタップで開始）')){setBank(bank);}
+    // 集約モード時: グループ名からそのグループに属する全カテゴリの間違いを横断出題
+    if(themeGrouped){
+      const catsInGroup=Object.keys(THEME_GROUP).filter(k=>THEME_GROUP[k]===c);
+      if(!catsInGroup.length){showToast('対象カテゴリがありません');return;}
+      if(bank==='__all'){
+        // 全バンク横断でグループ内の間違いを集める
+        loadAllBanks(function(){
+          const list=collectCrossWrong('').filter(q=>catsInGroup.includes(q.cat));
+          if(!list.length){showToast(c+' の間違いはありません🎉');return;}
+          state.mode='xwrong';state.list=list;state.idx=0;
+          state.session={correct:0,total:0,wrongIds:[]};
+          show('scQuiz');document.getElementById('btnRow').style.display='flex';
+          document.getElementById('hTitle').textContent=c+' 復習';
+          renderQ();
+        });
+      }else{
+        // 特定バンクでグループ内の間違いを出題
+        if(bank!==currentBank()){
+          if(confirm((BANKS[bank].label||bank)+' に切り替えますか？')){setBank(bank);}
+          return;
+        }
+        const list=QUESTIONS.filter(q=>catsInGroup.includes(q.cat)&&progress.wrong[q.id])
+          .sort((a,b)=>((progress.wrongCount[b.id]||0)-(progress.wrongCount[a.id]||0)));
+        if(!list.length){showToast(c+' の間違いはありません🎉');return;}
+        state.mode='wrong';state.list=list;state.idx=0;
+        state.session={correct:0,total:0,wrongIds:[]};
+        show('scQuiz');document.getElementById('btnRow').style.display='flex';
+        document.getElementById('hTitle').textContent=c+' 復習';
+        renderQ();
+      }
+      return;
+    }
+    // 詳細モード時: 従来どおり単一カテゴリ
+    if(bank==='__all'){
+      loadAllBanks(function(){
+        const list=collectCrossWrong(c);
+        if(!list.length){showToast(c+' の間違いはありません🎉');return;}
+        state.mode='xwrong';state.list=list;state.idx=0;
+        state.session={correct:0,total:0,wrongIds:[]};
+        show('scQuiz');document.getElementById('btnRow').style.display='flex';
+        document.getElementById('hTitle').textContent=c+' 復習';
+        renderQ();
+      });
+    }else if(bank===currentBank()){
+      const list=QUESTIONS.filter(q=>q.cat===c&&progress.wrong[q.id])
+        .sort((a,b)=>((progress.wrongCount[b.id]||0)-(progress.wrongCount[a.id]||0)));
+      if(!list.length){showToast(c+' の間違いはありません🎉');return;}
+      state.mode='wrong';state.list=list;state.idx=0;
+      state.session={correct:0,total:0,wrongIds:[]};
+      show('scQuiz');document.getElementById('btnRow').style.display='flex';
+      document.getElementById('hTitle').textContent=c+' 復習';
+      renderQ();
+    }else{
+      if(confirm((BANKS[bank].label||bank)+' に切り替えますか？')){setBank(bank);}
+    }
   }
 }
 
