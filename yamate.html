@@ -918,6 +918,9 @@ const DATA=[
    tale:`<span class="a">Data Streams</span>は保持期間内でデータを持ち、複数コンシューマーが独立に読む・リプレイ可（シャード管理あり）。<span class="b">Firehose</span>はS3/Redshift/OpenSearchへバッファ配信するだけ・リプレイ不可・ほぼ全自動。`},
   {a:"Kinesis Data Streams",b:"SQS",key:"複数が読めるか1つが消すか",
    tale:`<span class="a">Data Streams</span>は同じデータを複数が読め、保持期間内で再読み込み可。<span class="b">SQS</span>は1メッセージを基本1コンシューマーが処理して削除・リプレイ不可。`},
+  {a:"Kinesis Lambda消費",b:"KCL（Kinesis Client Library）消費",key:"サーバーレスで簡単か・カスタムチェックポイント/シャード制御か",
+   scene:`センサーデータをLambdaでほぼリアルタイム処理していたが、一部のシャードで再処理範囲を細かく制御したくなった。Lambdaはチェックポイントをバッチ末尾で自動記録するだけで位置を自分で決められない。KCLアプリをECS(Fargate)で動かしたら、任意のタイミングでチェックポイントを打てて、シャードごとの処理を完全に制御できた。`,
+   tale:`<span class="a">Lambda消費</span>はサーバーレスで最も楽（チェックポイントはAWS自動管理・シャード並列度もAWS側が決定・コード最小）。ただし<b>カスタムチェックポイント不可</b>・シャードレベルの細かい制御不可。<span class="b">KCL消費</span>はアプリ(EC2/ECS)上で常駐し、シャードごとにワーカーを割り当て・<b>チェックポイントの位置をDynamoDBに任意タイミングで記録</b>・再処理範囲を自由に制御。コードは増えるがシャードレベルの制御が必要ならKCL。`},
   {a:"Amazon MSK",b:"Kinesis Data Streams",key:"Kafka資産を活かすか",
    tale:`<span class="a">MSK</span>はApache Kafka互換で既存Kafka資産を活かす（ブローカー運用はAWS）。<span class="b">Kinesis</span>はAWSネイティブでKafka非互換だがよりサーバーレスで運用が軽い。既存Kafkaがあるなら<span class="a">MSK</span>。`},
   {a:"AppFlow",b:"Kinesis Data Firehose",key:"SaaSアプリのレコードか・絶え間ないストリームか",
@@ -1099,12 +1102,18 @@ const DATA=[
   {a:"SQS 標準キュー（Standard）",b:"SQS FIFOキュー",key:"重複して届きうるか・厳密に1回＆順序か",
    scene:`SQSには重複を入れていないのに、RDSに時々同じレコードが二重に保存される——標準キューは「少なくとも1回（at-least-once）」配信なので、まれに同じメッセージが2回ワーカーに届き、2回処理されるのが原因（処理が可視性タイムアウトより長引き、メッセージが再表示されて二重処理されるパターンもある）。順序と一意性が要るならFIFOキュー（重複排除）に替える。または処理側を冪等（同じメッセージを2回処理しても結果が1回分になる＝一意キーでupsertする等）にして受け止める。`,
    tale:`<span class="a">標準キュー</span>は「少なくとも1回（at-least-once）」配信＝まれに重複して届く・順序保証なし・ほぼ無制限スループット。<span class="b">FIFOキュー</span>は順序保証＋重複排除で実質1回だけ処理（スループットに上限）。重複が困るなら<span class="b">FIFO</span>、コストやスループットを優先して標準のまま使うなら処理を冪等にする。`},
+  {a:"DLQ（デッドレターキュー）で後から救済",b:"再試行回数を増やすだけ",key:"最終的に失敗したメッセージを捨てないか",
+   scene:`SNS→Lambdaで一部のメッセージが処理されなかった。再試行を増やしても、Lambda側のバグや一時的障害が根本原因なら結局失敗して消えた。DLQ（SQSキュー）を設定したら、最終的に配信失敗したメッセージがDLQに退避し、後からLambdaで拾い直して「取りこぼしゼロ」を実現できた。`,
+   tale:`<span class="a">DLQ（デッドレターキュー）</span>は<b>最終的に処理/配信できなかったメッセージの退避先</b>（SQSキュー）。SNSの場合はサブスクリプションにDLQを設定→配信失敗メッセージをSQSに退避→後からLambda等で再処理。SQSの場合はmaxReceiveCountを超えたメッセージがDLQへ移動→調査/再投入。<span class="b">再試行回数を増やすだけ</span>では根本原因が残る限り最終的に失敗→メッセージは消える。<b>「取りこぼしゼロ」「メッセージが処理されない」と来たらDLQ</b>が答え。FIFOトピック化(順序保証で配信失敗救済でない)やCloudTrail(監査ログでメッセージ本文を保存しない)は罠。`},
   {a:"Amazon MQ",b:"SQS/SNS",key:"既存ブローカー移行か新規クラウドネイティブか",
    tale:`<span class="a">Amazon MQ</span>はActiveMQ/RabbitMQ互換・JMS/AMQP等の標準プロトコル（既存アプリの無改修移行）。<span class="b">SQS/SNS</span>はAWS独自・サーバーレスでスケーラブル（新規開発向き）。既存ブローカーの移行なら<span class="a">MQ</span>。`},
   {a:"Amazon SES",b:"Amazon SNS",key:"本格メール配信か通知か",
    tale:`<span class="a">SES</span>はメール送信に特化（到達率・SPF/DKIM/DMARC・バウンス管理・HTMLメール）。<span class="b">SNS</span>はpub/subの通知（SMS/メール/HTTPへの簡易fan-out）。本格的なメール配信なら<span class="a">SES</span>。`},
   {a:"EventBridge",b:"Step Functions",key:"ルーティングかオーケストレーションか",
    tale:`<span class="a">EventBridge</span>はイベントを発生源から切り離して各所へルーティング（疎結合・1対多）。<span class="b">Step Functions</span>は多段処理を順序・分岐・リトライ付きで確実に実行（オーケストレーション）。組み合わせて使う。`},
+  {a:"EventBridge（S3イベント）",b:"S3イベント通知（S3 Event Notification）",key:"複数ターゲットか1宛先か",
+   scene:`S3にファイルが到着したら、分析用Lambdaの実行とSageMaker Pipelinesの開始を同時にしたかった。S3イベント通知は同一イベントタイプ(s3:ObjectCreated:*)に対して宛先は1つしか設定できず両方に送れなかった。S3バケットでEventBridge通知を有効化してEventBridgeルールに2つのターゲットを設定したら、1つのイベントで両方が同時に起動した。`,
+   tale:`<span class="a">EventBridge（S3イベント）</span>は<b>1ルールに複数ターゲット（最大5つ）</b>を設定でき、1つのS3イベントでLambda＋SageMaker＋SNS等を同時に起動可能。<span class="b">S3イベント通知</span>は同じイベントタイプ＋プレフィックス/サフィックス条件の組み合わせに対して<b>宛先は1つだけ</b>（Lambda 1つ or SQS 1つ or SNS 1つ）。<b>「S3のイベントで複数の処理を同時に起動」ならEventBridge必須</b>。1宛先で足りる単純な構成ならS3イベント通知の方が設定が簡単。`},
   {a:"Step Functions",b:"Lambdaチェーン",key:"状態管理が組み込みか自前か",
    tale:`<span class="a">Step Functions</span>はワークフローを宣言的に定義しリトライ/分岐/並列/状態管理/可視化を組み込みで提供。<span class="b">Lambdaチェーン</span>は各関数が次を直接呼び、エラー制御・状態管理を自前で散らばらせ複雑化。多段の制御なら<span class="a">Step Functions</span>。`},
   {a:"Step Functions Express",b:"Step Functions Standard",key:"高頻度・5分以内・低コストか長時間・監査・Exactly-onceか",
@@ -1238,6 +1247,66 @@ const DATA=[
   ["改ざん絶対不可（ルートでも消せない）","S3 Object Lock コンプライアンスモード"],
   ["移行ツールの進捗を横断で追跡","Migration Hub"],
   // LK
+ ]},
+{ico:"🔥",t:"間違いまくってるやつ（2回以上ミスした問題の急所）",weak:true,
+ story:`ドリルで2回以上間違えた問題は「知識が曖昧」なのではなく、「選択肢の地雷に同じパターンでハマっている」ことが多い。ここでは全バンクから繰り返しミスした問題だけ引っ張ってきて、なぜ引っかかるのかと、次回の一発判定法をまとめる。`,
+ notes:[
+  {h:"🔁 可用性の3条件セット（main Q1・2回ミス）",body:`<p style="margin-bottom:10px"><b>問題の急所：</b>Auto Scaling＋Multi-AZ＋RDS Multi-AZの「3条件全部満たすか」を1選択肢ずつ潰す問題。見落としポイントは<b>リードレプリカ≠フェイルオーバー</b>。</p>
+  <table class="gtbl">
+   <tr><th>選択肢の罠</th><th>なぜバツか</th></tr>
+   <tr><td>常時10台固定</td><td>可用性○だがコスト要件×（平常時CPU 5%で10台は過剰）</td></tr>
+   <tr><td>RDS Single-AZ＋リードレプリカ</td><td>読み取り分散は可用性ではない。マスター障害で書込み不可＝フェイルオーバーなし</td></tr>
+   <tr><td>垂直スケール（大型1台）</td><td>単一障害点。1台が落ちたら終わり＋自動拡縮なし</td></tr>
+  </table>
+  <div class="decide">一発判定 ／ <b>「可用性＋コスト」と来たら3点チェック</b>＝①Auto Scaling（需要追従＋平常コスト↓）②複数AZ（EC2もDBも）③RDS Multi-AZ（自動フェイルオーバー）。<b>リードレプリカは「読み取り性能」であって「可用性」ではない</b>（最頻出の引っかけ）。</div>`},
+  {h:"🔁 NACL vs セキュリティグループ（main Q11・2回ミス）",body:`<p style="margin-bottom:10px"><b>問題の急所：</b>「特定IPを<b>拒否</b>」がキーワード。SGは許可ルールしか書けない（暗黙のDeny All）。明示的にブロック＝NACLの仕事。</p>
+  <table class="gtbl">
+   <tr><th>判断軸</th><th>セキュリティグループ (SG)</th><th>ネットワークACL (NACL)</th></tr>
+   <tr><td>ルールの種類</td><td>許可のみ（Denyは書けない）</td><td>許可 AND 拒否</td></tr>
+   <tr><td>適用対象</td><td>ENI（インスタンス単位）</td><td>サブネット境界</td></tr>
+   <tr><td>ステート</td><td>ステートフル（戻りは自動許可）</td><td>ステートレス（戻りも明示ルール要）</td></tr>
+   <tr><td>評価順</td><td>全ルール一括評価</td><td>番号順に上から評価・最初にマッチで決定</td></tr>
+  </table>
+  <div class="decide">一発判定 ／ <b>「拒否」「ブロック」「Deny」が見えたら NACL</b>。SGで特定IPを弾くには「そのIPを許可ルールに含めない」しかないが、フルオープン(0.0.0.0/0許可)なSGでは不可＝NACLで明示Deny。</div>`},
+  {h:"🔁 DynamoDB一択のシグナル（main Q12・2回ミス）",body:`<p style="margin-bottom:10px"><b>問題の急所：</b>「キーで引くだけ」「1桁ミリ秒」「JOINなし」「急増する読み書き」「サーバーレス」が全部揃ったらDynamoDB以外あり得ない。迷う原因は<b>ElastiCacheやAuroraと混同</b>する時。</p>
+  <table class="gtbl">
+   <tr><th>紛らわしい選択肢</th><th>なぜバツか</th></tr>
+   <tr><td>Aurora Serverless</td><td>RDB（SQL/JOIN前提）。キーで1件引くだけなら過剰。自動スケールするがミリ秒保証はDynamoDBほどではない</td></tr>
+   <tr><td>ElastiCache</td><td>揮発性キャッシュ。永続データストアではない。「DBの代わり」には使えない</td></tr>
+   <tr><td>RDS + リードレプリカ</td><td>スケールはするがサーバーレスではない。運用ゼロも満たさない</td></tr>
+  </table>
+  <div class="decide">一発判定 ／ <b>「キーアクセス」「ミリ秒」「急増」「運用ゼロ/サーバーレス」が4つ揃ったら DynamoDB 確定</b>。JOINが要るならRDB（Aurora）、一時キャッシュならElastiCache。</div>`},
+  {h:"🔁 ゲートウェイ型VPCエンドポイント＝無料（v3 Q11・2回ミス）",body:`<p style="margin-bottom:10px"><b>問題の急所：</b>S3とDynamoDBだけがゲートウェイ型エンドポイントに対応。これは<b>時間課金もデータ処理料金もゼロ</b>。他のサービス（SQS, Kinesis等）はインターフェース型（PrivateLink）で時間課金あり。</p>
+  <table class="gtbl">
+   <tr><th>エンドポイント種類</th><th>対象</th><th>料金</th></tr>
+   <tr><td>ゲートウェイ型</td><td>S3, DynamoDB のみ</td><td>無料（ルートテーブルに経路追加するだけ）</td></tr>
+   <tr><td>インターフェース型 (PrivateLink)</td><td>他の全サービス</td><td>ENI時間課金＋データ処理料金</td></tr>
+  </table>
+  <div class="decide">一発判定 ／ <b>「S3/DynamoDBへのプライベートアクセス」「NATを経由したくない」「追加料金ゼロ」</b>→ゲートウェイ型VPCエンドポイント。NAT Gatewayはデータ処理料金がかかるので「コスト削減」文脈では即排除。</div>`},
+  {h:"🔁 OpenSearch＝全文検索＋ダッシュボード（v3 Q21・2回ミス）",body:`<p style="margin-bottom:10px"><b>問題の急所：</b>「大量ログの<b>全文検索</b>」「リアルタイム<b>ダッシュボード</b>」「キーワード横断検索」が揃ったらOpenSearch（旧Elasticsearch）。紛らわしいのはAthena/CloudWatch Logs Insights。</p>
+  <table class="gtbl">
+   <tr><th>紛らわしい選択肢</th><th>なぜバツか</th></tr>
+   <tr><td>Athena</td><td>S3上のデータにSQLクエリ。全文検索エンジンではない。ダッシュボードもQuickSight別途</td></tr>
+   <tr><td>CloudWatch Logs Insights</td><td>CWログ内の検索・集計。大量の外部ログを取り込む全文検索基盤ではない</td></tr>
+   <tr><td>Redshift</td><td>DWH（列指向集計）。テキスト全文検索ではない</td></tr>
+  </table>
+  <div class="decide">一発判定 ／ <b>「全文検索」「Kibana/ダッシュボード」「ログ検索エンジン」</b>→OpenSearch Service 一択。Athenaは「S3上のデータにSQL」、Redshiftは「構造化データの集計分析」で別物。</div>`},
+  {h:"🔁 Detective＝検知の「後」の調査（v4 Q30・2回ミス）",body:`<p style="margin-bottom:10px"><b>問題の急所：</b>GuardDutyが「何か起きた」と<b>検知</b>した後、「なぜ起きた？誰が関与？」を<b>調査</b>するのがDetective。セキュリティの検知→調査→対処の流れで、Detectiveは「調査フェーズ」担当。</p>
+  <table class="gtbl">
+   <tr><th>サービス</th><th>役割</th><th>キーワード</th></tr>
+   <tr><td>GuardDuty</td><td>検知（異常を見つける）</td><td>脅威検出・フローログ/DNS/CloudTrail分析・自動で見つける</td></tr>
+   <tr><td>Detective</td><td>調査（原因を掘る）</td><td>根本原因分析・相関分析・エンティティ関係グラフ・なぜ起きたか</td></tr>
+   <tr><td>Security Hub</td><td>集約・優先順位付け</td><td>一元ダッシュボード・コンプライアンス評価・マルチアカウント集約</td></tr>
+  </table>
+  <div class="decide">一発判定 ／ <b>「根本原因」「相関分析」「誰が関与」「調査」</b>→Detective。<b>「脅威を自動検出」</b>→GuardDuty。<b>「検出結果を一元管理・優先度」</b>→Security Hub。</div>`},
+  {h:"🔁 Gateway Load Balancer＝透過挿入（v4 Q49・2回ミス）",body:`<p style="margin-bottom:10px"><b>問題の急所：</b>「サードパーティのファイアウォール/IDSを経路上に<b>透過的に挿入</b>して全トラフィックを検査」はGWLBの専売特許。ALB/NLBでは透過挿入できない。</p>
+  <table class="gtbl">
+   <tr><th>LB</th><th>レイヤー</th><th>できること</th><th>キーワード</th></tr>
+   <tr><td>ALB</td><td>L7 (HTTP)</td><td>URLパス/ホスト名で振り分け</td><td>HTTP, WAF連携, マイクロサービス</td></tr>
+   <tr><td>NLB</td><td>L4 (TCP/UDP)</td><td>IP/ポートで流す（中身見ない）</td><td>固定IP, 超低遅延, 数百万接続</td></tr>
+   <tr><td>GWLB</td><td>L3</td><td>経路に透過的に挿入＋分散</td><td>サードパーティ仮想アプライアンス, インライン検査, GENEVE</td></tr>
+  </table>
+  <div class="decide">一発判定 ／ <b>「サードパーティ製品を透過挿入」「インライン検査」「仮想アプライアンスをスケール」</b>→GWLB。ALB/NLBでは経路に透過的に割り込めない。</div>`}
  ]}
 ];
 // scene補完：物語のない対決ペアに「こんな場面」を後付けする（a|b で対応）
