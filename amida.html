@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SAA こんな時どっち？</title>
+<title>DEA こんな時どっち？</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;background:#fafafa;color:#121212;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
@@ -70,9 +70,7 @@ body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;backgro
 <div class="app">
   <nav style="display:flex;gap:6px;margin:0 0 16px;padding:8px 0;flex-wrap:wrap">
     <a href="index.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5e5e5e;background:#fff;border:1px solid #c8c2b0;padding:8px 4px;text-decoration:none;min-width:60px">🎯 ドリル</a>
-    <a href="cards.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5e5e5e;background:#fff;border:1px solid #c8c2b0;padding:8px 4px;text-decoration:none;min-width:60px">📇 暗記帳</a>
     <a href="amida.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#121212;background:#edf2f4;border:1px solid #21537f;padding:8px 4px;text-decoration:none;min-width:60px">⚡ どっち</a>
-    <a href="network-zukai.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5e5e5e;background:#fff;border:1px solid #c8c2b0;padding:8px 4px;text-decoration:none;min-width:60px">🧭 図解</a>
     <a href="mock-exam.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5e5e5e;background:#fff;border:1px solid #c8c2b0;padding:8px 4px;text-decoration:none;min-width:60px">📝 模試</a>
   </nav>
   <div class="top" id="top">
@@ -116,7 +114,7 @@ body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;backgro
       <p style="font-size:14px;color:#5e5e5e;margin-bottom:14px">ドリルで間違えた問題をAmidaの「間違えたものモード」に取り込みます。AmidaのlocalStorageデータが変更されます。</p>
       <details style="margin-bottom:14px">
         <summary style="cursor:pointer;font-size:14px;color:#21537f;font-weight:700">💾 ふっかつのじゅもんから取り込む（別端末のデータ）</summary>
-        <textarea id="import-jumon" style="width:100%;height:80px;margin-top:8px;font-size:13px;border:1px solid #c8c2b0;padding:8px;border-radius:6px" placeholder="SAAv1:... のじゅもんを貼り付け"></textarea>
+        <textarea id="import-jumon" style="width:100%;height:80px;margin-top:8px;font-size:13px;border:1px solid #c8c2b0;padding:8px;border-radius:6px" placeholder="DEAv1:... のじゅもんを貼り付け"></textarea>
       </details>
       <div id="import-status" style="display:none;font-size:14px;padding:10px;margin-bottom:10px;border-radius:8px"></div>
       <div style="display:flex;gap:10px">
@@ -128,428 +126,100 @@ body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;backgro
 </div>
 <script>
 const decks = {
-  'compute': {
-    name: '💻 コンピュートの選び方',
+  'ingest': {
+    name: '🌊 取り込み・ストリーミングの選び方',
     cards: [
-      {s:'コンテナを使いたいがEC2を管理したくない',a:'ECS on Fargate',b:'ECS on EC2',ans:'a',why:'Fargate=<b>サーバー管理ゼロ</b>。EC2起動タイプは自分で管理。'},
-      {s:'15分以内で終わるイベント駆動の処理',a:'Lambda',b:'EC2',ans:'a',why:'Lambda=<b>イベント駆動・サーバーレス</b>。15分制限あり。'},
-      {s:'数時間かかる動画エンコード',a:'Lambda',b:'AWS Batch',ans:'b',why:'Lambda=15分制限。Batch=<b>長時間バッチ処理</b>。'},
-      {s:'コードだけ渡して環境一式を自動構築',a:'Elastic Beanstalk',b:'CloudFormationでEC2/ELB/ASGを自分で定義',ans:'a',why:'Beanstalk=<b>コードを渡すだけで環境一式を自動構築</b>。CloudFormationは自分でリソースを定義する必要がある。',tip:'コードを渡すだけ＝Elastic Beanstalk(PaaS)。CloudFormationはリソースを自分で定義。'},
-      {s:'波のあるトラフィックに自動で増減',a:'Auto Scaling',b:'大きいインスタンスに変更',ans:'a',why:'Auto Scaling=<b>水平スケール</b>。スケールアップは上限あり。'},
-      {s:'常時必要なベース＋上乗せを安く',a:'全部スポット',b:'オンデマンド＋スポット混在',ans:'b',why:'混在=<b>安定＋コスト最適化</b>。全スポットは追い出しリスク。'},
-      {s:'Step Functions:IoT 10万/秒・5分以内',a:'Standard',b:'Express',ans:'b',why:'Express=<b>高頻度・短時間・安い</b>。Standardは長時間/監査向き。'},
-      {s:'Step Functions:長時間ワークフロー・監査証跡',a:'Standard',b:'Express',ans:'a',why:'Standard=<b>最大1年・Exactly-once・状態遷移記録</b>。'},
-      {s:'Kinesisのチェックポイントをカスタム制御したい',a:'Lambda',b:'ECS + KCL（Kinesis Client Library）',ans:'b',why:'Lambda=チェックポイント自動管理。<b>KCL（Kinesis Client Library）=アプリ側で任意位置制御可</b>。'},
-      {s:'S3はサーバーレス？',a:'はい',b:'いいえ',ans:'a',why:'管理不要・使った分だけ課金・自動スケール=<b>サーバーレス</b>。'},
-      {s:'RDSはサーバーレス？',a:'はい',b:'いいえ',ans:'b',why:'RDS=インスタンス常時起動=<b>非サーバーレス</b>。（Aurora Serverless v2は例外）'},
-      {s:'ElastiCacheはサーバーレス？',a:'はい',b:'いいえ',ans:'b',why:'ノード常時起動=<b>非サーバーレス</b>。'},
-      {s:'Fargateはサーバーレス？',a:'はい',b:'いいえ',ans:'a',why:'Fargate=EC2管理なし・タスク単位課金=<b>サーバーレス</b>。'},
-      {s:'Lambda + RDS の構成は全体としてサーバーレス？',a:'はい',b:'いいえ',ans:'b',why:'裏のRDSが常時課金。<b>全部サーバーレスか</b>で判定。'},
-      {s:'「サーバーレスでSQL分析」と来たら？',a:'Lambda',b:'Athena',ans:'b',why:'Athena=<b>サーバーレスSQLエンジン</b>。LambdaはSQLエンジンを持たない。'},
-      {s:'API Gateway + Lambda + DynamoDB は？',a:'サーバーレス鉄板',b:'非サーバーレス',ans:'a',why:'3つとも管理不要・使った分だけ=<b>鉄板構成</b>。'},
-      {s:'「CPU使用率を常に50%に保つ」ように自動調整',a:'ターゲット追跡（Target Tracking）',b:'ステップスケーリング',ans:'a',why:'ターゲット追跡=<b>目標値を維持するよう自動増減</b>。最も簡単で推奨。'},
-      {s:'「アラームの超過幅に応じて段階的に」台数を増やす',a:'ターゲット追跡',b:'ステップスケーリング',ans:'b',why:'ステップ=<b>逸脱の大きさで増分を変える</b>細かい制御。'},
-      {s:'「毎週月曜9時にアクセス増」が分かっている',a:'スケジュールドスケーリング',b:'ターゲット追跡',ans:'a',why:'スケジュール=<b>決まった時刻に事前増減</b>。反応型では立ち上がりが間に合わない。',tip:'時刻が読める＝スケジュールド(事前に増やす)。反応型(ターゲット追跡)は立ち上がりが間に合わない。'},
-      {s:'過去傾向から「未来の需要を予測して」先回りで増やす',a:'予測スケーリング（Predictive）',b:'ステップスケーリング',ans:'a',why:'予測スケーリング=<b>MLで需要予測し事前プロビジョン</b>。急な立ち上がりに強い。'},
-      {s:'スケールインで「消したくないインスタンスを守る」',a:'スケールイン保護',b:'クールダウン',ans:'a',why:'スケールイン保護=<b>特定インスタンスを削除対象から除外</b>。クールダウンは連続動作の待ち時間。'},
+      {s:'保持期間内に複数コンシューマーが同じストリームを独立に再読み込み（リプレイ）',a:'Kinesis Data Streams',b:'Kinesis Data Firehose',ans:'a',why:'KDS=<b>保持期間内で再読み＋複数独立読み</b>。Firehoseは配信するだけで溜めて読み直せない。',tip:'リプレイ・複数独立読み＝KDS(溜めた水を各自コップで何度でも)。'},
+      {s:'変換・圧縮こみでS3やRedshiftへサーバーレスに配信（コードを書きたくない）',a:'Kinesis Data Firehose',b:'Kinesis Data Streams',ans:'a',why:'Firehose=<b>配信特化・フルマネージド</b>。バッファリング・変換・圧縮を内蔵。',tip:'配信特化・コード不要＝Firehose(蛇口から直接バケツへ)。'},
+      {s:'既存のApache Kafka資産（API互換必須）をそのままマネージドに移したい',a:'Amazon MSK',b:'Kinesis Data Streams',ans:'a',why:'MSK=<b>Kafka互換</b>で既存資産をそのまま。KinesisはAWS独自API。',tip:'Kafka互換＝MSK。独自APIで良ければKinesis。'},
+      {s:'各コンシューマーに専用スループット（他の読み手の影響を受けない）が欲しい',a:'標準コンシューマー',b:'拡張ファンアウト（Enhanced Fan-Out）',ans:'b',why:'拡張ファンアウト=<b>コンシューマーごとに2MB/秒を専有</b>・低レイテンシ。',tip:'専用スループット＝拡張ファンアウト。共有で足りるなら標準。'},
+      {s:'オンプレDBの変更を継続的にキャプチャ（CDC）してS3へレプリケート',a:'AWS DMS',b:'AWS Glue',ans:'a',why:'DMS=<b>全ロード＋CDC</b>で継続レプリケート。Glueは変換ETL用。',tip:'DBのCDC・移行＝DMS。'},
+      {s:'Salesforce等のSaaSからノーコードでデータを取り込みたい',a:'Kinesis Data Firehose',b:'Amazon AppFlow',ans:'b',why:'AppFlow=<b>SaaSコネクタ・ノーコード</b>連携。',tip:'SaaS連携ノーコード＝AppFlow。'},
+      {s:'ストリームにリアルタイムでウィンドウ集計（直近5分の合計など）を行う',a:'Managed Service for Apache Flink',b:'Kinesis Data Firehose',ans:'a',why:'Flink=<b>継続クエリ・ストリーム集計</b>。Firehoseは配信のみ。',tip:'ストリームのウィンドウ集計＝Flink。'},
+      {s:'ストリーム取り込み量が予測不能で急変する。シャード管理をしたくない',a:'KDS プロビジョンドモード',b:'KDS オンデマンドモード',ans:'b',why:'オンデマンド=<b>シャードを自動スケール</b>・容量管理不要。',tip:'容量が読めない・管理したくない＝オンデマンド。'},
+      {s:'Kafkaを使いたいがブローカー容量の管理もしたくない',a:'MSK Serverless',b:'MSK プロビジョンド',ans:'a',why:'MSK Serverless=<b>容量管理不要</b>で自動スケール。',tip:'Kafka＋容量管理ゼロ＝MSK Serverless。'},
+      {s:'多数の小さなレコードをまとめてLambdaで効率よく処理したい',a:'1レコードごとに関数を起動',b:'バッチウィンドウ/バッチサイズを設定',ans:'b',why:'<b>バッチウィンドウ</b>で複数レコードをまとめて1回の呼び出しに。',tip:'小レコード多数＝バッチ化して呼び出し削減。'},
+      {s:'RDS/Auroraのデータを継続的にRedshiftへ、ETLパイプラインを作らず同期したい',a:'ゼロETL統合',b:'DMSでCDCレプリケーション',ans:'a',why:'ゼロETL統合=<b>パイプライン不要でRedshiftへ自動同期</b>。DMSは構築・運用が要る。',tip:'ETL作らずDB→Redshift同期＝ゼロETL統合。'},
+      {s:'ストリームデータをRedshiftに直接取り込みマテリアライズドビュー化',a:'Firehose経由でS3→COPY',b:'Redshift Streaming Ingestion',ans:'b',why:'Streaming Ingestion=<b>ストリームを直接Redshiftへ取り込み</b>。S3経由のバッチより低レイテンシ。',tip:'ストリーム→Redshift直接＝Streaming Ingestion。'},
+      {s:'オンプレの大量ファイルを定期的にS3へ効率よく転送',a:'AWS DataSync',b:'AWS Transfer Family',ans:'a',why:'DataSync=<b>大量データの高速転送に特化</b>。Transfer FamilyはSFTP/FTPS窓口。',tip:'大量転送＝DataSync。SFTP受け口＝Transfer Family。'},
+      {s:'100TB級を回線が細い拠点から物理デバイスでオフライン移行',a:'DataSync',b:'AWS Snowball',ans:'b',why:'Snowball=<b>物理デバイスでオフライン大容量移行</b>。回線が細い時に有効。',tip:'巨大＋細回線＝Snowball(物理搬送)。'},
+      {s:'Kafkaのスキーマ進化と互換性を一元管理したい',a:'Glue Schema Registry',b:'アプリ側で手動管理',ans:'a',why:'Glue Schema Registry=<b>スキーマ進化・互換性チェックを管理</b>。',tip:'スキーマ進化管理＝Glue Schema Registry。'},
+    
     ]
   },
-  'storage': {
-    name: '🗄 ストレージの選び方',
+  'transform': {
+    name: '🔧 変換・ETLの選び方',
     cards: [
-      {s:'月1回しかアクセスしない安いS3',a:'S3 Standard',b:'S3 Standard-IA',ans:'b',why:'IA=<b>低頻度</b>。保管安い＋取り出し有料。'},
-      {s:'アクセス頻度が読めない',a:'S3 Intelligent-Tiering',b:'S3 Standard-IAに固定する',ans:'a',why:'Intelligent-Tiering=<b>アクセス頻度に応じ自動移動</b>。IA固定は頻繁アクセスだと取り出し料で割高になりうる。'},
-      {s:'7-10年保管・年1回取り出し',a:'Glacier Deep Archive',b:'S3 Standard-IA',ans:'a',why:'Deep Archive=<b>最安・12時間復元</b>。規制対応の長期保管。',tip:'最安・待てる＝Glacier Deep Archive(取り出し数時間)。即時が要るならInstant Retrieval。'},
-      {s:'EC2のブートディスク',a:'EBS（Elastic Block Store）',b:'EFS（Elastic File System）',ans:'a',why:'EBS=<b>EC2直付け</b>（1対1）。EFSは共有ファイルシステム。'},
-      {s:'複数EC2から同時に読み書き',a:'EBS（Elastic Block Store）',b:'EFS（Elastic File System）',ans:'b',why:'EFS=<b>共有</b>（NFS）。EBSは基本1台のみ。',tip:'共有(NFS)＝EFS。EC2に1対1直付けはEBS。'},
-      {s:'オンプレのファイルサーバーを残しつつ、裏でS3にデータを同期したい',a:'Storage Gateway',b:'DataSync',ans:'a',why:'Storage Gateway=<b>オンプレにキャッシュ</b>を残しつつS3に。DataSyncは転送/同期。'},
-      {s:'オンプレのデータをS3にまとめて引っ越したい（移行目的）',a:'Storage Gateway',b:'DataSync',ans:'b',why:'DataSync=<b>転送・同期</b>が仕事。Gatewayは常設キャッシュ。'},
-      {s:'既存バケットにS3 Object Lockを後から有効化できる？',a:'できる',b:'できない（作成時のみ）',ans:'b',why:'Object Lock=<b>バケット作成時のみ</b>有効化可能。後付け不可。'},
-      {s:'普通のDB・Webサーバーに安定した性能を安く',a:'gp3（汎用SSD）',b:'io2（プロビジョンドIOPS）',ans:'a',why:'gp3=<b>大半のワークロードに十分・コスパ最良</b>。io2は高い。'},
-      {s:'決済DBで一瞬の遅延も許されない・最高IOPS',a:'gp3（汎用SSD）',b:'io2 Block Express',ans:'b',why:'io2=<b>サブミリ秒・最高IOPS</b>。ミッションクリティカル用。'},
-      {s:'大容量ログのシーケンシャル読み書き（安く）',a:'st1（スループットHDD）',b:'gp3（汎用SSD）',ans:'a',why:'st1=<b>シーケンシャル・高スループット・安いHDD</b>。'},
-      {s:'めったにアクセスしないコールドデータ（最安HDD）',a:'st1（スループットHDD）',b:'sc1（Cold HDD）',ans:'b',why:'sc1=<b>最安HDD・めったに触らない</b>。st1は頻繁に読む。',tip:'HDDは2枚。st1＝throughputのt(よく読む大容量ログ)。sc1＝coldのc(めったに触らない最安)。'},
-      {s:'EC2を停止してもデータが残るのはどっち？',a:'EBS',b:'インスタンスストア',ans:'a',why:'EBS=<b>永続（停止しても残る）</b>。インスタンスストア=<b>停止で消える使い捨て</b>。'},
-      {s:'一時データ・スクラッチ用で超低レイテンシ（消えてOK）',a:'EBS（Elastic Block Store）',b:'インスタンスストア',ans:'b',why:'インスタンスストア=<b>ホスト直結・超高速・揮発</b>。'},
-      {s:'複数AZにまたがって自動で冗長化されるファイルシステムは？',a:'EBS',b:'EFS',ans:'b',why:'EFS=<b>複数AZに自動冗長・複数EC2から共有</b>。EBSは<b>単一AZ</b>に閉じる。'},
-      {s:'EBSボリュームはAZをまたげる？',a:'またげる',b:'またげない（単一AZ・別AZはスナップショット経由）',ans:'b',why:'EBS=<b>単一AZ</b>。別AZで使うにはスナップショットから作り直す。'},
-      {s:'EC2を停止(Stop)するとデータが消えるのは？',a:'EBS',b:'インスタンスストア',ans:'b',why:'インスタンスストア=<b>停止で揮発</b>（ホスト直結の使い捨て）。EBSは永続。'},
-      {s:'S3の「99.999999999%(11 9s)」は何を表す？',a:'耐久性（データが失われない）',b:'可用性（アクセスできる）',ans:'a',why:'11 9s=<b>耐久性(durability)</b>。可用性(availability)はクラスにより99.9〜99.99%で別物。'},
-      {s:'EFSを最も安くするには（低頻度アクセス）？',a:'EFS標準のまま',b:'EFS-IA + ライフサイクル自動移行',ans:'b',why:'EFS-IA=<b>低頻度クラスへ自動移行して節約</b>。S3のIAと同じ発想。'},
-      {s:'S3バージョニング有効時、オブジェクトを「削除」すると実体はどうなる？',a:'完全に消える',b:'削除マーカーが付くだけ（実体は残る）',ans:'b',why:'バージョニング有効時の削除＝<b>削除マーカー</b>。実体は旧バージョンとして残り復元可能。',tip:'バージョニング＝上書き/削除しても旧版が残る保険。完全削除にはバージョンIDを指定する必要がある。'},
-      {s:'S3バージョニングで「バージョンIDを指定した完全削除」すら防ぎたい',a:'バケットポリシーでDenyを書く',b:'MFA Deleteを有効化する',ans:'b',why:'MFA Delete＝<b>バージョンの完全削除にMFA認証を要求</b>。万一キーが漏れても物理削除を防げる。',tip:'MFA Delete＝最後の砦。バージョニング無効化＋完全削除にMFAを要求。rootアカウントでのみ設定可。'},
+      {s:'サーバーレスのSpark ETL＋スキーマを自動でカタログ化したい',a:'AWS Glue',b:'Amazon EMR',ans:'a',why:'Glue=<b>サーバーレスETL＋Data Catalog</b>。クラスタ管理なし。',tip:'サーバーレスETL＋カタログ＝Glue。'},
+      {s:'Hadoop/Sparkクラスタを細かく制御・チューニング・常時稼働で使いたい',a:'Amazon EMR',b:'AWS Glue',ans:'a',why:'EMR=<b>クラスタを自分で制御</b>。細かいチューニング向き。',tip:'クラスタを触る＝EMR。サーバーレスで済むならGlue。'},
+      {s:'コードを書かずに視覚的にデータクレンジング・準備をしたい',a:'Glue DataBrew',b:'Glue ETLジョブ',ans:'a',why:'DataBrew=<b>ノーコード・ビジュアル準備（レシピ）</b>。',tip:'ノーコード整形＝DataBrew。'},
+      {s:'前回実行以降に届いた新規ファイルだけを差分処理したい',a:'処理済み一覧を自前でDynamoDBに記録',b:'ジョブブックマークを有効化',ans:'b',why:'Glueの<b>ジョブブックマーク</b>が処理済みを自動追跡。自前管理は車輪の再発明。',tip:'Glueの増分処理＝ジョブブックマーク。'},
+      {s:'Sparkクラスタの起動・停止管理なしでSparkジョブを実行したい',a:'EMR Serverless',b:'EMR on EC2',ans:'a',why:'EMR Serverless=<b>クラスタ管理不要</b>で自動プロビジョン。',tip:'Spark＋クラスタ管理ゼロ＝EMR Serverless。'},
+      {s:'SLAが緩いバッチを、多少遅くてもいいので安く回したい',a:'標準実行',b:'Glue Flex実行',ans:'b',why:'Flex=<b>余剰キャパで割安</b>（開始遅延を許容）。',tip:'急がないバッチを安く＝Glue Flex。'},
+      {s:'S3上に大量の小さなファイルができてクエリが遅い。どう対処？',a:'コンパクション（ファイル結合）',b:'そのまま放置',ans:'a',why:'小ファイルは<b>結合して最適サイズ化</b>するとスキャン効率が上がる。',tip:'小ファイル問題＝コンパクションで結合。'},
+      {s:'ETLの複数ステップ（ジョブ→クローラ→ジョブ）の依存を組みたい（Glue中心）',a:'手動で順番に実行',b:'Glue Workflows',ans:'b',why:'Glue Workflows=<b>Glueジョブ/クローラの依存を連結</b>。',tip:'Glue中心の連結＝Glue Workflows。'},
+      {s:'列指向で圧縮が効き、分析クエリのスキャン量を減らす保存形式は？',a:'Parquet / ORC',b:'CSV / JSON',ans:'a',why:'Parquet/ORC=<b>列指向・圧縮・述語プッシュダウン</b>でスキャン削減。',tip:'分析用の保存＝列指向(Parquet/ORC)。'},
+      {s:'S3へのクエリ結果を新テーブル＋Parquetで一発書き出し',a:'Athena CTAS',b:'手動でGlueジョブを書く',ans:'a',why:'CTAS=<b>CREATE TABLE AS SELECTでクエリ結果を新テーブル化</b>・フォーマット指定可。',tip:'クエリ結果を新テーブル＝Athena CTAS。'},
+      {s:'RDS等の複数ソースを事前コピーせず横断SQLしたい',a:'都度エクスポートして結合',b:'Athena Federated Query',ans:'b',why:'Federated Query=<b>コネクタで多様なソースを直接横断クエリ</b>。事前コピー不要。',tip:'事前コピーなし横断＝Athena Federated Query。'},
+      {s:'大テーブルと小テーブルの結合で、シャッフルを避け高速化',a:'ブロードキャストジョイン',b:'通常のシャッフルジョイン',ans:'a',why:'ブロードキャスト=<b>小テーブルを全ノードに配布</b>しシャッフル回避。',tip:'小テーブル配布で高速結合＝ブロードキャストジョイン。'},
+    
     ]
   },
-  'database': {
-    name: '🗃 データベースの選び方',
+  'store': {
+    name: '🗃 データストア・モデリングの選び方',
     cards: [
-      {s:'JOINが必要なリレーショナルデータ',a:'RDS/Aurora',b:'DynamoDB',ans:'a',why:'RDS=<b>SQL・JOIN・トランザクション</b>。',tip:'JOIN・トランザクション＝RDS/Aurora(SQL)。キー引きだけならDynamoDB。'},
-      {s:'キーで一発取り出し・ミリ秒未満',a:'RDS',b:'DynamoDB',ans:'b',why:'DynamoDB=<b>キーバリュー・超高速</b>。',tip:'キー1件・JOIN不要・ミリ秒＝DynamoDB(NoSQL)。JOINや複雑クエリはRDS/Aurora。'},
-      {s:'DynamoDBの読み込みをもっと速く',a:'DAX（DynamoDB Accelerator）',b:'ElastiCache',ans:'a',why:'DAX=<b>DynamoDB専用</b>キャッシュ。',tip:'DAXの「DA」はDynamoDBのDA＝DynamoDB専用。汎用キャッシュ(RDB結果/セッション)はElastiCache。'},
-      {s:'RDSの読み込みを分散したい',a:'リードレプリカ',b:'マルチAZ',ans:'a',why:'リードレプリカ=<b>読み取り分散</b>。マルチAZ=可用性（フェイルオーバー）。',tip:'レプリカ＝読み取りの分身(分散)。マルチAZは待機系(可用性)で読み分散ではない。頻出の罠。'},
-      {s:'RDSが落ちても自動復旧（可用性）',a:'リードレプリカ',b:'マルチAZ',ans:'b',why:'マルチAZ=<b>自動フェイルオーバー</b>。読み取り分散ではない。'},
-      {s:'世界中で読み書き両方高速',a:'DynamoDB Global Tables',b:'DAX（DynamoDB Accelerator）',ans:'a',why:'Global Tables=<b>マルチリージョン読み書き</b>。DAX=読みだけ・単一リージョン。'},
-      {s:'グラフDB（人間関係・ネットワーク）',a:'Neptune',b:'DynamoDB',ans:'a',why:'Neptune=<b>グラフ</b>（ノードとエッジ）。',tip:'多段の関係をたどる(友達の友達)＝Neptune(グラフ)。RDBのJOINは多段で結合爆発。'},
-      {s:'全文検索・ログ分析',a:'OpenSearch',b:'RDS',ans:'a',why:'OpenSearch=<b>全文検索・分析</b>。RDSはLIKE程度。',tip:'全文検索＋Kibana可視化＝OpenSearch。SQLのLIKE程度ならRDSでも。'},
-      {s:'DynamoDB TTLの削除にWCU(書き込み容量)は消費される？',a:'される',b:'されない（無料）',ans:'b',why:'TTL削除は<b>無料</b>。WCU消費なし。48時間のズレあり。'},
-      {s:'RDB(PostgreSQL/MySQL互換)で、アイドル時ほぼ課金ゼロ・自動スケール',a:'Aurora Serverless v2',b:'DynamoDBオンデマンド',ans:'a',why:'Aurora Serverless v2=<b>RDBのまま自動スケール</b>。SQL/JOINが要るならこちら。'},
-      {s:'キーバリューNoSQLで、容量計画なし・使った分だけ',a:'Aurora Serverless v2',b:'DynamoDBオンデマンド',ans:'b',why:'DynamoDBオンデマンド=<b>NoSQLでキャパシティ計画不要</b>。急なスパイクにも自動追従。'},
-      {s:'DynamoDBで「予測可能な安定した高トラフィック」を最安にするには',a:'オンデマンド',b:'プロビジョンド + Auto Scaling',ans:'b',why:'安定高負荷=<b>プロビジョンド(予約)が単価安い</b>。オンデマンドは変動・読めない時向け。'},
-      {s:'Aurora Serverless v2は0までスケールダウンする？',a:'0.5 ACUが下限（完全に0にはならない）',b:'0まで落ちて無課金',ans:'a',why:'v2は<b>最小0.5 ACU</b>常時。完全ゼロ停止は旧v1の挙動で、v2は即応性重視で下限あり。'},
-      {s:'MongoDBアプリをコード変更最小でマネージドに移したい',a:'DocumentDB(MongoDB互換)',b:'DynamoDB',ans:'a',why:'DocumentDB＝<b>MongoDB互換でドライバ/クエリそのまま</b>。DynamoDBはAPI書き換えが要る。',tip:'MongoDB互換＝DocumentDB(ドライバ/クエリそのまま)。DynamoDBは書き換え要。'},
-      {s:'Cassandra(CQL)アプリをコード変更最小でマネージドに移したい',a:'DynamoDB',b:'Keyspaces(Cassandra互換)',ans:'b',why:'Keyspaces＝<b>Apache Cassandra(CQL)互換でそのまま移行</b>。DynamoDBは独自APIで書き換えが要る。',tip:'Cassandra(CQL)そのまま＝Keyspaces。DynamoDBは独自APIで書き換え要。'},
-      {s:'Redis互換で「インメモリの速さ」と「データ永続性・耐久性」を両立しプライマリDBとして使いたい',a:'ElastiCache for Redis',b:'MemoryDB for Redis',ans:'b',why:'MemoryDB＝<b>Redis互換＋マルチAZの永続性でプライマリDBになれる</b>。ElastiCacheは基本キャッシュ用途。'},
-      {s:'ElastiCacheで「レプリカ・自動フェイルオーバー・スナップショット」など高度な機能が要る',a:'Memcached',b:'Redis',ans:'b',why:'Redis＝<b>レプリケーション/フェイルオーバー/永続化/データ構造が豊富</b>。Memcachedは<b>単純・マルチスレッドのキャッシュ</b>で高度機能なし。'},
-      {s:'関係性(友達の友達・レコメンド)を多段でたどる高速クエリ',a:'Neptune(グラフDB)',b:'RDSのJOIN',ans:'a',why:'Neptune＝<b>グラフで多段の関係探索が速い</b>。RDBのJOINは多段で結合爆発し劣化。'},
-      {s:'IoT計測値など時刻付きデータの時間範囲集計と自動階層化',a:'Timestream',b:'DynamoDB',ans:'a',why:'Timestream＝<b>時系列専用・時間集計・自動階層化</b>。DynamoDBは汎用KVで時系列集計は不得手。'},
-      {s:'アイドル時ほぼ課金ゼロで自動スケールするRDB(PostgreSQL/MySQL互換)',a:'Aurora Serverless v2',b:'RDS(通常)',ans:'a',why:'Aurora Serverless v2＝<b>需要に応じ容量自動伸縮・低負荷時は最小</b>。RDS通常はインスタンス常時課金。'},
-      {s:'「5分前の状態」に巻き戻したい（任意の時点へ復元）',a:'スナップショットから復元',b:'PITR（ポイントインタイムリカバリ）',ans:'b',why:'PITR=<b>保持期間内の任意の秒に復元</b>。スナップショットは取得時点にしか戻れない。'},
-      {s:'Auroraで「DBを作り直さず」数秒〜数分巻き戻したい',a:'Auroraバックトラック',b:'スナップショット復元',ans:'a',why:'バックトラック=<b>新規クラスタを作らず巻き戻す</b>(Aurora MySQL)。復元は新インスタンスができる。'},
-      {s:'RDSの自動バックアップの保持期間を0にすると？',a:'PITRが無効になる',b:'影響なし',ans:'a',why:'保持0=<b>自動バックアップOFF=PITR不可</b>。PITRには自動バックアップ有効が前提。'},
-      {s:'手動スナップショットはいつ消える？',a:'保持期間で自動削除',b:'明示的に削除するまで残る',ans:'b',why:'手動スナップショット=<b>自分で消すまで永続</b>。自動バックアップは保持期間で消える。'},
-      {s:'別リージョンの災害に備えてDBを継続複製したい',a:'スナップショットのクロスリージョンコピー',b:'Aurora Global Database / リードレプリカ(別リージョン)',ans:'b',why:'継続複製・低RPO=<b>Global Database</b>。スナップショットコピーは定期・RPO大きめ。'},
-      {s:'暗号化なしで稼働中のRDSを、後から保管データ暗号化にする正攻法は？',a:'既存インスタンスの設定変更で暗号化を有効にする',b:'スナップショット取得→暗号化コピー→そのコピーから復元',ans:'b',why:'RDSは<b>既存インスタンスに後から暗号化を有効化できない</b>。スナップショットを取り、KMSキーを指定して<b>暗号化コピー</b>→そこから復元して切り替える。',tip:'RDS暗号化は「後付け不可」。スナップショット→暗号化コピー→復元が唯一の標準ルート。非暗号ソースから暗号レプリカも作れない。'},
-      {s:'DynamoDBで「誤った一括更新の直前(秒単位)」に戻したい。運用の作り込みなしで',a:'DynamoDB PITR（ポイントインタイムリカバリ）を有効化',b:'グローバルテーブルで別リージョンのレプリカに切り替える',ans:'a',why:'PITR＝<b>有効化するだけで直近35日の任意の秒に別テーブルへ復元</b>。グローバルテーブルは誤更新も即レプリケートされ<b>復旧手段にならない</b>。',tip:'誤操作から戻す＝PITR(35日・秒単位・作り込み不要)。グローバルテーブルは可用性用で、誤更新も複製されるので救えない。'},
+      {s:'S3上のデータにサーバーレスでアドホックにSQL（クラスタ不要）',a:'Amazon Redshift',b:'Amazon Athena',ans:'b',why:'Athena=<b>サーバーレス・スキャン従量課金</b>。クラスタ不要。',tip:'S3にサーバーレスSQL＝Athena。'},
+      {s:'ペタバイト級を高頻度に複雑集計・結合する本格DWH',a:'Amazon Athena',b:'Amazon Redshift',ans:'b',why:'Redshift=<b>列指向・分散並列の本格DWH</b>。高頻度大規模向き。',tip:'常設の大規模DWH＝Redshift。アドホックはAthena。'},
+      {s:'Redshiftから、S3のデータをロードせず直接結合クエリしたい',a:'一度COPYでロード',b:'Redshift Spectrum',ans:'b',why:'Spectrum=<b>外部テーブルでS3を直接クエリ</b>（ロード不要）。',tip:'ロードせずS3直接＝Redshift Spectrum。'},
+      {s:'S3のテーブルにACIDな更新・削除・タイムトラベルが欲しい',a:'Apache Iceberg',b:'素のParquet',ans:'a',why:'Iceberg=<b>ACID・スナップショット・スキーマ進化</b>対応のテーブル形式。',tip:'S3でACID/タイムトラベル＝Iceberg(やHudi)。'},
+      {s:'Redshiftで結合されるテーブルを同じノードに寄せて再分散を減らす',a:'SORTKEY（ソートキー）',b:'DISTKEY（分散キー）',ans:'b',why:'DISTKEY=<b>結合キーでデータ配置を揃え</b>再分散を削減。',tip:'再分散を減らす＝DISTKEY。範囲絞りはSORTKEY。'},
+      {s:'Redshiftで日付範囲の絞り込みを高速化してスキャンを減らす',a:'DISTKEY（分散キー）',b:'SORTKEY（ソートキー）',ans:'b',why:'SORTKEY=<b>ソート順で範囲スキャンをスキップ</b>。',tip:'範囲フィルタ高速化＝SORTKEY。'},
+      {s:'アクセス頻度が読めないS3データのコストを自動最適化',a:'S3 Standard-IAに固定',b:'S3 Intelligent-Tiering',ans:'b',why:'Intelligent-Tiering=<b>アクセス頻度で自動階層化</b>。読めない時に最適。',tip:'頻度が読めない＝Intelligent-Tiering。'},
+      {s:'DynamoDBで特定キーにアクセスが集中（ホットパーティション）。どう設計？',a:'書き込みシャーディング（キーに接尾辞）',b:'オンデマンドにすれば解決',ans:'a',why:'ホットキーは<b>キー分散（シャーディング）</b>で解消。容量モード変更では直らない。',tip:'ホットパーティション＝キー設計で分散。オンデマンドは万能薬ではない。'},
+      {s:'DynamoDBの全データを分析用にS3へ、テーブル負荷をかけずに出したい',a:'全項目をScan',b:'S3へのエクスポート（PITR活用）',ans:'b',why:'<b>S3エクスポート</b>はテーブルのRCUを消費せず全件出力。Scanは高負荷。',tip:'DynamoDB→分析＝S3エクスポート(Scanしない)。'},
+      {s:'複数チームでRedshiftのデータをコピーせず共有したい',a:'Redshiftデータ共有（Data Sharing）',b:'UNLOADして配布',ans:'a',why:'Data Sharing=<b>コピーせずライブに共有</b>。',tip:'コピーなし共有＝Redshift Data Sharing。'},
+      {s:'DynamoDBの読み取りをマイクロ秒級に高速化',a:'ElastiCacheを自前構築',b:'DynamoDB Accelerator（DAX）',ans:'b',why:'DAX=<b>DynamoDB専用インメモリキャッシュ</b>・マイクロ秒応答。',tip:'DynamoDB読み取り高速化＝DAX。'},
+      {s:'DynamoDBを複数リージョンで双方向にレプリケート',a:'グローバルテーブル',b:'自前でクロスリージョン複製',ans:'a',why:'グローバルテーブル=<b>マルチリージョン双方向レプリケーション</b>をマネージド提供。',tip:'DynamoDBマルチリージョン＝グローバルテーブル。'},
+      {s:'IoTの時系列データを自動階層化して保存・時間集計',a:'DynamoDB',b:'Amazon Timestream',ans:'b',why:'Timestream=<b>時系列専用DB</b>・メモリ/マグネティック層の自動階層化。',tip:'時系列専用＝Timestream。'},
+      {s:'高カーディナリティ列で過剰パーティションを避けつつ等値検索を速く',a:'Bucketing（ハッシュ振り分け）',b:'その列でパーティション',ans:'a',why:'Bucketing=<b>ハッシュで固定数バケットに振り分け</b>・パーティション肥大を回避。',tip:'高カーディナリティ＝Bucketing(パーティションでなく)。'},
+      {s:'巨大なCSV/JSONの一部の列・行だけ取得してスキャン削減',a:'S3 Select',b:'オブジェクト全体をダウンロード',ans:'a',why:'S3 Select=<b>オブジェクト内を部分抽出</b>し転送量を削減。',tip:'一部だけ取り出す＝S3 Select。'},
+    
     ]
   },
-  'network': {
-    name: '🕸 ネットワークの選び方',
+  'ops': {
+    name: '⚙️ 運用・オーケストレーションの選び方',
     cards: [
-      {s:'戻り通信は自動で許可される？',a:'SG／セキュリティグループ（はい）',b:'NACL（いいえ）',ans:'a',why:'SGは<b>ステートフル</b>。NACLは<b>ステートレス</b>（戻りも書く）。',tip:'SG＝インスタンスの用心棒(ステートフル・戻り自動・許可のみ)。NACL＝サブネットの関所(ステートレス・往復とも記帳・拒否も書ける)。'},
-      {s:'「拒否ルール」を書ける？',a:'SG／セキュリティグループ（書けない）',b:'NACL（書ける）',ans:'b',why:'SGは許可のみ。NACLは許可＋拒否。'},
-      {s:'セキュリティグループの許可ルールに、別のセキュリティグループを「送信元」として指定できる？',a:'SG／セキュリティグループ（できる）',b:'NACL（できない）',ans:'a',why:'SGは<b>SG参照</b>可（Auto Scaling自動追従）。NACLはIPのみ。'},
-      {s:'サブネット全体に適用される？',a:'SG（セキュリティグループ）',b:'NACL（ネットワークACL）',ans:'b',why:'SG=インスタンス単位。NACL=<b>サブネット単位</b>。'},
-      {s:'ALBのヘルスチェック(80)はどの方向？',a:'ALBのインバウンド',b:'ALBのアウトバウンド',ans:'b',why:'ALBが<b>EC2に出す</b>のでアウトバウンド。'},
-      {s:'公開ALBのセキュリティグループ、受付元は「VPCのCIDR」でOK？',a:'正しい',b:'間違い（0.0.0.0/0にすべき）',ans:'b',why:'公開ALBのソースは<b>0.0.0.0/0</b>。VPC CIDRでは外からのアクセスが届かない。'},
-      {s:'プライベートEC2からS3へ（NAT料金を減らす）',a:'VPCエンドポイント(GW型)',b:'NAT Gateway経由のまま',ans:'a',why:'ゲートウェイ型=<b>S3/DynamoDB無料</b>。NAT GWはデータ処理課金。',tip:'S3とDynamoDBだけ「ゲートウェイ型＝無料(ルートテーブルに追加するだけ)」。NAT経由はデータ処理課金。合言葉「SちゃんとDくんは無料」。'},
-      {s:'プライベートからSQS/KMSへプライベート接続',a:'ゲートウェイ型エンドポイント',b:'インターフェイス型(PrivateLink)',ans:'b',why:'S3/DynamoDB以外=<b>インターフェイス型</b>（ENI＋SG）。',tip:'S3/DynamoDB以外は「インターフェイス型(PrivateLink)＝ENI＋時間課金」。無料のゲートウェイ型はS3とDynamoDBだけ。'},
-      {s:'VPCが20個以上でピアリング爆発',a:'Transit Gateway',b:'VPCピアリング追加',ans:'a',why:'TGW=<b>ハブ集約</b>。ピアリングはメッシュ爆発する。',tip:'ピアリングは1対1で数が増えると網の目に爆発。TGW＝中央ハブ(駅)に集約。'},
-      {s:'HTTPの静的コンテンツを世界に速く配信',a:'CloudFront',b:'Global Accelerator',ans:'a',why:'CloudFront=<b>CDNキャッシュ配信</b>。GAはキャッシュしない。',tip:'CloudFront＝キャッシュするCDN(HTTP/静的)。Global Accelerator＝キャッシュせず・TCP/UDP・固定IP(GAのGはGameのG＝UDPゲーム)。'},
-      {s:'非HTTP(UDP)ゲーム＋固定IP＋低遅延',a:'CloudFront',b:'Global Accelerator',ans:'b',why:'GA=<b>TCP/UDP・固定IP・AWSバックボーン</b>。',tip:'GAのGはGame。TCP/UDP・固定IP・AWSバックボーンで最短。HTTPの静的配信はCloudFront。'},
-      {s:'特定の国からのアクセスだけ許可',a:'SG(セキュリティグループ)',b:'WAF Geo Match',ans:'b',why:'SGは国指定不可。<b>WAF/CloudFront</b>で国フィルタ。',tip:'国フィルタはWAF/CloudFront(Geo)。SGは国を知らない(IP/ポートだけ)。'},
-      {s:'オンプレとの安定・低遅延な専用線',a:'Direct Connect',b:'Site-to-Site VPN',ans:'a',why:'DX=<b>物理専用線</b>（安定・大容量）。VPN=ネット経由トンネル。',tip:'DX＝物理専用線(安定・大容量だが敷設に数週間)。今すぐ・暗号ならVPN。'},
-      {s:'即日・安く・暗号化された拠点間接続',a:'Direct Connect',b:'Site-to-Site VPN',ans:'b',why:'VPN=<b>即日・安い・暗号</b>。DXは敷設に時間かかる。',tip:'VPN＝即日・安い・ネット経由で暗号。専用線や大容量が要るならDX。'},
-      {s:'Dedicated Connectionの帯域を途中で変更できる？',a:'できる',b:'できない（契約時固定）',ans:'b',why:'Dedicated=1G/10G/100G<b>固定</b>。中間帯域はHosted Connection。'},
-      {s:'オンプレDNSからAWSのプライベートホストゾーンを解決させたい（オンプレ→AWS方向）',a:'Route 53 Resolver インバウンドエンドポイント',b:'アウトバウンドエンドポイント',ans:'a',why:'インバウンド＝<b>オンプレ→AWSへの解決を受け付ける入口</b>。アウトバウンドはAWS→オンプレの転送。'},
-      {s:'VPCからオンプレの社内DNS(db.corp.local等)を解決させたい（AWS→オンプレ方向）',a:'Route 53 Resolver インバウンドエンドポイント',b:'アウトバウンドエンドポイント',ans:'b',why:'アウトバウンド＋転送ルール＝<b>AWS→オンプレDNSへクエリ転送</b>。インバウンドは逆方向。'},
-      {s:'1本のDirect Connectから複数リージョンの複数VPCへ接続したい',a:'Direct Connect Gateway',b:'VPCごとに専用線を契約',ans:'a',why:'DX Gateway＝<b>1つのDXから複数リージョン/VPCのVGW/TGWへ接続</b>。回線を都度契約する必要がない。'},
-      {s:'自社のサービスを、顧客VPCへプライベートに公開したい(CIDR重複OK・一方向)',a:'PrivateLink(エンドポイントサービス)',b:'VPCピアリング/TGW',ans:'a',why:'PrivateLink＝<b>NLB前段でサービスを一方向にプライベート公開・CIDR重複可</b>。ピアリング/TGWは相互到達でCIDR重複不可。'},
-      {s:'IPv6のプライベートサブネットから外向き通信のみ許可（インバウンド拒否）',a:'NAT Gateway',b:'Egress-Only Internet Gateway',ans:'b',why:'Egress-Only IGW＝<b>IPv6専用の外向き専用</b>。NAT GatewayはIPv4用で対象が違う。'},
-      {s:'個々の従業員のPCから（拠点間ではなく）AWS VPCへリモートVPN接続したい',a:'AWS Client VPN',b:'Site-to-Site VPN',ans:'a',why:'Client VPN＝<b>個人デバイスからのリモートアクセス(OpenVPN)</b>。Site-to-Site＝<b>拠点(データセンター)とVPCを結ぶ</b>。単位が「個人」か「拠点」かで決まる。',tip:'Client VPN＝個人デバイスのリモートアクセス(OpenVPN)。拠点ごとはSite-to-Site。'},
-      {s:'固定のパブリックIP(Elastic IP)を付けたい・クライアントの送信元IPをそのまま保持したい',a:'NLB',b:'ALB',ans:'a',why:'NLB＝<b>L4でクライアントIPを保持・AZごとに固定IP/Elastic IP付与可</b>。ALBはIPが変動し送信元は X-Forwarded-For で伝える。',tip:'固定IP・送信元IP保持・超低遅延＝NLB(L4)。HTTPの中身で振り分けるならALB(L7)。'},
-      {s:'パスやホスト名で振り分け・WebSocket・リダイレクト・Cognito認証を使いたい',a:'ALB',b:'NLB',ans:'a',why:'ALB＝<b>L7でHTTP/HTTPSの高度なルーティング(パス/ホスト/ヘッダ)・WebSocket・認証連携</b>。NLBはL4で中身を見ない。',tip:'HTTPの機能(パス/ホスト振り分け・WebSocket・認証・リダイレクト)が要る＝ALB。中身を見ないNLBでは無理。'},
-      {s:'WAFを直接関連付けられるロードバランサーは？',a:'ALB',b:'NLB',ans:'a',why:'WAFはL7の中身を見るので<b>ALB(とCloudFront/API Gateway)に付く</b>。NLB(L4)には直接付けられない。',tip:'WAFはL7＝ALB/CloudFront/API GWに付く。NLB(L4)には付かない。'},
-      {s:'急なスパイク(事前ウォームアップなし)で毎秒数百万接続をさばきたい',a:'NLB',b:'ALB',ans:'a',why:'NLB＝<b>L4で超低遅延・突発スパイクにも即応(事前プリウォーム不要)・数百万接続</b>。ALBはL7処理のぶんオーバーヘッドがある。',tip:'いきなり大量接続・超低遅延・TCP/UDP＝NLB。'},
-      {s:'Direct Connectの障害に備えたい。追加コストを最小にしつつ自動で切り替わるバックアップは？',a:'Site-to-Site VPNをバックアップに用意しBGPで自動フェイルオーバー',b:'2本目のDirect Connectを別ロケーションに敷設',ans:'a',why:'コスト最小のバックアップ＝<b>Site-to-Site VPN(安価・BGPで自動切替)</b>。2本目のDXは最も堅牢だが回線費が倍で「コスト最小」に反する。障害時に帯域が少し落ちてよいならVPNバックアップが定石。',tip:'DXのバックアップ＝安いVPN(BGPで自動フェイルオーバー)。帯域も品質も完全維持したい時だけ2本目のDX。'},
-      {s:'各AZのプライベートEC2の外向き通信。NAT Gatewayはどう置く？',a:'AZごとに1つずつ置き、各AZは自分のAZのNATを使う',b:'1つのNAT Gatewayに全AZから集約する',ans:'a',why:'NAT GatewayはAZ単位のリソース。AZごとに置くと<b>AZ間データ転送料金が消え、あるAZのNAT障害が他AZに波及しない</b>。1つに集約するとAZ間転送課金＋そのAZ障害で全体が巻き添えになる。',tip:'NATはAZごとに置く＝AZ間転送ゼロ＋AZ障害が波及しない。1つに集約はコスト増＋単一障害点。'},
-      {s:'Route 53で「距離＋バイアス値で境界を寄せて」振り分けるルーティングは？',a:'地理的近接性ルーティング（geoproximity）',b:'位置情報ルーティング（geolocation）',ans:'a',why:'geoproximity＝<b>リソースとの距離を基準にバイアスで境界を寄せられる(調整可)</b>。geolocation＝<b>アクセス元の国/大陸で確定的に固定</b>(規制対応向け)。',tip:'国で確実に固定＝geolocation(規制)。距離＋バイアスで寄せ具合を調整＝geoproximity。速さで振る＝latency。'}
-    ]
-  },
-  'gateways': {
-    name: '🚪 ○○ゲートウェイの使い分け',
-    cards: [
-      {s:'Site-to-Site VPNの「AWS側」の終端はどっち？',a:'仮想プライベートゲートウェイ(VGW)',b:'カスタマーゲートウェイ(CGW)',ans:'a',why:'VGW＝<b>AWS側の終端</b>。CGW＝<b>オンプレ側ルーターを表すAWS上の情報</b>。この2つでVPNトンネルを張る。',tip:'V(irtual)＝AWS側、C(ustomer)＝顧客(オンプレ)側。頭文字で覚える。'},
-      {s:'VPCをインターネットにつなぐ「双方向の玄関」はどっち？',a:'インターネットゲートウェイ(IGW)',b:'NAT Gateway',ans:'a',why:'IGW＝<b>VPCとインターネットの境界(双方向)</b>。NAT GW＝<b>プライベートの外向き専用</b>(外からの接続開始は不可)。',tip:'IGW(Internet Gateway)＝VPCの玄関(双方向)。NAT Gateway＝プライベートの勝手口(出るだけ)。'},
-      {s:'プライベートサブネットの外向き専用。IPv6ならどっち？',a:'NAT Gateway',b:'Egress-Only Internet Gateway',ans:'b',why:'外向き専用は、<b>IPv4＝NAT Gateway / IPv6＝Egress-Only IGW</b>。役割は同じで対象アドレスが違う。',tip:'外向き専用の兄弟。IPv4はNAT Gateway、IPv6はEgress-Only Internet Gateway。'},
-      {s:'外向きNATをマネージドで高可用・自動スケールにしたい',a:'NAT Gateway',b:'NATインスタンス(自前EC2)',ans:'a',why:'NAT Gateway＝<b>マネージド・高可用・自動スケール</b>。NATインスタンスは自前EC2で運用が残り単一障害点になりがち。',tip:'楽して高可用＝NAT Gateway。自前EC2＝NATインスタンス(運用/冗長化が手間)。'},
-      {s:'多数のVPC/オンプレを1つのハブで相互接続する「ゲートウェイ」は？',a:'Transit Gateway(TGW)',b:'Direct Connect Gateway(DXGW)',ans:'a',why:'TGW＝<b>VPC/VPN/オンプレを束ねる中央ハブ</b>。DXGW＝<b>1本の専用線(DX)を複数リージョン/VPCへ配る中継</b>。',tip:'束ねるハブ＝TGW(Transit Gateway)。専用線(DX＝Direct Connect)を複数VPC/リージョンへ配る＝Direct Connect Gateway(DXGW)。'},
-      {s:'名前が似た2つ。APIの受付(認証・スロットリング)をするのは？',a:'Amazon API Gateway',b:'Gateway Load Balancer',ans:'a',why:'API Gateway＝<b>APIの入口(認証/スロットリング/変換)</b>。GWLB＝<b>サードパーティFW/IDS機器を経路に透過挿入するLB</b>。名前は似て全くの別物。',tip:'API GW(Amazon API Gateway)＝APIの受付。GWLB(Gateway Load Balancer)＝FW等の機器を経路に透過挿入するLB。別物。'},
-      {s:'オンプレからS3を「NFS/SMBのファイル共有」として使うStorage Gatewayは？',a:'File Gateway',b:'Volume Gateway',ans:'a',why:'Storage Gatewayは3種：<b>File(NFS/SMBファイル共有→S3)・Volume(iSCSIブロック→S3)・Tape(仮想テープVTL→S3/Glacier)</b>。',tip:'Storage Gatewayは3種＝File(ファイル共有)/Volume(iSCSIブロック)/Tape(仮想テープ)。用途で選ぶ。'}
-    ]
-  },
-  'edge-hybrid': {
-    name: '🌐 エッジ・ハイブリッド・配信',
-    cards: [
-      {s:'コンテナイメージを渡すだけでLB/スケール/HTTPSまで全自動にしたい',a:'App Runner',b:'ECS on Fargate',ans:'a',why:'App Runner＝<b>イメージ指定だけで構成不要・最小の手間</b>。Fargateはクラスタ/サービス/ALBを自分で構成する。',tip:'App Runner＝イメージ指定だけで全部自動(最小の手間)。Fargateはクラスタ/LBを自分で組む。'},
-      {s:'既存のKubernetesマニフェスト・ツールをそのまま使いたい',a:'ECS',b:'EKS',ans:'b',why:'EKS＝<b>Kubernetes互換</b>で既存マニフェストが使える。ECSはAWS独自のオーケストレーター。'},
-      {s:'大都市圏のユーザーに一桁ミリ秒の低遅延を提供したい（自社施設ではない）',a:'AWS Local Zones',b:'AWS Outposts',ans:'a',why:'Local Zones＝<b>AWSが大都市圏に置く拠点</b>。Outpostsは自社データセンター内に設置するAWS。',},
-      {s:'規制でデータを自社データセンター内に残しつつAWSと同じAPIで動かしたい',a:'AWS Local Zones',b:'AWS Outposts',ans:'b',why:'Outposts＝<b>自社施設内にAWSハードを設置</b>（データ所在地要件対応）。Local Zonesは自社施設ではない。'},
-      {s:'5Gモバイル網内で処理して移動体からの遅延を最小化したい',a:'AWS Wavelength',b:'AWS Local Zones',ans:'a',why:'Wavelength＝<b>通信事業者の5G網内にAWSを配置</b>。Local Zonesは大都市圏拠点で5G網内ではない。'},
-      {s:'IPv6のプライベートサブネットから外向き通信だけ許可したい（インバウンド拒否）',a:'NAT Gateway',b:'Egress-Only Internet Gateway',ans:'b',why:'Egress-Only IGW＝<b>IPv6専用の外向きのみ</b>。NAT GatewayはIPv4専用で対象が違う。'},
-      {s:'サードパーティの仮想ファイアウォール群に全トラフィックを透過的に通したい',a:'Application Load Balancer',b:'Gateway Load Balancer',ans:'b',why:'GWLB＝<b>サードパーティアプライアンスをインラインで透過挿入</b>。ALBはL7 HTTP分散が専門。',tip:'GWLB(Gateway Load Balancer)＝サードパーティ機器をインラインに透過挿入。ALBはL7分散。'},
-      {s:'ECS FargateでコストNGなワークロードを最大割引で動かしたい（中断OK）',a:'Fargate Spot',b:'通常のFargate',ans:'a',why:'Fargate Spot＝<b>大幅割引だが中断され得る</b>。中断耐性のあるバッチ/ワーカー向け。中断NGのAPIは通常Fargateで。'},
-      {s:'従業員にクラウド上の永続的なフル仮想デスクトップを払い出したい',a:'Amazon WorkSpaces',b:'Amazon AppStream 2.0',ans:'a',why:'WorkSpaces＝<b>フルデスクトップ環境（VDI/DaaS）</b>。AppStreamは特定アプリだけのストリーミング配信。'},
-      {s:'特定の1本のアプリだけをブラウザにストリーミング配信したい',a:'Amazon WorkSpaces',b:'Amazon AppStream 2.0',ans:'b',why:'AppStream 2.0＝<b>アプリ単位のストリーミング</b>。WorkSpacesはデスクトップごとの提供。'},
-      {s:'1つのファイルへ「期限付き」でアクセスさせたい',a:'署名付きURL（Signed URL）',b:'署名付きCookie（Signed Cookie）',ans:'a',why:'署名付きURL=<b>個別ファイル1本の期限付きアクセス</b>。',tip:'1本＝署名付きURL。複数ファイルやパス配下まとめて＝署名付きCookie。'},
-      {s:'複数ファイル（会員限定の動画群全体）にまとめてアクセス許可',a:'署名付きURL',b:'署名付きCookie',ans:'b',why:'署名付きCookie=<b>複数ファイル/パス配下をまとめて許可</b>（URLを毎回作らない）。'},
-      {s:'S3を非公開のままCloudFront経由でのみ配信（直リンク防止）',a:'バケットを公開設定',b:'OAC（Origin Access Control）',ans:'b',why:'OAC=<b>CloudFrontからのみS3許可・S3は非公開</b>。旧OAIの後継。',tip:'OAC＝CloudFrontからのみS3を許可(S3は非公開)。旧OAIの後継。'},
-      {s:'特定の国だけ配信を許可/ブロックしたい',a:'CloudFront地理的制限（Geo Restriction）',b:'S3バケットポリシー',ans:'a',why:'CloudFront Geo Restriction=<b>国単位で許可/拒否</b>。S3ポリシーに国の概念はない。'},
-    ]
-  },
-  'app-integration': {
-    name: '🔗 アプリ統合・メッセージング',
-    cards: [
-      {s:'1対1・順番に処理（順番箱）',a:'SQS（Simple Queue Service）',b:'SNS（Simple Notification Service）',ans:'a',why:'SQS=<b>キュー・1対1・順番処理</b>。SNSは1対多。',tip:'SQS＝1対1の順番箱(取ったら消える)。1対多の同報はSNS。'},
-      {s:'1対多・全員に同時放送',a:'SQS（Simple Queue Service）',b:'SNS（Simple Notification Service）',ans:'b',why:'SNS=<b>Pub/Sub・ファンアウト</b>。SQSは1対1。',tip:'SNS＝pub/sub(1対多ファンアウト)。溜めて1対1はSQS。'},
-      {s:'「条件に応じて宛先を振り分け」たい',a:'SNS（Simple Notification Service）',b:'EventBridge',ans:'b',why:'EventBridge=<b>ルールで条件ルーティング</b>。SNSは全員に同じものを送る。'},
-      {s:'複数ステップを順番に・状態管理・リトライ',a:'Step Functions',b:'SQS（Simple Queue Service）',ans:'a',why:'Step Functions=<b>ワークフロー司令官</b>。SQSはキューで状態管理しない。'},
-      {s:'S3イベントを複数の宛先に送りたい',a:'S3イベント通知を複数設定',b:'EventBridge経由',ans:'b',why:'S3イベント通知は<b>1宛先のみ</b>。複数ターゲットはEventBridge必須。'},
-      {s:'SQSで同じメッセージが2回届く（重複配信）原因は？',a:'可視性タイムアウトが短すぎる',b:'ロングポーリングが短すぎる',ans:'a',why:'可視性タイムアウト<処理時間→<b>処理中に再配信</b>。ロングポーリングは取得待ちで無関係。',tip:'処理時間>可視性タイムアウトだと処理中に再配信。可視性タイムアウトを処理時間より長く。'},
-      {s:'順序保証＋重複排除を標準機能で持つキューは？',a:'SQS Standard',b:'SQS FIFO',ans:'b',why:'FIFO=<b>First-In-First-Out・正確に1回配信</b>。Standardは順序保証なし。',tip:'FIFOキュー＝順序保証＋正確に1回。標準SQSは順序保証なし。'},
-      {s:'1つのイベントを複数のSQSキューに同時配信',a:'SQSキューを複数設定',b:'SNS→SQSファンアウト',ans:'b',why:'SNS→複数SQSサブスクリプション=<b>ファンアウトパターン</b>。SQS単体は1対1。'},
-      {s:'JMS/AMQPなど標準プロトコルの既存メッセージングアプリを、コードを書き換えずマネージドに移したい',a:'Amazon MQ',b:'Amazon SQS/SNS',ans:'a',why:'Amazon MQ＝<b>ActiveMQ/RabbitMQ互換で標準プロトコル(JMS/AMQP)のまま移行</b>。SQS/SNSはAWS独自APIで書き換えが要る。'},
-      {s:'新規のシンプルなキュー/通知をAWSネイティブに作る（既存資産なし）',a:'Amazon MQ',b:'Amazon SQS/SNS',ans:'b',why:'新規はSQS/SNSが定番（サーバーレス・低運用）。MQは<b>既存の標準プロトコル資産を活かす移行向け</b>。'},
-      {s:'複数データソースを1エンドポイントに集約しモバイルにリアルタイム同期・オフライン対応で返す',a:'API Gateway(REST)',b:'AppSync(GraphQL)',ans:'b',why:'AppSync＝<b>GraphQLで複数ソース集約・リアルタイム購読・オフライン同期</b>。RESTは複数回呼び出してアプリ側で結合が要る。'},
-      {s:'サーバーレスで大量のスケジュール（cron/レート/一回限り）を一元管理し多様なAWSターゲットを直接呼ぶ',a:'EventBridge Scheduler',b:'EC2のcron',ans:'a',why:'EventBridge Scheduler＝<b>サーバーレスで大規模スケジュール・多様なターゲットを直接起動</b>。cronはサーバー運用が残る。'},
-      {s:'ソース→(フィルタ→エンリッチ)→ターゲットのポイントツーポイント連携をコードなしで作る',a:'EventBridge Pipes',b:'つなぎのLambdaを自作',ans:'a',why:'EventBridge Pipes＝<b>ソースとターゲットを繋ぎ、フィルタ/エンリッチを組み込みで提供（コード最小）</b>。Lambda自作は保守が増える。'},
-      {s:'多数のイベント源をルールでフィルタ/ルーティングしたい（1対多の配信ではなく振り分け）',a:'EventBridge(イベントバス)',b:'SNS',ans:'a',why:'EventBridge＝<b>ルールで条件ルーティング・多数のイベント源に対応</b>。SNSは購読者へ一律ファンアウト。'},
-      {s:'サーバーとクライアントで持続的な双方向のリアルタイム通信をしたい',a:'API Gateway WebSocket API',b:'REST APIをポーリング',ans:'a',why:'WebSocket API＝<b>持続接続で双方向のプッシュ通信</b>。RESTポーリングは無駄な繰り返し取得で遅延も大きい。'},
-      {s:'SNSで各購読者に必要な種類のメッセージだけ配信したい',a:'SNSフィルターポリシー',b:'全部配信して各自で破棄',ans:'a',why:'フィルターポリシー＝<b>メッセージ属性で購読者ごとに配信を絞る</b>。全配信＋各自破棄は無駄と複雑さを生む。'},
-      {s:'多段処理のリトライ・分岐・エラー処理・状態管理を可視化しながらオーケストレーションしたい',a:'Lambdaが次のLambdaを直接呼ぶチェーン',b:'Step Functions',ans:'b',why:'Step Functions＝<b>状態遷移・リトライ・分岐・並列を管理し可視化</b>。Lambdaチェーンは制御が各関数に散らばり脆い。'},
-      {s:'不正メッセージ1件が処理失敗→再取得を延々繰り返す（ポイズンメッセージ）。一定回数で隔離したい',a:'可視性タイムアウトを長くする',b:'DLQ（デッドレターキュー）＋maxReceiveCountを設定',ans:'b',why:'DLQ＋maxReceiveCount＝<b>規定回数を超えて失敗したメッセージを自動で別キューへ隔離</b>し、本流を回復＋後から調査できる。可視性タイムアウトの延長は繰り返し自体を止められない。',tip:'同じメッセージが失敗ループ(ポイズン)＝DLQ＋maxReceiveCountで隔離。可視性タイムアウトは「重複配信」対策で別問題。'},
-      {s:'複数の処理系が同じデータを独立に処理＋過去分をリプレイ（先頭から読み直し）したい',a:'SQS（Simple Queue Service）',b:'Kinesis Data Streams',ans:'b',why:'Kinesis＝<b>保持期間内は同じデータを何度でも・複数コンシューマが独立に読める（リプレイ可）</b>。SQSは<b>取得して処理したら消える</b>ので複数独立読みもリプレイもできない。',tip:'「リプレイ」「複数の処理系が独立に」「順序保持」が出たらKinesis。SQS/SNSは取ったら消える＝過去に遡れない。SAA最頻出の引っかけ。'},
-      {s:'1つのイベントを複数システムが各自処理・発生元は受け手を意識しない（ファンアウト）',a:'SQS単体',b:'SNS＋SQS（ファンアウト）',ans:'b',why:'SNS＋SQSファンアウト＝<b>1メッセージを複数のキューへ同報し各システムが独立に処理</b>。SQS単体は1メッセージを1コンシューマしか取れず1対多にならない。',tip:'1対多で各自処理＝SNS＋SQSファンアウト。リプレイ/順序が要るならKinesis。ただの1対1の緩衝はSQS単体。'}
-    ]
-  },
-  'data-analytics': {
-    name: '📊 データ分析',
-    cards: [
-      {s:'大量ログの全文検索＋ダッシュボード可視化',a:'OpenSearch Service',b:'Athena',ans:'a',why:'OpenSearch=<b>全文検索＋Kibana可視化</b>。AthenaはSQL分析。',tip:'全文検索＋可視化＝OpenSearch(旧Elasticsearch+Kibana)。SQL分析はAthena。'},
-      {s:'S3上のデータにサーバーレスでSQL',a:'Athena',b:'Redshift',ans:'a',why:'Athena=<b>サーバーレス・スキャン従量課金</b>。Redshiftは常時稼働DWH。'},
-      {s:'ペタバイト級の複雑な集計・結合を高頻度に',a:'Athena',b:'Redshift',ans:'b',why:'Redshift=<b>本格DWH・列指向・分散並列</b>。Athenaはアドホック向き。',tip:'Athena＝たまに飲む(アドホック・サーバーレス・スキャン量で従量)。Redshift＝常設の浄水場(常時稼働の大規模DWH・高頻度)。'},
-      {s:'Redshiftから、S3のデータをロードせず直接結合クエリ',a:'Redshift Spectrum',b:'Athena',ans:'a',why:'Spectrum=<b>Redshiftの外部テーブルでS3直接クエリ</b>。',tip:'Redshift Spectrum＝S3を外部テーブルで直接クエリ(ロード不要)。'},
-      {s:'ストリームをサーバーレスでS3に配信（変換・圧縮込み）',a:'Kinesis Data Streams',b:'Kinesis Data Firehose',ans:'b',why:'Firehose=<b>配信特化・フルマネージド</b>。Streamsは自分で読む。',tip:'Firehose＝配信特化(S3等へ自動・変換圧縮込み・コード不要)。自分で読むのはStreams。'},
-      {s:'複数コンシューマーが同じストリームを独立に再読み込み',a:'Kinesis Data Streams',b:'Kinesis Data Firehose',ans:'a',why:'Streams=<b>保持期間内で再読み＋複数独立読み</b>。',tip:'Streams＝水道管に溜めた水を各自コップで何度でも汲む(複数・リプレイ)。Firehose＝蛇口から直接バケツ(S3)へ自動配送(溜めない・リプレイ不可)。'},
-      {s:'ストリームに対してリアルタイムにウィンドウ集計',a:'Managed Service for Apache Flink',b:'Kinesis Data Firehose',ans:'a',why:'Flink=<b>継続クエリ・ストリーム分析</b>。Firehoseは配信するだけ。'},
-      {s:'サーバーレスETL（Sparkベース＋スキーマ自動カタログ化）',a:'AWS Glue',b:'EMR',ans:'a',why:'Glue=<b>サーバーレスETL＋Data Catalog</b>。EMRはクラスタ管理あり。',tip:'Glue＝サーバーレスETL＋データカタログ(クラスタ管理なし)。クラスタを触るのはEMR。'},
-      {s:'Hadoop/Sparkクラスタを細かく制御・チューニング',a:'AWS Glue',b:'EMR（Elastic MapReduce）',ans:'b',why:'EMR=<b>クラスタを自分で制御</b>。Glueはサーバーレス。',tip:'EMR＝Hadoop/Sparkクラスタを自分で制御。サーバーレスで済むならGlue。'},
-      {s:'コードを書かずに視覚的にデータクレンジング',a:'Glue DataBrew',b:'Glue ETLジョブ',ans:'a',why:'DataBrew=<b>ノーコード・ビジュアルデータ準備</b>。',tip:'DataBrew＝ノーコードのデータ準備(レシピ)。コードを書くGlue ETLとは別。'},
-      {s:'データレイクの権限をテーブル/列/行レベルで一元管理',a:'Lake Formation',b:'IAMポリシー',ans:'a',why:'Lake Formation=<b>データレイクの統合ガバナンス</b>。'},
-      {s:'時系列データ（IoTセンサー）を高速クエリ＋自動階層化',a:'Timestream',b:'DynamoDB',ans:'a',why:'Timestream=<b>時系列専用DB</b>。DynamoDBはキーバリュー汎用。',tip:'Timestream＝時系列専用(時間集計・自動階層化)。汎用KVのDynamoDBは時系列集計が苦手。'},
-      {s:'既存Kafka資産（API互換必須）をマネージドに',a:'Amazon MSK（Managed Streaming for Kafka）',b:'Kinesis Data Streams',ans:'a',why:'MSK=<b>Kafka互換</b>。KinesisはAWS独自API。',tip:'MSK＝Kafka互換(既存資産そのまま)。KinesisはAWS独自API。'},
-      {s:'GlueのETLで、前回以降に届いた新規ファイルだけを差分処理したい',a:'ジョブブックマークを有効化する',b:'処理済みファイル一覧を自前でDynamoDBに記録する',ans:'a',why:'Glueの<b>ジョブブックマーク</b>は処理済みデータを自動追跡し、新規到着分だけを処理する標準機能。自前で処理済みリストを管理するのは車輪の再発明。',tip:'Glueの差分処理＝ジョブブックマーク(処理済みを自動追跡)。自前の処理済み管理は不要。'},
-    ]
-  },
-  'ai-ml': {
-    name: '🤖 AI/MLサービス',
-    cards: [
-      {s:'画像の中の物体・顔・不適切コンテンツを検出したい',a:'Rekognition',b:'Textract',ans:'a',why:'Rekognition＝<b>画像/映像の物体・顔・シーン認識</b>。Textractは文字の抽出が専門。'},
-      {s:'スキャンした請求書PDFから文字と表を抽出したい',a:'Rekognition',b:'Textract',ans:'b',why:'Textract＝<b>OCR＋表/フォーム構造の抽出</b>。Rekognitionは画像認識で文字構造は読まない。'},
-      {s:'テキストを別の言語に翻訳したい',a:'Translate',b:'Comprehend',ans:'a',why:'Translate＝<b>翻訳家</b>。Comprehendは言語検出・感情分析はできるが訳さない。'},
-      {s:'レビュー文の感情（ポジ/ネガ）やキーフレーズを分析したい',a:'Translate',b:'Comprehend',ans:'b',why:'Comprehend＝<b>テキストの意味・感情・キーフレーズ分析</b>。Translateは翻訳専門。'},
-      {s:'テキストを自然な音声に変換して読み上げたい',a:'Polly',b:'Transcribe',ans:'a',why:'Polly＝<b>テキスト→音声</b>（口）。Transcribeは音声→テキスト（耳）で向きが逆。'},
-      {s:'録音された音声ファイルを文字に書き起こしたい',a:'Polly',b:'Transcribe',ans:'b',why:'Transcribe＝<b>音声→テキスト</b>。Pollyは逆方向のテキスト読み上げ。'},
-      {s:'社内文書を根拠にチャットボットで自然文の回答を生成したい（作り話を避けたい）',a:'SageMakerでゼロから訓練',b:'Bedrock＋RAG（Knowledge Bases）',ans:'b',why:'Bedrock＋RAG＝<b>基盤モデルに社内文書を検索させて根拠付き生成</b>・訓練不要。SageMaker自前訓練は専門知識と時間が要る。'},
-      {s:'既製AIに該当がなく、自社固有のパターン＋ラベル付き教師データ＋データサイエンティストが揃っている',a:'Amazon SageMaker（自前でモデル訓練）',b:'既製AIサービス（Rekognition等）',ans:'a',why:'この4条件が揃ったら<b>SageMakerで独自モデルを訓練</b>。既製サービスは汎用タスク向けで自社固有の判別はできない。',tip:'既製AIになし＋教師データ＋データサイエンティスト＝SageMakerで自前訓練。'},
+      {s:'既存のAirflow DAG資産と運用ノウハウを活かしてマネージド化したい',a:'AWS Step Functions',b:'Amazon MWAA',ans:'b',why:'MWAA=<b>マネージドAirflow</b>。既存DAGをそのまま流用できる。',tip:'既存Airflow資産＝MWAA。'},
+      {s:'サーバーレスに状態遷移・分岐・リトライを定義（Airflow資産なし）',a:'AWS Step Functions',b:'Amazon MWAA',ans:'a',why:'Step Functions=<b>サーバーレスなワークフロー</b>。ゼロから組むなら軽量。',tip:'サーバーレスで新規＝Step Functions。'},
+      {s:'数万件を並列で反復処理（大規模fan-out）したい',a:'Lambdaで直列ループ',b:'Step Functions 分散マップ',ans:'b',why:'分散マップ=<b>大規模並列反復</b>を管理。直列ループは遅く上限も厳しい。',tip:'大規模並列反復＝分散マップ(Distributed Map)。'},
+      {s:'データの欠損・異常・重複をルールで自動検査したい',a:'Glue Data Quality',b:'自前SQLでチェック',ans:'a',why:'Glue Data Quality=<b>DQDLルールセット</b>で品質を自動評価。',tip:'データ品質チェック＝Glue Data Quality。'},
+      {s:'イベントソースを軽量に変換してターゲットへ中継（フィルタ・エンリッチ）',a:'自前Lambda中継を実装',b:'EventBridge Pipes',ans:'b',why:'Pipes=<b>source→filter→enrich→targetを設定で実現</b>。',tip:'イベント中継の配管＝EventBridge Pipes。'},
+      {s:'cron的に定時起動したい（多数のスケジュールを一元管理）',a:'EventBridge Scheduler',b:'各サービスで個別にcron',ans:'a',why:'Scheduler=<b>大量スケジュールを一元管理</b>・柔軟なcron/rate。',tip:'定時起動の一元管理＝EventBridge Scheduler。'},
+      {s:'再実行しても二重集計にならないパイプラインにしたい',a:'とにかくリトライ',b:'冪等性（デデュープ/上書き設計）',ans:'b',why:'<b>冪等な設計</b>で重複実行を無害化。リトライ前提ほど重要。',tip:'再実行安全＝冪等性(idempotency)。'},
+      {s:'特定のログパターン発生数をメトリクス化してアラームしたい',a:'CloudWatch メトリクスフィルタ',b:'ログを目視で確認',ans:'a',why:'メトリクスフィルタ=<b>ログのパターンを数値メトリクス化</b>しアラーム可能。',tip:'ログ→メトリクス＝メトリクスフィルタ。'},
+      {s:'大量ログを対話的にクエリして障害を調査',a:'目視でログを確認',b:'CloudWatch Logs Insights',ans:'b',why:'Logs Insights=<b>ログを対話的にクエリ・集計</b>して原因調査。',tip:'ログ対話クエリ＝Logs Insights。'},
+      {s:'高頻度・短時間で大量に走るワークフロー',a:'Step Functions Express',b:'Step Functions Standard',ans:'a',why:'Express=<b>高頻度・短時間・低コスト</b>。Standardは長時間・監査向き。',tip:'高頻度短時間＝Express。長時間監査＝Standard。'},
+      {s:'データパイプラインを再現可能にコードで管理・デプロイ',a:'手動でコンソール構築',b:'CloudFormation / CDK',ans:'b',why:'IaC=<b>構成をコード化し再現可能にデプロイ</b>。',tip:'再現可能な構築＝IaC(CloudFormation/CDK)。'},
+      {s:'分散処理のどこが遅いか、サービス間をまたいで追跡',a:'AWS X-Ray',b:'勘とログ目視',ans:'a',why:'X-Ray=<b>分散トレース・サービスマップ</b>でボトルネック可視化。',tip:'分散トレース＝X-Ray。'},
+    
     ]
   },
   'security': {
-    name: '🛡 セキュリティ（予防/検出/防御）',
+    name: '🛡 セキュリティ・ガバナンスの選び方',
     cards: [
-      {s:'スナップショットを公開させたくない',a:'Block Public Access',b:'AWS Config',ans:'a',why:'<b>予防</b>（そもそも禁止）。Configは検出のみ。'},
-      {s:'組織全体で特定APIを禁止',a:'SCP（Service Control Policy）',b:'IAMポリシー配布',ans:'a',why:'SCPはルートユーザーすら超えられない上限。IAM配布は漏れる。'},
-      {s:'S3バケットが公開されたら自動で戻す',a:'Config＋SSM修復',b:'Block Public Access',ans:'b',why:'<b>予防が勝つ</b>。一度公開された瞬間に流出する。'},
-      {s:'各アカウントのセキュリティグループの設定が基準通りか、ずっと監視したい',a:'AWS Config',b:'CloudTrail',ans:'a',why:'Configは<b>構成の状態</b>を継続評価。CloudTrailは<b>APIの行為</b>の記録。'},
-      {s:'「誰がいつ設定を変えたか」を追う',a:'AWS Config',b:'CloudTrail',ans:'b',why:'CloudTrailは<b>行為の記録</b>（誰が/いつ/何を）。'},
-      {s:'DDoSの物量攻撃を受け止める',a:'Shield',b:'WAF（Web Application Firewall）',ans:'a',why:'Shield=<b>DDoS</b>。WAF=L7の中身(SQLi/XSS)フィルタ。',tip:'Shield＝DDoS(物量・L3/4)。WAF＝アプリ層(L7)の中身フィルタ。'},
-      {s:'SQLインジェクションを防ぐ',a:'Shield',b:'WAF（Web Application Firewall）',ans:'b',why:'WAF=<b>HTTPの中身を見る</b>L7フィルタ。',tip:'WAF＝HTTPの中身(L7)を見てSQLi/XSSを遮断。DDoSの物量はShield。層が違う。'},
-      {s:'VPC内のネットワーク層でドメイン名フィルタや侵入検知をしたい',a:'WAF（Web Application Firewall）',b:'Network Firewall',ans:'b',why:'Network Firewall=<b>VPC城壁</b>。WAFはALB/CloudFront前のL7。',tip:'Network Firewall＝VPCの城壁(L3-7・FQDN許可拒否・IPS)。WAFはALB/CloudFront前のL7。'},
-      {s:'Shield AdvancedのDDoSコスト保護とは？',a:'攻撃中のスケーリング課金を返金',b:'DDoS検知のための追加課金',ans:'a',why:'Shield Advanced=DDoS中の膨らんだ<b>ELB/EC2等の課金をクレジット返金</b>。'},
-      {s:'AWS Backupでスナップショットの公開設定を制御できる？',a:'できる',b:'できない（バックアップ管理が役目）',ans:'b',why:'Backup=作成/保管/世代管理。<b>公開設定の制御は範囲外</b>。'},
-      {s:'AWSアカウントを持たない人にCloudWatchメトリクスを見せる',a:'IAMユーザーを発行',b:'ダッシュボード共有（URL）',ans:'b',why:'ダッシュボード共有=<b>URLだけで閲覧可</b>。IAM発行は過剰。'},
-      {s:'ALB/CloudFront用の公開TLS証明書を無料で発行・自動更新したい',a:'ACM (AWS Certificate Manager)',b:'IAMに証明書をアップロード',ans:'a',why:'ACM=<b>公開証明書は無料・自動更新</b>。IAMアップロードは手動更新で期限切れ事故のもと。'},
-      {s:'CloudFrontに付ける証明書は「どのリージョン」のACMで発行する？',a:'配信元と同じリージョン',b:'us-east-1（バージニア北部）固定',ans:'b',why:'CloudFrontのACM証明書は<b>必ずus-east-1</b>。ALBは使うリージョンでOK。頻出の罠。'},
-      {s:'社内専用（非公開）システムに証明書を配りたい',a:'ACMパブリック証明書',b:'ACM Private CA（プライベート認証局）',ans:'b',why:'内部通信=<b>ACM Private CA</b>で自社CAから発行。パブリック証明書は公開名向け。'},
-      {s:'ACMの証明書をEC2に直接インストールして使える？',a:'できる',b:'できない（ELB/CloudFront/API GW等の統合先で終端）',ans:'b',why:'ACMパブリック証明書は<b>EC2へエクスポート不可</b>。ELB等マネージドサービスで終端する。EC2に載せるなら別途取得。'},
-      {s:'GuardDutyが検知した後、「なぜ/誰が関与したか」を相関分析して深掘り調査したい',a:'Inspector',b:'Detective',ans:'b',why:'Detective＝<b>検知の先の根本原因調査・関係の可視化</b>。Inspectorは脆弱性スキャンで用途が違う。',tip:'名前どおり探偵(Detective)＝事件の「後」に「なぜ・誰が」を捜査。検知＝GuardDuty(警備)、弱点点検＝Inspector(健康診断)。'},
-      {s:'Organizations配下の全アカウント・新規リソースにWAF/SGルールを一元適用したい',a:'AWS Firewall Manager',b:'各アカウントで個別にWAF設定',ans:'a',why:'Firewall Manager＝<b>組織全体・新規リソースにも自動適用</b>。個別設定は抜け漏れる。',tip:'Firewall Manager＝組織全体に一括適用＋新規リソースにも自動。個別設定は漏れる。'},
-      {s:'構成が基準から逸脱したら検出し、自動で修復まで行いたい',a:'AWS Config(検出のみ)',b:'AWS Config＋Systems Manager Automation(修復)',ans:'b',why:'Config＋SSM Automation修復＝<b>逸脱検出→自動修復</b>。Config単体は検出・記録まで。'},
-      {s:'マイクロサービス間のどの区間が遅いか、レイテンシを分散トレースで可視化したい',a:'CloudWatch',b:'X-Ray',ans:'b',why:'X-Ray＝<b>分散トレースでサービス間の経路と区間レイテンシを可視化</b>。CloudWatchはメトリクス監視が主。',tip:'X-Ray＝分散トレースで区間ごとの遅延を可視化。CloudWatchはメトリクス監視。'},
-      {s:'固定しきい値でなく、普段のパターンからの異常なコスト急増をMLで自動検知したい',a:'AWS Budgets',b:'Cost Anomaly Detection',ans:'b',why:'Cost Anomaly Detection＝<b>MLで異常なコスト逸脱を自動検知</b>。Budgetsは固定しきい値ベース。'},
-      {s:'EC2のOS・ミドルウェアのパッチ適用は誰の責任？',a:'AWS（インフラ側）',b:'利用者（顧客側）',ans:'b',why:'責任共有モデル＝<b>OSから上は顧客の責任</b>。AWSはハード/ネットワーク/ハイパーバイザーまで。',tip:'「AWSは建物の管理人、部屋の中（OS/データ/アプリ）は住人の責任」。マネージド(RDS等)ならOS管理はAWSに移る。'},
-      {s:'RDSの「OSパッチ」は誰の責任？',a:'AWS',b:'利用者',ans:'a',why:'RDS＝<b>マネージドなのでOSパッチはAWS側</b>。EC2なら顧客。責任境界はサービスの管理レベルで変わる。',tip:'EC2＝OS以上は顧客。RDS＝DBエンジン設定・データは顧客、OS/パッチはAWS。Lambda＝コードだけ顧客。'},
-    ]
-  },
-  'iam-auth': {
-    name: '🔑 IAM・認証・暗号化',
-    cards: [
-      {s:'人間の開発チームに権限を付ける',a:'IAMグループ＋ポリシー',b:'IAMロール',ans:'a',why:'<b>人間=グループ+ポリシー</b>。ロールは引き受けるもの。',tip:'人＝グループ＋ポリシー(所属で権限)。マシンや一時的なアクセス＝ロール(引き受ける)。'},
-      {s:'EC2からS3を読みたい',a:'アクセスキーを環境変数に',b:'IAMロールをアタッチ',ans:'b',why:'ロール=一時認証で安全。長期キー=漏洩リスク。'},
-      {s:'インスタンスプロファイルは何用？',a:'EC2にロールを履かせる',b:'人間ユーザーに権限を付ける',ans:'a',why:'インスタンスプロファイル=<b>EC2専用</b>。'},
-      {s:'IAMロールをIAMグループにアタッチできる？',a:'できる',b:'できない',ans:'b',why:'ロールは<b>引き受ける</b>もの。グループに直接付けられない。'},
-      {s:'別アカウントに一時的に権限を渡す',a:'アクセスキー共有',b:'AssumeRole',ans:'b',why:'AssumeRole=一時認証・期限切れ・安全。'},
-      {s:'IAMロールの信頼ポリシーは何を書く？',a:'「何ができるか」',b:'「誰が引き受けられるか」',ans:'b',why:'信頼ポリシー=<b>Principal</b>（誰）。権限ポリシー=Action（何）。'},
-      {s:'「フルアクセス権限をグループに付与」は最小権限を満たす？',a:'満たす',b:'満たさない',ans:'b',why:'フルアクセス=<b>最小権限違反</b>。業務に必要な最小限のみ。'},
-      {s:'S3バケットやKMSキーなど「リソース側」に、誰が使えるかを直接書く',a:'アイデンティティベースポリシー',b:'リソースベースポリシー',ans:'b',why:'リソースベース＝<b>リソース側にプリンシパルを直接許可(バケットポリシー等)</b>。アイデンティティベースはユーザー/ロール側に付与。'},
-      {s:'IAMユーザー/ロールが「持てる権限の上限」を委譲時に制限したい',a:'SCP',b:'許可境界(Permissions Boundary)',ans:'b',why:'許可境界＝<b>個々のエンティティの権限上限</b>。SCPは<b>アカウント/OU全体の上限</b>で層が違う。'},
-      {s:'サードパーティにクロスアカウントで一時アクセスさせる際、混乱した代理を防ぐ',a:'長期アクセスキーを共有',b:'AssumeRole＋External ID',ans:'b',why:'AssumeRole＋External ID＝<b>一時認証＋外部ID条件でなりすまし防止</b>。長期キー共有は漏洩・棚卸しリスク。'},
-      {s:'複数リージョンで同じ鍵マテリアルを使い各地でローカルに暗号化/復号したい',a:'KMSマルチリージョンキー',b:'各リージョンで独立したKMSキー',ans:'a',why:'マルチリージョンキー＝<b>同じ鍵マテリアルのレプリカを各リージョンに持てる</b>。独立キーはリージョン跨ぎで再暗号化が要る。'},
-      {s:'専用のシングルテナントHSMで鍵を自社が完全管理(FIPS 140-2 Lv3)',a:'AWS KMS',b:'AWS CloudHSM',ans:'b',why:'CloudHSM＝<b>専有HSM・顧客単独管理・FIPS 140-2 Lv3</b>。KMSはマネージド・マルチテナントで大半はこれで十分。',tip:'専有HSM・自社単独管理・FIPS 140-2 Lv3＝CloudHSM。大半のケースはKMSで十分。'},
-      {s:'「MFAでサインインした時だけ」操作を許可したい。IAMポリシーのどこに書く？',a:'Conditionブロック（aws:MultiFactorAuthPresent）',b:'Actionブロック',ans:'a',why:'追加の条件は<b>Conditionブロックの条件キー</b>で表す。MFA有無＝aws:MultiFactorAuthPresent。',tip:'追加条件は全部Conditionブロック。MFA有無＝aws:MultiFactorAuthPresent。'},
-      {s:'「社内IPレンジからのみ」AWS操作を許可したい',a:'IAMポリシーのCondition（aws:SourceIp）',b:'IAMユーザーごとにパスワードを強化',ans:'a',why:'送信元IP制限は<b>Conditionのaws:SourceIp</b>で表す。「誰の操作か＋どこから」をIAM側で縛れる。',tip:'送信元IP制限＝Conditionのaws:SourceIp。「誰が＋どこから」をIAM側で縛る。'}
-    ]
-  },
-  'ha-dr': {
-    name: '♻️ 可用性・DR・スケーリング',
-    cards: [
-      {s:'RDSが落ちても自動フェイルオーバー（可用性）',a:'マルチAZ',b:'リードレプリカ',ans:'a',why:'マルチAZ=<b>自動フェイルオーバー</b>（可用性）。リードレプリカ=読み取り分散。',tip:'AZ＝Availability(可用性の保険・待機系)。レプリカ＝読み取りの分身(分散)。「落ちても→AZ」「重い読み→レプリカ」。'},
-      {s:'RDSの読み取り負荷を分散',a:'マルチAZ',b:'リードレプリカ',ans:'b',why:'リードレプリカ=<b>読み取り分散</b>。マルチAZは読み分散ではない。'},
-      {s:'RTO数分・コスト抑えめ・縮小版を温めておく',a:'パイロットライト',b:'ウォームスタンバイ',ans:'b',why:'ウォームスタンバイ=<b>縮小版が常に稼働</b>。パイロットライト=最小限のDB等のみ。'},
-      {s:'RTO数十分・最小コスト・コアだけ複製',a:'パイロットライト',b:'バックアップ＆リストア',ans:'a',why:'パイロットライト=<b>コアだけ常時複製</b>（障害時に残りを起動）。B&R=最安だがRTO数時間。'},
-      {s:'ダウンタイムゼロ・両リージョン常時フル稼働',a:'ウォームスタンバイ',b:'マルチサイト(アクティブ/アクティブ)',ans:'b',why:'マルチサイト=<b>両方フル稼働・RTO≒0</b>。最もコスト高。'},
-      {s:'EC2が落ちても自動で代替を起動',a:'Auto Scaling',b:'CloudWatchアラームで通知を受けて対応',ans:'a',why:'Auto Scaling=<b>異常検知→自動で置換</b>。アラーム通知だけでは自動で代替は起動しない。'},
-      {s:'EC2のStop/Start後もIPが変わらないようにしたい',a:'パブリックIP',b:'Elastic IP',ans:'b',why:'パブリックIPは再起動で変わる。<b>Elastic IP=固定</b>。'},
-      {s:'S3を別リージョンに複製（リージョン災害対策）',a:'バージョニング',b:'クロスリージョンレプリケーション(CRR)',ans:'b',why:'CRR=<b>別リージョン複製</b>。バージョニング=同一バケット内の世代管理。'},
-      {s:'リージョンまたぎで自動切替（ドメインのDNSレベル）',a:'Route 53フェイルオーバールーティング',b:'ALBのヘルスチェック',ans:'a',why:'Route 53=<b>DNSでリージョン切替</b>。ALBは単一リージョン内。',tip:'リージョン跨ぎの自動切替はDNS＝Route 53フェイルオーバー＋ヘルスチェック。ALBは1リージョン内。'},
-      {s:'需要の波が大きい（アイドル時ほぼゼロ）のRDB・PostgreSQL互換',a:'RDS PostgreSQL',b:'Aurora Serverless v2',ans:'b',why:'Aurora Serverless=<b>自動スケール・アイドル時低課金</b>。RDSは常時インスタンス起動。',tip:'アイドルほぼゼロ＋自動伸縮＋RDB互換＝Aurora Serverless v2。RDS通常は常時課金。'},
-      {s:'水平スケールできない（常に1台のみ稼働）アプリを、AZ障害でも自動復旧させたい',a:'min/max/希望容量をすべて1にしたマルチAZのAuto Scalingグループ',b:'2つのAZに1台ずつ置いてALBで冗長化',ans:'a',why:'容量=1固定のASGは<b>スケールではなく「常に1台を維持する自己修復」</b>として働き、障害時に別AZで自動再作成する。2台並行は「同時1台のみ」の制約に違反。',tip:'スケール不可アプリの自動復旧＝ASGをmin/max/希望=1に(自己修復用途)。Auto Scaling＝台数を増やす道具、の思い込みを外す。'},
-      {s:'セッションをEC2のメモリに保持＋スティッキー。スケールイン/障害で強制ログアウトが起きる。サブミリ秒で解決したい',a:'ElastiCache for Redisにセッションを外部化',b:'スティッキーセッションの継続時間を延ばす',ans:'a',why:'セッションを<b>外部の共有ストアへ出す</b>とインスタンスの増減から切り離せる。サブミリ秒＝Redis(インメモリ)。スティッキー延長は消える構造自体を直さない。',tip:'スティッキー＋インメモリ保持は消える。外部化が解。サブミリ秒＝ElastiCache/Redis、1桁ミリ秒でよければDynamoDBでも可。'},
-    ]
-  },
-  'cost': {
-    name: '💰 コスト・購入オプション',
-    cards: [
-      {s:'常時起動の安定ワークロード（1-3年確約OK）',a:'オンデマンド',b:'Reserved Instance / Savings Plan',ans:'b',why:'確約=<b>最大72%割引</b>。オンデマンドは定価。'},
-      {s:'中断されても問題ない処理を安く',a:'スポットインスタンス',b:'オンデマンド',ans:'a',why:'スポット=<b>最大90%割引</b>。ただし2分前通知で追い出される。'},
-      {s:'割引はほしいがEC2以外(Fargate/Lambda)や別ファミリーにも効かせたい。選ぶのは？',a:'Compute Savings Plan',b:'EC2 Instance Savings Plan',ans:'a',why:'Compute SP=<b>EC2/Fargate/Lambda横断・ファミリー/リージョン変更可で柔軟</b>。EC2 Instance SP=<b>特定ファミリー固定で割引率は最大だが柔軟性なし</b>。'},
-      {s:'S3のアクセス頻度が読めない（自動で最安に）',a:'S3 Intelligent-Tiering',b:'S3 Standard-IA',ans:'a',why:'Intelligent-Tiering=<b>自動移動</b>。手動判断不要。'},
-      {s:'プライベートEC2→S3で「NAT Gatewayのデータ処理料金」を減らす',a:'NAT GW経由のまま',b:'S3 VPCエンドポイント(GW型・無料)',ans:'b',why:'ゲートウェイ型=<b>追加料金なし</b>。NAT GW=データ処理課金。'},
-      {s:'EBSスナップショットの自動世代管理（削除も自動）',a:'Data Lifecycle Manager(DLM)',b:'スナップショットを取るだけ（削除は未設定）',ans:'a',why:'DLM=<b>タグ+スケジュールで作成も削除も自動</b>。スナップショットを取るだけでは古い世代が溜まりコスト増。'},
-      {s:'Lambda関数のコールドスタートを防ぐ（追加課金あり）',a:'予約済み同時実行(Reserved)',b:'プロビジョンド同時実行(Provisioned)',ans:'b',why:'Provisioned=<b>常に温めておく（追加課金）</b>。Reservedは上限設定でコスト削減でない。'},
-      {s:'中断されると困る短期の本番。確約もしたくない',a:'オンデマンド',b:'スポット',ans:'a',why:'オンデマンド=<b>中断なし・確約なし</b>（定価）。短期/読めない負荷向け。'},
-      {s:'中断OKなバッチを「最大90%引き」で',a:'スポット',b:'Reserved Instance',ans:'a',why:'スポット=<b>最大90%引き・2分前通知で中断</b>。フォールトトレラント処理向け。'},
-      {s:'1〜3年使う「特定インスタンスファミリー」を最大割引で確約',a:'EC2 Instance Savings Plan / Standard RI',b:'Compute Savings Plan',ans:'a',why:'EC2 Instance SP/Standard RI=<b>固定で割引最大</b>。柔軟性は低い。'},
-      {s:'EC2/Fargate/Lambdaを「柔軟に」使いつつ割引',a:'Compute Savings Plan',b:'Standard RI',ans:'a',why:'Compute SP=<b>ファミリー/リージョン/サービスを変えても適用</b>（柔軟）。割引率はやや低め。'},
-      {s:'RIで「使わなくなったら売却/変更したい」',a:'Standard RI',b:'Convertible RI',ans:'b',why:'Convertible RI=<b>ファミリー変更可（柔軟）</b>。Standardは割引大だが変更不可(Marketplace売却は可)。'},
-      {s:'物理サーバーごと占有（BYOLライセンス・コンプライアンス）',a:'Dedicated Host',b:'Dedicated Instance',ans:'a',why:'Dedicated Host=<b>物理サーバーを可視化して占有・ソケット単位BYOL</b>。Dedicated Instanceは物理分離のみでホスト可視化なし。'},
-    ]
-  },
-  'migration': {
-    name: '🚚 移行の使い分け',
-    cards: [
-      {s:'オンプレDBをRDSへ（異種エンジン可）',a:'DMS（Database Migration Service）',b:'DataSync',ans:'a',why:'DMS=<b>DB論理移行</b>＋異種変換(SCT)。DataSyncはファイル転送。'},
-      {s:'NASのファイルをS3に継続同期',a:'DMS（Database Migration Service）',b:'DataSync',ans:'b',why:'DataSync=<b>ファイル転送・同期</b>。DMSはDB専用。'},
-      {s:'数十TBをネットで送ると何週間もかかる',a:'Snowball',b:'DataSync',ans:'a',why:'Snowball=<b>物理デバイス</b>で大量データを物理搬送。'},
-      {s:'サーバーを丸ごとEC2へ移行',a:'MGN（Application Migration Service）',b:'DMS（Database Migration Service）',ans:'a',why:'MGN=<b>サーバー丸ごと</b>（OS/アプリ/データ）。DMSはDB論理データだけ。'},
-      {s:'DR用にオンプレサーバーをAWSに複製',a:'MGN（Application Migration Service）',b:'DRS（Elastic Disaster Recovery）',ans:'b',why:'DRS=<b>DR専用</b>（常時レプリケーション＋即起動）。MGNは移行。',tip:'DRS(Elastic Disaster Recovery)＝DR専用(常時レプリケーション＋即起動)。移行はMGN。'},
-      {s:'SaaS（Salesforce等）からS3/Redshiftへ',a:'AppFlow',b:'Firehose',ans:'a',why:'AppFlow=<b>SaaSコネクタ内蔵</b>。FirehoseはIoT/ログのストリーミング。'},
-      {s:'IoTセンサーのリアルタイムストリーム→S3',a:'AppFlow',b:'Firehose',ans:'b',why:'Firehose=<b>ストリーミング→S3/Redshift/OpenSearch</b>。'},
-      {s:'Direct Connectで物理回線を引く相手は？',a:'オンプレ↔AWS',b:'SaaS（他社クラウド）↔AWS',ans:'a',why:'DX=<b>自社オンプレ↔AWS</b>の物理専用線。SaaSに直接線は引けない。'},
-      {s:'S3イベント通知の宛先を2つ以上にしたい',a:'S3イベント通知を2つ設定',b:'EventBridge経由で複数ルール',ans:'b',why:'S3イベント通知は同じイベントに<b>1宛先</b>。EventBridge経由なら複数ルール可。'},
-      {s:'DynamoDBのデータからPII(個人情報)を検出したい',a:'MacieでDynamoDBを直接スキャン',b:'DynamoDB→S3エクスポート→Macie',ans:'b',why:'Macie=<b>S3専門</b>。DynamoDBは一度S3にエクスポートしてからMacie。'},
-      {s:'異種DB移行(Oracle→PostgreSQL)で、まずスキーマやストアドを変換・互換性評価するのは？',a:'AWS SCT（Schema Conversion Tool）',b:'AWS DMS（Database Migration Service）',ans:'a',why:'SCT＝<b>スキーマ/ストアドを変換し互換性を事前評価</b>。DMS＝変換後の<b>データ移行(フルロード＋CDC)</b>。順番はSCT→DMS。',tip:'異種は「翻訳してから引越し」。SCT＝翻訳者(スキーマ/コード変換)→DMS＝引越し業者(データ運搬)。同種ならDMSだけ。'},
-      {s:'同種エンジン間(MySQL→MySQL等)でデータだけ継続移行したい。SCTは要る？',a:'不要（DMSだけでよい）',b:'必要（毎回SCTを使う）',ans:'a',why:'SCTは<b>異種エンジン間の変換用</b>。同種ならスキーマ互換でDMSだけでOK。Oracle→PostgreSQL等の異種の時だけSCT。'}
-    ]
-  },
-  'governance': {
-    name: '🏛 運用・ガバナンス',
-    cards: [
-      {s:'GuardDuty/Inspector/Macieの検出結果を1画面に集約し標準準拠も自動チェックしたい',a:'AWS Config',b:'AWS Security Hub',ans:'b',why:'Security Hub＝<b>複数セキュリティサービスの結果を集約・正規化・準拠チェック</b>。Configは自リソースの構成準拠のみ。'},
-      {s:'マイクロサービス間でどこがボトルネックか、区間ごとのレイテンシを可視化したい',a:'CloudWatch',b:'X-Ray',ans:'b',why:'X-Ray＝<b>分散トレーシングでサービス間の経路とレイテンシを可視化</b>。CloudWatchはメトリクス監視が主。'},
-      {s:'普段と違う異常なコスト急増を機械学習で自動検知したい',a:'AWS Budgets',b:'Cost Anomaly Detection',ans:'b',why:'Cost Anomaly Detection＝<b>MLで異常なコスト増を自動検知</b>。Budgetsは予算しきい値の事前アラート。'},
-      {s:'予算に近づいたら/超えそうになったら事前に通知を受けたい',a:'AWS Budgets',b:'Cost Anomaly Detection',ans:'a',why:'Budgets＝<b>予算としきい値アラート（予測ベース含む）で先回り通知</b>。異常検知はCost Anomaly Detectionの役目。'},
-      {s:'ネットワーク基盤（サブネット/TGW）を所有は集約したまま他アカウントに共有したい',a:'CloudFormation StackSets',b:'Resource Access Manager (RAM)',ans:'b',why:'RAM＝<b>1つのリソースを複数アカウントで共有</b>（所有は1つ）。StackSetsは同じ構成を複製する（実体が複数できる）。'},
-      {s:'別アカウントのリソースに、長期アクセスキーを渡さず一時的にアクセスさせたい',a:'IAMユーザーのアクセスキーを共有',b:'IAMロール＋STS AssumeRole',ans:'b',why:'AssumeRole＝<b>一時認証情報を都度取得</b>・鍵の共有不要。アクセスキー共有は漏洩・棚卸しリスクが残る。'},
-      {s:'オンプレのNetApp/ONTAP機能（クローン・重複排除）をそのままAWSで使いたい',a:'Amazon EFS',b:'FSx for NetApp ONTAP',ans:'b',why:'FSx for NetApp ONTAP＝<b>NFS/SMB両対応＋ONTAP機能をそのまま移行</b>。EFSはNFS専用でONTAP機能を持たない。'},
-      {s:'取引先の既存SFTPクライアントはそのまま、自前SFTPサーバー運用はやめたい',a:'EC2にSFTPサーバーを構築しAuto Scalingで冗長化',b:'AWS Transfer Family',ans:'b',why:'Transfer Family＝<b>マネージドSFTPエンドポイント・直接S3保存でサーバー運用不要</b>。EC2構築は冗長化してもOS/パッチ運用が残る。'},
-      {s:'数千台規模の大規模移行で、依存関係の自動発見と複数移行ツールの進捗を一元管理したい',a:'移行ツールごとに個別のダッシュボードで進捗管理',b:'Application Discovery Service＋Migration Hub',ans:'b',why:'Discovery Service＝<b>依存関係を自動棚卸し</b>、Migration Hub＝<b>複数ツールの進捗を横断一元管理</b>。個別ダッシュボードは大規模で全体像が見えない。',tip:'Discovery Service＝依存関係の棚卸し＋Migration Hub＝複数ツールの進捗を横断一元管理。'},
-      {s:'大量のトランザクションメールを到達率管理・送信認証込みで送りたい',a:'Amazon SNS（Eメール）',b:'Amazon SES',ans:'b',why:'SES＝<b>到達率・バウンス/苦情管理・SPF/DKIM/DMARC対応の本格メール送信</b>。SNSのEメールは簡易な通知向け。'},
-      {s:'S3を非公開のまま、CloudFront経由でのみ配信させたい（直リンク防止）',a:'S3バケットポリシーで公開設定',b:'Origin Access Control（OAC）',ans:'b',why:'OAC＝<b>CloudFront経由のみアクセス許可・S3は非公開のまま</b>。バケット公開は誰でも直接アクセス可能になり危険。'},
-      {s:'コスト・性能・セキュリティ・上限などを「横断チェックしてベストプラクティス助言」',a:'Trusted Advisor',b:'Well-Architected Tool',ans:'a',why:'Trusted Advisor=<b>5本柱の自動チェック＆推奨</b>（即時アクション向け）。'},
-      {s:'設計を6本柱の質問に沿って「レビューして改善点を洗い出す」',a:'Trusted Advisor',b:'Well-Architected Tool',ans:'b',why:'WA Tool=<b>質問形式で設計をレビュー</b>しリスクを可視化（設計工程向け）。'},
-      {s:'EC2/EBS/Lambda等の「適正サイズ（右サイジング）」をMLで提案',a:'Compute Optimizer',b:'Trusted Advisor',ans:'a',why:'Compute Optimizer=<b>使用実績からリソースの最適サイズを推奨</b>。過剰/過小を是正。',tip:'Compute Optimizer＝実使用から適正サイズを提案(右サイジング)。Cost Explorerは費用可視化。'},
-      {s:'コスト配分やRI/SP購入推奨を「可視化・分析」したい',a:'Cost Explorer',b:'Compute Optimizer',ans:'a',why:'Cost Explorer=<b>コストの可視化・傾向分析・購入推奨</b>。リソースサイズ最適化はCompute Optimizer。'},
-      {s:'承認済みの構成(テンプレート)をカタログ化し、各チームに権限を絞ってセルフサービスで払い出す',a:'AWS Service Catalog',b:'広範なIAM権限を付与',ans:'a',why:'Service Catalog＝<b>承認済みプロダクトを統制付きセルフサービス化</b>。広範な権限付与はガバナンスが効かない。'},
-      {s:'AWSのSOC/ISOなど第三者監査レポートや認証を正式に入手したい',a:'AWS Artifact',b:'CloudTrail',ans:'a',why:'AWS Artifact＝<b>コンプライアンスレポート/認証の取得窓口</b>。CloudTrailはAPI操作ログで別物。'},
-      {s:'ベストプラクティスに沿ったマルチアカウント基盤(ログ集約・ガードレール・SSO)を自動構築したい',a:'AWS Organizations単体',b:'AWS Control Tower',ans:'b',why:'Control Tower＝<b>Organizationsの上にガードレール/ログ/SSO込みの標準環境を自動構築</b>。Organizations単体は束ねるだけ。',tip:'Control Tower＝Organizationsの上にガードレール/ログ/SSO込みの標準環境を自動構築。'},
-      {s:'エッジで超軽量・高頻度な処理(ヘッダー操作・リダイレクト)を最小コストで実行',a:'CloudFront Functions',b:'Lambda@Edge',ans:'a',why:'CloudFront Functions＝<b>超軽量・高頻度・低コストのエッジ処理</b>。Lambda@Edgeはより重い処理・外部アクセス向け。'},
-      {s:'エッジでより重い処理や外部ネットワークアクセスを伴うロジックを実行',a:'CloudFront Functions',b:'Lambda@Edge',ans:'b',why:'Lambda@Edge＝<b>重い処理・外部アクセス可</b>。CloudFront Functionsはヘッダー操作等の軽量処理限定。'}
-    ]
-  },
-  'exam-traps': {
-    name: '🔥 試験の罠・ひっかけ',
-    cards: [
-      {s:'ユーザーを「最も遅延の少ない」リージョンへ振り分ける',a:'レイテンシールーティング',b:'位置情報（Geolocation）ルーティング',c:'加重（Weighted）ルーティング',ans:'a',why:'決め手は<b>遅延が最小</b>＝レイテンシー。Geolocation＝<b>アクセス元の国/地域</b>で固定。Weighted＝<b>割合</b>（カナリア配信）。'},
-      {s:'「日本からは日本語サイト、米国は英語サイト」へ出し分け',a:'レイテンシールーティング',b:'位置情報（Geolocation）ルーティング',c:'フェイルオーバールーティング',ans:'b',why:'決め手は<b>国/地域で出し分け</b>＝Geolocation。レイテンシーは速さ基準。フェイルオーバーは障害時にDRへ。'},
-      {s:'ストリームデータを「コードなし」でS3/Redshiftへロード',a:'Kinesis Data Streams',b:'Kinesis Data Firehose',c:'Managed Service for Apache Flink',ans:'b',why:'Firehose＝<b>フルマネージドで宛先へ配送（ニアリアルタイム・コード不要）</b>。Data Streams＝<b>自前でコンシューマ実装・保持</b>。Flink＝<b>ストリームにSQL/集計</b>。'},
-      {s:'DynamoDBの読み取りを「マイクロ秒」に高速化',a:'ElastiCache for Redis',b:'DAX（DynamoDB Accelerator）',c:'CloudFront',ans:'b',why:'DAX＝<b>DynamoDB専用インメモリ・マイクロ秒</b>。ElastiCacheは<b>汎用（RDB結果/セッション）</b>。CloudFrontは静的配信。'},
-      {s:'RDBのクエリ結果やセッションをキャッシュして負荷軽減',a:'ElastiCache for Redis',b:'DAX（DynamoDB Accelerator）',c:'S3',ans:'a',why:'ElastiCache＝<b>汎用インメモリ（RDB結果/セッション/ランキング）</b>。DAXは<b>DynamoDB専用</b>。'},
-      {s:'1つのイベントを「複数の購読先へ同時配信」（ファンアウト）',a:'SQS',b:'SNS',c:'EventBridge',ans:'b',why:'SNS＝<b>pub/sub・1対多ファンアウト</b>。SQS＝<b>1対1キュー・順番処理</b>。EventBridge＝<b>多数のイベント源をルールでルーティング</b>。'},
-      {s:'「SaaSや多数のAWSサービスのイベント」をルールで振り分け',a:'SQS',b:'SNS',c:'EventBridge',ans:'c',why:'EventBridge＝<b>イベントバス・ルールでフィルタ/ルーティング・スケジュール</b>。SNSは単純通知、SQSはキュー。'},
-      {s:'DBの認証情報を「自動ローテーション」しながら安全に保管',a:'Secrets Manager',b:'Systems Manager Parameter Store',c:'KMS',ans:'a',why:'Secrets Manager＝<b>自動ローテーション内蔵（有料）</b>。Parameter Store＝<b>設定値/平文を無料で（ローテーションは自前）</b>。KMSは<b>鍵管理</b>。',tip:'自動ローテーション込み＝Secrets Manager(有料)。ただの設定値/平文は無料のParameter Store。'},
-      {s:'アプリの設定値・環境変数を「無料で」一元管理',a:'Secrets Manager',b:'Systems Manager Parameter Store',c:'KMS',ans:'b',why:'Parameter Store＝<b>無料・設定値/平文/SecureString</b>。Secrets Managerは<b>自動ローテーション込みで有料</b>。'},
-      {s:'数百ノードを「ラック障害から分離しつつ」大規模分散（HDFS/Cassandra）',a:'クラスタープレイスメントグループ',b:'スプレッドプレイスメントグループ',c:'パーティションプレイスメントグループ',ans:'c',why:'パーティション＝<b>大規模分散・ラック単位で障害分離</b>。クラスター＝<b>同一ラックで最低遅延</b>。スプレッド＝<b>少数を個別ハードに分散</b>。'},
-      {s:'S3暗号化で「誰がいつ鍵を使ったか監査＋鍵ローテーション」',a:'SSE-S3',b:'SSE-KMS',c:'SSE-C',ans:'b',why:'SSE-KMS＝<b>CloudTrailで鍵使用を監査・ローテーション可</b>。SSE-S3＝<b>AWS任せで一番簡単（監査は弱い）</b>。SSE-C＝<b>鍵を自分で持ち込み毎回渡す</b>。'},
-      {s:'オンプレからS3を「NFS/SMBのファイル共有」として使う',a:'File Gateway',b:'Volume Gateway',c:'Tape Gateway',ans:'a',why:'File GW＝<b>NFS/SMB→S3</b>。Volume GW＝<b>iSCSIブロック</b>。Tape GW＝<b>仮想テープ（バックアップ）→Glacier</b>。'},
-      {s:'「数十TBを、回線が細い/期限内に」一度だけAWSへ移す',a:'DataSync（ネット経由）',b:'Snowball（物理輸送）',c:'Storage Gateway',ans:'b',why:'回線が細い/大容量/期限＝<b>物理輸送のSnowball</b>。DataSync＝<b>回線が太く継続同期</b>向け。Storage GWはハイブリッド常用。'},
-      {s:'「専有ハードウェア・自社単独で鍵を完全管理（FIPS 140-2 Lv3）」',a:'KMS（Key Management Service）',b:'CloudHSM',ans:'b',why:'CloudHSM＝<b>専有HSM・顧客が単独管理</b>。KMS＝<b>マネージド・マルチテナント</b>で大半はこれで十分。「専有/単独管理」が決め手。'},
-      {s:'「非HTTP（TCP/UDP）」を固定IPで・低遅延に世界中から',a:'CloudFront',b:'Global Accelerator',ans:'b',why:'GA＝<b>L4・固定エニーキャストIP・任意のTCP/UDP</b>。CloudFront＝<b>HTTP(S)の静的/動的キャッシュ配信</b>。プロトコルが決め手。'},
-      {s:'アプリのサインイン後に「AWSリソースへの一時クレデンシャル」を発行',a:'Cognito ユーザープール',b:'Cognito IDプール（フェデレーテッドアイデンティティ）',ans:'b',why:'IDプール＝<b>認証後にAWSへの一時認証情報を払い出す</b>。ユーザープール＝<b>サインイン/ユーザーディレクトリ</b>。'},
-      {s:'拠点間を「暗号化して」「今すぐ」繋ぐ',a:'Site-to-Site VPN',b:'Direct Connect',ans:'a',why:'決め手は<b>暗号化・今すぐ</b>。VPN=即日・ネット経由で暗号。DXは物理敷設に数週間＋標準では暗号化なし。立派な名前のDXに釣られない。'},
-      {s:'2つのVPCを1対1で繋ぐ「だけ」',a:'VPCピアリング',b:'Transit Gateway',ans:'a',why:'決め手は<b>2つだけ</b>。ピアリング=1対1で十分・安い。TGWは多数VPCのハブ集約用で<b>オーバースペック</b>。'},
-      {s:'「単一リージョン内」でRDSの「読み取り」負荷を分散',a:'リードレプリカ',b:'Aurora Global Database',ans:'a',why:'決め手は<b>単一リージョン・読み取り</b>。リードレプリカで足りる。Global Databaseは別リージョン災対用の<b>過剰</b>。'},
-      {s:'SQSの「空ポーリングのAPI課金」の無駄を減らす',a:'ロングポーリング',b:'ショートポーリング',ans:'a',why:'ロングポーリング=<b>メッセージが来るまで待って空応答を減らす</b>＝APIコール削減。ショートは即空返答で無駄打ちが増える。'},
-      {s:'オンプレADのユーザーで「AWSコンソールにSSO」（SAML連携）',a:'IAM Identity Center（SAMLフェデレーション）',b:'各AWSアカウントにIAMロールを個別作成',ans:'a',why:'決め手は<b>既存ADでSSO</b>。Identity Center＋SAMLで一時認証・一元管理。アカウントごとに個別ロールを作るとSSOにならず管理が分散する。Cognitoはアプリ利用者(toC)用で別物。'},
-      {s:'「年1回」しか取り出さない「最安」アーカイブ',a:'Glacier Deep Archive',b:'Glacier Instant Retrieval',ans:'a',why:'決め手は<b>年1・最安</b>。Deep Archive=最安・復元12時間。Instant Retrievalは<b>即時取り出し</b>が要るとき用で割高。'},
-      {s:'「中断されると困る」本番Webサーバー',a:'オンデマンド / Reserved',b:'スポットインスタンス',ans:'a',why:'決め手は<b>中断NG</b>。スポットは最大90%安いが2分前通知で<b>追い出される</b>＝本番Web不可。「安い」に釣られない。'},
-      {s:'「OS・ミドルウェアまで自社で細かく管理」したいDB',a:'EC2上に自前でDB構築',b:'RDS（マネージド）',ans:'a',why:'決め手は<b>OSまで自社管理</b>。マネージドはOSに触れない→要件を満たすのはEC2自前構築だけ。「マネージドが正解」の思い込みを外す。'},
-      {s:'S3への「上り(アップロード)」を速くしたい',a:'CloudFront',b:'S3 Transfer Acceleration',ans:'b',why:'CloudFront=<b>下り(配信)</b>専門。上り高速化は<b>Transfer Acceleration</b>。'},
-      {s:'オンプレのAD(Active Directory)をAWSに移したい',a:'AWS Managed Microsoft AD',b:'Cognito',ans:'a',why:'Managed AD=<b>社内AD互換</b>。Cognito=アプリのエンドユーザー(toC)認証。'},
-      {s:'社員の複数AWSアカウントへのSSO',a:'IAM Identity Center',b:'Cognito',ans:'a',why:'Identity Center=<b>社員のAWSログインSSO</b>。Cognito=アプリ利用者。'},
-      {s:'Windowsファイルサーバー(SMB)をAWSへ',a:'EFS（Elastic File System）',b:'FSx for Windows',ans:'b',why:'EFS=Linux NFS。<b>FSx for Windows=SMB/NTFS/AD統合</b>。'},
-      {s:'HPC(高性能計算)用の超高スループットファイルシステム',a:'EFS（Elastic File System）',b:'FSx for Lustre',ans:'b',why:'Lustre=<b>数百GB/秒級・HPC/ML向け</b>。EFSは汎用NFS。'},
-      {s:'インスタンスストアのデータはEC2停止で？',a:'残る',b:'消える',ans:'b',why:'インスタンスストア=<b>停止で消える</b>使い捨て。永続はEBS。'},
-      {s:'Aurora Global Database は読み書き両方を別リージョンで？',a:'はい',b:'いいえ（読み取りだけ）',ans:'b',why:'Global DB=<b>書き込みは1リージョン</b>。読み書き両方別リージョンはDynamoDB Global Tables。'},
-      {s:'「予約済み同時実行(Reserved)」でコスト削減できる？',a:'できる',b:'できない（枠確保するだけ）',ans:'b',why:'Reserved Concurrency=<b>上限設定</b>。コスト削減はしない。Provisioned Concurrencyと混同する罠。'},
-      {s:'個々のリソースの設定が基準どおりか継続的に評価するのは？',a:'AWS Config',b:'Security Hub',ans:'a',why:'Config=<b>個々のリソース設定を継続的に評価</b>。Security Hub=<b>複数サービスの検出結果を1画面に集約</b>。'},
-      {s:'不審な挙動・攻撃の動き（脅威）を検知するのは？',a:'GuardDuty',b:'Inspector',ans:'a',why:'GuardDuty=<b>不審な動き(脅威)を検知</b>。Inspector=<b>EC2/コンテナのCVE脆弱性をスキャン</b>。'},
-      {s:'S3内の個人情報(PII)など機密データを検出するのは？',a:'Macie',b:'GuardDuty',ans:'a',why:'Macie=<b>S3の機密データ(PII)を検出</b>。GuardDuty=<b>不審アクセスの脅威検知</b>で用途が違う。'},
-      {s:'複数アカウントを束ねる「土台」そのものはどっち？',a:'Control Tower',b:'Organizations',ans:'b',why:'Organizations=<b>アカウントを束ねる土台</b>。Control Tower=<b>その上にガードレール/ログ/SSO込みの標準環境を自動構築</b>。'},
-      {s:'CloudTrailの「管理イベント」はデフォルトON？',a:'はい',b:'いいえ（手動で有効化が要る）',ans:'a',why:'管理イベント=<b>デフォルトON</b>。データイベント(S3 GetObject等)は明示的に有効化が要る。'},
-      {s:'DynamoDB Streams vs TTL、どっちが「変更検知」？',a:'Streams',b:'TTL',ans:'a',why:'Streams=<b>イベントベース(変更検知)</b>。TTL=<b>時間ベース(期限切れ削除)</b>。'},
-      {s:'L7でマイクロサービス間の通信を管理するのは？',a:'VPC Lattice',b:'Transit Gateway',ans:'a',why:'VPC Lattice=<b>L7・サービス間通信の管理</b>。Transit Gateway=<b>L3・VPC/オンプレ接続のハブ</b>で層が違う。'},
-      {s:'「セッション共有・ホットデータのキャッシュ」',a:'ElastiCache（Redis）',b:'DynamoDB',ans:'a',why:'ElastiCache=<b>インメモリ・マイクロ秒</b>。セッション/ランキング/キャッシュはRedisの出番。'},
-      {s:'GuardDutyが検知した後「なぜ/誰が関与」を調査',a:'Inspector',b:'Detective',ans:'b',why:'Detective=<b>検知の先の調査・関係者の可視化</b>。Inspectorは脆弱性スキャン。'},
-      {s:'S3を非公開のまま、一時的にURLでアクセスさせたい',a:'バケットポリシーを公開に変更',b:'署名付きURL（Presigned URL）',ans:'b',why:'署名付きURL=<b>期限付き一時アクセス</b>。バケット公開は永続で危険。'},
-      {s:'Lambda→RDSの接続数が枯渇する',a:'RDS Proxy',b:'マルチAZ',ans:'a',why:'RDS Proxy=<b>コネクションプール</b>。マルチAZは可用性で接続数問題は解決しない。',tip:'RDS Proxy＝コネクションプールで接続枯渇を解消。マルチAZは可用性で無関係。'},
-      {s:'APIへのリクエスト数を「クライアントごとに」制限',a:'API Gatewayの使用量プラン',b:'WAFレートベースルール',ans:'a',why:'API GW使用量プラン=<b>APIキー別に上限</b>。WAFはIP単位。'},
-      {s:'HPC（密結合ノード間通信）の遅延を最小化',a:'クラスタープレイスメントグループ',b:'スプレッドプレイスメントグループ',ans:'a',why:'クラスター=<b>同一ラック・最低遅延</b>。スプレッドは分散（可用性優先）。'},
-    ]
-  },
-  'exam-core': {
-    name: '🎓 基礎対比・本番レベル・総仕上げ',
-    cards: [
-      {s:'任意のコードを書いて実行できるのは？',a:'Lambda',b:'Athena',ans:'a',why:'Lambda=<b>任意コードを実行</b>（何でも書ける）。Athena=<b>S3にSQLを投げる分析エンジン</b>でコードは書けない。'},
-      {s:'テーブルをJOINして複雑な検索をするのは？',a:'RDS',b:'DynamoDB',ans:'a',why:'RDS=<b>SQL・JOIN・トランザクション</b>。DynamoDB=<b>キーで引くだけ・JOIN不可</b>。'},
-      {s:'キーを渡すとミリ秒未満で値が返るのは？',a:'RDS',b:'DynamoDB',ans:'b',why:'DynamoDB=<b>キーバリュー・超高速</b>。RDS=<b>SQL・JOIN</b>でキー一発取り出しの速さは出ない。'},
-      {s:'画像や動画などのファイルを保管するのは？',a:'DynamoDB',b:'S3',ans:'b',why:'S3=<b>ファイル/オブジェクトの保管庫</b>。DynamoDB=<b>キーで引く構造化データのDB</b>。'},
-      {s:'URLパス(L7)を見てHTTPを振り分けるのは？',a:'ALB',b:'NLB',ans:'a',why:'ALB=<b>L7・URLパスで振り分け</b>。NLB=<b>L4・TCP/UDPを超低遅延でそのまま流す</b>。',tip:'ALB＝Application(L7・HTTPの中身/パス/ホスト振り分け・WebSocket・認証)。NLB＝Network(L4・TCP/UDP・中身見ない・超低遅延・固定IP)。「HTTPの機能が要る→ALB」。'},
-      {s:'TCP/UDPを超低遅延でそのまま流す・固定IPなのは？',a:'ALB',b:'NLB',ans:'b',why:'NLB=<b>L4・TCP/UDP・固定IP・超低遅延</b>（中身は見ない）。ALB=<b>L7・URLパスで振り分け</b>。',tip:'固定IP・送信元IP保持・超低遅延・非HTTP(TCP/UDP)＝NLB(L4)。HTTPの中身で振り分けるならALB(L7)。'},
-      {s:'外から来た通信を受けて振り分けるのは？入口はどっち？',a:'NAT Gateway',b:'ALB',ans:'b',why:'ALB=<b>外からの通信を分配(入口)</b>。NAT GW=<b>プライベートから外に出る出口</b>。方向が逆。'},
-      {s:'LambdaからRDSを大量に呼ぶ時の問題と対策は？',a:'接続数が枯渇→RDS Proxyで接続プール',b:'SQLが使えない',ans:'a',why:'Lambda=毎回新規接続。<b>RDS Proxyで接続プール</b>が定石。DynamoDBはHTTP APIで接続枯渇しない。'},
-      {s:'「サーバーレスAPI」の鉄板構成は？',a:'API Gateway → Lambda → DynamoDB',b:'ALB → EC2 → RDS',ans:'a',why:'左が<b>サーバーレス鉄板</b>。右は全部サーバー管理が要る。'},
-      {s:'アプリが常時読み書きするDB / たまに分析する安い置き場、常時DBはどっち？',a:'RDS',b:'S3＋Athena',ans:'a',why:'RDS=<b>アプリが常時使うDB</b>。S3+Athena=<b>保管＋たまにSQL分析(サーバーレスで安い)</b>で常時アクセス向きではない。'},
-      {s:'「専用線を維持＋コスト削減＋300Mbps」',a:'Dedicated Connection(1G固定)を維持',b:'Hosted Connection(300Mbps)に切替',ans:'b',why:'Dedicated=1G/10G/100G固定。<b>中間帯域はHostedのみ</b>。'},
-      {s:'「リージョン障害でも読み書き両方継続」のDB',a:'Aurora Global Database',b:'DynamoDB Global Tables',ans:'b',why:'Aurora Global=<b>書き込みは1リージョン</b>。Global Tables=<b>マルチリージョン読み書き</b>。',tip:'複数リージョンで読み書き両方＝DynamoDB Global Tables。Aurora Globalは書き込み1リージョン。'},
-      {s:'「月末だけ負荷100倍・普段はゼロ」のRDB',a:'RDS(常時起動)',b:'Aurora Serverless v2',ans:'b',why:'Aurora Serverless=<b>ゼロ〜最大まで自動スケール</b>。RDSは常時インスタンス課金。'},
-      {s:'「S3の特定バケットを特定VPCからだけ」にする方法',a:'バケットポリシー＋VPCエンドポイント条件',b:'Block Public Access',ans:'a',why:'BPA=公開を防ぐだけ。<b>特定VPCに限定</b>はエンドポイント条件付きポリシー。'},
-      {s:'「DynamoDBのテーブルを別リージョンにDR」',a:'DynamoDB Streams＋Lambda',b:'Global Tables',ans:'b',why:'Global Tables=<b>マネージドでマルチリージョン複製</b>。Streams+Lambdaは自前で複雑。'},
-      {s:'「マルチアカウントで新規アカウントにも自動でルール適用」',a:'各アカウントでConfig Rulesを個別に有効化',b:'Firewall Manager / Organizations委任',ans:'b',why:'FW Manager=<b>新規アカウント/リソースにも自動適用・一元管理</b>。個別有効化は新規分の適用漏れが起きる。'},
-      {s:'「CloudTrailの"データイベント"はデフォルトで記録される？」',a:'はい',b:'いいえ（明示的に有効化が必要）',ans:'b',why:'管理イベント=デフォルトON。<b>データイベント(GetObject等)は明示有効化</b>。'},
-      {s:'「オンプレAD連携＋複数アカウントSSO」の正解セット',a:'Cognito＋IAMユーザー',b:'IAM Identity Center＋AWS Managed Microsoft AD',ans:'b',why:'Identity Center=<b>社員SSO</b>。Managed AD=<b>AD互換</b>。Cognitoはアプリ利用者(toC)。'},
-      {s:'「画像＋メタデータ」を保存する構成',a:'RDSに画像バイナリも入れる',b:'S3に画像＋DynamoDBにメタデータ',ans:'b',why:'<b>2段構え</b>=大容量バイナリはS3・構造化検索はDynamoDB。RDSに画像は非効率。'},
-      {s:'「既存バケットのオブジェクトを改ざん・削除不可に」',a:'既存バケットでObject Lockを有効化',b:'新バケット作成(Object Lock有効)→DataSyncで移行',ans:'b',why:'Object Lock=<b>バケット作成時のみ有効化可</b>。既存バケットには後付け不可。'},
-      {s:'「Lambda処理が失敗した時にメッセージを失わない」',a:'S3イベント→Lambda直結',b:'S3イベント→SQS→Lambda',ans:'b',why:'SQS挟む=<b>失敗時にキューに残る(再試行可)</b>。直結は失敗で消える。'},
-      {s:'「世界中の静的サイト＋独自ドメインHTTPS＋サーバーレス」',a:'EC2＋ALB＋ACM',b:'S3＋CloudFront＋ACM',ans:'b',why:'S3+CloudFront=<b>サーバーレス・グローバルCDN・低コスト</b>。EC2は管理が要る。'},
-      {s:'「予測可能な時刻のスパイクに事前に備える」',a:'ターゲット追跡スケーリング',b:'スケジュールドスケーリング（予測スケーリング）',ans:'b',why:'予測/スケジュール=<b>事前に台数を増やしておく</b>。ターゲット追跡は反応型。'},
-      {s:'「KMSの鍵使用ログを監査したい」',a:'CloudTrail',b:'AWS Config',ans:'a',why:'CloudTrail=<b>API呼び出しの監査ログ</b>（誰がいつ鍵を使ったか）。Configは構成評価。'},
-      {s:'「NATを通さずS3/DynamoDBへ（コスト削減）」',a:'インターフェイス型エンドポイント（課金あり）',b:'ゲートウェイ型エンドポイント（無料）',ans:'b',why:'S3/DynamoDB=<b>ゲートウェイ型(無料)</b>。インターフェイス型は時間課金。'},
-      {s:'「サーバーレスでSQL分析」で選ぶべきは？',a:'Lambda＋RDS',b:'S3＋Athena',ans:'b',why:'Athena=<b>サーバーレスSQLエンジン</b>。Lambda+RDS=RDSが常時課金で非サーバーレス。'},
-      {s:'「DDoS攻撃でスケーリング課金が膨張→補償したい」',a:'WAFレートベースルール',b:'Shield Advanced（コスト保護）',ans:'b',why:'Shield Advanced=<b>DDoS中のスケーリング課金をクレジット返金</b>。WAFはL7フィルタ。'},
-      {s:'「権限委譲：開発者にロール作成を許すが権限の上限を制限」',a:'SCP（Service Control Policy）',b:'許可境界（Permissions Boundary）',ans:'b',why:'許可境界=<b>個々のユーザー/ロールの権限上限</b>。SCPはアカウント全体の上限。'},
-      {s:'「S3のライフサイクルで30日後にIA→90日後にGlacier」は可能？',a:'可能（自動移行）',b:'不可能（手動で変更）',ans:'a',why:'ライフサイクルルール=<b>日数ベースで自動的にクラス移行</b>。'},
-      {s:'「VPCフローログ」で分かることは？',a:'通信の中身（ペイロード）',b:'送信元/宛先IP・ポート・許可/拒否',ans:'b',why:'フローログ=<b>メタデータのみ</b>（中身は見えない）。パケットキャプチャではない。'},
-      {s:'低頻度アクセスだが「単一AZでよい・可用性より安さ優先」のS3',a:'S3 Standard-IA',b:'S3 One Zone-IA',ans:'b',why:'One Zone-IA＝<b>単一AZで保管単価が約2割安い(再作成可能なデータ向け)</b>。Standard-IAは複数AZ冗長。可用性を捨てられるならOne Zone-IA。'},
-      {s:'低頻度アクセスで「AZ障害でも失いたくない・冗長性が要る」S3',a:'S3 Standard-IA',b:'S3 One Zone-IA',ans:'a',why:'Standard-IA＝<b>複数AZに冗長化された低頻度クラス</b>。One Zone-IAは単一AZで、AZ障害でデータ喪失リスクがある。'},
-      {s:'アーカイブだが「ミリ秒で即時取り出し」が必要(四半期に1回程度アクセス)',a:'S3 Glacier Instant Retrieval',b:'S3 Glacier Deep Archive',ans:'a',why:'Glacier Instant Retrieval＝<b>アーカイブ単価＋ミリ秒の即時取り出し</b>。Deep Archiveは最安だが取り出しに数時間かかる。'},
-      {s:'7年保管・年1〜2回・取り出しに数時間かかってよい「最安」アーカイブ',a:'S3 Glacier Flexible Retrieval',b:'S3 Glacier Deep Archive',ans:'b',why:'Deep Archive＝<b>最安・取り出し数時間</b>。Flexible Retrievalはやや高いが取り出しが速め(分〜時間)。'},
-      {s:'オンプレのバックアップを仮想テープ(VTL)としてS3/Glacierへ',a:'Storage Gateway テープゲートウェイ',b:'Storage Gateway ファイルゲートウェイ',ans:'a',why:'テープGW＝<b>既存バックアップソフトから仮想テープでS3/Glacierへ</b>。ファイルGWはNFS/SMBのファイル共有→S3。',tip:'Tape Gateway＝仮想テープVTL→S3/Glacier。ファイル共有(NFS/SMB)はFile Gateway。'},
-      {s:'オンプレのiSCSIブロックをAWSにバックアップしつつ頻繁部分はローカルキャッシュ',a:'ボリュームゲートウェイ(キャッシュ型)',b:'ボリュームゲートウェイ(保管型)',ans:'a',why:'キャッシュ型＝<b>プライマリはS3、頻繁アクセス分だけローカルにキャッシュ</b>。保管型は全データをローカルに置きS3へは非同期バックアップ。'},
-      {s:'EC2/Fargate/Lambdaを横断し、ファミリー変更にも柔軟に効く割引',a:'Compute Savings Plans',b:'スタンダードRI',ans:'a',why:'Compute SP＝<b>サービス/ファミリー/リージョン跨ぎで柔軟</b>。Standard RIは割引最大だが対象固定で柔軟性が低い。'},
-      {s:'特定ファミリーを長期固定で使う前提で「割引率を最大化」したい',a:'Compute Savings Plans',b:'スタンダードRI / EC2 Instance SP',ans:'b',why:'Standard RI / EC2 Instance SP＝<b>対象を固定して割引率が最も高い</b>。Compute SPは柔軟だが割引率はやや低い。'},
-      {s:'DWHだが「使う時だけ・アイドル時は課金抑制・管理不要」にしたい',a:'Amazon Redshift(プロビジョンド)',b:'Amazon Redshift Serverless',ans:'b',why:'Redshift Serverless＝<b>需要に応じ自動スケール・アイドル時課金抑制・クラスタ管理不要</b>。プロビジョンドは常時クラスタ稼働。'},
-      {s:'1つのDNS名で「複数の正常なIPをランダムに返し」簡易な負荷分散＋ヘルスチェックしたい',a:'Route 53 加重ルーティング',b:'Route 53 マルチバリュー応答ルーティング',ans:'b',why:'マルチバリュー応答＝<b>ヘルスチェック済みの複数IPを最大8件返し簡易分散</b>。加重は割合指定(カナリア等)で目的が違う。'},
-      {s:'インバウンドポートを開けず、踏み台なしでEC2にシェル接続し操作を監査ログに残す',a:'踏み台(Bastion)＋SSH',b:'Systems Manager Session Manager',ans:'b',why:'Session Manager＝<b>ポート開放/踏み台不要・IAM制御・操作ログ記録</b>。踏み台はSSHポート開放と鍵管理・常時稼働が負担。'}
+      {s:'データレイクを行・列・セル単位できめ細かくアクセス制御したい',a:'S3バケットポリシー/IAM',b:'AWS Lake Formation',ans:'b',why:'Lake Formation=<b>行/列/セル＋LF-Tags</b>の一元ガバナンス。',tip:'ファイングレイン＝Lake Formation。'},
+      {s:'増減する多数のアナリストに、属性・タグでまとめて権限付与したい',a:'LF-Tags（タグベースアクセス制御）',b:'個別にIAMを追記',ans:'a',why:'LF-Tags=<b>タグで権限をスケーラブルに付与</b>。',tip:'タグで一括権限＝LF-Tags。'},
+      {s:'暗号化キーの使用をCloudTrailで監査し、特定ロールに限定したい',a:'SSE-S3',b:'SSE-KMS',ans:'b',why:'SSE-KMS=<b>キーの監査・アクセス制御</b>が可能。SSE-S3はキー制御・監査ができない。',tip:'キーの監査・制御が要る＝SSE-KMS。'},
+      {s:'キー管理を任せて追加料金なしでS3を暗号化（監査要件なし）',a:'SSE-KMS',b:'SSE-S3',ans:'b',why:'SSE-S3=<b>AWS管理・追加料金なし</b>。監査/制御は不要な場合に十分。',tip:'手軽・無料の暗号化＝SSE-S3。'},
+      {s:'クエリ結果の特定列（患者ID等）を役割に応じて動的にマスキング',a:'手動でビューを都度作成',b:'Redshift 動的データマスキング',ans:'b',why:'動的データマスキング=<b>ポリシーで列値を動的に隠す</b>。',tip:'列を動的マスク＝Redshift Dynamic Data Masking。'},
+      {s:'S3内のPII（個人情報）などの機密データを自動検出したい',a:'Amazon Macie',b:'Amazon GuardDuty',ans:'a',why:'Macie=<b>S3の機密データ検出</b>。GuardDutyは脅威検知。',tip:'S3の機密データ検出＝Macie。脅威検知はGuardDuty。'},
+      {s:'DBの認証情報を安全に保管し、自動ローテーションしたい',a:'環境変数に直書き',b:'AWS Secrets Manager',ans:'b',why:'Secrets Manager=<b>保管＋自動ローテーション</b>。',tip:'認証情報の保管・自動更新＝Secrets Manager。'},
+      {s:'GlueやS3への通信をインターネットに出さずVPC内で完結させたい',a:'VPCエンドポイント',b:'NATゲートウェイ経由',ans:'a',why:'VPCエンドポイント=<b>プライベート接続</b>でネット非経由。',tip:'AWSサービスへ非公開接続＝VPCエンドポイント。'},
+      {s:'名寄せ可・生値を出さない・後で戻せる形で機密IDを保護',a:'一方向ハッシュ化',b:'トークナイゼーション',ans:'b',why:'トークナイゼーション=<b>可逆・参照整合性を保つ</b>置換。ハッシュは不可逆で戻せない。',tip:'可逆＋名寄せ＝トークナイゼーション。戻せないのはハッシュ。'},
+      {s:'リソース構成がルールに準拠しているか継続評価・自動修復',a:'AWS Config',b:'手動で定期監査',ans:'a',why:'Config=<b>構成コンプライアンスを継続評価</b>＋自動修復連携。',tip:'構成コンプラ継続評価＝AWS Config。'},
+      {s:'DR用に複数リージョンで同一の暗号化キーを使いたい',a:'リージョンごとに別々のキー',b:'KMSマルチリージョンキー',ans:'b',why:'マルチリージョンキー=<b>同一キーマテリアルを複数リージョンで</b>利用可。',tip:'複数リージョンで同一キー＝KMSマルチリージョンキー。'},
+      {s:'S3データを一定期間、改ざん・削除不可（WORM）で保持',a:'S3 Object Lock',b:'バケットポリシーで制限',ans:'a',why:'Object Lock=<b>WORM保持</b>で規制対応。ポリシーは外せてしまう。',tip:'改ざん削除不可＝S3 Object Lock(WORM)。'},
+    
     ]
   }
 };
@@ -876,28 +546,21 @@ showOnly('top');
 // ─── Drill-Amida Weakness Integration: Core Utilities ───
 
 /**
- * CATEGORY_DECK_MAP: ドリルのcat値 → AmidaデッキID のマッピング（12件）
+ * CATEGORY_DECK_MAP: ドリルのcat値 → AmidaデッキID のマッピング（DEA 5カテゴリ）
  */
 const CATEGORY_DECK_MAP = {
-  '可用性':       'ha-dr',
-  'ストレージ':   'storage',
-  'データベース': 'database',
-  'ネットワーク': 'network',
-  'セキュリティ': 'security',
-  'コンピュート': 'compute',
-  'サーバーレス': 'compute',
-  '疎結合':       'app-integration',
-  '配信/CDN':     'edge-hybrid',
-  'コスト最適化': 'cost',
-  '高性能':       'compute',
-  '移行':         'migration'
+  '取り込み・ストリーミング': 'ingest',
+  '変換・ETL':               'transform',
+  'データストア・モデリング': 'store',
+  '運用・オーケストレーション': 'ops',
+  'セキュリティ・ガバナンス': 'security'
 };
-const FALLBACK_DECK = 'exam-traps';
+const FALLBACK_DECK = 'store';
 
 /**
  * resolveDeck: catからデッキIDを決定する
  * @param {string|null|undefined} cat - ドリル問題のカテゴリ
- * @returns {string} 対応するAmidaデッキID、未マッピング時は'exam-traps'
+ * @returns {string} 対応するAmidaデッキID、未マッピング時は'store'
  */
 function resolveDeck(cat) {
   if (!cat) return FALLBACK_DECK;
@@ -911,12 +574,12 @@ function resolveDeck(cat) {
  * @returns {Record<string, string[]>} { bankId: [questionId, ...], ... }
  */
 function extractWrongIds(source) {
-  const BANKS = ['main', 'v2', 'v3', 'v4', 'v5'];
+  const BANKS = ['main', 'v2', 'v3'];
   const result = {};
 
   if (source === 'local') {
     BANKS.forEach(function(bankId) {
-      var key = 'saa_drill_progress_v1_' + bankId;
+      var key = 'dea_drill_progress_v1_' + bankId;
       try {
         var raw = localStorage.getItem(key);
         if (!raw) return;
@@ -969,12 +632,12 @@ function conceptMatch(question, deckId) {
 
 /**
  * decodeJumon: Jumon文字列をデコードする
- * @param {string} jumonStr - "SAAv1:base64..." 形式の文字列
+ * @param {string} jumonStr - "DEAv1:base64..." 形式の文字列
  * @returns {{ banks: object }|null} デコード結果、または失敗時null
  */
 function decodeJumon(jumonStr) {
   var trimmed = (jumonStr || '').trim();
-  if (!trimmed.startsWith('SAAv1:')) return null;
+  if (!trimmed.startsWith('DEAv1:')) return null;
   try {
     var b64 = trimmed.substring(6);
     var json = atob(b64);
@@ -1004,9 +667,7 @@ async function loadAllDrillQuestions() {
   var files = {
     main: 'questions.js',
     v2: 'questions_v2.js',
-    v3: 'questions_v3.js',
-    v4: 'questions_v4.js',
-    v5: 'questions_v5.js'
+    v3: 'questions_v3.js'
   };
   var banks = {};
   // scriptタグで順番に読み込み、グローバルQUESTIONSをコピーしていく
@@ -1132,7 +793,7 @@ async function runImportPipeline(source) {
         statusEl.style.display = 'block';
         statusEl.style.background = '#fdecec';
         statusEl.style.color = '#b01212';
-        statusEl.textContent = '❌ じゅもんの形式が無効です。SAAv1:... で始まるデータを貼り付けてください。';
+        statusEl.textContent = '❌ じゅもんの形式が無効です。DEAv1:... で始まるデータを貼り付けてください。';
         confirmBtn.disabled = false;
         confirmBtn.textContent = '取り込む';
         return;

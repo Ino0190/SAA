@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>SAA シナリオ判断ドリル</title>
+<title>DEA シナリオ判断ドリル</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -209,23 +209,19 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 
 <header>
   <div class="htop">
-    <div class="htitle" id="hTitle">SAA ドリル</div>
+    <div class="htitle" id="hTitle">DEA ドリル</div>
     <div class="hstat" id="hStat"></div>
   </div>
   <div class="bar"><i id="hBar"></i></div>
 </header>
 <nav class="appnav">
   <a class="navbtn active" href="index.html">🎯 ドリル</a>
-  <a class="navbtn" href="cards.html">📇 暗記帳</a>
   <a class="navbtn" href="amida.html">⚡ どっち</a>
-  <a class="navbtn" href="patterns.html">🗺️ アーキ図</a>
-  <a class="navbtn" href="network-zukai.html">🧭 図解</a>
-  <a class="navbtn" href="mock-exam.html">📝 模試</a>
 </nav>
 
 <!-- ホーム -->
 <section class="screen on home" id="scHome">
-  <h1>SAA シナリオ判断ドリル</h1>
+  <h1>DEA シナリオ判断ドリル</h1>
   <p class="lead">電車で1問ずつ。状況文から「本当の質問」を抜き出す練習。</p>
 
   <div id="bankToggle" class="bankToggle"></div>
@@ -236,17 +232,6 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
     <b>読み方の型：</b>長い状況説明はほぼ飾り。<b>最後の1行</b>と、その中の<b>キーワード</b>（コスト最小／手間最小／可用性最大／最も安全 など）だけが正解を決める。選択肢4つのうち2つは「やりすぎ」か「明らかに違う」。
   </div>
 
-  <a href="yamate.html" class="modecard" style="display:block;text-decoration:none;color:inherit">
-    <h3>📒 山あて帳（紛らわしい対を物語で覚える）</h3>
-    <p>サービスの本名と役割、似たもの同士の決め手の一語、利用シーンの物語。各対から関連する問題にも飛べる。迷ったらここで対を引く。</p>
-    <div class="cnt">横断学習・全分野の比較を一覧</div>
-  </a>
-
-  <div class="modecard listen" onclick="startListen()">
-    <h3>🎧 聞き流しモード（運転中・ハンズフリー）</h3>
-    <p>問題→選択肢→考える間→正解と理由、を読み上げて自動で次へ。画面どこでもタップで今の問題を最初から。</p>
-    <div class="cnt">耳だけで復習・全問ランダム</div>
-  </div>
 
   <div class="modecard" onclick="startMode('all')">
     <h3>▶ 全問を順番に</h3>
@@ -284,11 +269,6 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
     <p>スキマ時間用。シャッフルで10問。</p>
   </div>
 
-  <div class="modecard" onclick="location.href='mock-exam.html'" style="border-color:var(--accent)">
-    <h3 style="color:var(--accent)">📝 模試モード（本番形式65問・130分）</h3>
-    <p>全4バンク349問から本番配分で65問を抽出。タイマー付き。</p>
-    <div class="cnt">セキュア20問/回復性17問/高性能15問/コスト13問</div>
-  </div>
 
   <h3 style="margin:22px 0 4px;font-size:16px;color:var(--sub)">テーマ別の正答率</h3>
   <div id="themeWrap"></div>
@@ -427,19 +407,17 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 <script>
 // ===== 問題バンク切替（A=main / B=v2 / C=v3 / D=v4 / E=v5。各セットの件数はホームの「全セットの進捗」に動的表示）=====
 const BANKS={
-  main:{file:'questions.js', label:'A・既存'},
-  v2:{file:'questions_v2.js', label:'B・新規'},
-  v3:{file:'questions_v3.js', label:'C・未カバー'},
-  v4:{file:'questions_v4.js', label:'D・本番ギャップ'},
-  v5:{file:'questions_v5.js', label:'E・本番ストレス'}
+  main:{file:'questions.js', label:'A・基礎65問'},
+  v2:{file:'questions_v2.js', label:'B・未カバー65問'},
+  v3:{file:'questions_v3.js', label:'C・補強20問'}
 };
 function currentBank(){
-  const b=localStorage.getItem('saa_drill_bank');
+  const b=localStorage.getItem('dea_drill_bank');
   return BANKS[b]?b:'main';
 }
 function setBank(b){
   if(!BANKS[b]||b===currentBank())return;
-  localStorage.setItem('saa_drill_bank',b);
+  localStorage.setItem('dea_drill_bank',b);
   location.reload(); // QUESTIONSの再宣言を避けるためリロードで読み直す
 }
 // 選択中バンクのquestionsを動的に読み込んでから起動
@@ -453,7 +431,7 @@ function setBank(b){
 </script>
 <script>
 // 進捗キーはバンクごとに分ける（問題数・id体系が違うため混ぜない）
-const LS_KEY='saa_drill_progress_v1_'+currentBank();
+const LS_KEY='dea_drill_progress_v1_'+currentBank();
 let state={mode:'all',list:[],idx:0,answered:false,sel:null,session:{correct:0,total:0,wrongIds:[]}};
 let progress=loadProgress();
 
@@ -671,7 +649,7 @@ function revealAnswer(){
     '<div class="deep" id="deepBox">'+q.deep+'</div>';}
   // アーキ図ドリルへのリンク（pattern が設定された問題のみ）
   let patternLink='';
-  if(q.pattern){patternLink='<a class="patternBtn" href="patterns.html#'+q.pattern+'" target="_blank" rel="noopener">🗺️ この構成をアーキ図で見る</a>';}
+  if(q.pattern){patternLink="";}
   // 自信がなかった（正解でも復習に入れる）。不正解は既に復習対象なので出さない
   let unsureBtn='';
   if(correct){unsureBtn='<button class="unsureBtn" id="unsureBtn" onclick="markUnsure('+q.id+')">🤔 自信がなかった（復習に入れる）</button>';}
@@ -758,8 +736,8 @@ function buildAIPrompt(q){
   const labels='ABCDE';
   let opts=q.options.map((o,i)=>`${labels[i]}. ${stripTags(o)}`).join('\n');
   return [
-'あなたはAWS認定ソリューションアーキテクト（SAA）の講師です。',
-'AWS初心者の私が、下のSAA風の問題を「なぜその答えになるのか」まで腹落ちできるように解説してください。',
+'あなたはAWS認定データエンジニア アソシエイト（DEA-C01）の講師です。',
+'AWS初心者の私が、下のDEA風の問題を「なぜその答えになるのか」まで腹落ちできるように解説してください。',
 '',
 '【お願い】',
 '1. まず、この問題が結局「何を問うているのか」を一文で。',
@@ -1012,7 +990,7 @@ function stopListen(){
   goHome();
 }
 
-function goHome(){show('scHome');document.getElementById('btnRow').style.display='none';document.getElementById('listenBar').style.display='none';document.getElementById('hTitle').textContent='SAA ドリル';renderHome();}
+function goHome(){show('scHome');document.getElementById('btnRow').style.display='none';document.getElementById('listenBar').style.display='none';document.getElementById('hTitle').textContent='DEA ドリル';renderHome();}
 
 /* ===== 全セット横断で間違いを解き直すモード（採点は各問のバンクへ書き戻す） ===== */
 // 全バンクから wrong の問題を集める。各問に _bank と _wc を付与し、cat で絞れる。
@@ -1085,7 +1063,7 @@ const CAT2ZUKAI={
 function zukaiLink(q){
   const a=CAT2ZUKAI[q.cat];
   if(!a)return '';
-  return '<a class="zukaiBtn" href="network-zukai.html#'+a+'" target="_blank" rel="noopener">🧭 関連する図解で見る</a>';
+  return "";
 }
 function buildExpReadonly(q){
   const ans=ansArr(q);
@@ -1096,7 +1074,7 @@ function buildExpReadonly(q){
   let conf='';
   if(q.confusion){let cb;if(Array.isArray(q.confusion)){cb=q.confusion.map(c=>'<div class="confpair"><div class="confvs"><b>'+c.a+'</b> ⇔ <b>'+c.b+'</b></div><div class="confd">'+c.d+'</div></div>').join('');}else cb=q.confusion;conf='<div class="confbox"><div class="confh">⚡ 混同注意</div>'+cb+'</div>';}
   let more=q.deep?'<button class="moreBtn" id="moreBtn" onclick="toggleDeep()">🔍 もっと詳しく（なぜ？）</button><div class="deep" id="deepBox">'+q.deep+'</div>':'';
-  let patternLink=q.pattern?'<a class="patternBtn" href="patterns.html#'+q.pattern+'" target="_blank" rel="noopener">🗺️ この構成をアーキ図で見る</a>':'';
+  let patternLink="";
   const wc=(progress.wrongCount&&progress.wrongCount[q.id])||0;
   let wcBadge='';
   if(wc>0)wcBadge='<div class="verdict ng">✕ 間違えた'+(wc>=2?'（'+wc+'回）':'')+'</div>';
@@ -1186,7 +1164,7 @@ function buildWeaknessPrompt(){
     .sort((a,b)=>{if(a.rate===null)return 1;if(b.rate===null)return -1;return a.rate-b.rate;});
   const mistakes=wrongAll.filter(w=>w.wc>0).sort((a,b)=>b.wc-a.wc);
   const unsures=wrongAll.filter(w=>w.wc===0);
-  let s='あなたはAWS認定ソリューションアーキテクト アソシエイト(SAA-C03)の学習コーチです。以下は私のドリル学習の記録（全セット横断）です。(1)特に弱い分野トップ3 (2)間違えた問題に共通するつまずきのパターン (3)次にやるべき具体的な復習アクション を、初心者にもわかる日本語で教えてください。なお問題は「実際に間違えた」ものと「正解したが自信がなかった/AIに相談した」ものを分けてあります。\n\n';
+  let s='あなたはAWS認定データエンジニア アソシエイト(DEA-C01)の学習コーチです。以下は私のドリル学習の記録（全セット横断）です。(1)特に弱い分野トップ3 (2)間違えた問題に共通するつまずきのパターン (3)次にやるべき具体的な復習アクション を、初心者にもわかる日本語で教えてください。なお問題は「実際に間違えた」ものと「正解したが自信がなかった/AIに相談した」ものを分けてあります。\n\n';
   s+='【全体】全'+total+'問中 学習済'+seen+'問 / 解いた問題の正答率(いま正解状態の割合)='+rate+'%\n\n';
   s+='【分野別の正答率（弱い順・全セット合算）】\n';
   catRows.forEach(x=>{s+='- '+x.c+'：'+(x.rate===null?'未着手':x.seen+'問中'+x.cor+'問正解（'+x.rate+'%）')+'（全'+x.n+'問）\n';});
@@ -1339,20 +1317,13 @@ function startWeakness(){
 
 /* ===== テーマ別 正答率グラフ（V1〜V4タブ＋全体） ===== */
 let themeTab=null;
-// 73カテゴリ→12グループへの表示集約マッピング
+// DEA 5カテゴリ→表示名マッピング（集約なし・DEA-C01ドメイン）
 const THEME_GROUP={
-  'コンピュート・コンテナ':'🖥️ コンピュート','コンピュート・購入戦略':'🖥️ コンピュート','コンピュート・高性能':'🖥️ コンピュート','高性能':'🖥️ コンピュート','コンテナ・移行':'🖥️ コンピュート',
-  'サーバーレス':'⚡ サーバーレス','サーバーレス・API':'⚡ サーバーレス','サーバーレス・イベント駆動':'⚡ サーバーレス','サーバーレス・大規模処理':'⚡ サーバーレス',
-  'ストレージ':'🗄️ ストレージ','ストレージ・アーカイブ':'🗄️ ストレージ','ストレージ・パフォーマンス':'🗄️ ストレージ','ストレージ・共有ファイル':'🗄️ ストレージ','ストレージ・移行':'🗄️ ストレージ','ストレージ深掘り':'🗄️ ストレージ','ストレージ移行':'🗄️ ストレージ',
-  'データベース':'🗃️ データベース','目的別データベース':'🗃️ データベース','DB・読み取り最適化':'🗃️ データベース','可用性・DB':'🗃️ データベース',
-  'データ分析':'📊 データ分析','データ分析・DWH拡張':'📊 データ分析','データ分析・ETL':'📊 データ分析','データ分析・アクセス制御':'📊 データ分析','データ分析・アドホック分析':'📊 データ分析','データ分析・ストリーミング取込':'📊 データ分析','データ分析・リアルタイム基盤':'📊 データ分析','データ分析・ログ検索':'📊 データ分析','AI/ML':'📊 データ分析',
-  'ネットワーク深掘り':'🌐 ネットワーク','ネットワーク・AZ設計':'🌐 ネットワーク','ネットワーク・DNSルーティング':'🌐 ネットワーク','ネットワーク・VPCエンドポイント':'🌐 ネットワーク','ネットワーク・オンプレミス統合':'🌐 ネットワーク','ネットワーク・トラフィック検査':'🌐 ネットワーク','ネットワーク・ハイブリッドDNS':'🌐 ネットワーク','ネットワーク・プライベート接続':'🌐 ネットワーク','ネットワーク・マルチVPC接続':'🌐 ネットワーク',
-  'セキュリティ':'🔒 セキュリティ','セキュリティ深掘り':'🔒 セキュリティ','セキュリティ・S3保護':'🔒 セキュリティ','セキュリティ・データ検出':'🔒 セキュリティ','セキュリティ・ネットワーク制御':'🔒 セキュリティ','セキュリティ・暗号化':'🔒 セキュリティ','セキュリティ・秘密管理':'🔒 セキュリティ','セキュリティ・限定共有':'🔒 セキュリティ','IAM・ガバナンス':'🔒 セキュリティ','IAM・クロスアカウント':'🔒 セキュリティ','IAM・認証情報管理':'🔒 セキュリティ','WAF・DDoS防御':'🔒 セキュリティ','データ保護・暗号化キー管理':'🔒 セキュリティ',
-  '可用性':'🔄 高可用性・DR','高可用DR':'🔄 高可用性・DR','高可用・グローバル配信':'🔄 高可用性・DR','高可用・コスト':'🔄 高可用性・DR','高可用・移行':'🔄 高可用性・DR','DR・フェイルオーバー':'🔄 高可用性・DR','DR戦略':'🔄 高可用性・DR','バックアップ・PITR':'🔄 高可用性・DR','バックアップ・ランサム対策':'🔄 高可用性・DR',
-  'コスト最適化':'💰 コスト最適化','コスト最適化・EBS':'💰 コスト最適化','コスト管理・タグ戦略':'💰 コスト最適化',
-  'アプリ統合・疎結合':'🔗 アプリ統合','疎結合':'🔗 アプリ統合','API設計・スロットリング':'🔗 アプリ統合',
-  '移行・データベース':'🚚 移行','移行・大容量転送':'🚚 移行',
-  '運用・IaC':'🛠️ 運用・配信','運用・ガバナンス':'🛠️ 運用・配信','監視・オブザーバビリティ':'🛠️ 運用・配信','配信/CDN':'🛠️ 運用・配信','配信・セキュリティ':'🛠️ 運用・配信'
+  '取り込み・ストリーミング':'🌊 取り込み・ストリーミング',
+  '変換・ETL':'🔧 変換・ETL',
+  'データストア・モデリング':'🗃️ データストア・モデリング',
+  '運用・オーケストレーション':'⚙️ 運用・オーケストレーション',
+  'セキュリティ・ガバナンス':'🛡️ セキュリティ・ガバナンス'
 };
 function groupThemeRows(rows){
   const g={};
@@ -1490,7 +1461,7 @@ function themeWrapClick(e){
 }
 
 /* ===== ふっかつのじゅもん（進捗の端末間引き継ぎ・案B フル） ===== */
-const JUMON_PREFIX='SAAv1:';
+const JUMON_PREFIX='DEAv1:';
 function openJumon(){
   document.getElementById('jOut').value='';
   document.getElementById('jIn').value='';
@@ -1513,7 +1484,7 @@ function decodeJumon(str){
   return JSON.parse(json);
 }
 
-function bankLSKey(b){return 'saa_drill_progress_v1_'+b;}
+function bankLSKey(b){return 'dea_drill_progress_v1_'+b;}
 function readBankProg(b){
   try{const p=JSON.parse(localStorage.getItem(bankLSKey(b)))||{};
     p.seen=p.seen||{};p.wrong=p.wrong||{};p.wrongCount=p.wrongCount||{};p.correctCount=p.correctCount||{};p.unsure=p.unsure||{};
